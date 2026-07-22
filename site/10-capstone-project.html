@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capstone Project — Java Spring Boot Course</title>
+  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="logo">
+          <span class="logo-icon">☕</span>
+          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+        </a>
+      </div>
+      
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Search course..." autocomplete="off" />
+          <div id="searchResults" class="search-results"></div>
+        </div>
+      <nav class="nav-list">
+        
+        <a href="00-java-foundations.html" class="nav-item">
+          <span class="nav-num">00</span>
+          <span class="nav-title">Java Foundations</span>
+        </a>
+
+        <a href="01-build-tools-and-project-setup.html" class="nav-item">
+          <span class="nav-num">01</span>
+          <span class="nav-title">Build Tools & Project Setup</span>
+        </a>
+
+        <a href="02-dependency-injection.html" class="nav-item">
+          <span class="nav-num">02</span>
+          <span class="nav-title">Dependency Injection</span>
+        </a>
+
+        <a href="03-spring-boot-fundamentals.html" class="nav-item">
+          <span class="nav-num">03</span>
+          <span class="nav-title">Spring Boot Fundamentals</span>
+        </a>
+
+        <a href="04-repository-pattern.html" class="nav-item">
+          <span class="nav-num">04</span>
+          <span class="nav-title">Repository Pattern</span>
+        </a>
+
+        <a href="05-service-oriented-architecture.html" class="nav-item">
+          <span class="nav-num">05</span>
+          <span class="nav-title">Service-Oriented Architecture</span>
+        </a>
+
+        <a href="06-kafka.html" class="nav-item">
+          <span class="nav-num">06</span>
+          <span class="nav-title">Kafka</span>
+        </a>
+
+        <a href="07-graphql.html" class="nav-item">
+          <span class="nav-num">07</span>
+          <span class="nav-title">GraphQL</span>
+        </a>
+
+        <a href="08-reactor-pattern.html" class="nav-item">
+          <span class="nav-num">08</span>
+          <span class="nav-title">Reactor Pattern</span>
+        </a>
+
+        <a href="09-tdd.html" class="nav-item">
+          <span class="nav-num">09</span>
+          <span class="nav-title">Test-Driven Development</span>
+        </a>
+
+        <a href="10-capstone-project.html" class="nav-item active">
+          <span class="nav-num">10</span>
+          <span class="nav-title">Capstone Project</span>
+        </a>
+
+        <a href="11-migrating-java-to-kotlin.html" class="nav-item">
+          <span class="nav-num">11</span>
+          <span class="nav-title">Migrating Java to Kotlin</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-content">
+      <header class="page-header">
+        
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="breadcrumb">
+          <a href="index.html">Home</a> › <span>Capstone Project</span>
+        </div>
+      </header>
+
+      <article class="content">
+        <h1 id="module-10-capstone-project">Module 10: Capstone Project<a class="anchor-link" href="#module-10-capstone-project" title="Permanent link">¶</a></h1>
+<h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
+<ul>
+<li>How to assemble a complete Order Management System using all technologies from the course</li>
+<li>How REST and GraphQL APIs coexist in one Spring Boot application</li>
+<li>How to publish Kafka events from domain services and consume them</li>
+<li>How to stream order-status updates with Spring WebFlux (reactive programming)</li>
+<li>How to structure a project with layered architecture (Controller, Service, Repository, Domain)</li>
+<li>How to configure JPA, GraphQL, Kafka, WebFlux, Docker, and Testcontainers</li>
+<li>How to test all layers (unit, integration, Kafka, reactive)</li>
+<li>How to run and test the application with curl and GraphQL queries</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
+<ul>
+<li>All prior modules (00-09) must be completed</li>
+<li>Java 21+, Maven, Docker Desktop installed</li>
+<li>Understanding of: Java syntax, Spring Boot DI, REST controllers, JPA entities,
+  service layer, Kafka, GraphQL, Reactor (Mono/Flux), TDD</li>
+</ul>
+<hr />
+<h2 id="1-project-overview">1. Project Overview<a class="anchor-link" href="#1-project-overview" title="Permanent link">¶</a></h2>
+<p>The <strong>Order Management System (OMS)</strong> is a backend service for an e-commerce
+platform. It manages:</p>
+<ul>
+<li><strong>Customers</strong> who place orders</li>
+<li><strong>Products</strong> with stock levels</li>
+<li><strong>Orders</strong> containing multiple order items</li>
+<li><strong>Kafka events</strong> when orders are created or status changes</li>
+<li><strong>REST + GraphQL</strong> APIs for clients</li>
+<li><strong>Reactive streaming</strong> for real-time order status updates</li>
+</ul>
+<h3 id="architecture-diagram">Architecture Diagram<a class="anchor-link" href="#architecture-diagram" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code>┌────────────────┐   ┌────────────────┐   ┌────────────────┐
+│  REST Client   │   │  GraphQL       │   │  Reactive     │
+│  (curl, browser)│   │  Client       │   │  Subscriber   │
+└───────┬────────┘   └───────┬────────┘   └───────┬────────┘
+        │                     │                     │
+        │ HTTP                │ /graphql            │ WebSocket
+        │                     │                     │ /graphql
+┌───────▼─────────────────────▼─────────────────────▼────────┐
+│                    Spring Boot Application                 │
+│                                                            │
+│  ┌───────────────┐  ┌──────────────┐  ┌────────────────┐ │
+│  │ OrderController│  │OrderResolver │  │OrderFlux       │ │
+│  │ (REST)         │  │(GraphQL)     │  │(WebFlux)       │ │
+│  └───────┬───────┘  └──────┬───────┘  └───────┬────────┘ │
+│          │                  │                   │          │
+│  ┌───────▼──────────────────▼───────────────────▼────────┐│
+│  │                   OrderService                         ││
+│  │  (business logic, transactions, event publishing)      ││
+│  └───────┬──────────────┬─────────────────────────────────┘│
+│          │              │                                    │
+│  ┌───────▼───────┐  ┌───▼──────────────────┐               │
+│  │ Repositories   │  │ OrderEventProducer   │               │
+│  │ (JPA)          │  │ (Kafka)              │               │
+│  └───────┬───────┘  └───────┬──────────────┘               │
+│          │                   │                               │
+└──────────┼───────────────────┼───────────────────────────────┘
+           │                   │
+   ┌───────▼───────┐   ┌───────▼───────┐
+   │  PostgreSQL   │   │    Kafka      │
+   │  (database)   │   │  (broker)     │
+   └───────────────┘   └───────┬───────┘
+                               │
+                       ┌───────▼───────┐
+                       │OrderEvent      │
+                       │Consumer         │
+                       │(notifications) │
+                       └───────────────┘</code></pre>
+<hr />
+<h2 id="2-complete-project-structure">2. Complete Project Structure<a class="anchor-link" href="#2-complete-project-structure" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code>ordermgmt/
+├── src/
+│   ├── main/
+│   │   ├── java/com/example/ordermgmt/
+│   │   │   ├── OrderManagementApplication.java
+│   │   │   ├── config/
+│   │   │   │   └── KafkaConfig.java
+│   │   │   ├── controller/
+│   │   │   │   ├── OrderController.java
+│   │   │   │   └── GlobalExceptionHandler.java
+│   │   │   ├── domain/
+│   │   │   │   ├── CustomerEntity.java
+│   │   │   │   ├── ProductEntity.java
+│   │   │   │   ├── OrderEntity.java
+│   │   │   │   ├── OrderItemEntity.java
+│   │   │   │   └── OrderStatus.java
+│   │   │   ├── dto/
+│   │   │   │   ├── CreateOrderRequest.java
+│   │   │   │   └── OrderResponse.java
+│   │   │   ├── graphql/
+│   │   │   │   ├── OrderQueryResolver.java
+│   │   │   │   └── OrderMutationResolver.java
+│   │   │   ├── kafka/
+│   │   │   │   ├── OrderEventProducer.java
+│   │   │   │   ├── OrderEventConsumer.java
+│   │   │   │   └── event/
+│   │   │   │       ├── OrderCreatedEvent.java
+│   │   │   │       └── OrderStatusChangedEvent.java
+│   │   │   ├── repository/
+│   │   │   │   ├── CustomerRepository.java
+│   │   │   │   ├── ProductRepository.java
+│   │   │   │   └── OrderRepository.java
+│   │   │   └── service/
+│   │   │       ├── OrderService.java
+│   │   │       └── exception/
+│   │   │           └── OrderNotFoundException.java
+│   │   └── resources/
+│   │       ├── application.yml
+│   │       └── graphql/
+│   │           └── schema.graphqls
+│   └── test/java/com/example/ordermgmt/
+│       ├── service/OrderServiceTest.java
+│       ├── controller/OrderControllerTest.java
+│       └── repository/OrderRepositoryTest.java
+├── pom.xml
+└── docker-compose.yml</code></pre>
+<hr />
+<h2 id="3-pomxml">3. pom.xml<a class="anchor-link" href="#3-pomxml" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;parent&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+        &lt;version&gt;3.3.4&lt;/version&gt;
+        &lt;relativePath/&gt;
+    &lt;/parent&gt;
+
+    &lt;groupId&gt;com.example&lt;/groupId&gt;
+    &lt;artifactId&gt;ordermgmt&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;packaging&gt;jar&lt;/packaging&gt;
+    &lt;name&gt;Order Management System&lt;/name&gt;
+
+    &lt;properties&gt;
+        &lt;java.version&gt;21&lt;/java.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.postgresql&lt;/groupId&gt;
+            &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
+            &lt;scope&gt;runtime&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-graphql&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.kafka&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-kafka&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-webflux&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;
+            &lt;scope&gt;runtime&lt;/scope&gt;
+            &lt;optional&gt;true&lt;/optional&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.kafka&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-kafka-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.projectreactor&lt;/groupId&gt;
+            &lt;artifactId&gt;reactor-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+            &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+            &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+            &lt;artifactId&gt;kafka&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/project&gt;</code></pre>
+<hr />
+<h2 id="4-applicationyml">4. application.yml<a class="anchor-link" href="#4-applicationyml" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-yaml">server:
+  port: 8080
+
+spring:
+  application:
+    name: Order Management System
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ordermgmt
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  graphql:
+    graphiql:
+      enabled: true
+      path: /graphiql
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: ordermgmt-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "com.example.ordermgmt.kafka.event"
+
+logging:
+  level:
+    com.example.ordermgmt: DEBUG
+    org.hibernate.SQL: DEBUG</code></pre>
+<hr />
+<h2 id="5-docker-composeyml">5. docker-compose.yml<a class="anchor-link" href="#5-docker-composeyml" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-yaml">services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: oms-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ordermgmt
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  kafka:
+    image: apache/kafka:3.7.1
+    container_name: oms-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CONTROLLER_LISTENERS: PLAINTEXT://0.0.0.0:9093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    depends_on:
+      - postgres</code></pre>
+<p>Start everything with:</p>
+<pre class="code-block"><code class="language-bash">docker compose up -d</code></pre>
+<hr />
+<h2 id="6-domain-layer-jpa-entities">6. Domain Layer — JPA Entities<a class="anchor-link" href="#6-domain-layer-jpa-entities" title="Permanent link">¶</a></h2>
+<p>All entities use <strong>explicit getters and setters</strong> (no Lombok). JPA entities cannot
+be Java records because JPA requires a no-arg constructor and mutable fields.</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+public enum OrderStatus {
+    PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+}
+
+@Entity
+@Table(name = "customers")
+public class CustomerEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false, length = 100)
+    private String name;
+    @Column(nullable = false, unique = true)
+    private String email;
+    private String address;
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+
+    protected CustomerEntity() {}
+
+    public CustomerEntity(String name, String email, String address) {
+        this.name = name;
+        this.email = email;
+        this.address = address;
+        this.createdAt = Instant.now();
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+}
+
+@Entity
+@Table(name = "products")
+public class ProductEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false, length = 200)
+    private String name;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+    @Column(nullable = false)
+    private int stock;
+    @Column(nullable = false, length = 100)
+    private String category;
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+
+    protected ProductEntity() {}
+
+    public ProductEntity(String name, BigDecimal price, int stock, String category) {
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+        this.category = category;
+        this.createdAt = Instant.now();
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+}
+
+@Entity
+@Table(name = "orders")
+public class OrderEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private CustomerEntity customer;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
+    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalAmount;
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List&lt;OrderItemEntity&gt; items = new ArrayList&lt;&gt;();
+
+    protected OrderEntity() {}
+
+    public OrderEntity() {
+        this.status = OrderStatus.PENDING;
+        this.totalAmount = BigDecimal.ZERO;
+        this.createdAt = Instant.now();
+    }
+
+    public void recalculateTotal() {
+        totalAmount = items.stream()
+                .map(item -&gt; item.getUnitPrice()
+                        .multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public CustomerEntity getCustomer() { return customer; }
+    public void setCustomer(CustomerEntity customer) { this.customer = customer; }
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public List&lt;OrderItemEntity&gt; getItems() { return items; }
+    public void setItems(List&lt;OrderItemEntity&gt; items) { this.items = items; }
+}
+
+@Entity
+@Table(name = "order_items")
+public class OrderItemEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private OrderEntity order;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private ProductEntity product;
+    @Column(nullable = false)
+    private int quantity;
+    @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal unitPrice;
+
+    protected OrderItemEntity() {}
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public OrderEntity getOrder() { return order; }
+    public void setOrder(OrderEntity order) { this.order = order; }
+    public ProductEntity getProduct() { return product; }
+    public void setProduct(ProductEntity product) { this.product = product; }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public BigDecimal getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+}</code></pre>
+<hr />
+<h2 id="7-dtos-java-records">7. DTOs — Java Records<a class="anchor-link" href="#7-dtos-java-records" title="Permanent link">¶</a></h2>
+<p>DTOs are Java <strong>records</strong> — immutable, concise, and perfect for API payloads.</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.dto;
+
+import com.example.ordermgmt.domain.OrderEntity;
+import com.example.ordermgmt.domain.OrderItemEntity;
+import com.example.ordermgmt.domain.OrderStatus;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+
+public record CreateOrderRequest(
+        @NotNull(message = "Customer ID is required") Long customerId,
+        @NotEmpty(message = "Order must have at least one item")
+        List&lt;CreateOrderItemRequest&gt; items
+) {}
+
+public record CreateOrderItemRequest(
+        @NotNull(message = "Product ID is required") Long productId,
+        @NotNull(message = "Quantity is required")
+        @Min(value = 1, message = "Quantity must be at least 1") Integer quantity
+) {}
+
+public record OrderResponse(
+        Long id,
+        Long customerId,
+        String customerName,
+        OrderStatus status,
+        BigDecimal totalAmount,
+        Instant createdAt,
+        List&lt;OrderItemResponse&gt; items
+) {
+    public static OrderResponse from(OrderEntity entity) {
+        return new OrderResponse(
+                entity.getId(),
+                entity.getCustomer().getId(),
+                entity.getCustomer().getName(),
+                entity.getStatus(),
+                entity.getTotalAmount(),
+                entity.getCreatedAt(),
+                entity.getItems().stream()
+                        .map(OrderItemResponse::from)
+                        .toList()
+        );
+    }
+}
+
+public record OrderItemResponse(
+        Long id,
+        Long productId,
+        String productName,
+        Integer quantity,
+        BigDecimal unitPrice
+) {
+    public static OrderItemResponse from(OrderItemEntity entity) {
+        return new OrderItemResponse(
+                entity.getId(),
+                entity.getProduct().getId(),
+                entity.getProduct().getName(),
+                entity.getQuantity(),
+                entity.getUnitPrice()
+        );
+    }
+}
+
+public record UpdateOrderStatusRequest(
+        @NotNull(message = "Status is required") OrderStatus status
+) {}</code></pre>
+<hr />
+<h2 id="8-repository-layer">8. Repository Layer<a class="anchor-link" href="#8-repository-layer" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
+
+import com.example.ordermgmt.domain.CustomerEntity;
+import com.example.ordermgmt.domain.OrderEntity;
+import com.example.ordermgmt.domain.OrderStatus;
+import com.example.ordermgmt.domain.ProductEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface CustomerRepository extends JpaRepository&lt;CustomerEntity, Long&gt; {}
+
+@Repository
+public interface ProductRepository extends JpaRepository&lt;ProductEntity, Long&gt; {
+    List&lt;ProductEntity&gt; findByCategory(String category);
+}
+
+@Repository
+public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; {
+    List&lt;OrderEntity&gt; findByCustomerId(Long customerId);
+    List&lt;OrderEntity&gt; findByStatus(OrderStatus status);
+}</code></pre>
+<hr />
+<h2 id="9-kafka-event-records">9. Kafka Event Records<a class="anchor-link" href="#9-kafka-event-records" title="Permanent link">¶</a></h2>
+<p>Events are Java records — immutable message payloads.</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.kafka.event;
+
+import com.example.ordermgmt.domain.OrderEntity;
+import com.example.ordermgmt.domain.OrderStatus;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+public record OrderCreatedEvent(
+        Long orderId,
+        Long customerId,
+        OrderStatus status,
+        BigDecimal totalAmount,
+        Instant createdAt
+) {
+    public static OrderCreatedEvent from(OrderEntity order) {
+        return new OrderCreatedEvent(
+                order.getId(),
+                order.getCustomer().getId(),
+                order.getStatus(),
+                order.getTotalAmount(),
+                order.getCreatedAt()
+        );
+    }
+}
+
+public record OrderStatusChangedEvent(
+        Long orderId,
+        OrderStatus oldStatus,
+        OrderStatus newStatus,
+        Instant changedAt
+) {
+    public static OrderStatusChangedEvent from(OrderEntity order, OrderStatus oldStatus) {
+        return new OrderStatusChangedEvent(
+                order.getId(),
+                oldStatus,
+                order.getStatus(),
+                Instant.now()
+        );
+    }
+}</code></pre>
+<hr />
+<h2 id="10-kafka-producer">10. Kafka Producer<a class="anchor-link" href="#10-kafka-producer" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.kafka;
+
+import com.example.ordermgmt.kafka.event.OrderCreatedEvent;
+import com.example.ordermgmt.kafka.event.OrderStatusChangedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.stereotype.Component;
+
+import java.util.concurrent.CompletableFuture;
+
+@Component
+public class OrderEventProducer {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderEventProducer.class);
+
+    private final KafkaTemplate&lt;String, Object&gt; kafkaTemplate;
+    private final String orderCreatedTopic;
+    private final String orderStatusTopic;
+
+    public OrderEventProducer(
+            KafkaTemplate&lt;String, Object&gt; kafkaTemplate,
+            @Value("${kafka.topic.order-created:order-created}") String orderCreatedTopic,
+            @Value("${kafka.topic.order-status:order-status}") String orderStatusTopic) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.orderCreatedTopic = orderCreatedTopic;
+        this.orderStatusTopic = orderStatusTopic;
+    }
+
+    public void publishOrderCreated(OrderCreatedEvent event) {
+        CompletableFuture&lt;SendResult&lt;String, Object&gt;&gt; future =
+                kafkaTemplate.send(orderCreatedTopic, event);
+
+        future.whenComplete((result, ex) -&gt; {
+            if (ex != null) {
+                log.error("Failed to publish OrderCreatedEvent for order {}", event.orderId(), ex);
+            } else {
+                log.info("Published OrderCreatedEvent for order {} to partition {}",
+                        event.orderId(), result.getRecordMetadata().partition());
+            }
+        });
+    }
+
+    public void publishOrderStatusChanged(OrderStatusChangedEvent event) {
+        CompletableFuture&lt;SendResult&lt;String, Object&gt;&gt; future =
+                kafkaTemplate.send(orderStatusTopic, event);
+
+        future.whenComplete((result, ex) -&gt; {
+            if (ex != null) {
+                log.error("Failed to publish OrderStatusChangedEvent for order {}",
+                        event.orderId(), ex);
+            } else {
+                log.info("Published OrderStatusChangedEvent for order {} to partition {}",
+                        event.orderId(), result.getRecordMetadata().partition());
+            }
+        });
+    }
+}</code></pre>
+<hr />
+<h2 id="11-kafka-consumer">11. Kafka Consumer<a class="anchor-link" href="#11-kafka-consumer" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.kafka;
+
+import com.example.ordermgmt.kafka.event.OrderCreatedEvent;
+import com.example.ordermgmt.kafka.event.OrderStatusChangedEvent;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+
+@Component
+public class OrderEventConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderEventConsumer.class);
+
+    @KafkaListener(topics = "${kafka.topic.order-created:order-created}",
+                   groupId = "${spring.kafka.consumer.group-id:ordermgmt-group}")
+    public void handleOrderCreated(ConsumerRecord&lt;String, OrderCreatedEvent&gt; record) {
+        log.info("Received OrderCreatedEvent: orderId={}, partition={}, offset={}",
+                record.value().orderId(), record.partition(), record.offset());
+        // In a real app: send notification email, update analytics dashboard, etc.
+    }
+
+    @KafkaListener(topics = "${kafka.topic.order-status:order-status}",
+                   groupId = "${spring.kafka.consumer.group-id:ordermgmt-group}")
+    public void handleOrderStatusChanged(ConsumerRecord&lt;String, OrderStatusChangedEvent&gt; record) {
+        log.info("Received OrderStatusChangedEvent: orderId={}, {} -&gt; {}",
+                record.value().orderId(),
+                record.value().oldStatus(),
+                record.value().newStatus());
+        // In a real app: push real-time update via WebSocket/SSE, trigger shipping, etc.
+    }
+}</code></pre>
+<hr />
+<h2 id="12-service-layer">12. Service Layer<a class="anchor-link" href="#12-service-layer" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service.exception;
+
+public class OrderNotFoundException extends RuntimeException {
+    public OrderNotFoundException(Long orderId) {
+        super("Order not found: " + orderId);
+    }
+}</code></pre>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
+
+import com.example.ordermgmt.domain.*;
+import com.example.ordermgmt.dto.*;
+import com.example.ordermgmt.kafka.OrderEventProducer;
+import com.example.ordermgmt.kafka.event.OrderCreatedEvent;
+import com.example.ordermgmt.kafka.event.OrderStatusChangedEvent;
+import com.example.ordermgmt.repository.*;
+import com.example.ordermgmt.service.exception.OrderNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Service
+public class OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final CustomerRepository customerRepository;
+    private final OrderEventProducer eventProducer;
+
+    public OrderService(
+            OrderRepository orderRepository,
+            ProductRepository productRepository,
+            CustomerRepository customerRepository,
+            OrderEventProducer eventProducer) {
+        this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+        this.customerRepository = customerRepository;
+        this.eventProducer = eventProducer;
+    }
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        log.info("Creating order for customer {}", request.customerId());
+
+        CustomerEntity customer = customerRepository.findById(request.customerId())
+                .orElseThrow(() -&gt; new IllegalArgumentException(
+                        "Customer not found: " + request.customerId()));
+
+        OrderEntity order = new OrderEntity();
+        order.setCustomer(customer);
+
+        for (CreateOrderItemRequest itemRequest : request.items()) {
+            ProductEntity product = productRepository.findById(itemRequest.productId())
+                    .orElseThrow(() -&gt; new IllegalArgumentException(
+                            "Product not found: " + itemRequest.productId()));
+
+            if (product.getStock() &lt; itemRequest.quantity()) {
+                throw new IllegalStateException(
+                        "Insufficient stock for product " + product.getName()
+                                + ": requested " + itemRequest.quantity()
+                                + ", available " + product.getStock());
+            }
+
+            OrderItemEntity item = new OrderItemEntity();
+            item.setOrder(order);
+            item.setProduct(product);
+            item.setQuantity(itemRequest.quantity());
+            item.setUnitPrice(product.getPrice());
+
+            order.getItems().add(item);
+
+            product.setStock(product.getStock() - itemRequest.quantity());
+        }
+
+        order.recalculateTotal();
+        order = orderRepository.save(order);
+
+        eventProducer.publishOrderCreated(OrderCreatedEvent.from(order));
+
+        return OrderResponse.from(order);
+    }
+
+    @Transactional
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus) {
+        log.info("Updating order {} status to {}", orderId, newStatus);
+
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -&gt; new OrderNotFoundException(orderId));
+
+        OrderStatus oldStatus = order.getStatus();
+        order.setStatus(newStatus);
+        order = orderRepository.save(order);
+
+        eventProducer.publishOrderStatusChanged(
+                OrderStatusChangedEvent.from(order, oldStatus));
+
+        return OrderResponse.from(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;OrderResponse&gt; findAll() {
+        return orderRepository.findAll().stream()
+                .map(OrderResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponse findById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(OrderResponse::from)
+                .orElseThrow(() -&gt; new OrderNotFoundException(orderId));
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;OrderResponse&gt; findByStatus(OrderStatus status) {
+        return orderRepository.findByStatus(status).stream()
+                .map(OrderResponse::from)
+                .toList();
+    }
+}</code></pre>
+<hr />
+<h2 id="13-rest-controller">13. REST Controller<a class="anchor-link" href="#13-rest-controller" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
+
+import com.example.ordermgmt.domain.OrderStatus;
+import com.example.ordermgmt.dto.*;
+import com.example.ordermgmt.service.OrderService;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @GetMapping
+    public List&lt;OrderResponse&gt; findAll() {
+        log.info("GET /api/orders");
+        return orderService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;OrderResponse&gt; findById(@PathVariable Long id) {
+        log.info("GET /api/orders/{}", id);
+        return ResponseEntity.ok(orderService.findById(id));
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity&lt;List&lt;OrderResponse&gt;&gt; findByStatus(
+            @PathVariable OrderStatus status) {
+        log.info("GET /api/orders/status/{}", status);
+        return ResponseEntity.ok(orderService.findByStatus(status));
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;OrderResponse&gt; create(@Valid @RequestBody CreateOrderRequest request) {
+        log.info("POST /api/orders - customer {}", request.customerId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(orderService.createOrder(request));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity&lt;OrderResponse&gt; updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateOrderStatusRequest request) {
+        log.info("PUT /api/orders/{}/status - {}", id, request.status());
+        return ResponseEntity.ok(orderService.updateOrderStatus(id, request.status()));
+    }
+}</code></pre>
+<hr />
+<h2 id="14-global-exception-handler">14. Global Exception Handler<a class="anchor-link" href="#14-global-exception-handler" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
+
+import com.example.ordermgmt.service.exception.OrderNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleNotFound(OrderNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody(
+                HttpStatus.NOT_FOUND, ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBadRequest(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody(
+                HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleConflict(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody(
+                HttpStatus.CONFLICT, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleValidation(
+            MethodArgumentNotValidException ex) {
+        String details = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(e -&gt; e.getField() + ": " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody(
+                HttpStatus.BAD_REQUEST, "Validation failed", details));
+    }
+
+    private Map&lt;String, Object&gt; errorBody(HttpStatus status, String message) {
+        return errorBody(status, message, null);
+    }
+
+    private Map&lt;String, Object&gt; errorBody(HttpStatus status, String message, String details) {
+        return Map.of(
+                "timestamp", Instant.now().toString(),
+                "status", status.value(),
+                "error", status.getReasonPhrase(),
+                "message", message,
+                "details", details != null ? details : ""
+        );
+    }
+}</code></pre>
+<hr />
+<h2 id="15-graphql-schema">15. GraphQL Schema<a class="anchor-link" href="#15-graphql-schema" title="Permanent link">¶</a></h2>
+<p><strong><code>src/main/resources/graphql/schema.graphqls</code></strong></p>
+<pre class="code-block"><code class="language-graphql">type Query {
+    orders: [Order!]!
+    order(id: ID!): Order
+    ordersByStatus(status: OrderStatus!): [Order!]!
+}
+
+type Mutation {
+    createOrder(input: OrderInput!): Order!
+    updateOrderStatus(orderId: ID!, status: OrderStatus!): Order!
+}
+
+type Order {
+    id: ID!
+    customerId: ID!
+    customerName: String!
+    status: OrderStatus!
+    totalAmount: BigDecimal!
+    createdAt: String!
+    items: [OrderItem!]!
+}
+
+type OrderItem {
+    id: ID!
+    productId: ID!
+    productName: String!
+    quantity: Int!
+    unitPrice: BigDecimal!
+}
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    SHIPPED
+    DELIVERED
+    CANCELLED
+}
+
+input OrderInput {
+    customerId: ID!
+    items: [OrderItemInput!]!
+}
+
+input OrderItemInput {
+    productId: ID!
+    quantity: Int!
+}</code></pre>
+<hr />
+<h2 id="16-graphql-resolvers">16. GraphQL Resolvers<a class="anchor-link" href="#16-graphql-resolvers" title="Permanent link">¶</a></h2>
+<p>Uses Spring for GraphQL annotations (<code>@QueryMapping</code>, <code>@MutationMapping</code>).
+Spring Boot auto-registers these via <code>spring-boot-starter-graphql</code>.</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
+
+import com.example.ordermgmt.domain.OrderStatus;
+import com.example.ordermgmt.dto.CreateOrderRequest;
+import com.example.ordermgmt.dto.CreateOrderItemRequest;
+import com.example.ordermgmt.dto.OrderResponse;
+import com.example.ordermgmt.service.OrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.stereotype.Controller;
+
+import java.util.List;
+
+@Controller
+public class OrderResolver {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderResolver.class);
+    private final OrderService orderService;
+
+    public OrderResolver(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @QueryMapping
+    public List&lt;OrderResponse&gt; orders() {
+        log.info("GraphQL query: orders");
+        return orderService.findAll();
+    }
+
+    @QueryMapping
+    public OrderResponse order(@Argument Long id) {
+        log.info("GraphQL query: order({})", id);
+        return orderService.findById(id);
+    }
+
+    @QueryMapping
+    public List&lt;OrderResponse&gt; ordersByStatus(@Argument OrderStatus status) {
+        log.info("GraphQL query: ordersByStatus({})", status);
+        return orderService.findByStatus(status);
+    }
+
+    @MutationMapping
+    public OrderResponse createOrder(@Argument CreateOrderInput input) {
+        log.info("GraphQL mutation: createOrder(customerId={})", input.customerId());
+        var request = new CreateOrderRequest(
+                input.customerId(),
+                input.items().stream()
+                        .map(i -&gt; new CreateOrderItemRequest(i.productId(), i.quantity()))
+                        .toList()
+        );
+        return orderService.createOrder(request);
+    }
+
+    @MutationMapping
+    public OrderResponse updateOrderStatus(@Argument Long orderId,
+                                            @Argument OrderStatus status) {
+        log.info("GraphQL mutation: updateOrderStatus({}, {})", orderId, status);
+        return orderService.updateOrderStatus(orderId, status);
+    }
+
+    // GraphQL input types — records matching the schema input objects
+    public record CreateOrderInput(Long customerId, List&lt;CreateOrderItemInput&gt; items) {}
+    public record CreateOrderItemInput(Long productId, Integer quantity) {}
+}</code></pre>
+<hr />
+<h2 id="17-reactive-order-status-stream">17. Reactive Order Status Stream<a class="anchor-link" href="#17-reactive-order-status-stream" title="Permanent link">¶</a></h2>
+<p>This component exposes order status changes as a reactive <code>Flux</code> that clients can
+subscribe to via GraphQL subscriptions or SSE endpoints. The <code>Sinks.Many</code> is a
+thread-safe multicast publisher — multiple subscribers each receive every signal.</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.kafka;
+
+import com.example.ordermgmt.kafka.event.OrderStatusChangedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
+
+@Component
+public class OrderStatusPublisher {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderStatusPublisher.class);
+
+    private final Sinks.Many&lt;OrderStatusChangedEvent&gt; sink =
+            Sinks.many().multicast().onBackpressureBuffer();
+
+    public void publish(OrderStatusChangedEvent event) {
+        log.info("Publishing status change to reactive stream: order {} {} -&gt; {}",
+                event.orderId(), event.oldStatus(), event.newStatus());
+        sink.tryEmitNext(event);
+    }
+
+    public Flux&lt;OrderStatusChangedEvent&gt; subscribe() {
+        return sink.asFlux();
+    }
+}</code></pre>
+<p>Update <code>OrderEventConsumer</code> to also push events to the reactive stream:</p>
+<pre class="code-block"><code class="language-java">@Component
+public class OrderEventConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderEventConsumer.class);
+    private final OrderStatusPublisher statusPublisher;
+
+    public OrderEventConsumer(OrderStatusPublisher statusPublisher) {
+        this.statusPublisher = statusPublisher;
+    }
+
+    @KafkaListener(topics = "${kafka.topic.order-created:order-created}",
+                   groupId = "${spring.kafka.consumer.group-id:ordermgmt-group}")
+    public void handleOrderCreated(ConsumerRecord&lt;String, OrderCreatedEvent&gt; record) {
+        log.info("Received OrderCreatedEvent: orderId={}", record.value().orderId());
+    }
+
+    @KafkaListener(topics = "${kafka.topic.order-status:order-status}",
+                   groupId = "${spring.kafka.consumer.group-id:ordermgmt-group}")
+    public void handleOrderStatusChanged(ConsumerRecord&lt;String, OrderStatusChangedEvent&gt; record) {
+        log.info("Received OrderStatusChangedEvent: {} -&gt; {}",
+                record.value().oldStatus(), record.value().newStatus());
+        statusPublisher.publish(record.value());
+    }
+}</code></pre>
+<hr />
+<h2 id="18-test-suite-overview">18. Test Suite Overview<a class="anchor-link" href="#18-test-suite-overview" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Test Class</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OrderServiceTest.java</code></td>
+<td>Unit tests for <code>OrderService</code> — creation, status update, total calculation. Mocks repositories and <code>OrderEventProducer</code>.</td>
+</tr>
+<tr>
+<td><code>OrderControllerTest.java</code></td>
+<td>Integration tests for REST endpoints using <code>MockMvc</code>. Tests happy path and error handling.</td>
+</tr>
+<tr>
+<td><code>OrderRepositoryTest.java</code></td>
+<td>Integration tests for JPA repositories using Testcontainers with real PostgreSQL.</td>
+</tr>
+<tr>
+<td><code>OrderEventProducerTest.java</code></td>
+<td>Integration test for Kafka producer/consumer using Testcontainers embedded Kafka.</td>
+</tr>
+<tr>
+<td><code>OrderStatusPublisherTest.java</code></td>
+<td>Unit test for reactive stream using <code>StepVerifier</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>All tests live under <code>src/test/java/com/example/ordermgmt/</code> and run with
+<code>./mvnw test</code>.</p>
+<hr />
+<h2 id="19-unit-test-orderservice">19. Unit Test: OrderService<a class="anchor-link" href="#19-unit-test-orderservice" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
+
+import com.example.ordermgmt.domain.*;
+import com.example.ordermgmt.dto.*;
+import com.example.ordermgmt.kafka.OrderEventProducer;
+import com.example.ordermgmt.kafka.event.OrderCreatedEvent;
+import com.example.ordermgmt.repository.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class OrderServiceTest {
+
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private ProductRepository productRepository;
+    @Mock
+    private CustomerRepository customerRepository;
+    @Mock
+    private OrderEventProducer eventProducer;
+
+    @InjectMocks
+    private OrderService orderService;
+
+    @Test
+    void createOrder_withValidRequest_returnsOrderResponse() {
+        // Arrange
+        CustomerEntity customer = new CustomerEntity("Alice", "alice@example.com", "123 Main");
+        customer.setId(1L);
+
+        ProductEntity product = new ProductEntity("Coffee Mug", new BigDecimal("12.99"), 100, "Kitchen");
+        product.setId(10L);
+
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(productRepository.findById(10L)).thenReturn(Optional.of(product));
+        when(orderRepository.save(any(OrderEntity.class))).thenAnswer(inv -&gt; {
+            OrderEntity o = inv.getArgument(0);
+            o.setId(100L);
+            return o;
+        });
+
+        var request = new CreateOrderRequest(1L, List.of(
+                new CreateOrderItemRequest(10L, 3)
+        ));
+
+        // Act
+        OrderResponse response = orderService.createOrder(request);
+
+        // Assert
+        assertThat(response.customerName()).isEqualTo("Alice");
+        assertThat(response.status()).isEqualTo(OrderStatus.PENDING);
+        assertThat(response.totalAmount()).isEqualByComparingTo(new BigDecimal("38.97"));
+        assertThat(response.items()).hasSize(1);
+
+        verify(orderRepository).save(any(OrderEntity.class));
+        verify(eventProducer).publishOrderCreated(any(OrderCreatedEvent.class));
+    }
+
+    @Test
+    void findById_withNonExistentId_throwsOrderNotFoundException() {
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -&gt; orderService.findById(999L))
+                .isInstanceOf(OrderNotFoundException.class)
+                .hasMessageContaining("999");
+    }
+
+    @Test
+    void createOrder_withInsufficientStock_throwsIllegalStateException() {
+        CustomerEntity customer = new CustomerEntity("Alice", "alice@example.com", "123 Main");
+        customer.setId(1L);
+
+        ProductEntity product = new ProductEntity("Coffee Mug", new BigDecimal("12.99"), 2, "Kitchen");
+        product.setId(10L);
+
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(productRepository.findById(10L)).thenReturn(Optional.of(product));
+
+        var request = new CreateOrderRequest(1L, List.of(
+                new CreateOrderItemRequest(10L, 5)  // Request 5, stock is 2
+        ));
+
+        assertThatThrownBy(() -&gt; orderService.createOrder(request))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Insufficient stock");
+    }
+}</code></pre>
+<hr />
+<h2 id="20-controller-test-mockmvc">20. Controller Test (MockMvc)<a class="anchor-link" href="#20-controller-test-mockmvc" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
+
+import com.example.ordermgmt.domain.OrderStatus;
+import com.example.ordermgmt.dto.*;
+import com.example.ordermgmt.service.OrderService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(OrderController.class)
+class OrderControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @MockBean
+    private OrderService orderService;
+
+    @Test
+    void GET_orders_returns200WithJsonArray() throws Exception {
+        var order = new OrderResponse(
+                1L, 10L, "Alice", OrderStatus.PENDING,
+                new BigDecimal("25.98"), Instant.now(), List.of()
+        );
+        when(orderService.findAll()).thenReturn(List.of(order));
+
+        mockMvc.perform(get("/api/orders"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].customerName").value("Alice"))
+                .andExpect(jsonPath("$[0].status").value("PENDING"));
+    }
+
+    @Test
+    void POST_orders_withValidBody_returns201() throws Exception {
+        var response = new OrderResponse(
+                1L, 10L, "Alice", OrderStatus.PENDING,
+                new BigDecimal("25.98"), Instant.now(), List.of()
+        );
+        when(orderService.createOrder(any(CreateOrderRequest.class))).thenReturn(response);
+
+        var request = new CreateOrderRequest(10L, List.of(
+                new CreateOrderItemRequest(1L, 2)
+        ));
+
+        mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.customerName").value("Alice"));
+    }
+
+    @Test
+    void POST_orders_withMissingCustomerId_returns400() throws Exception {
+        String invalidJson = """
+            {
+              "items": [
+                {"productId": 1, "quantity": 2}
+              ]
+            }
+            "";
+
+        mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest());
+    }
+}</code></pre>
+<hr />
+<h2 id="21-repository-test-testcontainers">21. Repository Test (Testcontainers)<a class="anchor-link" href="#21-repository-test-testcontainers" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
+
+import com.example.ordermgmt.domain.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@Testcontainers
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class OrderRepositoryTest {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer&lt;?&gt; postgres = new PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
+
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Test
+    void findByCustomerId_returnsOrdersForThatCustomer() {
+        // Arrange
+        var customer = new CustomerEntity("Alice", "alice@example.com", "123 Main");
+        customer = customerRepository.save(customer);
+
+        var product = new ProductEntity("Mug", new BigDecimal("9.99"), 50, "Kitchen");
+        product = productRepository.save(product);
+
+        var order = new OrderEntity();
+        order.setCustomer(customer);
+
+        var item = new OrderItemEntity();
+        item.setOrder(order);
+        item.setProduct(product);
+        item.setQuantity(2);
+        item.setUnitPrice(product.getPrice());
+        order.getItems().add(item);
+
+        order.recalculateTotal();
+        orderRepository.save(order);
+
+        // Act
+        List&lt;OrderEntity&gt; found = orderRepository.findByCustomerId(customer.getId());
+
+        // Assert
+        assertThat(found).hasSize(1);
+        assertThat(found.get(0).getTotalAmount())
+                .isEqualByComparingTo(new BigDecimal("19.98"));
+    }
+
+    @Test
+    void findByStatus_filtersCorrectly() {
+        var customer = new CustomerEntity("Bob", "bob@example.com", "456 Oak");
+        customer = customerRepository.save(customer);
+
+        var pending = new OrderEntity();
+        pending.setCustomer(customer);
+        orderRepository.save(pending);
+
+        var confirmed = new OrderEntity();
+        confirmed.setCustomer(customer);
+        confirmed.setStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(confirmed);
+
+        var results = orderRepository.findByStatus(OrderStatus.PENDING);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getStatus()).isEqualTo(OrderStatus.PENDING);
+    }
+}</code></pre>
+<hr />
+<h2 id="22-reactive-stream-test-stepverifier">22. Reactive Stream Test (StepVerifier)<a class="anchor-link" href="#22-reactive-stream-test-stepverifier" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.kafka;
+
+import com.example.ordermgmt.kafka.event.OrderStatusChangedEvent;
+import com.example.ordermgmt.domain.OrderStatus;
+import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
+
+import java.time.Instant;
+
+class OrderStatusPublisherTest {
+
+    @Test
+    void publish_thenSubscriberReceivesEvent() {
+        var publisher = new OrderStatusPublisher();
+
+        OrderStatusChangedEvent event = new OrderStatusChangedEvent(
+                1L, OrderStatus.PENDING, OrderStatus.CONFIRMED, Instant.now()
+        );
+
+        StepVerifier.create(publisher.subscribe())
+                .then(() -&gt; publisher.publish(event))
+                .expectNextMatches(e -&gt;
+                        e.orderId().equals(1L) &amp;&amp;
+                        e.oldStatus() == OrderStatus.PENDING &amp;&amp;
+                        e.newStatus() == OrderStatus.CONFIRMED)
+                .thenCancel()
+                .verify();
+    }
+
+    @Test
+    void multipleSubscribers_eachReceiveEvents() {
+        var publisher = new OrderStatusPublisher();
+
+        var event1 = new OrderStatusChangedEvent(
+                1L, OrderStatus.PENDING, OrderStatus.CONFIRMED, Instant.now());
+        var event2 = new OrderStatusChangedEvent(
+                1L, OrderStatus.CONFIRMED, OrderStatus.SHIPPED, Instant.now());
+
+        // Subscribe first, then publish both, then cancel
+        StepVerifier.create(publisher.subscribe())
+                .then(() -&gt; {
+                    publisher.publish(event1);
+                    publisher.publish(event2);
+                })
+                .expectNext(event1)
+                .expectNext(event2)
+                .thenCancel()
+                .verify();
+    }
+}</code></pre>
+<hr />
+<h2 id="23-what-you-learned">23. What You Learned<a class="anchor-link" href="#23-what-you-learned" title="Permanent link">¶</a></h2>
+<ul>
+<li>How to combine <strong>REST controllers</strong>, <strong>GraphQL resolvers</strong>, <strong>Kafka events</strong>,
+  and <strong>WebFlux reactive streams</strong> in a single Spring Boot application</li>
+<li>How to structure a fully layered application: domain entities, repositories,
+  services, DTOs, controllers, GraphQL resolvers, and Kafka producer/consumer</li>
+<li>How to use <strong>records</strong> for DTOs and events, and <strong>explicit classes</strong> for JPA entities</li>
+<li>How to write <strong>unit tests</strong> (Mockito), <strong>controller tests</strong> (MockMvc),
+  <strong>repository tests</strong> (Testcontainers), and <strong>reactive tests</strong> (StepVerifier)</li>
+<li>How to handle <strong>stock validation</strong>, <strong>transactions</strong>, <strong>exception mapping</strong>,
+  and <strong>Kafka event publishing with async callbacks</strong></li>
+<li>How to expose a <strong>reactive Flux</strong> for real-time status updates using <code>Sinks.Many</code></li>
+</ul>
+<h3 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h3>
+<details>
+<summary>Exercise 1: Add a Product REST Controller</summary>
+
+Create a `ProductController` with `GET /api/products`,
+`GET /api/products/{category}`, and `POST /api/products`.
+Add a `ProductService` with stock management (increase/decrease).
+
+**Hint**: Follow the same pattern as `OrderController` — constructor injection,
+`ResponseEntity` return types, `@Valid` on request body. Add a
+`CreateProductRequest` record with validation annotations.
+</details>
+
+<details>
+<summary>Exercise 2: Add a Kafka DLQ (Dead Letter Queue)</summary>
+
+Modify `OrderEventConsumer` to catch deserialization errors and publish
+the failed record to a `order-created-dlq` topic. Add a logging listener
+for the DLQ topic.
+
+**Hint**: Use `DefaultErrorHandler` with a `DeadLetterPublishingRecoverer`.
+Register it in a `ConcurrentKafkaListenerContainerFactory` bean. See Module 06
+for the full pattern.
+</details>
+
+<details>
+<summary>Exercise 3: Add GraphQL Subscriptions</summary>
+
+Add a `subscription OrderStatusChanged { orderStatusChanged: OrderStatusChangedEvent! }`
+to the GraphQL schema and an `@SubscriptionMapping` resolver method that
+returns `Flux<OrderStatusChangedEvent>` from `OrderStatusPublisher.subscribe()`.
+
+**Hint**: Spring for GraphQL supports subscriptions over WebSocket out of the box.
+Use `org.springframework.graphql.data.method.annotation.SubscriptionMapping`.
+</details>
+
+<details>
+<summary>Exercise 4: Add Integration Test for Kafka</summary>
+
+Write a test using `@Testcontainers` with the Kafka container that publishes
+an `OrderCreatedEvent` and verifies the consumer receives it.
+
+**Hint**: Use `@EmbeddedKafka` or `@Container static KafkaContainer` with
+`@ServiceConnection`. Autowire `KafkaTemplate`, send a record, and use
+`Awaitility` or `ConcurrentMessageListenerContainer` to verify receipt.
+</details>
+
+<hr />
+<h2 id="24-extension-ideas-for-future-modules">24. Extension Ideas (for future modules)<a class="anchor-link" href="#24-extension-ideas-for-future-modules" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>Security</strong> — Add Spring Security with JWT authentication, role-based access,
+  and audit logging.</li>
+<li><strong>Micro-services</strong> — Split the domain into separate services (Customer, Product,
+  Order) communicating via REST or gRPC.</li>
+<li><strong>Caching</strong> — Introduce Caffeine or Redis for product look-ups and order status queries.</li>
+<li><strong>Analytics</strong> — Stream order events to Apache Flink or ksqlDB for real-time dashboards.</li>
+<li><strong>UI</strong> — Build a React or Thymeleaf front-end that consumes the GraphQL API and
+  subscribes to real-time status changes.</li>
+<li><strong>Deployment</strong> — Containerize the whole stack with Helm charts for Kubernetes.</li>
+<li><strong>CI/CD</strong> — Add GitHub Actions that runs tests, builds Docker images, and pushes
+  to a registry.</li>
+</ul>
+<hr />
+<h2 id="25-step-by-step-guide-to-run-the-application">25. Step-by-Step Guide to Run the Application<a class="anchor-link" href="#25-step-by-step-guide-to-run-the-application" title="Permanent link">¶</a></h2>
+<ol>
+<li>
+<p><strong>Create the project</strong> (or clone the repo).</p>
+</li>
+<li>
+<p><strong>Start PostgreSQL and Kafka</strong>:</p>
+</li>
+</ol>
+<pre class="code-block"><code class="language-bash">docker compose up -d</code></pre>
+<ol>
+<li><strong>Verify connectivity</strong>:</li>
+</ol>
+<pre class="code-block"><code class="language-bash">docker exec -it oms-postgres psql -U postgres -c "SELECT 1;"</code></pre>
+<ol>
+<li><strong>Build and run the application</strong>:</li>
+</ol>
+<pre class="code-block"><code class="language-bash">./mvnw clean package
+java -jar target/ordermgmt-1.0.0.jar</code></pre>
+<p>The REST API is at <code>http://localhost:8080/api/orders</code> and
+   GraphQL at <code>http://localhost:8080/graphql</code>.
+   GraphiQL UI at <code>http://localhost:8080/graphiql</code>.</p>
+<ol>
+<li><strong>Run the test suite</strong>:</li>
+</ol>
+<pre class="code-block"><code class="language-bash">./mvnw test</code></pre>
+<ol>
+<li><strong>Explore the API</strong> — see the curl commands and GraphQL queries below.</li>
+</ol>
+<hr />
+<h2 id="26-example-curl-commands-rest">26. Example Curl Commands (REST)<a class="anchor-link" href="#26-example-curl-commands-rest" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-bash"># --- Create a customer ---
+curl -X POST http://localhost:8080/api/customers \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Alice","email":"alice@example.com","address":"123 Main St"}'
+
+# --- Create a product ---
+curl -X POST http://localhost:8080/api/products \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Coffee Mug","price":"12.99","stock":100,"category":"Kitchen"}'
+
+# --- Create an order ---
+curl -X POST http://localhost:8080/api/orders \
+     -H "Content-Type: application/json" \
+     -d '{
+       "customerId": 1,
+       "items": [
+         {"productId": 1, "quantity": 2},
+         {"productId": 2, "quantity": 1}
+       ]
+     }'
+
+# --- List all orders ---
+curl http://localhost:8080/api/orders
+
+# --- Update order status ---
+curl -X PUT http://localhost:8080/api/orders/1/status \
+     -H "Content-Type: application/json" \
+     -d '{"status":"CONFIRMED"}'</code></pre>
+<hr />
+<h2 id="27-example-graphql-queries">27. Example GraphQL Queries<a class="anchor-link" href="#27-example-graphql-queries" title="Permanent link">¶</a></h2>
+<p><strong>Query all orders</strong>
+<pre class="code-block"><code class="language-graphql">query GetAllOrders {
+  orders {
+    id
+    customerName
+    status
+    totalAmount
+    items {
+      productName
+      quantity
+      unitPrice
+    }
+  }
+}</code></pre></p>
+<p><strong>Query orders by status</strong>
+<pre class="code-block"><code class="language-graphql">query GetPendingOrders {
+  ordersByStatus(status: PENDING) {
+    id
+    customerName
+    totalAmount
+  }
+}</code></pre></p>
+<p><strong>Create an order (mutation)</strong>
+<pre class="code-block"><code class="language-graphql">mutation CreateOrder {
+  createOrder(input: {
+    customerId: 1,
+    items: [
+      {productId: 1, quantity: 2},
+      {productId: 2, quantity: 1}
+    ]
+  }) {
+    id
+    status
+    totalAmount
+  }
+}</code></pre></p>
+<p><strong>Update order status</strong>
+<pre class="code-block"><code class="language-graphql">mutation UpdateStatus {
+  updateOrderStatus(orderId: 1, status: CONFIRMED) {
+    id
+    status
+  }
+}</code></pre></p>
+<hr />
+<h2 id="24-api-versioning-strategy">24. API Versioning Strategy<a class="anchor-link" href="#24-api-versioning-strategy" title="Permanent link">¶</a></h2>
+<p>API versioning lets you evolve your API without breaking existing clients.</p>
+<h3 id="url-based-versioning">URL-Based Versioning<a class="anchor-link" href="#url-based-versioning" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@RestController
+@RequestMapping("/api/v1/orders")
+public class OrderControllerV1 {
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;OrderResponseV1&gt; findById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.findByIdV1(id));
+    }
+}
+
+@RestController
+@RequestMapping("/api/v2/orders")
+public class OrderControllerV2 {
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;OrderResponseV2&gt; findById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.findByIdV2(id));
+    }
+}</code></pre>
+<pre class="code-block"><code class="language-bash"># V1 client
+curl http://localhost:8080/api/v1/orders/1
+
+# V2 client (new fields, different shape)
+curl http://localhost:8080/api/v2/orders/1</code></pre>
+<h3 id="header-based-versioning">Header-Based Versioning<a class="anchor-link" href="#header-based-versioning" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@GetMapping(value = "/api/orders/{id}", headers = "X-API-Version=1")
+public ResponseEntity&lt;OrderResponseV1&gt; findByIdV1(@PathVariable Long id) { ... }
+
+@GetMapping(value = "/api/orders/{id}", headers = "X-API-Version=2")
+public ResponseEntity&lt;OrderResponseV2&gt; findByIdV2(@PathVariable Long id) { ... }</code></pre>
+<pre class="code-block"><code class="language-bash">curl -H "X-API-Version: 2" http://localhost:8080/api/orders/1</code></pre>
+<h3 id="content-negotiation-versioning">Content Negotiation Versioning<a class="anchor-link" href="#content-negotiation-versioning" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@GetMapping(value = "/api/orders/{id}", produces = "application/vnd.ordermgmt.v1+json")
+public ResponseEntity&lt;OrderResponseV1&gt; findByIdV1(@PathVariable Long id) { ... }
+
+@GetMapping(value = "/api/orders/{id}", produces = "application/vnd.ordermgmt.v2+json")
+public ResponseEntity&lt;OrderResponseV2&gt; findByIdV2(@PathVariable Long id) { ... }</code></pre>
+<pre class="code-block"><code class="language-bash">curl -H "Accept: application/vnd.ordermgmt.v2+json" http://localhost:8080/api/orders/1</code></pre>
+<h3 id="comparison">Comparison<a class="anchor-link" href="#comparison" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URL path (<code>/v1/</code>)</td>
+<td>Simple, cacheable, visible</td>
+<td>URL changes with versions</td>
+</tr>
+<tr>
+<td>Header (<code>X-API-Version</code>)</td>
+<td>URL stays clean</td>
+<td>Not visible in URL, harder to debug</td>
+</tr>
+<tr>
+<td>Content negotiation</td>
+<td>RESTful, uses standard headers</td>
+<td>Complex Accept header</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="25-docker-production-best-practices">25. Docker Production Best Practices<a class="anchor-link" href="#25-docker-production-best-practices" title="Permanent link">¶</a></h2>
+<h3 id="multi-stage-build">Multi-Stage Build<a class="anchor-link" href="#multi-stage-build" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-dockerfile"># Stage 1: Build
+FROM maven:3-eclipse-temurin-21 AS builder
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline  # cache dependencies
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Stage 2: Runtime (small image)
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+# Non-root user for security
+RUN addgroup -S appgroup &amp;&amp; adduser -S appuser -G appgroup
+USER appuser
+
+COPY --from=builder /app/target/ordermgmt-1.0.0.jar app.jar
+
+# JVM container-aware settings
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom"
+
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD wget -qO- http://localhost:8080/actuator/health | grep -q '"status":"UP"'
+
+EXPOSE 8080
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]</code></pre>
+<h3 id="key-production-practices">Key Production Practices<a class="anchor-link" href="#key-production-practices" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Practice</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-stage build</td>
+<td>Final image only contains the JRE + JAR (~200MB vs ~800MB)</td>
+</tr>
+<tr>
+<td>Non-root user</td>
+<td>Prevents privilege escalation if container is compromised</td>
+</tr>
+<tr>
+<td><code>MaxRAMPercentage</code></td>
+<td>JVM auto-tunes heap to container memory limits</td>
+</tr>
+<tr>
+<td>Health check</td>
+<td>Orchestrator (Kubernetes) knows when app is ready</td>
+</tr>
+<tr>
+<td>Layer caching</td>
+<td><code>pom.xml</code> copied before <code>src/</code> — dependency download cached</td>
+</tr>
+<tr>
+<td>Alpine base</td>
+<td>Smaller attack surface, fewer vulnerabilities</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="26-observability-and-monitoring">26. Observability and Monitoring<a class="anchor-link" href="#26-observability-and-monitoring" title="Permanent link">¶</a></h2>
+<h3 id="structured-json-logging">Structured JSON Logging<a class="anchor-link" href="#structured-json-logging" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">// In application.yml — use Logback's JSON encoder
+# Add dependency: net.logstash.logback:logstash-logback-encoder</code></pre>
+<pre class="code-block"><code class="language-xml">&lt;!-- logback-spring.xml --&gt;
+&lt;configuration&gt;
+    &lt;appender name="JSON" class="ch.qos.logback.core.ConsoleAppender"&gt;
+        &lt;encoder class="net.logstash.logback.encoder.LogstashEncoder"&gt;
+            &lt;customFields&gt;{"service":"ordermgmt","version":"1.0.0"}&lt;/customFields&gt;
+        &lt;/encoder&gt;
+    &lt;/appender&gt;
+    &lt;root level="INFO"&gt;
+        &lt;appender-ref ref="JSON"/&gt;
+    &lt;/root&gt;
+&lt;/configuration&gt;</code></pre>
+<p>Output:
+<pre class="code-block"><code class="language-json">{"@timestamp":"2025-01-15T10:30:00Z","level":"INFO","logger":"c.e.o.service.OrderService","message":"Creating order","service":"ordermgmt","version":"1.0.0"}</code></pre></p>
+<h3 id="micrometer-metrics">Micrometer Metrics<a class="anchor-link" href="#micrometer-metrics" title="Permanent link">¶</a></h3>
+<p>Spring Boot Actuator + Micrometer exposes metrics at <code>/actuator/metrics</code>:</p>
+<pre class="code-block"><code class="language-java">@Service
+public class OrderService {
+
+    private final MeterRegistry meterRegistry;
+    private final Counter ordersCreated;
+    private final Timer orderProcessingTime;
+
+    public OrderService(OrderRepository repo, MeterRegistry meterRegistry) {
+        this.repo = repo;
+        this.meterRegistry = meterRegistry;
+        this.ordersCreated = meterRegistry.counter("orders.created.total");
+        this.orderProcessingTime = meterRegistry.timer("orders.processing.time");
+    }
+
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        return orderProcessingTime.record(() -&gt; {
+            ordersCreated.increment();
+            // ... business logic
+        });
+    }
+}</code></pre>
+<h3 id="custom-health-indicator">Custom Health Indicator<a class="anchor-link" href="#custom-health-indicator" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@Component
+public class KafkaHealthIndicator implements HealthIndicator {
+
+    private final KafkaTemplate&lt;String, Object&gt; kafkaTemplate;
+
+    public KafkaHealthIndicator(KafkaTemplate&lt;String, Object&gt; kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
+    @Override
+    public Health health() {
+        try {
+            kafkaTemplate.getDefaultTopic();  // check connectivity
+            return Health.up()
+                    .withDetail("broker", "connected")
+                    .build();
+        } catch (Exception e) {
+            return Health.down()
+                    .withDetail("error", e.getMessage())
+                    .build();
+        }
+    }
+}</code></pre>
+<p>Access at: <code>GET /actuator/health</code> → includes <code>kafka</code> health indicator.</p>
+<hr />
+<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
+<ul>
+<li>
+<p><strong>[Spring Boot Tutorial for Beginners - Crash Course using Spring Boot 3]</strong> by Dan Vega — Full crash course that ties together all concepts used in this capstone (3:43:52, 840K views)
+  <a href="https://www.youtube.com/watch?v=UgX5lgv4uVM">https://www.youtube.com/watch?v=UgX5lgv4uVM</a></p>
+</li>
+<li>
+<p><strong>[Spring Boot Tutorial for Beginners | Full Course 2025]</strong> by Amigoscode — Modern full course with Java 21, Docker, PostgreSQL, and JPA (1:11:19, 251K views)
+  <a href="https://www.youtube.com/watch?v=Cw0J6jYJtzw">https://www.youtube.com/watch?v=Cw0J6jYJtzw</a></p>
+</li>
+<li>
+<p><strong>[Test Driven Development (TDD) in Spring]</strong> by Dan Vega — TDD approach for testing REST controllers, essential for the capstone test section (51:09, 39K views)
+  <a href="https://www.youtube.com/watch?v=-H5sud1-K5A">https://www.youtube.com/watch?v=-H5sud1-K5A</a></p>
+</li>
+</ul>
+<hr />
+<p>← <a href="09-tdd.html">Previous: Module 09</a> | <a href="11-migrating-java-to-kotlin.html">Next: Module 11</a> →</p>
+      </article>
+
+      <div class="footer-nav"><a href="09-tdd.html" class="nav-link prev">← Test-Driven Development</a><a href="11-migrating-java-to-kotlin.html" class="nav-link next">Migrating Java to Kotlin →</a></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="assets/search.js"></script>
+</body>
+</html>

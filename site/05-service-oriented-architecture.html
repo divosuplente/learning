@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service-Oriented Architecture — Java Spring Boot Course</title>
+  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="logo">
+          <span class="logo-icon">☕</span>
+          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+        </a>
+      </div>
+      
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Search course..." autocomplete="off" />
+          <div id="searchResults" class="search-results"></div>
+        </div>
+      <nav class="nav-list">
+        
+        <a href="00-java-foundations.html" class="nav-item">
+          <span class="nav-num">00</span>
+          <span class="nav-title">Java Foundations</span>
+        </a>
+
+        <a href="01-build-tools-and-project-setup.html" class="nav-item">
+          <span class="nav-num">01</span>
+          <span class="nav-title">Build Tools & Project Setup</span>
+        </a>
+
+        <a href="02-dependency-injection.html" class="nav-item">
+          <span class="nav-num">02</span>
+          <span class="nav-title">Dependency Injection</span>
+        </a>
+
+        <a href="03-spring-boot-fundamentals.html" class="nav-item">
+          <span class="nav-num">03</span>
+          <span class="nav-title">Spring Boot Fundamentals</span>
+        </a>
+
+        <a href="04-repository-pattern.html" class="nav-item">
+          <span class="nav-num">04</span>
+          <span class="nav-title">Repository Pattern</span>
+        </a>
+
+        <a href="05-service-oriented-architecture.html" class="nav-item active">
+          <span class="nav-num">05</span>
+          <span class="nav-title">Service-Oriented Architecture</span>
+        </a>
+
+        <a href="06-kafka.html" class="nav-item">
+          <span class="nav-num">06</span>
+          <span class="nav-title">Kafka</span>
+        </a>
+
+        <a href="07-graphql.html" class="nav-item">
+          <span class="nav-num">07</span>
+          <span class="nav-title">GraphQL</span>
+        </a>
+
+        <a href="08-reactor-pattern.html" class="nav-item">
+          <span class="nav-num">08</span>
+          <span class="nav-title">Reactor Pattern</span>
+        </a>
+
+        <a href="09-tdd.html" class="nav-item">
+          <span class="nav-num">09</span>
+          <span class="nav-title">Test-Driven Development</span>
+        </a>
+
+        <a href="10-capstone-project.html" class="nav-item">
+          <span class="nav-num">10</span>
+          <span class="nav-title">Capstone Project</span>
+        </a>
+
+        <a href="11-migrating-java-to-kotlin.html" class="nav-item">
+          <span class="nav-num">11</span>
+          <span class="nav-title">Migrating Java to Kotlin</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-content">
+      <header class="page-header">
+        
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="breadcrumb">
+          <a href="index.html">Home</a> › <span>Service-Oriented Architecture</span>
+        </div>
+      </header>
+
+      <article class="content">
+        <h1 id="module-05-service-oriented-architecture">Module 05: Service-Oriented Architecture<a class="anchor-link" href="#module-05-service-oriented-architecture" title="Permanent link">¶</a></h1>
+<h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
+<ul>
+<li>What an architecture pattern is and why software needs structure</li>
+<li>The difference between monolithic, microservices, and service-oriented architecture</li>
+<li>Layered architecture: Controller, Service, Repository, Database</li>
+<li>How to build a service layer with Spring Boot</li>
+<li>Transaction management with <code>@Transactional</code></li>
+<li>Data Transfer Objects (DTOs) and why we use them</li>
+<li>Domain exceptions and custom exception hierarchies</li>
+<li>Application events for decoupled communication between services</li>
+<li>Common anti-patterns to avoid</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="00-java-foundations.html">Module 00: Java Foundations</a> — you understand Java classes, records, interfaces, exceptions</li>
+<li><a href="01-build-tools-and-project-setup.html">Module 01: Build Tools &amp; Project Setup</a> — you have a working Spring Boot project</li>
+<li><a href="02-dependency-injection.html">Module 02: Dependency Injection</a> — you understand <code>@Service</code>, <code>@Component</code>, constructor injection</li>
+<li><a href="03-spring-boot-fundamentals.html">Module 03: Spring Boot Fundamentals</a> — you can build REST controllers</li>
+<li><a href="04-repository-pattern.html">Module 04: Repository Pattern</a> — you understand JPA entities and Spring Data repositories</li>
+</ul>
+<hr />
+<h2 id="1-what-is-an-architecture-pattern">1. What Is an Architecture Pattern?<a class="anchor-link" href="#1-what-is-an-architecture-pattern" title="Permanent link">¶</a></h2>
+<p>When you build a house, you don't just start placing bricks randomly. You follow a blueprint that says where the foundation goes, where the walls are, where the plumbing runs. The same is true for software.</p>
+<p>An <strong>architecture pattern</strong> is a blueprint for how to organize the code in your application. It defines:</p>
+<ul>
+<li>Which parts of the code talk to which other parts</li>
+<li>What responsibilities each part has</li>
+<li>How data flows through the system</li>
+</ul>
+<p>Without an architecture pattern, code becomes a tangled mess where everything depends on everything else. Changing one thing breaks five other things. This is called <strong>spaghetti code</strong>, and it is a nightmare to maintain.</p>
+<hr />
+<h2 id="2-monolithic-vs-microservices-vs-soa">2. Monolithic vs Microservices vs SOA<a class="anchor-link" href="#2-monolithic-vs-microservices-vs-soa" title="Permanent link">¶</a></h2>
+<h3 id="monolithic-architecture">Monolithic Architecture<a class="anchor-link" href="#monolithic-architecture" title="Permanent link">¶</a></h3>
+<p>A <strong>monolith</strong> is a single application where all the code lives in one codebase and runs as one process.</p>
+<pre class="code-block"><code>┌─────────────────────────────────┐
+│         Monolithic App           │
+│  ┌───────┐ ┌───────┐ ┌───────┐  │
+│  │Orders │ │Users  │ │Billing│  │
+│  └───────┘ └───────┘ └───────┘  │
+│         Single database          │
+└─────────────────────────────────┘</code></pre>
+<p><strong>Pros:</strong> Simple to develop, deploy, and test. One codebase, one deployment.</p>
+<p><strong>Cons:</strong> As the application grows, it becomes hard to understand and change. One bug can bring down the entire system.</p>
+<h3 id="microservices-architecture">Microservices Architecture<a class="anchor-link" href="#microservices-architecture" title="Permanent link">¶</a></h3>
+<p><strong>Microservices</strong> split the application into many small, independently deployable services, each with its own database.</p>
+<pre class="code-block"><code>┌──────────┐  ┌──────────┐  ┌──────────┐
+│  Order   │  │   User   │  │  Billing │
+│ Service  │  │ Service  │  │ Service  │
+│  (DB)    │  │  (DB)    │  │  (DB)    │
+└──────────┘  └──────────┘  └──────────┘</code></pre>
+<p><strong>Pros:</strong> Each service is small and focused. Teams can work independently. Services can be deployed separately.</p>
+<p><strong>Cons:</strong> Complexity. Distributed systems are hard. Network failures, data consistency, and debugging across services are all challenges.</p>
+<h3 id="service-oriented-architecture-soa">Service-Oriented Architecture (SOA)<a class="anchor-link" href="#service-oriented-architecture-soa" title="Permanent link">¶</a></h3>
+<p><strong>SOA</strong> is a middle ground. The application is a monolith (single deployment), but the code is organized into <strong>services</strong> — logical groupings of business functionality. Each service has its own layer (controller, service, repository), but they share a database and run in the same process.</p>
+<pre class="code-block"><code>┌─────────────────────────────────────────┐
+│              Spring Boot App              │
+│                                           │
+│  ┌─────────────────┐  ┌────────────────┐ │
+│  │  Order Service   │  │ Customer Service│ │
+│  │  ┌────────────┐  │  │  ┌──────────┐ │ │
+│  │  │Controller  │  │  │  │Controller │ │ │
+│  │  │  Service   │  │  │  │  Service  │ │ │
+│  │  │ Repository │  │  │  │Repository │ │ │
+│  │  └────────────┘  │  │  └──────────┘ │ │
+│  └─────────────────┘  └────────────────┘ │
+│                                           │
+│           Shared Database                 │
+└─────────────────────────────────────────┘</code></pre>
+<p>This is the approach we use in this course. It gives us clean separation of concerns without the complexity of distributed systems.</p>
+<hr />
+<h2 id="3-layered-architecture">3. Layered Architecture<a class="anchor-link" href="#3-layered-architecture" title="Permanent link">¶</a></h2>
+<p>The most common architecture pattern within a Spring Boot application is <strong>layered architecture</strong>. Each layer has a specific responsibility and can only talk to the layer directly below it.</p>
+<pre class="code-block"><code>┌──────────────────────────────────────────────┐
+│               Client (Browser, Mobile)        │
+└──────────────────┬───────────────────────────┘
+                   │ HTTP
+┌──────────────────▼───────────────────────────┐
+│            Controller Layer                    │
+│  Receives HTTP requests, validates input,      │
+│  returns HTTP responses                        │
+│  Does NOT contain business logic               │
+└──────────────────┬───────────────────────────┘
+                   │ calls
+┌──────────────────▼───────────────────────────┐
+│              Service Layer                     │
+│  Contains business logic, orchestrates         │
+│  repository calls, enforces rules              │
+│  This is the "brain" of the application         │
+└──────────────────┬───────────────────────────┘
+                   │ calls
+┌──────────────────▼───────────────────────────┐
+│            Repository Layer                    │
+│  Talks to the database, executes queries        │
+│  No business logic, just data access           │
+└──────────────────┬───────────────────────────┘
+                   │ SQL
+┌──────────────────▼───────────────────────────┐
+│              Database                          │
+│  PostgreSQL — stores your data                 │
+└──────────────────────────────────────────────┘</code></pre>
+<h3 id="the-golden-rule">The Golden Rule<a class="anchor-link" href="#the-golden-rule" title="Permanent link">¶</a></h3>
+<p><strong>Each layer may only talk to the layer directly below it.</strong></p>
+<ul>
+<li>Controllers call Services. Controllers do NOT call Repositories directly.</li>
+<li>Services call Repositories. Services do NOT return HTTP responses.</li>
+<li>Repositories talk to the Database. Repositories do NOT contain business logic.</li>
+</ul>
+<p>This rule keeps responsibilities clean and makes the code easy to test and maintain.</p>
+<h3 id="why-not-skip-layers">Why Not Skip Layers?<a class="anchor-link" href="#why-not-skip-layers" title="Permanent link">¶</a></h3>
+<p>You might think: "The controller just needs to list orders, why not call the repository directly?"</p>
+<p>Because someday you'll need to add logic between the request and the database:
+- Check if the user is authorized to see these orders
+- Filter out cancelled orders
+- Cache the results
+- Send a notification when an order is viewed</p>
+<p>If the controller calls the repository directly, all that logic ends up in the controller. The controller becomes a 500-line mess. The service layer exists to keep the controller thin.</p>
+<hr />
+<h2 id="4-the-service-layer">4. The Service Layer<a class="anchor-link" href="#4-the-service-layer" title="Permanent link">¶</a></h2>
+<p>The service layer is where your business logic lives. In Spring Boot, a service is a class annotated with <code>@Service</code> that receives its dependencies through constructor injection.</p>
+<p>Let's build the <code>OrderService</code> for our Order Management System:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
+
+import com.example.ordermgmt.domain.OrderStatus;
+import com.example.ordermgmt.domain.OrderEntity;
+import com.example.ordermgmt.domain.OrderItemEntity;
+import com.example.ordermgmt.domain.ProductEntity;
+import com.example.ordermgmt.domain.CustomerEntity;
+import com.example.ordermgmt.dto.CreateOrderItemRequest;
+import com.example.ordermgmt.dto.CreateOrderRequest;
+import com.example.ordermgmt.dto.OrderResponse;
+import com.example.ordermgmt.repository.OrderRepository;
+import com.example.ordermgmt.repository.ProductRepository;
+import com.example.ordermgmt.repository.CustomerRepository;
+import com.example.ordermgmt.service.exception.OrderNotFoundException;
+import com.example.ordermgmt.service.exception.InsufficientStockException;
+import com.example.ordermgmt.service.exception.CustomerNotFoundException;
+import com.example.ordermgmt.service.exception.ProductNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final CustomerRepository customerRepository;
+
+    // Constructor injection — Spring wires these automatically
+    public OrderService(
+            OrderRepository orderRepository,
+            ProductRepository productRepository,
+            CustomerRepository customerRepository) {
+        this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+        this.customerRepository = customerRepository;
+    }
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        log.info("create_order customerId={}", request.customerId());
+
+        // 1. Find the customer
+        CustomerEntity customer = customerRepository.findById(request.customerId())
+                .orElseThrow(() -&gt; new CustomerNotFoundException(request.customerId()));
+
+        // 2. Create the order entity
+        OrderEntity order = new OrderEntity();
+        order.setCustomer(customer);
+        order.setStatus(OrderStatus.PENDING);
+        order.setCreatedAt(Instant.now());
+        order.setItems(new ArrayList&lt;&gt;());
+
+        // 3. Process each order item
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (CreateOrderItemRequest itemRequest : request.items()) {
+            ProductEntity product = productRepository.findById(itemRequest.productId())
+                    .orElseThrow(() -&gt; new ProductNotFoundException(itemRequest.productId()));
+
+            // Check stock
+            if (product.getStock() &lt; itemRequest.quantity()) {
+                throw new InsufficientStockException(
+                        product.getId(), product.getStock(), itemRequest.quantity());
+            }
+
+            // Reserve stock
+            product.setStock(product.getStock() - itemRequest.quantity());
+            productRepository.save(product);
+
+            // Create order item
+            OrderItemEntity orderItem = new OrderItemEntity();
+            orderItem.setProduct(product);
+            orderItem.setQuantity(itemRequest.quantity());
+            orderItem.setUnitPrice(product.getPrice());
+            orderItem.setOrder(order);
+            order.getItems().add(orderItem);
+
+            // Add to total
+            BigDecimal itemTotal = product.getPrice()
+                    .multiply(BigDecimal.valueOf(itemRequest.quantity()));
+            totalAmount = totalAmount.add(itemTotal);
+        }
+
+        order.setTotalAmount(totalAmount);
+
+        // 4. Save the order
+        OrderEntity savedOrder = orderRepository.save(order);
+        log.info("order_created orderId={} total={}", savedOrder.getId(), totalAmount);
+
+        // 5. Return the response
+        return OrderResponse.from(savedOrder);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderById(Long id) {
+        log.info("get_order orderId={}", id);
+        OrderEntity order = orderRepository.findById(id)
+                .orElseThrow(() -&gt; new OrderNotFoundException(id));
+        return OrderResponse.from(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;OrderResponse&gt; getOrdersByCustomer(Long customerId) {
+        log.info("list_orders customerId={}", customerId);
+        return orderRepository.findByCustomerId(customerId).stream()
+                .map(OrderResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public OrderResponse confirmOrder(Long orderId) {
+        log.info("confirm_order orderId={}", orderId);
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -&gt; new OrderNotFoundException(orderId));
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Order must be PENDING to confirm, current status: " + order.getStatus());
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
+        OrderEntity saved = orderRepository.save(order);
+        log.info("order_confirmed orderId={}", orderId);
+        return OrderResponse.from(saved);
+    }
+
+    @Transactional
+    public OrderResponse cancelOrder(Long orderId) {
+        log.info("cancel_order orderId={}", orderId);
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -&gt; new OrderNotFoundException(orderId));
+
+        if (order.getStatus() == OrderStatus.DELIVERED) {
+            throw new IllegalStateException("Cannot cancel a delivered order");
+        }
+
+        // Restore stock for each item
+        for (OrderItemEntity item : order.getItems()) {
+            ProductEntity product = item.getProduct();
+            product.setStock(product.getStock() + item.getQuantity());
+            productRepository.save(product);
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        OrderEntity saved = orderRepository.save(order);
+        log.info("order_cancelled orderId={}", orderId);
+        return OrderResponse.from(saved);
+    }
+}</code></pre>
+<h3 id="what-makes-this-a-good-service">What Makes This a Good Service?<a class="anchor-link" href="#what-makes-this-a-good-service" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Single responsibility:</strong> It handles order-related business logic. Nothing else.</li>
+<li><strong>Constructor injection:</strong> Dependencies are explicit and final.</li>
+<li><strong>Transactions:</strong> Each method that modifies data is annotated with <code>@Transactional</code>. Read methods use <code>@Transactional(readOnly = true)</code>.</li>
+<li><strong>Logging:</strong> Every method logs what it's doing for debugging.</li>
+<li><strong>Domain exceptions:</strong> It throws specific exceptions (<code>OrderNotFoundException</code>, <code>InsufficientStockException</code>) instead of generic ones.</li>
+<li><strong>DTOs:</strong> It returns <code>OrderResponse</code> objects, not raw entities.</li>
+</ol>
+<hr />
+<h2 id="5-transaction-management">5. Transaction Management<a class="anchor-link" href="#5-transaction-management" title="Permanent link">¶</a></h2>
+<p>A <strong>transaction</strong> is a sequence of operations that either all succeed together or all fail together. Think of a bank transfer: if you transfer $100 from account A to account B, two things must happen:</p>
+<ol>
+<li>Deduct $100 from account A</li>
+<li>Add $100 to account B</li>
+</ol>
+<p>If step 1 succeeds but step 2 fails, the money is lost. A transaction ensures that both steps either succeed together or fail together. This is called <strong>atomicity</strong> (the "A" in <strong>ACID</strong>).</p>
+<h3 id="acid-properties">ACID Properties<a class="anchor-link" href="#acid-properties" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Atomicity</strong></td>
+<td>All operations in a transaction succeed or none do</td>
+<td>If stock reservation fails for one item, the entire order creation rolls back</td>
+</tr>
+<tr>
+<td><strong>Consistency</strong></td>
+<td>The database is always in a valid state</td>
+<td>You can't have an order with a negative total</td>
+</tr>
+<tr>
+<td><strong>Isolation</strong></td>
+<td>Concurrent transactions don't interfere with each other</td>
+<td>Two users ordering the same product don't see each other's changes mid-transaction</td>
+</tr>
+<tr>
+<td><strong>Durability</strong></td>
+<td>Once committed, changes survive crashes</td>
+<td>After the database confirms the order is saved, it won't disappear even if the server crashes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-transactional-annotation">The <code>@Transactional</code> Annotation<a class="anchor-link" href="#the-transactional-annotation" title="Permanent link">¶</a></h3>
+<p>Spring Boot manages transactions for you with the <code>@Transactional</code> annotation:</p>
+<pre class="code-block"><code class="language-java">@Transactional
+public OrderResponse createOrder(CreateOrderRequest request) {
+    // Everything inside this method is one transaction.
+    // If any exception is thrown, all database changes are rolled back.
+    // If the method completes normally, all changes are committed.
+}</code></pre>
+<h3 id="read-only-transactions">Read-Only Transactions<a class="anchor-link" href="#read-only-transactions" title="Permanent link">¶</a></h3>
+<p>For methods that only read data (no writes), use <code>@Transactional(readOnly = true)</code>:</p>
+<pre class="code-block"><code class="language-java">@Transactional(readOnly = true)
+public OrderResponse getOrderById(Long id) {
+    // readOnly = true tells the database we won't modify anything.
+    // The database can optimize for reads.
+}</code></pre>
+<h3 id="transaction-propagation">Transaction Propagation<a class="anchor-link" href="#transaction-propagation" title="Permanent link">¶</a></h3>
+<p><strong>Propagation</strong> defines what happens when a transactional method calls another transactional method. The most common options:</p>
+<table>
+<thead>
+<tr>
+<th>Propagation</th>
+<th>Behavior</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REQUIRED</code> (default)</td>
+<td>Use the existing transaction, or create a new one if none exists</td>
+<td>Most cases</td>
+</tr>
+<tr>
+<td><code>REQUIRES_NEW</code></td>
+<td>Always start a new transaction, suspending the existing one</td>
+<td>Logging that must succeed even if the main transaction fails</td>
+</tr>
+<tr>
+<td><code>NESTED</code></td>
+<td>Create a nested transaction that can roll back independently</td>
+<td>Rarely needed</td>
+</tr>
+</tbody>
+</table>
+<pre class="code-block"><code class="language-java">@Transactional(propagation = Propagation.REQUIRES_NEW)
+public void logAuditEvent(String event) {
+    // This runs in its own transaction.
+    // Even if the calling transaction rolls back, this log entry is saved.
+}</code></pre>
+<h3 id="transaction-isolation-levels">Transaction Isolation Levels<a class="anchor-link" href="#transaction-isolation-levels" title="Permanent link">¶</a></h3>
+<p>Isolation levels control how much one transaction can see of another transaction's uncommitted changes:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Description</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEFAULT</code></td>
+<td>Uses the database's default (usually <code>READ_COMMITTED</code>)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>READ_UNCOMMITTED</code></td>
+<td>Can read uncommitted changes from other transactions</td>
+<td>Dirty reads</td>
+</tr>
+<tr>
+<td><code>READ_COMMITTED</code></td>
+<td>Only reads committed data</td>
+<td>Non-repeatable reads</td>
+</tr>
+<tr>
+<td><code>REPEATABLE_READ</code></td>
+<td>Same query returns the same results within a transaction</td>
+<td>Phantom reads</td>
+</tr>
+<tr>
+<td><code>SERIALIZABLE</code></td>
+<td>Transactions execute as if they were sequential</td>
+<td>Slow performance</td>
+</tr>
+</tbody>
+</table>
+<pre class="code-block"><code class="language-java">@Transactional(isolation = Isolation.READ_COMMITTED)
+public OrderResponse getOrderById(Long id) {
+    // Only sees data that has been committed by other transactions.
+}</code></pre>
+<p>For most applications, the default isolation level is fine. You only need to change it when you have specific concurrency requirements.</p>
+<hr />
+<h2 id="6-data-transfer-objects-dtos">6. Data Transfer Objects (DTOs)<a class="anchor-link" href="#6-data-transfer-objects-dtos" title="Permanent link">¶</a></h2>
+<p>A <strong>DTO (Data Transfer Object)</strong> is a simple object that carries data between layers. In our application, DTOs serve two purposes:</p>
+<ol>
+<li><strong>Request DTOs:</strong> Define the shape of data coming from the client</li>
+<li><strong>Response DTOs:</strong> Define the shape of data going back to the client</li>
+</ol>
+<h3 id="why-use-dtos">Why Use DTOs?<a class="anchor-link" href="#why-use-dtos" title="Permanent link">¶</a></h3>
+<p>You might wonder: "Why not just return the entity directly?" There are several reasons:</p>
+<p><strong>1. Security:</strong> Your entity has fields like <code>id</code> and <code>createdAt</code> that are set by the server. If you accept the entity directly, a client could set <code>id</code> to overwrite an existing order, or set <code>createdAt</code> to fake the timestamp.</p>
+<p><strong>2. Decoupling:</strong> Your database entity might have fields the client doesn't need. Sending all fields wastes bandwidth and couples the API to the database schema.</p>
+<p><strong>3. Different shapes:</strong> A create request needs <code>customerId</code> and <code>items</code>. A response needs <code>id</code>, <code>status</code>, and <code>totalAmount</code>. The shapes are different.</p>
+<h3 id="request-dto">Request DTO<a class="anchor-link" href="#request-dto" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.dto;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
+
+public record CreateOrderRequest(
+        @NotNull(message = "Customer ID is required") Long customerId,
+
+        @NotEmpty(message = "Order must have at least one item")
+        List&lt;@NotNull CreateOrderItemRequest&gt; items
+) {}</code></pre>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.dto;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
+public record CreateOrderItemRequest(
+        @NotNull(message = "Product ID is required") Long productId,
+
+        @NotNull(message = "Quantity is required")
+        @Min(value = 1, message = "Quantity must be at least 1") Integer quantity
+) {}</code></pre>
+<p>These are <strong>Java records</strong> (introduced in Module 00). They are immutable, compact, and perfect for DTOs. Validation annotations (<code>@NotNull</code>, <code>@Min</code>, <code>@NotEmpty</code>) come from the <strong>Jakarta Bean Validation</strong> API (the <code>jakarta.validation</code> package — Spring Boot 3.x uses Jakarta EE namespaces, not the older <code>javax.validation</code>).</p>
+<h3 id="response-dto">Response DTO<a class="anchor-link" href="#response-dto" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.dto;
+
+import com.example.ordermgmt.domain.OrderEntity;
+import com.example.ordermgmt.domain.OrderStatus;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+
+public record OrderResponse(
+        Long id,
+        Long customerId,
+        String customerName,
+        OrderStatus status,
+        BigDecimal totalAmount,
+        Instant createdAt,
+        List&lt;OrderItemResponse&gt; items
+) {
+    // Factory method to create a DTO from an entity
+    public static OrderResponse from(OrderEntity entity) {
+        return new OrderResponse(
+                entity.getId(),
+                entity.getCustomer().getId(),
+                entity.getCustomer().getName(),
+                entity.getStatus(),
+                entity.getTotalAmount(),
+                entity.getCreatedAt(),
+                entity.getItems().stream()
+                        .map(OrderItemResponse::from)
+                        .toList()
+        );
+    }
+}</code></pre>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.dto;
+
+import com.example.ordermgmt.domain.OrderItemEntity;
+
+import java.math.BigDecimal;
+
+public record OrderItemResponse(
+        Long id,
+        Long productId,
+        String productName,
+        Integer quantity,
+        BigDecimal unitPrice
+) {
+    public static OrderItemResponse from(OrderItemEntity entity) {
+        return new OrderItemResponse(
+                entity.getId(),
+                entity.getProduct().getId(),
+                entity.getProduct().getName(),
+                entity.getQuantity(),
+                entity.getUnitPrice()
+        );
+    }
+}</code></pre>
+<h3 id="the-from-factory-method">The <code>from()</code> Factory Method<a class="anchor-link" href="#the-from-factory-method" title="Permanent link">¶</a></h3>
+<p>Notice the <code>from()</code> method on each response DTO. This is a <strong>factory method</strong> — a static method that creates a DTO from an entity. This pattern:</p>
+<ul>
+<li>Keeps the conversion logic in one place (the DTO itself)</li>
+<li>Is easy to test</li>
+<li>Avoids needing a separate mapper class for simple conversions</li>
+</ul>
+<p>For more complex mappings with many fields, you can use a library like <strong>MapStruct</strong> (which generates mapper code at compile time), but for our course, manual <code>from()</code> methods are sufficient and clearer for learning.</p>
+<hr />
+<h2 id="7-domain-exceptions">7. Domain Exceptions<a class="anchor-link" href="#7-domain-exceptions" title="Permanent link">¶</a></h2>
+<p>Exceptions in your service layer should be <strong>specific</strong> and <strong>meaningful</strong>. Throwing <code>RuntimeException("Not found")</code> tells the caller nothing. Throwing <code>OrderNotFoundException(orderId)</code> tells the caller exactly what went wrong and with what data.</p>
+<h3 id="custom-exception-hierarchy">Custom Exception Hierarchy<a class="anchor-link" href="#custom-exception-hierarchy" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service.exception;
+
+// Base exception for all order management errors
+public class OrderManagementException extends RuntimeException {
+    public OrderManagementException(String message) {
+        super(message);
+    }
+
+    public OrderManagementException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}</code></pre>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service.exception;
+
+public class OrderNotFoundException extends OrderManagementException {
+    private final Long orderId;
+
+    public OrderNotFoundException(Long orderId) {
+        super("Order not found: " + orderId);
+        this.orderId = orderId;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+}</code></pre>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service.exception;
+
+public class CustomerNotFoundException extends OrderManagementException {
+    private final Long customerId;
+
+    public CustomerNotFoundException(Long customerId) {
+        super("Customer not found: " + customerId);
+        this.customerId = customerId;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+}</code></pre>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service.exception;
+
+public class ProductNotFoundException extends OrderManagementException {
+    private final Long productId;
+
+    public ProductNotFoundException(Long productId) {
+        super("Product not found: " + productId);
+        this.productId = productId;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+}</code></pre>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service.exception;
+
+public class InsufficientStockException extends OrderManagementException {
+    private final Long productId;
+    private final int availableStock;
+    private final int requestedQuantity;
+
+    public InsufficientStockException(Long productId, int availableStock, int requestedQuantity) {
+        super(String.format(
+                "Insufficient stock for product %d: available=%d, requested=%d",
+                productId, availableStock, requestedQuantity));
+        this.productId = productId;
+        this.availableStock = availableStock;
+        this.requestedQuantity = requestedQuantity;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public int getAvailableStock() {
+        return availableStock;
+    }
+
+    public int getRequestedQuantity() {
+        return requestedQuantity;
+    }
+}</code></pre>
+<h3 id="why-a-hierarchy">Why a Hierarchy?<a class="anchor-link" href="#why-a-hierarchy" title="Permanent link">¶</a></h3>
+<p>Having all custom exceptions extend <code>OrderManagementException</code> means:</p>
+<ol>
+<li>You can catch all domain exceptions with one <code>catch</code> block if needed</li>
+<li>You can handle specific exceptions differently in your <code>@ControllerAdvice</code> (which you learned about in Module 03)</li>
+<li>The exception type itself documents what went wrong</li>
+</ol>
+<h3 id="handling-exceptions-in-the-controller">Handling Exceptions in the Controller<a class="anchor-link" href="#handling-exceptions-in-the-controller" title="Permanent link">¶</a></h3>
+<p>Remember from Module 03, we use <code>@RestControllerAdvice</code> to translate exceptions into HTTP responses:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
+
+import com.example.ordermgmt.service.exception.OrderManagementException;
+import com.example.ordermgmt.service.exception.OrderNotFoundException;
+import com.example.ordermgmt.service.exception.InsufficientStockException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.Instant;
+import java.util.Map;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleOrderNotFound(OrderNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "timestamp", Instant.now().toString(),
+                "status", 404,
+                "error", "Not Found",
+                "message", ex.getMessage(),
+                "orderId", ex.getOrderId()
+        ));
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleInsufficientStock(InsufficientStockException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                "timestamp", Instant.now().toString(),
+                "status", 409,
+                "error", "Conflict",
+                "message", ex.getMessage(),
+                "productId", ex.getProductId(),
+                "availableStock", ex.getAvailableStock(),
+                "requestedQuantity", ex.getRequestedQuantity()
+        ));
+    }
+
+    @ExceptionHandler(OrderManagementException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleDomainException(OrderManagementException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "timestamp", Instant.now().toString(),
+                "status", 400,
+                "error", "Bad Request",
+                "message", ex.getMessage()
+        ));
+    }
+}</code></pre>
+<hr />
+<h2 id="8-the-controller-layer-recap">8. The Controller Layer (Recap)<a class="anchor-link" href="#8-the-controller-layer-recap" title="Permanent link">¶</a></h2>
+<p>Now that we have the service layer, the controller becomes very thin. It only:</p>
+<ol>
+<li>Receives the HTTP request</li>
+<li>Validates input (using <code>@Valid</code>)</li>
+<li>Calls the service</li>
+<li>Returns the response</li>
+</ol>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
+
+import com.example.ordermgmt.dto.CreateOrderRequest;
+import com.example.ordermgmt.dto.OrderResponse;
+import com.example.ordermgmt.service.OrderService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;OrderResponse&gt; createOrder(@Valid @RequestBody CreateOrderRequest request) {
+        OrderResponse response = orderService.createOrder(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;OrderResponse&gt; getOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity&lt;List&lt;OrderResponse&gt;&gt; getOrdersByCustomer(
+            @RequestParam Long customerId) {
+        return ResponseEntity.ok(orderService.getOrdersByCustomer(customerId));
+    }
+
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity&lt;OrderResponse&gt; confirmOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.confirmOrder(id));
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity&lt;OrderResponse&gt; cancelOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.cancelOrder(id));
+    }
+}</code></pre>
+<p>Notice how the controller contains <strong>zero business logic</strong>. It just delegates to the service. If you removed the service, the controller would have no idea how to create an order, check stock, or calculate totals. That is the sign of a well-designed controller.</p>
+<hr />
+<h2 id="9-service-to-service-communication">9. Service-to-Service Communication<a class="anchor-link" href="#9-service-to-service-communication" title="Permanent link">¶</a></h2>
+<p>Sometimes one service needs to call another. For example, the <code>OrderService</code> might need to call the <code>CustomerService</code> to check if a customer is active before allowing them to place an order.</p>
+<h3 id="option-1-direct-method-call-same-application">Option 1: Direct Method Call (Same Application)<a class="anchor-link" href="#option-1-direct-method-call-same-application" title="Permanent link">¶</a></h3>
+<p>When both services run in the same Spring Boot application, one service can simply inject and call the other:</p>
+<pre class="code-block"><code class="language-java">@Service
+public class OrderService {
+
+    private final CustomerService customerService;
+    private final OrderRepository orderRepository;
+
+    public OrderService(CustomerService customerService, OrderRepository orderRepository) {
+        this.customerService = customerService;
+        this.orderRepository = orderRepository;
+    }
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        // Call the customer service to verify the customer
+        CustomerResponse customer = customerService.getCustomerById(request.customerId());
+
+        if (!customer.active()) {
+            throw new IllegalStateException("Customer is not active: " + customer.id());
+        }
+
+        // Continue with order creation...
+    }
+}</code></pre>
+<p><strong>Warning:</strong> Be careful about circular dependencies. If <code>OrderService</code> calls <code>CustomerService</code> and <code>CustomerService</code> calls <code>OrderService</code>, Spring will fail to start. If you need bidirectional communication, use events (see below).</p>
+<h3 id="option-2-application-events-decoupled-communication">Option 2: Application Events (Decoupled Communication)<a class="anchor-link" href="#option-2-application-events-decoupled-communication" title="Permanent link">¶</a></h3>
+<p>When you want to notify other parts of the system without creating tight coupling, use Spring's <strong>application events</strong>.</p>
+<p>First, define an event:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service.event;
+
+import com.example.ordermgmt.domain.OrderStatus;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+public record OrderCreatedEvent(
+        Long orderId,
+        Long customerId,
+        BigDecimal totalAmount,
+        Instant createdAt
+) {}</code></pre>
+<p>Then publish the event from the service:</p>
+<pre class="code-block"><code class="language-java">@Service
+public class OrderService {
+
+    private final ApplicationEventPublisher eventPublisher;
+    private final OrderRepository orderRepository;
+    // ... other dependencies
+
+    public OrderService(
+            ApplicationEventPublisher eventPublisher,
+            OrderRepository orderRepository,
+            ProductRepository productRepository,
+            CustomerRepository customerRepository) {
+        this.eventPublisher = eventPublisher;
+        this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+        this.customerRepository = customerRepository;
+    }
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        // ... order creation logic ...
+
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        // Publish an event — anyone listening will be notified
+        eventPublisher.publishEvent(new OrderCreatedEvent(
+                savedOrder.getId(),
+                savedOrder.getCustomer().getId(),
+                savedOrder.getTotalAmount(),
+                savedOrder.getCreatedAt()
+        ));
+
+        return OrderResponse.from(savedOrder);
+    }
+}</code></pre>
+<p>Then create a listener:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service.event;
+
+import com.example.ordermgmt.service.event.OrderCreatedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+
+@Component
+public class OrderEventListener {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderEventListener.class);
+
+    @EventListener
+    public void onOrderCreated(OrderCreatedEvent event) {
+        log.info("order_created_event orderId={} customerId={} total={}",
+                event.orderId(), event.customerId(), event.totalAmount());
+
+        // Here you could:
+        // - Send a confirmation email
+        // - Update analytics
+        // - Trigger a Kafka message (we'll learn this in Module 06)
+        // - Update a recommendation engine
+    }
+}</code></pre>
+<h3 id="why-events-vs-direct-calls">Why Events vs Direct Calls?<a class="anchor-link" href="#why-events-vs-direct-calls" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Coupling</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Direct method call</td>
+<td>Tight — caller depends on the callee</td>
+<td>When you need the result immediately</td>
+</tr>
+<tr>
+<td>Application events</td>
+<td>Loose — publisher doesn't know who listens</td>
+<td>When you want to notify without waiting for a response</td>
+</tr>
+</tbody>
+</table>
+<p>Events are the foundation of <strong>event-driven architecture</strong>, which we'll explore more in Module 06 when we add Kafka.</p>
+<hr />
+<h2 id="10-anti-patterns-to-avoid">10. Anti-Patterns to Avoid<a class="anchor-link" href="#10-anti-patterns-to-avoid" title="Permanent link">¶</a></h2>
+<h3 id="anti-pattern-1-fat-controller">Anti-Pattern 1: Fat Controller<a class="anchor-link" href="#anti-pattern-1-fat-controller" title="Permanent link">¶</a></h3>
+<p><strong>Problem:</strong> Business logic in the controller instead of the service.</p>
+<pre class="code-block"><code class="language-java">// BAD — controller doing too much
+@PostMapping("/orders")
+public ResponseEntity&lt;OrderResponse&gt; createOrder(@RequestBody CreateOrderRequest request) {
+    CustomerEntity customer = customerRepository.findById(request.customerId()).orElseThrow();
+    OrderEntity order = new OrderEntity();
+    order.setCustomer(customer);
+    for (CreateOrderItemRequest item : request.items()) {
+        ProductEntity product = productRepository.findById(item.productId()).orElseThrow();
+        product.setStock(product.getStock() - item.getQuantity());
+        productRepository.save(product);
+        // ... 20 more lines of business logic
+    }
+    orderRepository.save(order);
+    return ResponseEntity.ok(OrderResponse.from(order));
+}</code></pre>
+<p><strong>Fix:</strong> Move all business logic to the service layer. The controller should be 5-10 lines per method.</p>
+<h3 id="anti-pattern-2-anemic-domain-model">Anti-Pattern 2: Anemic Domain Model<a class="anchor-link" href="#anti-pattern-2-anemic-domain-model" title="Permanent link">¶</a></h3>
+<p><strong>Problem:</strong> Entities are just bags of getters and setters with no behavior. All logic lives in the service.</p>
+<pre class="code-block"><code class="language-java">// BAD — entity with no behavior, logic scattered in services
+OrderEntity order = new OrderEntity();
+order.setStatus(OrderStatus.CONFIRMED);
+order.setTotalAmount(BigDecimal.ZERO);
+// Service does everything: calculating totals, changing status, etc.</code></pre>
+<p><strong>Fix:</strong> Put domain logic in the entity where it belongs:</p>
+<pre class="code-block"><code class="language-java">// GOOD — entity encapsulates its own rules
+OrderEntity order = new OrderEntity(customer);
+order.addItem(product, 3);  // Entity calculates the line total
+order.confirm();              // Entity enforces state transition rules</code></pre>
+<h3 id="anti-pattern-3-business-logic-in-repository">Anti-Pattern 3: Business Logic in Repository<a class="anchor-link" href="#anti-pattern-3-business-logic-in-repository" title="Permanent link">¶</a></h3>
+<p><strong>Problem:</strong> Custom queries that contain business rules.</p>
+<pre class="code-block"><code class="language-java">// BAD — repository doing business logic
+public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; {
+    @Query("SELECT o FROM OrderEntity o WHERE o.status = 'PENDING' AND o.totalAmount &gt; 1000")
+    List&lt;OrderEntity&gt; findHighValuePendingOrders();
+    // "high value" is a business rule, not a data access concern
+}</code></pre>
+<p><strong>Fix:</strong> Keep repositories simple. Put the filtering logic in the service:</p>
+<pre class="code-block"><code class="language-java">// GOOD — repository is generic, service applies the business rule
+public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; {
+    @Query("SELECT o FROM OrderEntity o WHERE o.status = :status")
+    List&lt;OrderEntity&gt; findByStatus(@Param("status") OrderStatus status);
+}
+
+// In the service:
+List&lt;OrderEntity&gt; pendingOrders = orderRepository.findByStatus(OrderStatus.PENDING);
+List&lt;OrderEntity&gt; highValue = pendingOrders.stream()
+        .filter(o -&gt; o.getTotalAmount().compareTo(BigDecimal.valueOf(1000)) &gt; 0)
+        .toList();</code></pre>
+<h3 id="anti-pattern-4-service-that-does-everything">Anti-Pattern 4: Service That Does Everything<a class="anchor-link" href="#anti-pattern-4-service-that-does-everything" title="Permanent link">¶</a></h3>
+<p><strong>Problem:</strong> One giant <code>OrderService</code> that handles orders, payments, shipping, notifications, and inventory.</p>
+<p><strong>Fix:</strong> Split into focused services: <code>OrderService</code>, <code>PaymentService</code>, <code>ShippingService</code>, <code>NotificationService</code>, <code>InventoryService</code>.</p>
+<hr />
+<h2 id="11-complete-architecture-summary">11. Complete Architecture Summary<a class="anchor-link" href="#11-complete-architecture-summary" title="Permanent link">¶</a></h2>
+<p>Here is the complete picture of how all the pieces fit together:</p>
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────┐
+│                    Browser / Client                    │
+└────────────────────────┬────────────────────────────┘
+                         │ HTTP (JSON)
+┌────────────────────────▼────────────────────────────┐
+│                  Controller Layer                      │
+│  OrderController                                       │
+│  - Receives HTTP requests                              │
+│  - Validates input with @Valid                         │
+│  - Calls service, wraps result in ResponseEntity       │
+│  - Handles NO business logic                           │
+└────────────────────────┬────────────────────────────┘
+                         │ DTOs (CreateOrderRequest)
+┌────────────────────────▼────────────────────────────┐
+│                   Service Layer                       │
+│  OrderService                                          │
+│  - Contains business logic                            │
+│  - Manages transactions with @Transactional          │
+│  - Calls repositories for data access                 │
+│  - Publishes domain events                            │
+│  - Returns DTOs (never entities)                      │
+└──────────┬─────────────┬──────────────────────────────┘
+           │             │ events
+┌──────────▼──────┐ ┌───▼──────────────────────────┐
+│ Repository Layer │ │  Event Listeners              │
+│ OrderRepository  │ │  OrderEventListener           │
+│ - Spring Data    │ │  - Reacts to domain events     │
+│   JPA interface  │ │  - Decoupled from publisher   │
+│ - Executes SQL   │ └───────────────────────────────┘
+└──────────┬───────┘
+           │ SQL
+┌──────────▼──────────────────────────────────────────┐
+│                  Database (PostgreSQL)                │
+│  Tables: customers, products, orders, order_items   │
+└─────────────────────────────────────────────────────┘</code></pre>
+<h3 id="package-structure">Package Structure<a class="anchor-link" href="#package-structure" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code>com.example.ordermgmt
+├── config/                     # Configuration classes
+├── controller/                  # REST controllers
+│   ├── OrderController.java
+│   └── GlobalExceptionHandler.java
+├── domain/                      # JPA entities and enums
+│   ├── OrderEntity.java
+│   ├── OrderItemEntity.java
+│   ├── CustomerEntity.java
+│   ├── ProductEntity.java
+│   └── OrderStatus.java
+├── dto/                         # Request and Response DTOs
+│   ├── CreateOrderRequest.java
+│   ├── CreateOrderItemRequest.java
+│   ├── OrderResponse.java
+│   └── OrderItemResponse.java
+├── repository/                  # Spring Data JPA repositories
+│   ├── OrderRepository.java
+│   ├── ProductRepository.java
+│   └── CustomerRepository.java
+├── service/                     # Business logic
+│   ├── OrderService.java
+│   ├── CustomerService.java
+│   ├── event/
+│   │   ├── OrderCreatedEvent.java
+│   │   └── OrderEventListener.java
+│   └── exception/
+│       ├── OrderManagementException.java
+│       ├── OrderNotFoundException.java
+│       ├── CustomerNotFoundException.java
+│       ├── ProductNotFoundException.java
+│       └── InsufficientStockException.java
+└── OrderManagementApplication.java</code></pre>
+<hr />
+<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
+<h3 id="exercise-1-add-a-customerservice">Exercise 1: Add a CustomerService<a class="anchor-link" href="#exercise-1-add-a-customerservice" title="Permanent link">¶</a></h3>
+<p>Create a <code>CustomerService</code> with methods:
+- <code>createCustomer(CreateCustomerRequest)</code> — creates a new customer
+- <code>getCustomerById(Long id)</code> — returns a <code>CustomerResponse</code>
+- <code>deactivateCustomer(Long id)</code> — marks a customer as inactive</p>
+<p>Ensure it uses <code>@Transactional</code> correctly, constructor injection, and returns DTOs.</p>
+<details>
+<summary>Hint</summary>
+
+Follow the same pattern as `OrderService`. Create `CreateCustomerRequest` (with `@NotBlank` validation on name and email), `CustomerResponse`, and add an `active` boolean field to your `CustomerEntity`. Use `@Transactional(readOnly = true)` for `getCustomerById`.
+</details>
+
+<h3 id="exercise-2-add-order-status-transition-rules">Exercise 2: Add Order Status Transition Rules<a class="anchor-link" href="#exercise-2-add-order-status-transition-rules" title="Permanent link">¶</a></h3>
+<p>Currently <code>confirmOrder</code> and <code>cancelOrder</code> do basic checks. Enhance them to enforce a proper state machine:</p>
+<ul>
+<li><code>PENDING → CONFIRMED</code> (allowed)</li>
+<li><code>PENDING → CANCELLED</code> (allowed)</li>
+<li><code>CONFIRMED → SHIPPED</code> (allowed)</li>
+<li><code>SHIPPED → DELIVERED</code> (allowed)</li>
+<li>Any other transition should throw an <code>IllegalStateException</code></li>
+</ul>
+<p>Add a <code>shipOrder</code> and <code>deliverOrder</code> method to <code>OrderService</code>.</p>
+<details>
+<summary>Hint</summary>
+
+Create a method `validateTransition(OrderStatus from, OrderStatus to)` that checks if the transition is allowed. Call it at the start of each status-change method. You can define allowed transitions with a `Map<OrderStatus, Set<OrderStatus>>` or with a `switch` statement using pattern matching.
+</details>
+
+<h3 id="exercise-3-add-a-productservice">Exercise 3: Add a ProductService<a class="anchor-link" href="#exercise-3-add-a-productservice" title="Permanent link">¶</a></h3>
+<p>Create a <code>ProductService</code> with methods:
+- <code>createProduct(CreateProductRequest)</code> — creates a new product
+- <code>getProductById(Long id)</code> — returns a <code>ProductResponse</code>
+- <code>updateStock(Long productId, int quantity)</code> — adds or removes stock
+- <code>listProducts(Pageable)</code> — returns a page of products</p>
+<p>Ensure <code>updateStock</code> prevents negative stock and publishes a <code>StockUpdatedEvent</code>.</p>
+<details>
+<summary>Hint</summary>
+
+Inject `ApplicationEventPublisher` into the service. After saving the updated product, call `eventPublisher.publishEvent(new StockUpdatedEvent(productId, newStock))`. Create a `StockUpdatedEvent` record and an `@EventListener` that logs the event.
+</details>
+
+<h3 id="exercise-4-refactor-to-rich-domain-model">Exercise 4: Refactor to Rich Domain Model<a class="anchor-link" href="#exercise-4-refactor-to-rich-domain-model" title="Permanent link">¶</a></h3>
+<p>Refactor <code>OrderEntity</code> to encapsulate behavior:
+- Move <code>addItem(ProductEntity, int quantity)</code> into the entity (it calculates line total internally)
+- Move <code>confirm()</code>, <code>cancel()</code>, <code>ship()</code>, <code>deliver()</code> methods into the entity (they enforce state transitions)
+- Update <code>OrderService</code> to call these methods instead of setting fields directly</p>
+<details>
+<summary>Hint</summary>
+
+In `OrderEntity`, add a method `addItem(ProductEntity product, int quantity)` that creates an `OrderItemEntity`, sets its relationships, adds it to `items`, and updates `totalAmount`. Add `confirm()` that checks `status == PENDING` and sets `status = CONFIRMED`. This makes the entity self-validating and the service thinner.
+</details>
+
+<hr />
+<h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
+<ul>
+<li>An architecture pattern is a blueprint for organizing code — it keeps responsibilities clean and changes safe</li>
+<li><strong>SOA</strong> organizes code into logical services within a single deployable application</li>
+<li><strong>Layered architecture</strong> (Controller → Service → Repository → Database) is the standard Spring Boot pattern, and each layer may only talk to the layer directly below it</li>
+<li>The <strong>service layer</strong> contains business logic, uses <code>@Transactional</code> for transaction management, and returns DTOs (never entities)</li>
+<li><strong>Transactions</strong> (ACID) ensure all operations in a transaction succeed or fail together — use <code>@Transactional</code> for writes and <code>@Transactional(readOnly = true)</code> for reads</li>
+<li><strong>DTOs</strong> decouple the API shape from the database schema and prevent security issues</li>
+<li><strong>Domain exceptions</strong> with a hierarchy give meaningful error messages and are translated to HTTP responses by <code>@RestControllerAdvice</code></li>
+<li><strong>Application events</strong> enable loose coupling — the publisher doesn't know who listens</li>
+<li>Anti-patterns to avoid: fat controllers, anemic domain models, business logic in repositories, and services that do everything</li>
+</ul>
+<hr />
+<h2 id="12-transaction-propagation-in-depth">12. Transaction Propagation in Depth<a class="anchor-link" href="#12-transaction-propagation-in-depth" title="Permanent link">¶</a></h2>
+<p>When a <code>@Transactional</code> method calls another <code>@Transactional</code> method, the
+<strong>propagation</strong> behavior determines what happens with the transaction.</p>
+<h3 id="the-seven-propagation-types">The Seven Propagation Types<a class="anchor-link" href="#the-seven-propagation-types" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Propagation</th>
+<th>Behavior</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REQUIRED</code> (default)</td>
+<td>Join existing transaction, or create new one</td>
+<td>Most business logic</td>
+</tr>
+<tr>
+<td><code>REQUIRES_NEW</code></td>
+<td>Always start a new transaction, suspend existing</td>
+<td>Audit logging that must succeed independently</td>
+</tr>
+<tr>
+<td><code>NESTED</code></td>
+<td>Create a savepoint within existing transaction</td>
+<td>Partial rollback without losing parent work</td>
+</tr>
+<tr>
+<td><code>SUPPORTS</code></td>
+<td>Join if exists, run non-transactional if not</td>
+<td>Read-only queries</td>
+</tr>
+<tr>
+<td><code>MANDATORY</code></td>
+<td>Must run inside existing transaction — error if none</td>
+<td>Methods that should only be called from transactional code</td>
+</tr>
+<tr>
+<td><code>NEVER</code></td>
+<td>Must run without transaction — error if one exists</td>
+<td>External API calls that shouldn't be transactional</td>
+</tr>
+<tr>
+<td><code>NOT_SUPPORTED</code></td>
+<td>Suspend existing transaction, run non-transactional</td>
+<td>Long-running operations that don't need a transaction</td>
+</tr>
+</tbody>
+</table>
+<h3 id="code-example-requires_new-for-audit-logging">Code Example: REQUIRES_NEW for Audit Logging<a class="anchor-link" href="#code-example-requires_new-for-audit-logging" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@Service
+public class OrderService {
+
+    private final OrderRepository orderRepo;
+    private final AuditLogService auditLog;
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        OrderEntity order = buildOrder(request);
+        orderRepo.save(order);
+        auditLog.log("ORDER_CREATED", order.getId());  // should succeed even if order save rolled back
+        return OrderResponse.from(order);
+    }
+}
+
+@Service
+public class AuditLogService {
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)  // independent transaction
+    public void log(String action, Long entityId) {
+        // This commits independently — even if the caller rolls back,
+        // the audit log entry is saved
+        auditRepo.save(new AuditEntry(action, entityId, Instant.now()));
+    }
+}</code></pre>
+<h3 id="common-pitfall-self-invocation">Common Pitfall: Self-Invocation<a class="anchor-link" href="#common-pitfall-self-invocation" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@Service
+public class OrderService {
+
+    @Transactional
+    public void processAll(List&lt;Long&gt; ids) {
+        for (Long id : ids) {
+            this.processOne(id);  // BAD: bypasses @Transactional proxy!
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void processOne(Long id) {
+        // This does NOT get REQUIRES_NEW — Spring proxies don't intercept self-calls
+        // The method runs in the SAME transaction as processAll
+    }
+}</code></pre>
+<hr />
+<h2 id="13-domain-events-and-application-events">13. Domain Events and Application Events<a class="anchor-link" href="#13-domain-events-and-application-events" title="Permanent link">¶</a></h2>
+<p>Spring's event system lets components communicate <strong>without direct dependencies</strong>.</p>
+<h3 id="publishing-events">Publishing Events<a class="anchor-link" href="#publishing-events" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@Service
+public class OrderService {
+
+    private final OrderRepository orderRepo;
+    private final ApplicationEventPublisher eventPublisher;
+
+    public OrderService(OrderRepository orderRepo, ApplicationEventPublisher eventPublisher) {
+        this.orderRepo = orderRepo;
+        this.eventPublisher = eventPublisher;
+    }
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        OrderEntity order = buildOrder(request);
+        orderRepo.save(order);
+
+        // Publish an event — listeners will react
+        eventPublisher.publishEvent(new OrderCreatedEvent(order.getId(), order.getStatus(), order.getTotalAmount()));
+        return OrderResponse.from(order);
+    }
+}
+
+public record OrderCreatedEvent(Long orderId, OrderStatus status, BigDecimal totalAmount) {}</code></pre>
+<h3 id="listening-to-events">Listening to Events<a class="anchor-link" href="#listening-to-events" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@Component
+public class OrderEventListener {
+
+    @EventListener
+    public void onOrderCreated(OrderCreatedEvent event) {
+        log.info("Order created: id={}, total=${}", event.orderId(), event.totalAmount());
+        // Send email, update analytics, etc.
+    }
+
+    // Runs AFTER the transaction commits (not on rollback)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onOrderCreatedAfterCommit(OrderCreatedEvent event) {
+        // Only fires if the transaction that published the event committed successfully
+        notificationService.sendOrderConfirmation(event.orderId());
+    }
+}</code></pre>
+<h3 id="why-use-events">Why Use Events?<a class="anchor-link" href="#why-use-events" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Decoupling</strong> — the order service doesn't know about email, analytics, or notifications</li>
+<li><strong>Single Responsibility</strong> — each listener does one thing</li>
+<li><strong>Extensibility</strong> — add new listeners without modifying the publisher</li>
+<li><strong>Transaction safety</strong> — <code>@TransactionalEventListener</code> only fires after commit</li>
+</ul>
+<hr />
+<h2 id="14-caching-strategy">14. Caching Strategy<a class="anchor-link" href="#14-caching-strategy" title="Permanent link">¶</a></h2>
+<h3 id="enabling-caching">Enabling Caching<a class="anchor-link" href="#enabling-caching" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@SpringBootApplication
+@EnableCaching  // enables @Cacheable, @CacheEvict, @CachePut
+public class OrderManagementApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(OrderManagementApplication.class, args);
+    }
+}</code></pre>
+<h3 id="cacheable-skip-method-execution-on-cache-hit">@Cacheable — Skip Method Execution on Cache Hit<a class="anchor-link" href="#cacheable-skip-method-execution-on-cache-hit" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@Service
+public class ProductService {
+
+    private final ProductRepository productRepo;
+
+    @Cacheable(value = "products", key = "#id")
+    public Product findById(Long id) {
+        // Only executes if not in cache
+        return productRepo.findById(id)
+                .orElseThrow(() -&gt; new IllegalArgumentException("Not found: " + id));
+    }
+
+    @Cacheable(value = "products", key = "#category")
+    public List&lt;Product&gt; findByCategory(String category) {
+        return productRepo.findByCategory(category);
+    }
+}</code></pre>
+<h3 id="cacheevict-remove-from-cache">@CacheEvict — Remove from Cache<a class="anchor-link" href="#cacheevict-remove-from-cache" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@CacheEvict(value = "products", key = "#product.id")
+public Product update(Product product) {
+    return productRepo.save(product);
+}
+
+// Clear the entire cache when bulk updates happen
+@CacheEvict(value = "products", allEntries = true)
+public void bulkUpdatePrices(BigDecimal percentage) {
+    productRepo.applyPriceIncrease(percentage);
+}</code></pre>
+<h3 id="cacheput-always-execute-update-cache">@CachePut — Always Execute, Update Cache<a class="anchor-link" href="#cacheput-always-execute-update-cache" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@CachePut(value = "products", key = "#id")
+public Product updateStock(Long id, int newStock) {
+    Product product = productRepo.findById(id).orElseThrow();
+    product.setStock(newStock);
+    return productRepo.save(product);  // result puts into cache
+}</code></pre>
+<h3 id="when-to-cache-vs-when-not-to">When to Cache vs. When Not To<a class="anchor-link" href="#when-to-cache-vs-when-not-to" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Cache?</th>
+<th>Situation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Read-heavy, rarely changing data (product catalog, user profiles)</td>
+</tr>
+<tr>
+<td>Yes</td>
+<td>Expensive computations (reports, aggregations)</td>
+</tr>
+<tr>
+<td>No</td>
+<td>Write-heavy data (order status, stock levels)</td>
+</tr>
+<tr>
+<td>No</td>
+<td>Frequently changing data (real-time metrics)</td>
+</tr>
+<tr>
+<td>No</td>
+<td>Data that must always be fresh (pricing, availability)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
+<ul>
+<li>
+<p><strong>[Build a Clean Spring Boot Project Step by Step]</strong> by Dan Vega — Covers project structure and layered architecture (controllers, services, repositories)
+  <a href="https://www.youtube.com/watch?v=rWhqxgBd2qA">https://www.youtube.com/watch?v=rWhqxgBd2qA</a></p>
+</li>
+<li>
+<p><strong>[Spring Boot Tutorial for Beginners | Full Course 2025]</strong> by Amigoscode — Full course that naturally covers the service layer pattern, Docker, and JPA (1:11:19, 251K views)
+  <a href="https://www.youtube.com/watch?v=Cw0J6jYJtzw">https://www.youtube.com/watch?v=Cw0J6jYJtzw</a></p>
+</li>
+</ul>
+<hr />
+<p>← <a href="04-repository-pattern.html">Previous: Module 04</a> | <a href="06-kafka.html">Next: Module 06</a> →</p>
+      </article>
+
+      <div class="footer-nav"><a href="04-repository-pattern.html" class="nav-link prev">← Repository Pattern</a><a href="06-kafka.html" class="nav-link next">Kafka →</a></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="assets/search.js"></script>
+</body>
+</html>

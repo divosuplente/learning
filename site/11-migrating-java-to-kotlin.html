@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Migrating Java to Kotlin — Java Spring Boot Course</title>
+  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="logo">
+          <span class="logo-icon">☕</span>
+          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+        </a>
+      </div>
+      
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Search course..." autocomplete="off" />
+          <div id="searchResults" class="search-results"></div>
+        </div>
+      <nav class="nav-list">
+        
+        <a href="00-java-foundations.html" class="nav-item">
+          <span class="nav-num">00</span>
+          <span class="nav-title">Java Foundations</span>
+        </a>
+
+        <a href="01-build-tools-and-project-setup.html" class="nav-item">
+          <span class="nav-num">01</span>
+          <span class="nav-title">Build Tools & Project Setup</span>
+        </a>
+
+        <a href="02-dependency-injection.html" class="nav-item">
+          <span class="nav-num">02</span>
+          <span class="nav-title">Dependency Injection</span>
+        </a>
+
+        <a href="03-spring-boot-fundamentals.html" class="nav-item">
+          <span class="nav-num">03</span>
+          <span class="nav-title">Spring Boot Fundamentals</span>
+        </a>
+
+        <a href="04-repository-pattern.html" class="nav-item">
+          <span class="nav-num">04</span>
+          <span class="nav-title">Repository Pattern</span>
+        </a>
+
+        <a href="05-service-oriented-architecture.html" class="nav-item">
+          <span class="nav-num">05</span>
+          <span class="nav-title">Service-Oriented Architecture</span>
+        </a>
+
+        <a href="06-kafka.html" class="nav-item">
+          <span class="nav-num">06</span>
+          <span class="nav-title">Kafka</span>
+        </a>
+
+        <a href="07-graphql.html" class="nav-item">
+          <span class="nav-num">07</span>
+          <span class="nav-title">GraphQL</span>
+        </a>
+
+        <a href="08-reactor-pattern.html" class="nav-item">
+          <span class="nav-num">08</span>
+          <span class="nav-title">Reactor Pattern</span>
+        </a>
+
+        <a href="09-tdd.html" class="nav-item">
+          <span class="nav-num">09</span>
+          <span class="nav-title">Test-Driven Development</span>
+        </a>
+
+        <a href="10-capstone-project.html" class="nav-item">
+          <span class="nav-num">10</span>
+          <span class="nav-title">Capstone Project</span>
+        </a>
+
+        <a href="11-migrating-java-to-kotlin.html" class="nav-item active">
+          <span class="nav-num">11</span>
+          <span class="nav-title">Migrating Java to Kotlin</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-content">
+      <header class="page-header">
+        
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="breadcrumb">
+          <a href="index.html">Home</a> › <span>Migrating Java to Kotlin</span>
+        </div>
+      </header>
+
+      <article class="content">
+        <h1 id="module-11-migrating-java-to-kotlin">Module 11: Migrating Java to Kotlin<a class="anchor-link" href="#module-11-migrating-java-to-kotlin" title="Permanent link">¶</a></h1>
+<h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
+<ul>
+<li>Why Kotlin is a compelling alternative to Java for Spring Boot applications</li>
+<li>How Kotlin's syntax compares to Java — line-by-line equivalents</li>
+<li>How to add Kotlin to an existing Spring Boot Maven project</li>
+<li>How to convert Java entities, DTOs, services, and controllers to Kotlin</li>
+<li>How Kotlin's <strong>null safety</strong> system prevents NullPointerException at compile time</li>
+<li>How to use <strong>Kotlin coroutines</strong> as an alternative to Reactor's Mono/Flux</li>
+<li>How Kotlin <strong>data classes</strong>, <strong>extension functions</strong>, and <strong>DSLs</strong> simplify code</li>
+<li>How to use Kotlin-specific Spring Boot features (routing DSL, coroutine repositories)</li>
+<li>A step-by-step migration strategy with automated tools (J2K converter)</li>
+<li>How to test Kotlin code with JUnit 5, MockK, and kotest-assertions</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
+<ul>
+<li>All prior modules (00-10) must be completed</li>
+<li>Java 21+, Maven, and an IDE (IntelliJ IDEA Community or Ultimate)</li>
+<li>Understanding of: Java OOP, Spring Boot DI/REST/JPA, records, Reactor Mono/Flux</li>
+</ul>
+<hr />
+<h2 id="1-why-kotlin">1. Why Kotlin?<a class="anchor-link" href="#1-why-kotlin" title="Permanent link">¶</a></h2>
+<p><strong>Kotlin</strong> is a modern, statically-typed programming language that runs on the JVM.
+It was created by JetBrains (the company behind IntelliJ IDEA) and is fully
+<strong>interoperable</strong> with Java — you can call Java code from Kotlin and vice versa
+without any wrappers or adapters.</p>
+<p>Google made Kotlin the preferred language for Android development in 2019, and
+Spring Boot added first-class Kotlin support starting with Spring Framework 5.0
+(2017). Today, many production Spring Boot applications run on Kotlin.</p>
+<h3 id="java-vs-kotlin-quick-comparison">Java vs Kotlin: Quick Comparison<a class="anchor-link" href="#java-vs-kotlin-quick-comparison" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Java 21</th>
+<th>Kotlin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Null safety</td>
+<td>Optional API (runtime)</td>
+<td>Built-in type system (compile-time)</td>
+</tr>
+<tr>
+<td>Data classes</td>
+<td>Records (Java 16+)</td>
+<td><code>data class</code> (since Kotlin 1.0)</td>
+</tr>
+<tr>
+<td>String interpolation</td>
+<td><code>String.format()</code> or concatenation</td>
+<td><code>"Hello $name"</code></td>
+</tr>
+<tr>
+<td>Smart casting</td>
+<td><code>instanceof</code> + cast</td>
+<td><code>is</code> check, automatic cast</td>
+</tr>
+<tr>
+<td>Extension functions</td>
+<td>Not available</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Coroutines</td>
+<td>Virtual threads (Java 21)</td>
+<td><code>suspend</code> functions, structured concurrency</td>
+</tr>
+<tr>
+<td>Pattern matching</td>
+<td>Switch expressions (Java 21)</td>
+<td><code>when</code> expression</td>
+</tr>
+<tr>
+<td>Properties</td>
+<td>Getters/setters boilerplate</td>
+<td><code>val</code>/<code>var</code> — getters/setters auto-generated</td>
+</tr>
+<tr>
+<td>Default arguments</td>
+<td>Not available</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Named arguments</td>
+<td>Not available</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Sealed classes</td>
+<td>Sealed interfaces (Java 17+)</td>
+<td><code>sealed class</code> (since Kotlin 1.0)</td>
+</tr>
+<tr>
+<td>Collection literals</td>
+<td><code>List.of()</code>, <code>Map.of()</code></td>
+<td><code>listOf()</code>, <code>mapOf()</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="should-you-migrate">Should You Migrate?<a class="anchor-link" href="#should-you-migrate" title="Permanent link">¶</a></h3>
+<p>You should NOT migrate every Java project to Kotlin. Consider Kotlin when:</p>
+<ul>
+<li>Starting a <strong>new microservice</strong> in an existing Java/Spring ecosystem</li>
+<li>Adding new features to a project where the team wants to <strong>gradually adopt</strong> Kotlin</li>
+<li>You need <strong>concise code</strong> with fewer bugs (null safety, immutability by default)</li>
+<li>Your team values <strong>expressiveness</strong> (DSLs, extension functions, coroutines)</li>
+</ul>
+<p>You should NOT migrate when:
+- Your team has <strong>no Kotlin experience</strong> and ramp-up time is not acceptable
+- You rely heavily on <strong>annotation processing tools</strong> that don't support Kotlin well
+- Your codebase is <strong>stable and low-churn</strong> — migration effort outweighs benefits</p>
+<hr />
+<h2 id="2-setting-up-kotlin-in-a-spring-boot-project">2. Setting Up Kotlin in a Spring Boot Project<a class="anchor-link" href="#2-setting-up-kotlin-in-a-spring-boot-project" title="Permanent link">¶</a></h2>
+<h3 id="option-a-start-a-new-project-with-spring-initializr">Option A: Start a New Project with Spring Initializr<a class="anchor-link" href="#option-a-start-a-new-project-with-spring-initializr" title="Permanent link">¶</a></h3>
+<p>Go to <a href="https://start.spring.io">start.spring.io</a>, select:</p>
+<ul>
+<li><strong>Language</strong>: Kotlin</li>
+<li><strong>Project</strong>: Maven</li>
+<li><strong>Spring Boot</strong>: 3.3.x</li>
+<li><strong>Packaging</strong>: Jar</li>
+<li><strong>Java version</strong>: 21</li>
+</ul>
+<p>Add dependencies: Spring Web, Spring Data JPA, PostgreSQL Driver,
+Spring for GraphQL, Spring for Apache Kafka, Spring Boot DevTools.</p>
+<h3 id="option-b-add-kotlin-to-an-existing-java-project">Option B: Add Kotlin to an Existing Java Project<a class="anchor-link" href="#option-b-add-kotlin-to-an-existing-java-project" title="Permanent link">¶</a></h3>
+<p>Add the Kotlin Maven plugin and standard library to your <code>pom.xml</code>:</p>
+<pre class="code-block"><code class="language-xml">&lt;properties&gt;
+    &lt;java.version&gt;21&lt;/java.version&gt;
+    &lt;kotlin.version&gt;2.0.21&lt;/kotlin.version&gt;
+&lt;/properties&gt;
+
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+        &lt;artifactId&gt;kotlin-stdlib&lt;/artifactId&gt;
+        &lt;version&gt;${kotlin.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+        &lt;artifactId&gt;kotlin-reflect&lt;/artifactId&gt;
+        &lt;version&gt;${kotlin.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.fasterxml.jackson.module&lt;/groupId&gt;
+        &lt;artifactId&gt;jackson-module-kotlin&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+
+&lt;build&gt;
+    &lt;plugins&gt;
+        &lt;plugin&gt;
+            &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+            &lt;artifactId&gt;kotlin-maven-plugin&lt;/artifactId&gt;
+            &lt;version&gt;${kotlin.version}&lt;/version&gt;
+            &lt;configuration&gt;
+                &lt;compilerPlugins&gt;
+                    &lt;plugin&gt;spring&lt;/plugin&gt;
+                    &lt;plugin&gt;jpa&lt;/plugin&gt;
+                    &lt;plugin&gt;all-open&lt;/plugin&gt;
+                &lt;/compilerPlugins&gt;
+                &lt;jvmTarget&gt;21&lt;/jvmTarget&gt;
+            &lt;/configuration&gt;
+            &lt;executions&gt;
+                &lt;execution&gt;
+                    &lt;id&gt;compile&lt;/id&gt;
+                    &lt;goals&gt;&lt;goal&gt;compile&lt;/goal&gt;&lt;/goals&gt;
+                    &lt;configuration&gt;
+                        &lt;sourceDirs&gt;
+                            &lt;sourceDir&gt;src/main/kotlin&lt;/sourceDir&gt;
+                            &lt;sourceDir&gt;src/main/java&lt;/sourceDir&gt;
+                        &lt;/sourceDirs&gt;
+                    &lt;/configuration&gt;
+                &lt;/execution&gt;
+                &lt;execution&gt;
+                    &lt;id&gt;test-compile&lt;/id&gt;
+                    &lt;goals&gt;&lt;goal&gt;test-compile&lt;/goal&gt;&lt;/goals&gt;
+                    &lt;configuration&gt;
+                        &lt;sourceDirs&gt;
+                            &lt;sourceDir&gt;src/test/kotlin&lt;/sourceDir&gt;
+                            &lt;sourceDir&gt;src/test/java&lt;/sourceDir&gt;
+                        &lt;/sourceDirs&gt;
+                    &lt;/configuration&gt;
+                &lt;/execution&gt;
+            &lt;/executions&gt;
+            &lt;dependencies&gt;
+                &lt;dependency&gt;
+                    &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+                    &lt;artifactId&gt;kotlin-maven-allopen&lt;/artifactId&gt;
+                    &lt;version&gt;${kotlin.version}&lt;/version&gt;
+                &lt;/dependency&gt;
+                &lt;dependency&gt;
+                    &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+                    &lt;artifactId&gt;kotlin-maven-noarg&lt;/artifactId&gt;
+                    &lt;version&gt;${kotlin.version}&lt;/version&gt;
+                &lt;/dependency&gt;
+            &lt;/dependencies&gt;
+        &lt;/plugin&gt;
+        &lt;plugin&gt;
+            &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+            &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+            &lt;executions&gt;
+                &lt;execution&gt;
+                    &lt;id&gt;default-compile&lt;/id&gt;
+                    &lt;phase&gt;none&lt;/phase&gt;
+                &lt;/execution&gt;
+                &lt;execution&gt;
+                    &lt;id&gt;default-testCompile&lt;/id&gt;
+                    &lt;phase&gt;none&lt;/phase&gt;
+                &lt;/execution&gt;
+                &lt;execution&gt;
+                    &lt;id&gt;java-compile&lt;/id&gt;
+                    &lt;phase&gt;compile&lt;/phase&gt;
+                    &lt;goals&gt;&lt;goal&gt;compile&lt;/goal&gt;&lt;/goals&gt;
+                &lt;/execution&gt;
+                &lt;execution&gt;
+                    &lt;id&gt;java-test-compile&lt;/id&gt;
+                    &lt;phase&gt;test-compile&lt;/phase&gt;
+                    &lt;goals&gt;&lt;goal&gt;testCompile&lt;/goal&gt;&lt;/goals&gt;
+                &lt;/execution&gt;
+            &lt;/executions&gt;
+        &lt;/plugin&gt;
+    &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+<h3 id="the-three-kotlin-compiler-plugins">The Three Kotlin Compiler Plugins<a class="anchor-link" href="#the-three-kotlin-compiler-plugins" title="Permanent link">¶</a></h3>
+<p>These plugins are essential for Spring Boot + Kotlin:</p>
+<ol>
+<li>
+<p><strong><code>spring</code></strong> (allopen) — Opens classes and methods that Spring needs to
+   proxy (e.g., <code>@Service</code>, <code>@Configuration</code>, <code>@RestController</code>). Kotlin
+   classes are <code>final</code> by default, but Spring creates subclass proxies via CGLIB.</p>
+</li>
+<li>
+<p><strong><code>jpa</code></strong> (no-arg) — Generates a synthetic no-argument constructor for
+   classes annotated with <code>@Entity</code>. JPA requires this, but Kotlin classes
+   don't have implicit no-arg constructors.</p>
+</li>
+<li>
+<p><strong><code>all-open</code></strong> — A general plugin that opens classes annoted with any
+   annotation you specify. Used alongside <code>spring</code> for custom annotations.</p>
+</li>
+</ol>
+<p>Without these plugins, Spring Boot will <strong>fail to start</strong> with Kotlin.</p>
+<hr />
+<h2 id="3-kotlin-syntax-crash-course-for-java-developers">3. Kotlin Syntax Crash Course for Java Developers<a class="anchor-link" href="#3-kotlin-syntax-crash-course-for-java-developers" title="Permanent link">¶</a></h2>
+<h3 id="31-hello-world">3.1 Hello World<a class="anchor-link" href="#31-hello-world" title="Permanent link">¶</a></h3>
+<p><strong>Java:</strong>
+<pre class="code-block"><code class="language-java">public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">fun main() {
+    println("Hello, World!")
+}</code></pre></p>
+<p>Key differences:
+- No class wrapper needed — top-level <code>fun main()</code> is valid
+- <code>System.out.println</code> → <code>println</code>
+- No <code>String[] args</code> required (optional)</p>
+<h3 id="32-variables">3.2 Variables<a class="anchor-link" href="#32-variables" title="Permanent link">¶</a></h3>
+<p><strong>Java:</strong>
+<pre class="code-block"><code class="language-java">String name = "Alice";           // mutable
+final int age = 30;              // immutable
+var city = "NYC";                // type inferred (Java 10+)</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">var name: String = "Alice"       // mutable
+val age: Int = 30                // immutable (preferred)
+val city = "NYC"                 // type inferred</code></pre></p>
+<p>Kotlin uses <code>val</code> (read-only, like Java's <code>final</code>) and <code>var</code> (mutable).
+<strong>Prefer <code>val</code></strong> — immutability by default is a Kotlin best practice.</p>
+<h3 id="33-null-safety">3.3 Null Safety<a class="anchor-link" href="#33-null-safety" title="Permanent link">¶</a></h3>
+<p>This is Kotlin's headline feature. In Java, any object reference can be <code>null</code>,
+leading to <code>NullPointerException</code> (NPE) at runtime. Kotlin distinguishes
+<strong>nullable</strong> and <strong>non-nullable</strong> types <strong>at compile time</strong>.</p>
+<p><strong>Java:</strong>
+<pre class="code-block"><code class="language-java">String name = getName();      // might be null
+int length = name.length();   // NPE if name is null!</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">var name: String = "Alice"             // non-nullable — CANNOT be null
+var nickname: String? = null           // nullable — explicitly marked with ?
+
+// Safe call — returns null if nickname is null
+val length: Int? = nickname?.length
+
+// Elvis operator — provide a default when null
+val safeLength: Int = nickname?.length ?: 0
+
+// Not-null assertion — throws NPE if null (use sparingly!)
+val forced: Int = nickname!!.length
+
+// Smart cast — after a null check, Kotlin knows it's non-null
+if (nickname != null) {
+    val len: Int = nickname.length     // no ? needed — smart cast
+}</code></pre></p>
+<h3 id="34-string-interpolation">3.4 String Interpolation<a class="anchor-link" href="#34-string-interpolation" title="Permanent link">¶</a></h3>
+<p><strong>Java:</strong>
+<pre class="code-block"><code class="language-java">String name = "Alice";
+int age = 30;
+String message = String.format("Hello %s, you are %d years old", name, age);</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">val name = "Alice"
+val age = 30
+val message = "Hello $name, you are $age years old"        // simple
+val complex = "Name length: ${name.length}"                 // expressions</code></pre></p>
+<h3 id="35-data-classes">3.5 Data Classes<a class="anchor-link" href="#35-data-classes" title="Permanent link">¶</a></h3>
+<p>Kotlin's <code>data class</code> is equivalent to Java's <code>record</code> — but with more features.</p>
+<p><strong>Java (record):</strong>
+<pre class="code-block"><code class="language-java">public record Customer(Long id, String name, String email) {}</code></pre></p>
+<p><strong>Kotlin (data class):</strong>
+<pre class="code-block"><code class="language-kotlin">data class Customer(
+    val id: Long,
+    val name: String,
+    val email: String
+)</code></pre></p>
+<p>Both auto-generate <code>equals()</code>, <code>hashCode()</code>, <code>toString()</code>, and accessors.
+Kotlin additionally provides:
+- <strong><code>copy()</code></strong> — create a modified copy: <code>customer.copy(email = "new@email.com")</code>
+- <strong><code>componentN()</code></strong> — destructuring: <code>val (id, name, _) = customer</code>
+- <strong>Named arguments</strong> — <code>Customer(id = 1, name = "Alice", email = "a@b.com")</code></p>
+<h3 id="36-when-expression-kotlins-switch">3.6 When Expression (Kotlin's switch)<a class="anchor-link" href="#36-when-expression-kotlins-switch" title="Permanent link">¶</a></h3>
+<p><strong>Java (switch expression):</strong>
+<pre class="code-block"><code class="language-java">String label = switch (status) {
+    case PENDING -&gt; "Waiting";
+    case CONFIRMED -&gt; "Confirmed";
+    case SHIPPED -&gt; "In transit";
+    case DELIVERED -&gt; "Delivered";
+    case CANCELLED -&gt; "Cancelled";
+    default -&gt; "Unknown";
+};</code></pre></p>
+<p><strong>Kotlin (when expression):</strong>
+<pre class="code-block"><code class="language-kotlin">val label = when (status) {
+    OrderStatus.PENDING -&gt; "Waiting"
+    OrderStatus.CONFIRMED -&gt; "Confirmed"
+    OrderStatus.SHIPPED -&gt; "In transit"
+    OrderStatus.DELIVERED -&gt; "Delivered"
+    OrderStatus.CANCELLED -&gt; "Cancelled"
+}</code></pre></p>
+<p>Kotlin's <code>when</code> is more powerful:
+- No <code>break</code> needed (branches don't fall through)
+- Can match types: <code>when (x) { is String -&gt; ...; is Int -&gt; ... }</code>
+- Can match ranges: <code>when (n) { in 1..10 -&gt; ...; in 11..100 -&gt; ... }</code>
+- Can match conditions: <code>when { x &gt; 0 -&gt; ...; x &lt; 0 -&gt; ...; else -&gt; ... }</code></p>
+<h3 id="37-functions">3.7 Functions<a class="anchor-link" href="#37-functions" title="Permanent link">¶</a></h3>
+<p><strong>Java:</strong>
+<pre class="code-block"><code class="language-java">public int add(int a, int b) {
+    return a + b;
+}
+
+public int square(int n) {
+    return n * n;
+}</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">fun add(a: Int, b: Int): Int {
+    return a + b
+}
+
+// Single-expression function (concise)
+fun square(n: Int): Int = n * n
+
+// Default arguments
+fun greet(name: String, greeting: String = "Hello"): String = "$greeting, $name!"
+
+// Named arguments
+greet(name = "Alice", greeting = "Hi")
+greet("Bob")  // uses default greeting
+
+// Vararg
+fun sum(vararg numbers: Int): Int = numbers.sum()
+sum(1, 2, 3, 4, 5)</code></pre></p>
+<h3 id="38-extension-functions">3.8 Extension Functions<a class="anchor-link" href="#38-extension-functions" title="Permanent link">¶</a></h3>
+<p>Extension functions let you add methods to existing classes <strong>without inheritance</strong>.</p>
+<pre class="code-block"><code class="language-kotlin">// Add a function to String
+fun String.isEmail(): Boolean = this.contains("@") &amp;&amp; this.contains(".")
+
+// Add a function to BigDecimal
+fun BigDecimal.toMoneyString(): String = "$${this.toPlainString()}"
+
+// Usage
+val email = "alice@example.com"
+val isValid = email.isEmail()   // looks like a method on String
+
+val price = BigDecimal("19.99")
+println(price.toMoneyString())  // "$19.99"</code></pre>
+<p>This is a <strong>superpower</strong> — you can make any existing Java class feel like it has
+new methods, without modifying the original class.</p>
+<h3 id="39-collections">3.9 Collections<a class="anchor-link" href="#39-collections" title="Permanent link">¶</a></h3>
+<p><strong>Java:</strong>
+<pre class="code-block"><code class="language-java">List&lt;String&gt; names = List.of("Alice", "Bob", "Charlie");
+List&lt;String&gt; upper = names.stream()
+        .map(String::toUpperCase)
+        .filter(n -&gt; n.length() &gt; 3)
+        .toList();</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">val names = listOf("Alice", "Bob", "Charlie")
+val upper = names
+        .map { it.uppercase() }
+        .filter { it.length &gt; 3 }
+
+// Map and set
+val orderMap = mapOf("order1" to OrderStatus.PENDING, "order2" to OrderStatus.CONFIRMED)
+val prices = setOf(BigDecimal("9.99"), BigDecimal("19.99"))</code></pre></p>
+<p>Kotlin's collection API is richer than Java Streams:
+- <code>mapNotNull</code> — map and filter nulls in one step
+- <code>groupBy</code> — group into a <code>Map&lt;K, List&lt;V&gt;&gt;</code>
+- <code>associateBy</code> — convert list to map by a key
+- <code>chunked(n)</code> — split into chunks of size n
+- <code>windowed(n)</code> — sliding window of size n</p>
+<hr />
+<h2 id="4-migrating-the-domain-layer">4. Migrating the Domain Layer<a class="anchor-link" href="#4-migrating-the-domain-layer" title="Permanent link">¶</a></h2>
+<h3 id="41-java-entities-kotlin-entities">4.1 Java Entities → Kotlin Entities<a class="anchor-link" href="#41-java-entities-kotlin-entities" title="Permanent link">¶</a></h3>
+<p>JPA entities in Kotlin need the <code>no-arg</code> compiler plugin (configured in the pom.xml
+above) to generate the synthetic no-argument constructor JPA requires.</p>
+<p><strong>Java (from Module 04):</strong>
+<pre class="code-block"><code class="language-java">@Entity
+@Table(name = "customers")
+public class CustomerEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false, length = 100)
+    private String name;
+    @Column(nullable = false, unique = true)
+    private String email;
+    private String address;
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+
+    protected CustomerEntity() {}
+
+    public CustomerEntity(String name, String email, String address) {
+        this.name = name;
+        this.email = email;
+        this.address = address;
+        this.createdAt = Instant.now();
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+}</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">@Entity
+@Table(name = "customers")
+class CustomerEntity(
+    @Column(nullable = false, length = 100)
+    var name: String,
+
+    @Column(nullable = false, unique = true)
+    var email: String,
+
+    var address: String? = null
+) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null
+
+    @Column(name = "created_at", updatable = false)
+    var createdAt: Instant = Instant.now()
+}</code></pre></p>
+<p>Key differences:
+- <strong>No explicit getters/setters</strong> — <code>var</code> generates them automatically
+- <strong>No-arg constructor</strong> — generated by the JPA plugin
+- <strong>Nullable <code>id</code></strong> — <code>Long?</code> because it's <code>null</code> until persisted
+- <strong>Constructor parameters</strong> — Kotlin classes use primary constructors
+- <strong><code>Instant.now()</code> as default</strong> — runs at instantiation time</p>
+<h3 id="42-java-records-kotlin-data-classes">4.2 Java Records → Kotlin Data Classes<a class="anchor-link" href="#42-java-records-kotlin-data-classes" title="Permanent link">¶</a></h3>
+<p>DTOs are even simpler in Kotlin:</p>
+<p><strong>Java (record):</strong>
+<pre class="code-block"><code class="language-java">public record OrderResponse(
+        Long id,
+        String customerName,
+        OrderStatus status,
+        BigDecimal totalAmount,
+        Instant createdAt,
+        List&lt;OrderItemResponse&gt; items
+) {
+    public static OrderResponse from(OrderEntity entity) { ... }
+}</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">data class OrderResponse(
+    val id: Long?,
+    val customerName: String,
+    val status: OrderStatus,
+    val totalAmount: BigDecimal,
+    val createdAt: Instant,
+    val items: List&lt;OrderItemResponse&gt;
+) {
+    companion object {
+        fun from(entity: OrderEntity): OrderResponse = OrderResponse(
+            id = entity.id,
+            customerName = entity.customer.name,
+            status = entity.status,
+            totalAmount = entity.totalAmount,
+            createdAt = entity.createdAt,
+            items = entity.items.map { OrderItemResponse.from(it) }
+        )
+    }
+}</code></pre></p>
+<p>The <code>companion object</code> replaces Java's <code>static</code> methods. It's a singleton object
+attached to the class.</p>
+<h3 id="43-java-enums-kotlin-enums">4.3 Java Enums → Kotlin Enums<a class="anchor-link" href="#43-java-enums-kotlin-enums" title="Permanent link">¶</a></h3>
+<p><strong>Java:</strong>
+<pre class="code-block"><code class="language-java">public enum OrderStatus {
+    PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+}</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">enum class OrderStatus {
+    PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+}</code></pre></p>
+<p>Identical syntax (just <code>enum class</code> instead of <code>enum</code>).</p>
+<hr />
+<h2 id="5-migrating-services-and-controllers">5. Migrating Services and Controllers<a class="anchor-link" href="#5-migrating-services-and-controllers" title="Permanent link">¶</a></h2>
+<h3 id="51-service-layer">5.1 Service Layer<a class="anchor-link" href="#51-service-layer" title="Permanent link">¶</a></h3>
+<p><strong>Java:</strong>
+<pre class="code-block"><code class="language-java">@Service
+public class OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
+    private final OrderRepository orderRepository;
+    private final OrderEventProducer eventProducer;
+
+    public OrderService(OrderRepository orderRepository,
+                        OrderEventProducer eventProducer) {
+        this.orderRepository = orderRepository;
+        this.eventProducer = eventProducer;
+    }
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        log.info("Creating order for customer {}", request.customerId());
+        // ... business logic
+    }
+}</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">@Service
+class OrderService(
+    private val orderRepository: OrderRepository,
+    private val orderEventProducer: OrderEventProducer
+) {
+    private val log = LoggerFactory.getLogger(javaClass)
+
+    @Transactional
+    fun createOrder(request: CreateOrderRequest): OrderResponse {
+        log.info("Creating order for customer {}", request.customerId)
+        // ... business logic
+    }
+}</code></pre></p>
+<p>Key differences:
+- <strong>Constructor injection via primary constructor</strong> — parameters in the class header
+- <strong><code>private val</code></strong> — Spring injects dependencies as read-only properties
+- <strong>No <code>this.x = x</code></strong> — Kotlin handles it automatically
+- <strong><code>javaClass</code></strong> — equivalent to <code>OrderService::class.java</code>
+- <strong><code>fun</code> keyword</strong> — all functions start with <code>fun</code></p>
+<h3 id="52-rest-controller">5.2 REST Controller<a class="anchor-link" href="#52-rest-controller" title="Permanent link">¶</a></h3>
+<p><strong>Java:</strong>
+<pre class="code-block"><code class="language-java">@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;OrderResponse&gt; findById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.findById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;OrderResponse&gt; create(@Valid @RequestBody CreateOrderRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(request));
+    }
+}</code></pre></p>
+<p><strong>Kotlin:</strong>
+<pre class="code-block"><code class="language-kotlin">@RestController
+@RequestMapping("/api/orders")
+class OrderController(
+    private val orderService: OrderService
+) {
+    private val log = LoggerFactory.getLogger(javaClass)
+
+    @GetMapping("/{id}")
+    fun findById(@PathVariable id: Long): ResponseEntity&lt;OrderResponse&gt; =
+        ResponseEntity.ok(orderService.findById(id))
+
+    @PostMapping
+    fun create(@Valid @RequestBody request: CreateOrderRequest): ResponseEntity&lt;OrderResponse&gt; =
+        ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(request))
+}</code></pre></p>
+<hr />
+<h2 id="6-kotlin-coroutines-alternative-to-reactor">6. Kotlin Coroutines — Alternative to Reactor<a class="anchor-link" href="#6-kotlin-coroutines-alternative-to-reactor" title="Permanent link">¶</a></h2>
+<p>Spring Boot supports <strong>Kotlin coroutines</strong> as a simpler alternative to Reactor's
+<code>Mono</code>/<code>Flux</code>. Coroutines use the <code>suspend</code> keyword and look like synchronous code
+but are non-blocking under the hood.</p>
+<h3 id="monoflux-vs-coroutines">Mono/Flux vs Coroutines<a class="anchor-link" href="#monoflux-vs-coroutines" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Reactor (Java)</th>
+<th>Coroutines (Kotlin)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Mono&lt;Order&gt;</code></td>
+<td><code>suspend fun getOrder(): Order</code></td>
+</tr>
+<tr>
+<td><code>Flux&lt;Order&gt;</code></td>
+<td><code>Flow&lt;Order&gt;</code></td>
+</tr>
+<tr>
+<td><code>.map(it -&gt; ...)</code></td>
+<td>direct code (synchronous-looking)</td>
+</tr>
+<tr>
+<td><code>.flatMap(...)</code></td>
+<td>direct code (synchronous-looking)</td>
+</tr>
+<tr>
+<td><code>.subscribe()</code></td>
+<td>coroutine launch (<code>viewModelScope { }</code>)</td>
+</tr>
+<tr>
+<td><code>StepVerifier</code></td>
+<td>direct assertions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="adding-coroutine-support">Adding Coroutine Support<a class="anchor-link" href="#adding-coroutine-support" title="Permanent link">¶</a></h3>
+<p>Add to <code>pom.xml</code>:
+<pre class="code-block"><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.jetbrains.kotlinx&lt;/groupId&gt;
+    &lt;artifactId&gt;kotlinx-coroutines-core&lt;/artifactId&gt;
+    &lt;version&gt;1.8.1&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.jetbrains.kotlinx&lt;/groupId&gt;
+    &lt;artifactId&gt;kotlinx-coroutines-reactor&lt;/artifactId&gt;
+    &lt;version&gt;1.8.1&lt;/version&gt;
+&lt;/dependency&gt;</code></pre></p>
+<h3 id="coroutine-controller-example">Coroutine Controller Example<a class="anchor-link" href="#coroutine-controller-example" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-kotlin">@RestController
+@RequestMapping("/api/coroutine/orders")
+class CoroutineOrderController(
+    private val service: CoroutineOrderService
+) {
+    @GetMapping
+    suspend fun findAll(): List&lt;OrderResponse&gt; =
+        service.findAll()   // looks synchronous, runs non-blocking
+
+    @GetMapping("/{id}")
+    suspend fun findById(@PathVariable id: Long): OrderResponse =
+        service.findById(id)   // no Mono wrapping needed
+
+    @GetMapping("/{id}/status/stream", produces = "text/event-stream")
+    fun streamStatus(@PathVariable id: Long): Flow&lt;OrderStatus&gt; =
+        service.streamStatusUpdates(id)   // Flow replaces Flux
+
+    @PostMapping
+    suspend fun create(@Valid @RequestBody request: CreateOrderRequest): OrderResponse =
+        service.createOrder(request)
+}</code></pre>
+<h3 id="coroutine-service-example">Coroutine Service Example<a class="anchor-link" href="#coroutine-service-example" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-kotlin">@Service
+class CoroutineOrderService(
+    private val orderRepository: OrderRepository
+) {
+    // suspending function — non-blocking but looks synchronous
+    suspend fun findAll(): List&lt;OrderResponse&gt; =
+        orderRepository.findAll().map { OrderResponse.from(it) }
+
+    suspend fun findById(id: Long): OrderResponse =
+        orderRepository.findById(id)
+            ?.let { OrderResponse.from(it) }
+            ?: throw IllegalArgumentException("Order not found: $id")
+
+    @Transactional
+    suspend fun createOrder(request: CreateOrderRequest): OrderResponse {
+        val order = OrderEntity().apply {
+            // build order
+        }
+        val saved = orderRepository.save(order)
+        return OrderResponse.from(saved)
+    }
+
+    // Flow replaces Flux — cold stream that produces items lazily
+    fun streamStatusUpdates(orderId: Long): Flow&lt;OrderStatus&gt; = flow {
+        var current = orderRepository.findById(orderId)?.status
+        while (current != OrderStatus.DELIVERED &amp;&amp; current != OrderStatus.CANCELLED) {
+            delay(1000)  // check every second
+            val updated = orderRepository.findById(orderId)?.status
+            if (updated != current) {
+                current = updated
+                emit(current!!)
+            }
+        }
+    }
+}</code></pre>
+<p>Coroutines are <strong>dramatically simpler</strong> than Reactor for most use cases:
+- No <code>Mono</code>/<code>Flux</code> wrapping
+- No operators to chain
+- Stack traces are meaningful (they look like normal function calls)
+- Error handling uses standard <code>try</code>/<code>catch</code></p>
+<hr />
+<h2 id="7-kotlin-specific-spring-features">7. Kotlin-Specific Spring Features<a class="anchor-link" href="#7-kotlin-specific-spring-features" title="Permanent link">¶</a></h2>
+<h3 id="71-routing-dsl">7.1 Routing DSL<a class="anchor-link" href="#71-routing-dsl" title="Permanent link">¶</a></h3>
+<p>Spring Boot provides a Kotlin DSL for defining routes (alternative to annotations):</p>
+<pre class="code-block"><code class="language-kotlin">@Configuration
+class RoutesConfig {
+    @Bean
+    fun apiRoutes(controller: OrderController) = router {
+        "/api/orders".nest {
+            GET("/", controller::findAll)
+            GET("/{id}", controller::findById)
+            POST("/", controller::create)
+            PUT("/{id}/status", controller::updateStatus)
+        }
+    }
+}</code></pre>
+<h3 id="72-bean-dsl">7.2 Bean DSL<a class="anchor-link" href="#72-bean-dsl" title="Permanent link">¶</a></h3>
+<p>Spring Boot supports a Kotlin DSL for bean configuration:</p>
+<pre class="code-block"><code class="language-kotlin">@Configuration
+class AppConfig {
+    @Bean
+    fun objectMapper() = jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+    @Bean
+    fun kafkaTemplate(cf: ConnectionFactory) = KafkaTemplate(cf)
+}</code></pre>
+<h3 id="73-kotlin-jpa-repositories">7.3 Kotlin JPA Repositories<a class="anchor-link" href="#73-kotlin-jpa-repositories" title="Permanent link">¶</a></h3>
+<p>Spring Data JPA works identically in Kotlin:</p>
+<pre class="code-block"><code class="language-kotlin">@Repository
+interface OrderRepository : JpaRepository&lt;OrderEntity, Long&gt; {
+    fun findByStatus(status: OrderStatus): List&lt;OrderEntity&gt;
+    fun findByCustomerId(customerId: Long): List&lt;OrderEntity&gt;
+}</code></pre>
+<p>For reactive R2DBC:
+<pre class="code-block"><code class="language-kotlin">interface ReactiveOrderRepository : R2dbcRepository&lt;OrderEntity, Long&gt; {
+    fun findByStatus(status: OrderStatus): Flow&lt;OrderEntity&gt;
+    suspend fun findById(id: Long): OrderEntity?
+}</code></pre></p>
+<p>Note: With coroutines, Spring Data returns <code>Flow&lt;T&gt;</code> instead of <code>Flux&lt;T&gt;</code> and
+<code>suspend</code> functions instead of <code>Mono&lt;T&gt;</code>.</p>
+<hr />
+<h2 id="8-intellij-ideas-java-to-kotlin-converter-j2k">8. IntelliJ IDEA's Java-to-Kotlin Converter (J2K)<a class="anchor-link" href="#8-intellij-ideas-java-to-kotlin-converter-j2k" title="Permanent link">¶</a></h2>
+<p>IntelliJ IDEA (Community or Ultimate) ships with a <strong>Java to Kotlin converter</strong>
+(J2K) that automatically converts Java files to Kotlin.</p>
+<h3 id="how-to-use-it">How to Use It<a class="anchor-link" href="#how-to-use-it" title="Permanent link">¶</a></h3>
+<ol>
+<li>Open your Java file in IntelliJ</li>
+<li>Select all code (Ctrl/Cmd+A)</li>
+<li>Code → Convert Java File to Kotlin File (Ctrl/Cmd+Shift+Alt+K)</li>
+<li>IntelliJ generates equivalent Kotlin code</li>
+</ol>
+<h3 id="what-j2k-handles-well">What J2K Handles Well<a class="anchor-link" href="#what-j2k-handles-well" title="Permanent link">¶</a></h3>
+<ul>
+<li>Class → class with primary constructor</li>
+<li>Getters/setters → <code>var</code>/<code>val</code> properties</li>
+<li><code>if-else</code> chains → <code>when</code> expressions (sometimes)</li>
+<li><code>for</code> loops → <code>for</code> or <code>forEach</code></li>
+<li>Static methods → <code>companion object</code></li>
+</ul>
+<h3 id="what-j2k-does-not-handle">What J2K Does NOT Handle<a class="anchor-link" href="#what-j2k-does-not-handle" title="Permanent link">¶</a></h3>
+<ul>
+<li>Fluent builder patterns (leaves them as Java-style chains)</li>
+<li>Stream API (doesn't always convert to Kotlin collection functions)</li>
+<li>Lombok annotations (must be removed first)</li>
+<li>Field injection (leaves <code>@Autowired</code> on fields — must be converted to constructor injection)</li>
+<li>Java records (sometimes generates verbose Kotlin instead of <code>data class</code>)</li>
+</ul>
+<h3 id="migration-strategy">Migration Strategy<a class="anchor-link" href="#migration-strategy" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Start with DTOs</strong> — Convert records to <code>data class</code> (simplest, no behavior)</li>
+<li><strong>Convert enums</strong> — Trivial, nearly identical syntax</li>
+<li><strong>Convert entities</strong> — JPA entities need the <code>jpa</code> plugin (already configured)</li>
+<li><strong>Convert controllers</strong> — Simple, mostly annotation-driven</li>
+<li><strong>Convert services</strong> — More logic, requires careful review</li>
+<li><strong>Convert repositories</strong> — Just interfaces, trivial</li>
+<li><strong>Convert tests last</strong> — Tests should validate the migration</li>
+</ol>
+<h3 id="mixed-javakotlin">Mixed Java/Kotlin<a class="anchor-link" href="#mixed-javakotlin" title="Permanent link">¶</a></h3>
+<p>You can have <strong>both Java and Kotlin files in the same project</strong>. This lets you
+migrate incrementally — one file at a time, one module at a time. The Kotlin
+compiler compiles both languages together.</p>
+<hr />
+<h2 id="9-testing-kotlin-code">9. Testing Kotlin Code<a class="anchor-link" href="#9-testing-kotlin-code" title="Permanent link">¶</a></h2>
+<h3 id="91-junit-5-with-kotlin">9.1 JUnit 5 with Kotlin<a class="anchor-link" href="#91-junit-5-with-kotlin" title="Permanent link">¶</a></h3>
+<p>JUnit 5 works with Kotlin out of the box:</p>
+<pre class="code-block"><code class="language-kotlin">package com.example.ordermgmt.service
+
+import com.example.ordermgmt.domain.*
+import com.example.ordermgmt.dto.*
+import com.example.ordermgmt.repository.*
+import com.example.ordermgmt.kafka.OrderEventProducer
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.*
+
+@ExtendWith(MockitoExtension::class)
+class OrderServiceTest {
+
+    @Mock
+    private lateinit var orderRepository: OrderRepository
+
+    @Mock
+    private lateinit var eventProducer: OrderEventProducer
+
+    @InjectMocks
+    private lateinit var orderService: OrderService
+
+    @Test
+    fun `createOrder with valid request returns response`() {
+        // Arrange
+        val customer = CustomerEntity("Alice", "alice@example.com", "123 Main")
+        customer.id = 1L
+
+        val product = ProductEntity("Mug", BigDecimal("12.99"), 100, "Kitchen")
+        product.id = 10L
+
+        whenever(customerRepository.findById(1L)).thenReturn(Optional.of(customer))
+        whenever(productRepository.findById(10L)).thenReturn(Optional.of(product))
+        whenever(orderRepository.save(any())).thenAnswer { invocation -&gt;
+            val order = invocation.getArgument&lt;OrderEntity&gt;(0)
+            order.id = 100L
+            order
+        }
+
+        val request = CreateOrderRequest(1L, listOf(CreateOrderItemRequest(10L, 3)))
+
+        // Act
+        val response = orderService.createOrder(request)
+
+        // Assert
+        assertEquals("Alice", response.customerName)
+        assertEquals(OrderStatus.PENDING, response.status)
+        assertEquals(1, response.items.size)
+        verify(orderRepository).save(any())
+        verify(eventProducer).publishOrderCreated(any())
+    }
+
+    @Test
+    fun `findById with nonexistent id throws exception`() {
+        whenever(orderRepository.findById(999L)).thenReturn(Optional.empty())
+
+        assertThrows&lt;OrderNotFoundException&gt; {
+            orderService.findById(999L)
+        }
+    }
+}</code></pre>
+<h3 id="92-key-testing-differences">9.2 Key Testing Differences<a class="anchor-link" href="#92-key-testing-differences" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Java</th>
+<th>Kotlin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Mock private OrderRepository repo;</code></td>
+<td><code>@Mock private lateinit var repo: OrderRepository</code></td>
+</tr>
+<tr>
+<td><code>when(repo.findById(1L)).thenReturn(...)</code></td>
+<td><code>whenever(repo.findById(1L)).thenReturn(...)</code></td>
+</tr>
+<tr>
+<td><code>verify(repo).save(any())</code></td>
+<td><code>verify(repo).save(any())</code> (same)</td>
+</tr>
+<tr>
+<td><code>assertThat(result).isEqualTo(expected)</code></td>
+<td>assertEquals(expected, result) (or use AssertJ)</td>
+</tr>
+<tr>
+<td><code>assertThrows(Exception.class, () -&gt; ...)</code></td>
+<td><code>assertThrows&lt;Exception&gt; { ... }</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>mockito-kotlin</code> library (<code>org.mockito.kotlin</code>) provides Kotlin-friendly
+wrappers. Add it to your pom.xml:</p>
+<pre class="code-block"><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.mockito.kotlin&lt;/groupId&gt;
+    &lt;artifactId&gt;mockito-kotlin&lt;/artifactId&gt;
+    &lt;version&gt;5.4.0&lt;/version&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+<h3 id="93-testing-coroutines-with-runtest">9.3 Testing Coroutines with <code>runTest</code><a class="anchor-link" href="#93-testing-coroutines-with-runtest" title="Permanent link">¶</a></h3>
+<p>For coroutine tests, use <code>kotlinx-coroutines-test</code>:</p>
+<pre class="code-block"><code class="language-kotlin">import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Test
+
+class CoroutineOrderServiceTest {
+
+    @Test
+    fun `findAll returns all orders`() = runTest {
+        // Arrange
+        val service = CoroutineOrderService(mockRepository)
+
+        // Act
+        val result = service.findAll()
+
+        // Assert
+        assertEquals(3, result.size)
+    }
+}</code></pre>
+<hr />
+<h2 id="10-exercises">10. exercises<a class="anchor-link" href="#10-exercises" title="Permanent link">¶</a></h2>
+<h3 id="exercise-1-convert-a-java-record-to-kotlin-data-class">exercise 1 — Convert a Java Record to Kotlin data class<a class="anchor-link" href="#exercise-1-convert-a-java-record-to-kotlin-data-class" title="Permanent link">¶</a></h3>
+<p>Convert this Java record to a Kotlin data class with all the same properties:</p>
+<pre class="code-block"><code class="language-java">public record ProductResponse(
+        Long id,
+        String name,
+        BigDecimal price,
+        String category,
+        boolean inStock
+) {}</code></pre>
+<details>
+<summary>Hint</summary>
+
+<pre class="code-block"><code class="language-kotlin">data class ProductResponse(
+    val id: Long?,
+    val name: String,
+    val price: BigDecimal,
+    val category: String,
+    val inStock: Boolean
+)</code></pre>
+The `id` is `Long?` because it may not be assigned yet. All others are non-nullable.
+</details>
+
+<h3 id="exercise-2-convert-a-java-service-to-kotlin">exercise 2 — Convert a Java Service to Kotlin<a class="anchor-link" href="#exercise-2-convert-a-java-service-to-kotlin" title="Permanent link">¶</a></h3>
+<p>Convert this Java service method to Kotlin, using constructor injection via the
+primary constructor:</p>
+<pre class="code-block"><code class="language-java">@Service
+public class ProductService {
+    private final ProductRepository repo;
+    private final Logger log = LoggerFactory.getLogger(ProductService.class);
+
+    public ProductService(ProductRepository repo) {
+        this.repo = repo;
+    }
+
+    public Product findById(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -&gt; new IllegalArgumentException("Not found: " + id));
+    }
+}</code></pre>
+<details>
+<summary>Hint</summary>
+
+<pre class="code-block"><code class="language-kotlin">@Service
+class ProductService(
+    private val repo: ProductRepository
+) {
+    private val log = LoggerFactory.getLogger(javaClass)
+
+    fun findById(id: Long): Product =
+        repo.findById(id)
+            .orElseThrow { IllegalArgumentException("Not found: $id") }
+}</code></pre>
+</details>
+
+<h3 id="exercise-3-write-a-suspend-function">exercise 3 — Write a Suspend Function<a class="anchor-link" href="#exercise-3-write-a-suspend-function" title="Permanent link">¶</a></h3>
+<p>Write a Kotlin suspend function that fetches an order by ID, checks if its total
+exceeds $100, and returns a discount-eligible label. Use coroutines.</p>
+<details>
+<summary>Hint</summary>
+
+<pre class="code-block"><code class="language-kotlin">suspend fun checkDiscountEligibility(id: Long): String {
+    val order = orderRepository.findById(id)
+        ?: throw IllegalArgumentException("Order not found: $id")
+    return if (order.totalAmount &gt; BigDecimal("100")) {
+        "Eligible for 10% discount"
+    } else {
+        "Not eligible"
+    }
+}</code></pre>
+</details>
+
+<h3 id="exercise-4-convert-a-rest-controller-to-kotlin-with-coroutines">exercise 4 — Convert a REST Controller to Kotlin with Coroutines<a class="anchor-link" href="#exercise-4-convert-a-rest-controller-to-kotlin-with-coroutines" title="Permanent link">¶</a></h3>
+<p>Convert this Java reactive controller to a Kotlin coroutine controller:</p>
+<pre class="code-block"><code class="language-java">@RestController
+@RequestMapping("/api/orders")
+public class ReactiveOrderController {
+    private final ReactiveOrderService service;
+
+    @GetMapping("/{id}")
+    public Mono&lt;OrderResponse&gt; findById(@PathVariable Long id) {
+        return service.findById(id);
+    }
+}</code></pre>
+<details>
+<summary>Hint</summary>
+
+<pre class="code-block"><code class="language-kotlin">@RestController
+@RequestMapping("/api/orders")
+class CoroutineOrderController(
+    private val service: CoroutineOrderService
+) {
+    @GetMapping("/{id}")
+    suspend fun findById(@PathVariable id: Long): OrderResponse =
+        service.findById(id)
+}</code></pre>
+The `suspend` keyword replaces `Mono<>` wrapping.
+</details>
+
+<h3 id="exercise-5-extension-function">exercise 5 — Extension Function<a class="anchor-link" href="#exercise-5-extension-function" title="Permanent link">¶</a></h3>
+<p>Write a Kotlin extension function on <code>BigDecimal</code> that formats it as a currency
+string with a dollar sign and two decimal places.</p>
+<details>
+<summary>Hint</summary>
+
+<pre class="code-block"><code class="language-kotlin">fun BigDecimal.toCurrency(): String = "$${String.format("%.2f", this)}"</code></pre>
+Usage: `BigDecimal("19.999").toCurrency()` → `"$20.00"`
+</details>
+
+<hr />
+<h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>Kotlin</strong> is a JVM language fully interoperable with Java — you can mix both in one project</li>
+<li><strong>Null safety</strong> is Kotlin's headline feature — nullable types are explicit and checked at compile time</li>
+<li><strong>Data classes</strong> replace Java records and provide <code>copy()</code>, destructuring, and named arguments</li>
+<li><strong><code>when</code></strong> expressions are more powerful than Java's <code>switch</code></li>
+<li><strong>Extension functions</strong> let you add methods to any class without inheritance</li>
+<li><strong>Constructor injection</strong> is even cleaner in Kotlin — dependencies go in the primary constructor header</li>
+<li><strong>Kotlin coroutines</strong> offer a simpler alternative to Reactor's Mono/Flux — <code>suspend</code> functions look synchronous</li>
+<li><strong><code>Flow&lt;T&gt;</code></strong> replaces <code>Flux&lt;T&gt;</code> for cold streams in coroutine-based Spring WebFlux</li>
+<li><strong>Spring Boot</strong> has first-class Kotlin support with compiler plugins (<code>spring</code>, <code>jpa</code>, <code>all-open</code>)</li>
+<li><strong>IntelliJ's J2K converter</strong> automates most of the migration, but manual review is essential</li>
+<li><strong>Testing</strong> uses the same JUnit 5 + Mockito stack, with <code>mockito-kotlin</code> for Kotlin-friendly syntax</li>
+<li><strong>Migration strategy</strong>: DTOs first, then entities, controllers, services, repositories, tests last</li>
+</ul>
+<hr />
+<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
+<ul>
+<li>
+<p><strong>[Full 2025 Kotlin Crash Course For Beginners]</strong> by Philipp Lackner — Complete Kotlin tutorial from basics, 3 hours (3:11:50, 362K views)
+  <a href="https://www.youtube.com/watch?v=dzUc9vrsldM">https://www.youtube.com/watch?v=dzUc9vrsldM</a></p>
+</li>
+<li>
+<p><strong>[Spring Boot with Kotlin Tutorial - Enterprise Backend Development for Beginners]</strong> by CodeLucky — Spring Boot with Kotlin, covering data classes, REST controllers, JPA repositories, and exception handling
+  <a href="https://www.youtube.com/watch?v=jY5TesBSdRE">https://www.youtube.com/watch?v=jY5TesBSdRE</a></p>
+</li>
+</ul>
+<hr />
+<p>← <a href="10-capstone-project.html">Previous: Module 10</a> | <strong>Next:</strong> None (final module)</p>
+      </article>
+
+      <div class="footer-nav"><a href="10-capstone-project.html" class="nav-link prev">← Capstone Project</a></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="assets/search.js"></script>
+</body>
+</html>

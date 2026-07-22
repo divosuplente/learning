@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Repository Pattern — Java Spring Boot Course</title>
+  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="logo">
+          <span class="logo-icon">☕</span>
+          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+        </a>
+      </div>
+      
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Search course..." autocomplete="off" />
+          <div id="searchResults" class="search-results"></div>
+        </div>
+      <nav class="nav-list">
+        
+        <a href="00-java-foundations.html" class="nav-item">
+          <span class="nav-num">00</span>
+          <span class="nav-title">Java Foundations</span>
+        </a>
+
+        <a href="01-build-tools-and-project-setup.html" class="nav-item">
+          <span class="nav-num">01</span>
+          <span class="nav-title">Build Tools & Project Setup</span>
+        </a>
+
+        <a href="02-dependency-injection.html" class="nav-item">
+          <span class="nav-num">02</span>
+          <span class="nav-title">Dependency Injection</span>
+        </a>
+
+        <a href="03-spring-boot-fundamentals.html" class="nav-item">
+          <span class="nav-num">03</span>
+          <span class="nav-title">Spring Boot Fundamentals</span>
+        </a>
+
+        <a href="04-repository-pattern.html" class="nav-item active">
+          <span class="nav-num">04</span>
+          <span class="nav-title">Repository Pattern</span>
+        </a>
+
+        <a href="05-service-oriented-architecture.html" class="nav-item">
+          <span class="nav-num">05</span>
+          <span class="nav-title">Service-Oriented Architecture</span>
+        </a>
+
+        <a href="06-kafka.html" class="nav-item">
+          <span class="nav-num">06</span>
+          <span class="nav-title">Kafka</span>
+        </a>
+
+        <a href="07-graphql.html" class="nav-item">
+          <span class="nav-num">07</span>
+          <span class="nav-title">GraphQL</span>
+        </a>
+
+        <a href="08-reactor-pattern.html" class="nav-item">
+          <span class="nav-num">08</span>
+          <span class="nav-title">Reactor Pattern</span>
+        </a>
+
+        <a href="09-tdd.html" class="nav-item">
+          <span class="nav-num">09</span>
+          <span class="nav-title">Test-Driven Development</span>
+        </a>
+
+        <a href="10-capstone-project.html" class="nav-item">
+          <span class="nav-num">10</span>
+          <span class="nav-title">Capstone Project</span>
+        </a>
+
+        <a href="11-migrating-java-to-kotlin.html" class="nav-item">
+          <span class="nav-num">11</span>
+          <span class="nav-title">Migrating Java to Kotlin</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-content">
+      <header class="page-header">
+        
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="breadcrumb">
+          <a href="index.html">Home</a> › <span>Repository Pattern</span>
+        </div>
+      </header>
+
+      <article class="content">
+        <h1 id="module-04-repository-pattern">Module 04: Repository Pattern<a class="anchor-link" href="#module-04-repository-pattern" title="Permanent link">¶</a></h1>
+<h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
+<ul>
+<li>What a database is and how relational databases work</li>
+<li>A crash course in SQL (just enough to understand what JPA does)</li>
+<li>What the Repository Pattern is and why it separates data access from business logic</li>
+<li>Object-Relational Mapping (ORM) and the impedance mismatch between objects and tables</li>
+<li>JPA and Hibernate: what they are and how they relate</li>
+<li>Spring Data JPA: what it gives you for free</li>
+<li>JPA entities: <code>@Entity</code>, <code>@Id</code>, <code>@GeneratedValue</code>, <code>@Column</code>, <code>@Table</code>, relationship annotations</li>
+<li>Creating entity classes for Customer, Product, Order, and OrderItem</li>
+<li>Spring Data repositories: <code>JpaRepository</code> interface and derived query methods</li>
+<li>Custom queries with <code>@Query</code></li>
+<li>Pagination and sorting in repositories</li>
+<li>The N+1 problem and how to fix it</li>
+<li>Configuring PostgreSQL with Spring Boot</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="00-java-foundations.html">Module 00: Java Foundations</a> — you understand Java classes, records, collections</li>
+<li><a href="01-build-tools-and-project-setup.html">Module 01: Build Tools &amp; Project Setup</a> — you have a Spring Boot project</li>
+<li><a href="02-dependency-injection.html">Module 02: Dependency Injection</a> — you understand beans and constructor injection</li>
+<li><a href="03-spring-boot-fundamentals.html">Module 03: Spring Boot Fundamentals</a> — you understand <code>application.yml</code> and REST controllers</li>
+</ul>
+<hr />
+<h2 id="1-what-is-a-database">1. What Is a Database?<a class="anchor-link" href="#1-what-is-a-database" title="Permanent link">¶</a></h2>
+<p>A <strong>database</strong> is organized storage for your application's data. When your application shuts down, the data in memory (variables, objects) disappears. A database persists data — it saves it to disk so it survives restarts.</p>
+<h3 id="relational-databases">Relational Databases<a class="anchor-link" href="#relational-databases" title="Permanent link">¶</a></h3>
+<p>The most common type of database is a <strong>relational database</strong> (RDBMS). It stores data in <strong>tables</strong> — think of a table as a spreadsheet:</p>
+<p><strong>customers table:</strong>
+| id | name | email | address |
+|----|------|-------|---------|
+| 1 | Alice | <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#97;&#108;&#105;&#99;&#101;&#64;&#101;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#99;&#111;&#109;">&#97;&#108;&#105;&#99;&#101;&#64;&#101;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#99;&#111;&#109;</a> | 123 Main St |
+| 2 | Bob | <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#98;&#111;&#98;&#64;&#101;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#99;&#111;&#109;">&#98;&#111;&#98;&#64;&#101;&#120;&#97;&#109;&#112;&#108;&#101;&#46;&#99;&#111;&#109;</a> | 456 Oak Ave |</p>
+<p><strong>products table:</strong>
+| id | name | price | stock | category |
+|----|------|-------|-------|----------|
+| 1 | Widget | 19.99 | 100 | Electronics |
+| 2 | Gadget | 49.99 | 50 | Electronics |
+| 3 | Book | 14.99 | 200 | Media |</p>
+<h3 id="key-concepts">Key Concepts<a class="anchor-link" href="#key-concepts" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Table</strong></td>
+<td>A structured collection of rows and columns (like a spreadsheet)</td>
+</tr>
+<tr>
+<td><strong>Row</strong></td>
+<td>A single record (one customer, one product)</td>
+</tr>
+<tr>
+<td><strong>Column</strong></td>
+<td>A named attribute (name, email, price)</td>
+</tr>
+<tr>
+<td><strong>Primary Key</strong></td>
+<td>A column that uniquely identifies each row (usually <code>id</code>)</td>
+</tr>
+<tr>
+<td><strong>Foreign Key</strong></td>
+<td>A column that references a primary key in another table, creating a relationship</td>
+</tr>
+</tbody>
+</table>
+<h3 id="relationships">Relationships<a class="anchor-link" href="#relationships" title="Permanent link">¶</a></h3>
+<p>Tables relate to each other:</p>
+<ul>
+<li>A <strong>customer</strong> can have many <strong>orders</strong> (one-to-many)</li>
+<li>An <strong>order</strong> belongs to one <strong>customer</strong> (many-to-one)</li>
+<li>An <strong>order</strong> has many <strong>order items</strong> (one-to-many)</li>
+<li>An <strong>order item</strong> references one <strong>product</strong> (many-to-one)</li>
+</ul>
+<pre class="code-block"><code>Customer 1 ────&lt; Order 1 ────&lt; OrderItem &gt;──── 1 Product
+                                        &gt;──── 1 Product</code></pre>
+<p>We use <strong>PostgreSQL</strong> — a powerful, open-source relational database.</p>
+<hr />
+<h2 id="2-sql-crash-course">2. SQL Crash Course<a class="anchor-link" href="#2-sql-crash-course" title="Permanent link">¶</a></h2>
+<p><strong>SQL (Structured Query Language)</strong> is the language used to interact with relational databases. You don't need to be a SQL expert — that's what JPA does for you. But understanding the basics helps you understand what JPA does behind the scenes.</p>
+<h3 id="select-read-data">SELECT — Read Data<a class="anchor-link" href="#select-read-data" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-sql">-- Get all customers
+SELECT * FROM customers;
+
+-- Get a specific customer
+SELECT * FROM customers WHERE id = 1;
+
+-- Get only name and email
+SELECT name, email FROM customers WHERE id = 1;</code></pre>
+<h3 id="insert-create-data">INSERT — Create Data<a class="anchor-link" href="#insert-create-data" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-sql">INSERT INTO customers (name, email, address)
+VALUES ('Charlie', 'charlie@example.com', '789 Pine St');</code></pre>
+<h3 id="update-modify-data">UPDATE — Modify Data<a class="anchor-link" href="#update-modify-data" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-sql">UPDATE customers SET address = '999 New St' WHERE id = 1;</code></pre>
+<h3 id="delete-remove-data">DELETE — Remove Data<a class="anchor-link" href="#delete-remove-data" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-sql">DELETE FROM customers WHERE id = 1;</code></pre>
+<h3 id="join-combine-data-from-multiple-tables">JOIN — Combine Data from Multiple Tables<a class="anchor-link" href="#join-combine-data-from-multiple-tables" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-sql">-- Get orders with customer names
+SELECT o.id, o.status, c.name
+FROM orders o
+JOIN customers c ON o.customer_id = c.id;</code></pre>
+<h3 id="what-jpa-does">What JPA Does<a class="anchor-link" href="#what-jpa-does" title="Permanent link">¶</a></h3>
+<p>JPA generates SQL for you. Instead of writing <code>SELECT * FROM customers WHERE id = 1</code>, you call <code>customerRepository.findById(1L)</code> and JPA generates the SQL automatically.</p>
+<hr />
+<h2 id="3-what-is-the-repository-pattern">3. What Is the Repository Pattern?<a class="anchor-link" href="#3-what-is-the-repository-pattern" title="Permanent link">¶</a></h2>
+<p>The <strong>Repository Pattern</strong> separates data access logic from business logic. Instead of writing SQL queries scattered throughout your application, you put all data access in one place — the <strong>repository</strong>.</p>
+<h3 id="without-repository-pattern">Without Repository Pattern<a class="anchor-link" href="#without-repository-pattern" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">// BAD — SQL everywhere
+public class OrderService {
+    public Order createOrder(...) {
+        Connection conn = DriverManager.getConnection("jdbc:postgresql://...");
+        PreparedStatement stmt = conn.prepareStatement(
+            "INSERT INTO orders (customer_id, status) VALUES (?, ?)");
+        stmt.setLong(1, customerId);
+        stmt.setString(2, "PENDING");
+        stmt.executeUpdate();
+        // ... more SQL scattered everywhere
+    }
+}</code></pre>
+<h3 id="with-repository-pattern">With Repository Pattern<a class="anchor-link" href="#with-repository-pattern" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">// GOOD — clean data access
+public class OrderService {
+    private final OrderRepository orderRepository;
+
+    public OrderResponse createOrder(...) {
+        OrderEntity order = new OrderEntity();
+        order.setCustomer(customer);
+        order.setStatus(OrderStatus.PENDING);
+        orderRepository.save(order); // JPA generates the INSERT
+        return OrderResponse.from(order);
+    }
+}</code></pre>
+<p>The service doesn't know SQL — it just tells the repository "save this" and "find that." The repository translates these calls into SQL.</p>
+<hr />
+<h2 id="4-orm-jpa-and-hibernate">4. ORM, JPA, and Hibernate<a class="anchor-link" href="#4-orm-jpa-and-hibernate" title="Permanent link">¶</a></h2>
+<h3 id="orm-object-relational-mapping">ORM (Object-Relational Mapping)<a class="anchor-link" href="#orm-object-relational-mapping" title="Permanent link">¶</a></h3>
+<p>Java works with <strong>objects</strong>. Databases work with <strong>tables and rows</strong>. There's a mismatch:</p>
+<ul>
+<li>Java object: <code>Order</code> has a <code>Customer</code> field (a reference to another object)</li>
+<li>Database: <code>orders</code> table has a <code>customer_id</code> column (a number, a foreign key)</li>
+</ul>
+<p><strong>ORM</strong> bridges this gap. It maps Java objects to database tables automatically:
+- <code>order.getCustomer()</code> → SQL JOIN to fetch the customer
+- <code>orderRepository.save(order)</code> → INSERT into orders table</p>
+<h3 id="jpa-java-persistence-api">JPA (Java Persistence API)<a class="anchor-link" href="#jpa-java-persistence-api" title="Permanent link">¶</a></h3>
+<p><strong>JPA</strong> is a specification (a set of interfaces) for ORM in Java. It defines annotations like <code>@Entity</code>, <code>@Id</code>, <code>@OneToMany</code> and the <code>EntityManager</code> interface. JPA itself doesn't do anything — it's just a contract.</p>
+<h3 id="hibernate">Hibernate<a class="anchor-link" href="#hibernate" title="Permanent link">¶</a></h3>
+<p><strong>Hibernate</strong> is the most popular <strong>implementation</strong> of JPA. It's the engine that actually does the work — it converts JPA annotations into SQL and executes it against the database.</p>
+<h3 id="spring-data-jpa">Spring Data JPA<a class="anchor-link" href="#spring-data-jpa" title="Permanent link">¶</a></h3>
+<p><strong>Spring Data JPA</strong> is a Spring module that makes JPA even easier. It provides the <code>JpaRepository</code> interface — you just define an interface and Spring Data generates the implementation automatically at runtime.</p>
+<pre class="code-block"><code>Your Code → Spring Data JPA (interface) → JPA/Hibernate → SQL → PostgreSQL</code></pre>
+<hr />
+<h2 id="5-jpa-entities">5. JPA Entities<a class="anchor-link" href="#5-jpa-entities" title="Permanent link">¶</a></h2>
+<p>A <strong>JPA entity</strong> is a Java class that maps to a database table. Each instance of the class represents a row in the table.</p>
+<h3 id="entity-anatomy">Entity Anatomy<a class="anchor-link" href="#entity-anatomy" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@Entity                          // Marks this class as a JPA entity
+@Table(name = "customers")       // Maps to the "customers" table
+public class CustomerEntity {
+
+    @Id                          // This field is the primary key
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Auto-increment
+    @Column(name = "id")         // Maps to the "id" column
+    private Long id;
+
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+
+    // Required by JPA — must have a no-argument constructor
+    protected CustomerEntity() {}
+
+    public CustomerEntity(String name, String email, String address) {
+        this.name = name;
+        this.email = email;
+        this.address = address;
+        this.createdAt = Instant.now();
+    }
+
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+}</code></pre>
+<h3 id="key-annotations">Key Annotations<a class="anchor-link" href="#key-annotations" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Entity</code></td>
+<td>Marks the class as a JPA entity (maps to a table)</td>
+</tr>
+<tr>
+<td><code>@Table(name = "x")</code></td>
+<td>Specifies the table name (optional — defaults to class name)</td>
+</tr>
+<tr>
+<td><code>@Id</code></td>
+<td>Marks a field as the primary key</td>
+</tr>
+<tr>
+<td><code>@GeneratedValue</code></td>
+<td>Auto-generates the primary key value (auto-increment)</td>
+</tr>
+<tr>
+<td><code>@Column(name = "x")</code></td>
+<td>Maps a field to a specific column</td>
+</tr>
+<tr>
+<td><code>@OneToMany</code></td>
+<td>One entity has many of another (e.g., one customer, many orders)</td>
+</tr>
+<tr>
+<td><code>@ManyToOne</code></td>
+<td>Many entities reference one (e.g., many orders, one customer)</td>
+</tr>
+<tr>
+<td><code>@JoinColumn(name = "x")</code></td>
+<td>Specifies the foreign key column name</td>
+</tr>
+<tr>
+<td><code>@Table(name = "x")</code></td>
+<td>Overrides the default table name</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-not-records">Why Not Records?<a class="anchor-link" href="#why-not-records" title="Permanent link">¶</a></h3>
+<p>JPA entities <strong>cannot be records</strong> because JPA expects to:
+1. Create instances with a no-argument constructor
+2. Set fields via setters (or field access)
+3. Use lazy-loading proxies (which require subclassing)</p>
+<p>Records are immutable and final — they can't be subclassed or modified. So entities use traditional classes with getters and setters. We use records for DTOs (which don't need persistence).</p>
+<hr />
+<h2 id="6-creating-all-domain-entities">6. Creating All Domain Entities<a class="anchor-link" href="#6-creating-all-domain-entities" title="Permanent link">¶</a></h2>
+<h3 id="productentity">ProductEntity<a class="anchor-link" href="#productentity" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Entity
+@Table(name = "products")
+public class ProductEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 200)
+    private String name;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(nullable = false)
+    private int stock;
+
+    @Column(nullable = false, length = 100)
+    private String category;
+
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+
+    protected ProductEntity() {}
+
+    public ProductEntity(String name, BigDecimal price, int stock, String category) {
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+        this.category = category;
+        this.createdAt = Instant.now();
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+}</code></pre>
+<h3 id="orderstatus-enum">OrderStatus Enum<a class="anchor-link" href="#orderstatus-enum" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
+
+public enum OrderStatus {
+    PENDING,
+    CONFIRMED,
+    SHIPPED,
+    DELIVERED,
+    CANCELLED
+}</code></pre>
+<h3 id="orderentity">OrderEntity<a class="anchor-link" href="#orderentity" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "orders")
+public class OrderEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private CustomerEntity customer;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalAmount;
+
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List&lt;OrderItemEntity&gt; items = new ArrayList&lt;&gt;();
+
+    protected OrderEntity() {}
+
+    public OrderEntity() {
+        this.status = OrderStatus.PENDING;
+        this.totalAmount = BigDecimal.ZERO;
+        this.createdAt = Instant.now();
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public CustomerEntity getCustomer() { return customer; }
+    public void setCustomer(CustomerEntity customer) { this.customer = customer; }
+
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
+
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public List&lt;OrderItemEntity&gt; getItems() { return items; }
+    public void setItems(List&lt;OrderItemEntity&gt; items) { this.items = items; }
+}</code></pre>
+<h3 id="orderitementity">OrderItemEntity<a class="anchor-link" href="#orderitementity" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "order_items")
+public class OrderItemEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private OrderEntity order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private ProductEntity product;
+
+    @Column(nullable = false)
+    private int quantity;
+
+    @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal unitPrice;
+
+    protected OrderItemEntity() {}
+
+    public OrderEntity getOrder() { return order; }
+    public void setOrder(OrderEntity order) { this.order = order; }
+
+    public ProductEntity getProduct() { return product; }
+    public void setProduct(ProductEntity product) { this.product = product; }
+
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+
+    public BigDecimal getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+}</code></pre>
+<h3 id="understanding-relationships">Understanding Relationships<a class="anchor-link" href="#understanding-relationships" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code>CustomerEntity  1 ───&lt; OrderEntity  1 ───&lt; OrderItemEntity  &gt;─── 1  ProductEntity
+                 │                    │                                │
+            @ManyToOne             @ManyToOne                      @ManyToOne
+            (from Order)          (from OrderItem)               (from OrderItem)</code></pre>
+<ul>
+<li><code>@ManyToOne</code> — many orders belong to one customer. The foreign key is on the "many" side (the <code>orders</code> table has <code>customer_id</code>).</li>
+<li><code>@OneToMany(mappedBy = "order")</code> — one order has many items. <code>mappedBy = "order"</code> means the relationship is defined by the <code>order</code> field on <code>OrderItemEntity</code>. You don't need a separate foreign key — it's already there.</li>
+<li><code>cascade = CascadeType.ALL</code> — when you save an order, all its items are saved automatically.</li>
+<li><code>orphanRemoval = true</code> — when you remove an item from the list, it's deleted from the database.</li>
+<li><code>fetch = FetchType.LAZY</code> — the related entity is loaded only when accessed (not when the order is loaded). This avoids unnecessary queries.</li>
+</ul>
+<hr />
+<h2 id="7-spring-data-repositories">7. Spring Data Repositories<a class="anchor-link" href="#7-spring-data-repositories" title="Permanent link">¶</a></h2>
+<p>Spring Data JPA provides the <code>JpaRepository</code> interface. You only define the interface — Spring generates the implementation at runtime.</p>
+<h3 id="customerrepository">CustomerRepository<a class="anchor-link" href="#customerrepository" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
+
+import com.example.ordermgmt.domain.CustomerEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface CustomerRepository extends JpaRepository&lt;CustomerEntity, Long&gt; {
+
+    // Derived query method — Spring generates the SQL automatically
+    // SELECT * FROM customers WHERE email = ?
+    Optional&lt;CustomerEntity&gt; findByEmail(String email);
+
+    // SELECT * FROM customers WHERE name LIKE ?
+    // The % wildcards must be in the argument, not the method name
+    // findByEmail method already above
+}</code></pre>
+<h3 id="productrepository">ProductRepository<a class="anchor-link" href="#productrepository" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
+
+import com.example.ordermgmt.domain.ProductEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface ProductRepository extends JpaRepository&lt;ProductEntity, Long&gt; {
+
+    // Derived query method
+    // SELECT * FROM products WHERE category = ?
+    List&lt;ProductEntity&gt; findByCategory(String category);
+
+    // SELECT * FROM products WHERE stock &lt; ?
+    List&lt;ProductEntity&gt; findByStockLessThan(int threshold);
+
+    // SELECT * FROM products WHERE name CONTAINS ? (case-insensitive)
+    List&lt;ProductEntity&gt; findByNameContainingIgnoreCase(String name);
+}</code></pre>
+<h3 id="orderrepository">OrderRepository<a class="anchor-link" href="#orderrepository" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
+
+import com.example.ordermgmt.domain.OrderEntity;
+import com.example.ordermgmt.domain.OrderStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; {
+
+    // Derived query method
+    // SELECT * FROM orders WHERE customer_id = ?
+    List&lt;OrderEntity&gt; findByCustomerId(Long customerId);
+
+    // Derived query method with multiple conditions
+    // SELECT * FROM orders WHERE customer_id = ? AND status = ?
+    List&lt;OrderEntity&gt; findByCustomerIdAndStatus(Long customerId, OrderStatus status);
+
+    // Custom JPQL query (when derived methods aren't enough)
+    // @Query uses JPQL (Java Persistence Query Language) — like SQL but for entities
+    @Query("SELECT o FROM OrderEntity o WHERE o.status = :status ORDER BY o.createdAt DESC")
+    List&lt;OrderEntity&gt; findOrdersByStatusOrdered(@Param("status") OrderStatus status);
+
+    // Native SQL query (when you need database-specific features)
+    @Query(value = "SELECT * FROM orders WHERE total_amount &gt; :amount",
+           nativeQuery = true)
+    List&lt;OrderEntity&gt; findHighValueOrders(@Param("amount") java.math.BigDecimal amount);
+}</code></pre>
+<h3 id="what-does-jparepository-give-you-for-free">What Does <code>JpaRepository</code> Give You for Free?<a class="anchor-link" href="#what-does-jparepository-give-you-for-free" title="Permanent link">¶</a></h3>
+<p>Without writing any implementation, <code>JpaRepository</code> gives you:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>save(entity)</code></td>
+<td>INSERT or UPDATE the entity</td>
+</tr>
+<tr>
+<td><code>findById(id)</code></td>
+<td>Find one entity by its ID</td>
+</tr>
+<tr>
+<td><code>findAll()</code></td>
+<td>Get all entities</td>
+</tr>
+<tr>
+<td><code>findAll(Pageable)</code></td>
+<td>Get a page of entities (pagination)</td>
+</tr>
+<tr>
+<td><code>deleteById(id)</code></td>
+<td>Delete an entity by ID</td>
+</tr>
+<tr>
+<td><code>delete(entity)</code></td>
+<td>Delete a specific entity</td>
+</tr>
+<tr>
+<td><code>count()</code></td>
+<td>Count all entities</td>
+</tr>
+<tr>
+<td><code>existsById(id)</code></td>
+<td>Check if an entity exists by ID</td>
+</tr>
+</tbody>
+</table>
+<h3 id="derived-query-methods">Derived Query Methods<a class="anchor-link" href="#derived-query-methods" title="Permanent link">¶</a></h3>
+<p>Spring Data can generate queries from method names:</p>
+<table>
+<thead>
+<tr>
+<th>Method Name</th>
+<th>Generated SQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>findByName(String name)</code></td>
+<td><code>WHERE name = ?</code></td>
+</tr>
+<tr>
+<td><code>findByEmailAndName(String email, String name)</code></td>
+<td><code>WHERE email = ? AND name = ?</code></td>
+</tr>
+<tr>
+<td><code>findByStockLessThan(int n)</code></td>
+<td><code>WHERE stock &lt; ?</code></td>
+</tr>
+<tr>
+<td><code>findByCategoryOrderByPriceDesc(String cat)</code></td>
+<td><code>WHERE category = ? ORDER BY price DESC</code></td>
+</tr>
+<tr>
+<td><code>findByCreatedAtAfter(Instant date)</code></td>
+<td><code>WHERE created_at &gt; ?</code></td>
+</tr>
+<tr>
+<td><code>findByNameContaining(String text)</code></td>
+<td><code>WHERE name LIKE '%text%'</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rules:</strong>
+- Method must start with <code>findBy</code>, <code>existsBy</code>, <code>countBy</code>, or <code>deleteBy</code>
+- Field names must match the entity's field names exactly
+- Conditions are connected with <code>And</code>, <code>Or</code>
+- Sorting is added with <code>OrderByFieldNameAsc</code> or <code>OrderByFieldNameDesc</code></p>
+<hr />
+<h2 id="8-pagination-and-sorting-in-repositories">8. Pagination and Sorting in Repositories<a class="anchor-link" href="#8-pagination-and-sorting-in-repositories" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">// In the repository interface:
+Page&lt;ProductEntity&gt; findAll(Pageable pageable);
+
+// In the service:
+Pageable pageable = PageRequest.of(0, 20, Sort.by("price").ascending());
+Page&lt;ProductEntity&gt; page = productRepository.findAll(pageable);
+
+page.getContent();          // List of products on this page
+page.getTotalElements();    // Total count of all products
+page.getTotalPages();       // Total number of pages
+page.getNumber();           // Current page number (0-based)
+page.hasNext();             // Is there a next page?
+page.hasPrevious();         // Is there a previous page?</code></pre>
+<hr />
+<h2 id="9-the-n1-problem">9. The N+1 Problem<a class="anchor-link" href="#9-the-n1-problem" title="Permanent link">¶</a></h2>
+<p>The <strong>N+1 problem</strong> is a common performance issue with JPA. It happens when you fetch a list of entities and then access their relationships.</p>
+<h3 id="the-problem">The Problem<a class="anchor-link" href="#the-problem" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">// 1 query: fetch 10 orders
+List&lt;OrderEntity&gt; orders = orderRepository.findAll();
+// SELECT * FROM orders LIMIT 10
+
+for (OrderEntity order : orders) {
+    // N queries: one per order to fetch the customer
+    String customerName = order.getCustomer().getName();
+    // SELECT * FROM customers WHERE id = ?
+}</code></pre>
+<p><strong>1 query for orders + 10 queries for customers = 11 queries!</strong> This is very slow for hundreds of orders.</p>
+<h3 id="solution-1-join-fetch">Solution 1: JOIN FETCH<a class="anchor-link" href="#solution-1-join-fetch" title="Permanent link">¶</a></h3>
+<p>Use <code>@Query</code> with <code>JOIN FETCH</code> to fetch related data in a single query:</p>
+<pre class="code-block"><code class="language-java">@Query("SELECT o FROM OrderEntity o JOIN FETCH o.customer WHERE o.status = :status")
+List&lt;OrderEntity&gt; findByStatusWithCustomer(@Param("status") OrderStatus status);</code></pre>
+<p>This generates a single SQL query with a JOIN:
+<pre class="code-block"><code class="language-sql">SELECT o.*, c.* FROM orders o
+JOIN customers c ON o.customer_id = c.id
+WHERE o.status = ?</code></pre></p>
+<p><strong>11 queries → 1 query.</strong></p>
+<h3 id="solution-2-entitygraph">Solution 2: @EntityGraph<a class="anchor-link" href="#solution-2-entitygraph" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@EntityGraph(attributePaths = {"customer", "items", "items.product"})
+@Query("SELECT o FROM OrderEntity o WHERE o.status = :status")
+List&lt;OrderEntity&gt; findByStatusWithAllRelations(@Param("status") OrderStatus status);</code></pre>
+<p><code>@EntityGraph</code> tells JPA to fetch the specified relationships eagerly (in one query) without writing the JOIN in the query.</p>
+<hr />
+<h2 id="10-configuring-postgresql">10. Configuring PostgreSQL<a class="anchor-link" href="#10-configuring-postgresql" title="Permanent link">¶</a></h2>
+<h3 id="applicationyml-already-set-up-in-module-01">application.yml (already set up in Module 01)<a class="anchor-link" href="#applicationyml-already-set-up-in-module-01" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-yaml">spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ordermgmt
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update      # Creates/updates tables automatically
+    show-sql: true           # Print SQL statements in console
+    properties:
+      hibernate:
+        format_sql: true     # Pretty-print SQL</code></pre>
+<h3 id="what-ddl-auto-does">What <code>ddl-auto</code> Does<a class="anchor-link" href="#what-ddl-auto-does" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>What It Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>update</code></td>
+<td>Creates tables that don't exist and adds columns that don't exist. Does NOT drop or modify existing columns. Good for development.</td>
+</tr>
+<tr>
+<td><code>create</code></td>
+<td>Drops all tables and recreates them on every startup. Good for testing, destroys data.</td>
+</tr>
+<tr>
+<td><code>create-drop</code></td>
+<td>Same as <code>create</code>, but also drops tables when the application stops.</td>
+</tr>
+<tr>
+<td><code>validate</code></td>
+<td>Checks if the schema matches the entities (no changes). Use in production.</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>Does nothing. Use in production with Flyway or Liquibase for migrations.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="using-bigdecimal-in-postgresql">Using BigDecimal in PostgreSQL<a class="anchor-link" href="#using-bigdecimal-in-postgresql" title="Permanent link">¶</a></h3>
+<p>PostgreSQL has a <code>NUMERIC</code> type that maps perfectly to Java's <code>BigDecimal</code>. We use <code>precision</code> and <code>scale</code> on <code>@Column</code>:</p>
+<pre class="code-block"><code class="language-java">@Column(precision = 10, scale = 2)
+private BigDecimal price;</code></pre>
+<ul>
+<li><code>precision = 10</code> — up to 10 digits total</li>
+<li><code>scale = 2</code> — 2 digits after the decimal point</li>
+<li>Maps to <code>NUMERIC(10, 2)</code> in PostgreSQL — always use BigDecimal for money</li>
+</ul>
+<hr />
+<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
+<h3 id="exercise-1-add-a-derived-query-method">Exercise 1: Add a Derived Query Method<a class="anchor-link" href="#exercise-1-add-a-derived-query-method" title="Permanent link">¶</a></h3>
+<p>Add a method to <code>ProductRepository</code> that finds products by category and stock greater than a threshold.</p>
+<details>
+<summary>Hint</summary>
+
+<pre class="code-block"><code class="language-java">List&lt;ProductEntity&gt; findByCategoryAndStockGreaterThan(String category, int minStock);</code></pre>
+Spring generates: `WHERE category = ? AND stock > ?`
+</details>
+
+<h3 id="exercise-2-write-a-custom-jpql-query">Exercise 2: Write a Custom JPQL Query<a class="anchor-link" href="#exercise-2-write-a-custom-jpql-query" title="Permanent link">¶</a></h3>
+<p>Add a method to <code>OrderRepository</code> that finds orders with total amount greater than a given value, ordered by total descending.</p>
+<details>
+<summary>Hint</summary>
+
+<pre class="code-block"><code class="language-java">@Query("SELECT o FROM OrderEntity o WHERE o.totalAmount &gt; :amount ORDER BY o.totalAmount DESC")
+List&lt;OrderEntity&gt; findOrdersAboveAmount(@Param("amount") BigDecimal amount);</code></pre>
+</details>
+
+<h3 id="exercise-3-fix-an-n1-problem">Exercise 3: Fix an N+1 Problem<a class="anchor-link" href="#exercise-3-fix-an-n1-problem" title="Permanent link">¶</a></h3>
+<p>Write a <code>@Query</code> with <code>JOIN FETCH</code> that fetches orders with their items in a single query.</p>
+<details>
+<summary>Hint</summary>
+
+<pre class="code-block"><code class="language-java">@Query("SELECT DISTINCT o FROM OrderEntity o JOIN FETCH o.items WHERE o.status = :status")
+List&lt;OrderEntity&gt; findOrdersWithItems(@Param("status") OrderStatus status);</code></pre>
+The `DISTINCT` prevents duplicate orders when an order has multiple items (because the JOIN creates one row per item).
+</details>
+
+<h3 id="exercise-4-add-pagination-to-a-repository">Exercise 4: Add Pagination to a Repository<a class="anchor-link" href="#exercise-4-add-pagination-to-a-repository" title="Permanent link">¶</a></h3>
+<p>Create a method that finds products by category with pagination.</p>
+<details>
+<summary>Hint</summary>
+
+<pre class="code-block"><code class="language-java">Page&lt;ProductEntity&gt; findByCategory(String category, Pageable pageable);</code></pre>
+Call it with: `productRepository.findByCategory("Electronics", PageRequest.of(0, 10));`
+</details>
+
+<hr />
+<h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
+<ul>
+<li>A <strong>database</strong> stores data persistently in <strong>tables</strong> (rows and columns)</li>
+<li><strong>SQL</strong> is the language for databases — JPA generates it for you</li>
+<li>The <strong>Repository Pattern</strong> separates data access (repositories) from business logic (services)</li>
+<li><strong>ORM</strong> (via JPA/Hibernate) maps Java objects to database tables</li>
+<li><strong>Spring Data JPA</strong> generates repository implementations from interfaces — you just declare the interface</li>
+<li><strong>JPA entities</strong> use <code>@Entity</code>, <code>@Id</code>, <code>@GeneratedValue</code>, <code>@Column</code>, and relationship annotations — they are traditional classes (not records) with getters and setters</li>
+<li><strong>Relationships</strong>: <code>@ManyToOne</code> (many-to-one, foreign key on the "many" side), <code>@OneToMany(mappedBy = ...)</code> (one-to-many, the other side owns the relationship)</li>
+<li><strong>Derived query methods</strong> let you write queries as method names: <code>findByEmail()</code>, <code>findByCategoryAndStockGreaterThan()</code></li>
+<li><strong><code>@Query</code></strong> with JPQL handles complex queries, and <code>JOIN FETCH</code> solves the N+1 problem</li>
+<li><strong>BigDecimal</strong> with <code>@Column(precision = 10, scale = 2)</code> maps to PostgreSQL <code>NUMERIC</code> — always use BigDecimal for money, never <code>double</code></li>
+<li><strong><code>ddl-auto: update</code></strong> auto-creates tables for development; use <code>validate</code> or Flyway in production</li>
+</ul>
+<hr />
+<h2 id="11-jpa-entity-relationships-deep-dive">11. JPA Entity Relationships Deep Dive<a class="anchor-link" href="#11-jpa-entity-relationships-deep-dive" title="Permanent link">¶</a></h2>
+<h3 id="one-to-one">One-to-One<a class="anchor-link" href="#one-to-one" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@Entity
+public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // An order has exactly one shipping address
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "shipping_address_id")
+    private ShippingAddress shippingAddress;
+}
+
+@Entity
+public class ShippingAddress {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String street;
+    private String city;
+    private String zipCode;
+}</code></pre>
+<h3 id="cascade-types">Cascade Types<a class="anchor-link" href="#cascade-types" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Cascade</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PERSIST</code></td>
+<td>Saving the parent also saves the child</td>
+</tr>
+<tr>
+<td><code>MERGE</code></td>
+<td>Merging the parent also merges the child</td>
+</tr>
+<tr>
+<td><code>REMOVE</code></td>
+<td>Deleting the parent also deletes the child</td>
+</tr>
+<tr>
+<td><code>ALL</code></td>
+<td>All of the above</td>
+</tr>
+<tr>
+<td><code>REFRESH</code></td>
+<td>Refreshing the parent also refreshes the child</td>
+</tr>
+<tr>
+<td><code>DETACH</code></td>
+<td>Detaching the parent also detaches the child</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fetch-strategies">Fetch Strategies<a class="anchor-link" href="#fetch-strategies" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>When It Loads</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EAGER</code></td>
+<td>Immediately when parent is loaded</td>
+<td>Small, always-needed associations</td>
+</tr>
+<tr>
+<td><code>LAZY</code> (default for @OneToMany, @ManyToOne)</td>
+<td>Only when accessed</td>
+<td>Large or optional associations</td>
+</tr>
+</tbody>
+</table>
+<pre class="code-block"><code class="language-java">// BAD — loads every order item even when you only need the order header
+@OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
+private List&lt;OrderItem&gt; items;
+
+// GOOD — loads items only when .getItems() is called
+@OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+private List&lt;OrderItem&gt; items;</code></pre>
+<h3 id="the-n1-problem-recap-with-solution">The N+1 Problem (Recap with Solution)<a class="anchor-link" href="#the-n1-problem-recap-with-solution" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">// This triggers 1 query for orders + N queries for items (N+1 problem)
+List&lt;Order&gt; orders = orderRepository.findAll();
+for (Order order : orders) {
+    System.out.println(order.getItems().size());  // triggers a query per order!
+}
+
+// Solution: JOIN FETCH in the repository
+@Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items")
+List&lt;Order&gt; findAllWithItems();  // single query</code></pre>
+<hr />
+<h2 id="12-jpql-and-native-queries">12. JPQL and Native Queries<a class="anchor-link" href="#12-jpql-and-native-queries" title="Permanent link">¶</a></h2>
+<h3 id="jpql-java-persistence-query-language">JPQL (Java Persistence Query Language)<a class="anchor-link" href="#jpql-java-persistence-query-language" title="Permanent link">¶</a></h3>
+<p>JPQL looks like SQL but operates on <strong>entities</strong>, not tables:</p>
+<pre class="code-block"><code class="language-java">@Repository
+public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; {
+
+    // JPQL — uses entity names and field names (not table/column names)
+    @Query("SELECT o FROM OrderEntity o WHERE o.status = :status AND o.createdAt &gt; :after")
+    List&lt;OrderEntity&gt; findRecentByStatus(@Param("status") OrderStatus status,
+                                          @Param("after") Instant after);
+
+    // JPQL with JOIN FETCH to solve N+1
+    @Query("SELECT DISTINCT o FROM OrderEntity o LEFT JOIN FETCH o.items WHERE o.status = :status")
+    List&lt;OrderEntity&gt; findByStatusWithItems(@Param("status") OrderStatus status);
+
+    // JPQL aggregate
+    @Query("SELECT SUM(o.totalAmount) FROM OrderEntity o WHERE o.status = 'CONFIRMED'")
+    BigDecimal getTotalConfirmedRevenue();
+}</code></pre>
+<h3 id="native-sql-queries">Native SQL Queries<a class="anchor-link" href="#native-sql-queries" title="Permanent link">¶</a></h3>
+<p>When JPQL can't express what you need:</p>
+<pre class="code-block"><code class="language-java">@Query(value = "SELECT * FROM orders WHERE EXTRACT(MONTH FROM created_at) = :month",
+       nativeQuery = true)
+List&lt;OrderEntity&gt; findByMonth(@Param("month") int month);</code></pre>
+<h3 id="pagination-and-sorting">Pagination and Sorting<a class="anchor-link" href="#pagination-and-sorting" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">// Spring Data provides Pageable — no need to write pagination logic
+Page&lt;OrderEntity&gt; findByStatus(OrderStatus status, Pageable pageable);
+
+// Usage
+Pageable pageable = PageRequest.of(0, 20, Sort.by("createdAt").descending());
+Page&lt;OrderEntity&gt; page = orderRepository.findByStatus(OrderStatus.PENDING, pageable);
+
+page.getContent();       // list of orders on this page
+page.getTotalElements(); // total count
+page.getTotalPages();   // total page count
+page.hasNext();         // is there a next page?</code></pre>
+<hr />
+<h2 id="13-database-indexing-and-performance">13. Database Indexing and Performance<a class="anchor-link" href="#13-database-indexing-and-performance" title="Permanent link">¶</a></h2>
+<h3 id="adding-indexes">Adding Indexes<a class="anchor-link" href="#adding-indexes" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@Entity
+@Table(name = "orders", indexes = {
+    @Index(name = "idx_order_status", columnList = "status"),
+    @Index(name = "idx_order_customer_status", columnList = "customer_id, status"),
+    @Index(name = "idx_order_created_at", columnList = "created_at")
+})
+public class OrderEntity { ... }</code></pre>
+<h3 id="when-to-index">When to Index<a class="anchor-link" href="#when-to-index" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Index?</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primary key</td>
+<td>Yes (automatic)</td>
+<td>O(1) lookup by ID</td>
+</tr>
+<tr>
+<td>Foreign keys</td>
+<td>Yes</td>
+<td>JOIN performance</td>
+</tr>
+<tr>
+<td>Frequently filtered columns</td>
+<td>Yes</td>
+<td>WHERE clause speed</td>
+</tr>
+<tr>
+<td>Frequently sorted columns</td>
+<td>Yes</td>
+<td>ORDER BY speed</td>
+</tr>
+<tr>
+<td>Rarely queried columns</td>
+<td>No</td>
+<td>Indexes slow down writes</td>
+</tr>
+<tr>
+<td>Low cardinality (boolean)</td>
+<td>Usually no</td>
+<td>Index doesn't help much</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-performance-issues">Common Performance Issues<a class="anchor-link" href="#common-performance-issues" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">// BAD — can't use index on UPPER(name)
+@Query("SELECT p FROM ProductEntity p WHERE UPPER(p.name) = UPPER(:name)")
+ProductEntity findByNameIgnoreCase(@Param("name") String name);
+
+// GOOD — use ILIKE or store a normalized column
+@Query("SELECT p FROM ProductEntity p WHERE LOWER(p.name) = LOWER(:name)")
+ProductEntity findByNameIgnoreCase(@Param("name") String name);</code></pre>
+<hr />
+<h2 id="14-flyway-database-migrations">14. Flyway Database Migrations<a class="anchor-link" href="#14-flyway-database-migrations" title="Permanent link">¶</a></h2>
+<p>In production, you should <strong>never</strong> use <code>ddl-auto: update</code>. Instead, use a
+migration tool like <strong>Flyway</strong> to manage schema changes in version control.</p>
+<h3 id="adding-flyway">Adding Flyway<a class="anchor-link" href="#adding-flyway" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.flywaydb&lt;/groupId&gt;
+    &lt;artifactId&gt;flyway-core&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.flywaydb&lt;/groupId&gt;
+    &lt;artifactId&gt;flyway-database-postgresql&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+<h3 id="migration-files">Migration Files<a class="anchor-link" href="#migration-files" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code>src/main/resources/db/migration/
+├── V1__create_tables.sql
+├── V2__add_index_on_orders.sql
+├── V3__add_shipping_address_table.sql
+└── V4__add_audit_log_table.sql</code></pre>
+<p><strong>V1__create_tables.sql:</strong>
+<pre class="code-block"><code class="language-sql">CREATE TABLE customers (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    address VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE products (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    stock INTEGER NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE orders (
+    id BIGSERIAL PRIMARY KEY,
+    customer_id BIGINT NOT NULL REFERENCES customers(id),
+    status VARCHAR(20) NOT NULL,
+    total_amount NUMERIC(10, 2) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE order_items (
+    id BIGSERIAL PRIMARY KEY,
+    order_id BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    product_id BIGINT NOT NULL REFERENCES products(id),
+    quantity INTEGER NOT NULL,
+    unit_price NUMERIC(10, 2) NOT NULL
+);</code></pre></p>
+<p><strong>V2__add_index_on_orders.sql:</strong>
+<pre class="code-block"><code class="language-sql">CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_customer_status ON orders(customer_id, status);</code></pre></p>
+<h3 id="how-flyway-works">How Flyway Works<a class="anchor-link" href="#how-flyway-works" title="Permanent link">¶</a></h3>
+<ol>
+<li>On application startup, Flyway checks the <code>flyway_schema_history</code> table</li>
+<li>It compares migration files against the table</li>
+<li>Unexecuted migrations are run <strong>in order</strong> (V1, V2, V3...)</li>
+<li>Each migration is wrapped in a transaction — all or nothing</li>
+</ol>
+<h3 id="flyway-configuration">Flyway Configuration<a class="anchor-link" href="#flyway-configuration" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-yaml">spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true  # allow running on an existing database
+    validate-on-migrate: true   # verify checksums of applied migrations</code></pre>
+<h3 id="why-flyway-over-ddl-auto">Why Flyway Over ddl-auto<a class="anchor-link" href="#why-flyway-over-ddl-auto" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th><code>ddl-auto: update</code></th>
+<th>Flyway</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Updates schema silently</td>
+<td>Migrations are explicit and versioned</td>
+</tr>
+<tr>
+<td>Can't roll back changes</td>
+<td>Each migration is a file you can review</td>
+</tr>
+<tr>
+<td>No history of changes</td>
+<td>Full audit trail in <code>flyway_schema_history</code></td>
+</tr>
+<tr>
+<td>Unpredictable in production</td>
+<td>Deterministic — same migrations every time</td>
+</tr>
+<tr>
+<td>Can't add data migrations</td>
+<td>V3 can include INSERT/UPDATE statements</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="15-testing-jpa-repositories-with-testcontainers">15. Testing JPA Repositories with Testcontainers<a class="anchor-link" href="#15-testing-jpa-repositories-with-testcontainers" title="Permanent link">¶</a></h2>
+<h3 id="what-is-testcontainers">What Is Testcontainers?<a class="anchor-link" href="#what-is-testcontainers" title="Permanent link">¶</a></h3>
+<p>Testcontainers is a Java library that <strong>starts real Docker containers</strong> during
+tests. Instead of an in-memory H2 database that doesn't match production, you
+test against a real PostgreSQL instance.</p>
+<h3 id="setup">Setup<a class="anchor-link" href="#setup" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+    &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
+    &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+    &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+<h3 id="full-repository-test">Full Repository Test<a class="anchor-link" href="#full-repository-test" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
+
+import com.example.ordermgmt.domain.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@Testcontainers
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class OrderRepositoryFullTest {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer&lt;?&gt; postgres = new PostgreSQLContainer&lt;&gt;("postgres:16-alpine")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test");
+
+    @Autowired
+    private OrderRepository orderRepo;
+    @Autowired
+    private CustomerRepository customerRepo;
+    @Autowired
+    private ProductRepository productRepo;
+
+    @Test
+    void findByStatus_returnsOnlyMatchingOrders() {
+        // Arrange
+        var customer = customerRepo.save(
+                new CustomerEntity("Alice", "alice@test.com", "123 Main"));
+
+        var product = productRepo.save(
+                new ProductEntity("Mug", new BigDecimal("9.99"), 50, "Kitchen"));
+
+        var pendingOrder = new OrderEntity();
+        pendingOrder.setCustomer(customer);
+        orderRepo.save(pendingOrder);
+
+        var confirmedOrder = new OrderEntity();
+        confirmedOrder.setCustomer(customer);
+        confirmedOrder.setStatus(OrderStatus.CONFIRMED);
+        orderRepo.save(confirmedOrder);
+
+        // Act
+        List&lt;OrderEntity&gt; pendingOrders = orderRepo.findByStatus(OrderStatus.PENDING);
+
+        // Assert
+        assertThat(pendingOrders).hasSize(1);
+        assertThat(pendingOrders.get(0).getStatus()).isEqualTo(OrderStatus.PENDING);
+    }
+
+    @Test
+    void save_withItems_cascadesCorrectly() {
+        var customer = customerRepo.save(
+                new CustomerEntity("Bob", "bob@test.com", "456 Oak"));
+
+        var product = productRepo.save(
+                new ProductEntity("Book", new BigDecimal("24.99"), 100, "Education"));
+
+        var order = new OrderEntity();
+        order.setCustomer(customer);
+
+        var item = new OrderItemEntity();
+        item.setOrder(order);
+        item.setProduct(product);
+        item.setQuantity(2);
+        item.setUnitPrice(product.getPrice());
+        order.getItems().add(item);
+
+        order.recalculateTotal();
+        var saved = orderRepo.save(order);
+
+        // Assert cascade — item was saved with the order
+        var retrieved = orderRepo.findById(saved.getId()).orElseThrow();
+        assertThat(retrieved.getItems()).hasSize(1);
+        assertThat(retrieved.getTotalAmount())
+                .isEqualByComparingTo(new BigDecimal("49.98"));
+    }
+}</code></pre>
+<h3 id="serviceconnection">@ServiceConnection<a class="anchor-link" href="#serviceconnection" title="Permanent link">¶</a></h3>
+<p>Spring Boot 3.1+ introduced <code>@ServiceConnection</code> — it automatically wires the
+container's database URL, username, and password into your Spring configuration.
+No need for <code>@DynamicPropertySource</code> boilerplate.</p>
+<hr />
+<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
+<ul>
+<li>
+<p><strong>[Spring Boot Repository Layer + JPA + MySQL CRUD]</strong> by Dan Vega — Building the repository layer with Spring Data JPA, covers entities and CRUD operations
+  <a href="https://www.youtube.com/watch?v=tM4DmyFlfOY">https://www.youtube.com/watch?v=tM4DmyFlfOY</a></p>
+</li>
+<li>
+<p><strong>[Spring Data JDBC Tutorial: How to simplify data access in Spring Boot]</strong> by Dan Vega — Alternative data access approach with Spring Data JDBC
+  <a href="https://www.youtube.com/watch?v=l_T0nQNbFiM">https://www.youtube.com/watch?v=l_T0nQNbFiM</a></p>
+</li>
+</ul>
+<hr />
+<p>← <a href="03-spring-boot-fundamentals.html">Previous: Module 03</a> | <a href="05-service-oriented-architecture.html">Next: Module 05</a> →</p>
+      </article>
+
+      <div class="footer-nav"><a href="03-spring-boot-fundamentals.html" class="nav-link prev">← Spring Boot Fundamentals</a><a href="05-service-oriented-architecture.html" class="nav-link next">Service-Oriented Architecture →</a></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="assets/search.js"></script>
+</body>
+</html>

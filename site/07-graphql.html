@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GraphQL — Java Spring Boot Course</title>
+  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="logo">
+          <span class="logo-icon">☕</span>
+          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+        </a>
+      </div>
+      
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Search course..." autocomplete="off" />
+          <div id="searchResults" class="search-results"></div>
+        </div>
+      <nav class="nav-list">
+        
+        <a href="00-java-foundations.html" class="nav-item">
+          <span class="nav-num">00</span>
+          <span class="nav-title">Java Foundations</span>
+        </a>
+
+        <a href="01-build-tools-and-project-setup.html" class="nav-item">
+          <span class="nav-num">01</span>
+          <span class="nav-title">Build Tools & Project Setup</span>
+        </a>
+
+        <a href="02-dependency-injection.html" class="nav-item">
+          <span class="nav-num">02</span>
+          <span class="nav-title">Dependency Injection</span>
+        </a>
+
+        <a href="03-spring-boot-fundamentals.html" class="nav-item">
+          <span class="nav-num">03</span>
+          <span class="nav-title">Spring Boot Fundamentals</span>
+        </a>
+
+        <a href="04-repository-pattern.html" class="nav-item">
+          <span class="nav-num">04</span>
+          <span class="nav-title">Repository Pattern</span>
+        </a>
+
+        <a href="05-service-oriented-architecture.html" class="nav-item">
+          <span class="nav-num">05</span>
+          <span class="nav-title">Service-Oriented Architecture</span>
+        </a>
+
+        <a href="06-kafka.html" class="nav-item">
+          <span class="nav-num">06</span>
+          <span class="nav-title">Kafka</span>
+        </a>
+
+        <a href="07-graphql.html" class="nav-item active">
+          <span class="nav-num">07</span>
+          <span class="nav-title">GraphQL</span>
+        </a>
+
+        <a href="08-reactor-pattern.html" class="nav-item">
+          <span class="nav-num">08</span>
+          <span class="nav-title">Reactor Pattern</span>
+        </a>
+
+        <a href="09-tdd.html" class="nav-item">
+          <span class="nav-num">09</span>
+          <span class="nav-title">Test-Driven Development</span>
+        </a>
+
+        <a href="10-capstone-project.html" class="nav-item">
+          <span class="nav-num">10</span>
+          <span class="nav-title">Capstone Project</span>
+        </a>
+
+        <a href="11-migrating-java-to-kotlin.html" class="nav-item">
+          <span class="nav-num">11</span>
+          <span class="nav-title">Migrating Java to Kotlin</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-content">
+      <header class="page-header">
+        
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="breadcrumb">
+          <a href="index.html">Home</a> › <span>GraphQL</span>
+        </div>
+      </header>
+
+      <article class="content">
+        <h1 id="module-07-graphql">Module 07: GraphQL<a class="anchor-link" href="#module-07-graphql" title="Permanent link">¶</a></h1>
+<h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
+<ul>
+<li>What an API is and a recap of REST concepts from Module 03</li>
+<li>The problems REST has: over-fetching and under-fetching</li>
+<li>What GraphQL is and how it solves REST's problems</li>
+<li>GraphQL vs REST: a side-by-side comparison</li>
+<li>Core GraphQL concepts: schema, types, queries, mutations, subscriptions</li>
+<li>The Schema Definition Language (SDL)</li>
+<li>How to model the Order Management domain with GraphQL</li>
+<li>Writing queries and mutations for orders, customers, and products</li>
+<li>Implementing resolvers in Spring Boot with <code>@QueryMapping</code>, <code>@MutationMapping</code>, and <code>@SchemaMapping</code></li>
+<li>The N+1 problem in GraphQL and how to solve it with DataLoader</li>
+<li>Error handling in GraphQL</li>
+<li>GraphQL subscriptions with WebSockets</li>
+<li>Testing GraphQL endpoints with GraphiQL</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="00-java-foundations.html">Module 00: Java Foundations</a> — you understand Java classes, records, interfaces</li>
+<li><a href="01-build-tools-and-project-setup.html">Module 01: Build Tools &amp; Project Setup</a> — you have a Spring Boot project</li>
+<li><a href="02-dependency-injection.html">Module 02: Dependency Injection</a> — you understand Spring beans and constructor injection</li>
+<li><a href="03-spring-boot-fundamentals.html">Module 03: Spring Boot Fundamentals</a> — you understand REST controllers and DTOs</li>
+<li><a href="04-repository-pattern.html">Module 04: Repository Pattern</a> — you understand JPA entities and repositories</li>
+<li><a href="05-service-oriented-architecture.html">Module 05: Service-Oriented Architecture</a> — you understand the service layer</li>
+</ul>
+<hr />
+<h2 id="1-what-is-an-api-rest-recap">1. What Is an API? (REST Recap)<a class="anchor-link" href="#1-what-is-an-api-rest-recap" title="Permanent link">¶</a></h2>
+<p>An <strong>API (Application Programming Interface)</strong> is a contract that defines how software components communicate. In Module 03, you learned about <strong>REST APIs</strong>, where:</p>
+<ul>
+<li>Each resource has a URL: <code>/api/orders</code>, <code>/api/customers</code>, <code>/api/products</code></li>
+<li>You use HTTP methods to act on them: <code>GET</code> to read, <code>POST</code> to create, <code>PUT</code> to update, <code>DELETE</code> to remove</li>
+<li>Data is exchanged as JSON</li>
+</ul>
+<p>For example, to get order #42 in REST:</p>
+<pre class="code-block"><code>GET /api/orders/42
+
+Response:
+{
+  "id": 42,
+  "customerId": 7,
+  "customerName": "Alice",
+  "status": "CONFIRMED",
+  "totalAmount": 129.99,
+  "createdAt": "2025-01-15T10:30:00Z",
+  "items": [
+    { "id": 1, "productId": 100, "productName": "Widget", "quantity": 2, "unitPrice": 49.99 }
+  ]
+}</code></pre>
+<p>REST works well and is widely used. But it has limitations.</p>
+<hr />
+<h2 id="2-problems-with-rest">2. Problems with REST<a class="anchor-link" href="#2-problems-with-rest" title="Permanent link">¶</a></h2>
+<h3 id="over-fetching">Over-Fetching<a class="anchor-link" href="#over-fetching" title="Permanent link">¶</a></h3>
+<p><strong>Over-fetching</strong> happens when the API returns more data than the client needs.</p>
+<p>Imagine a mobile app that shows a list of orders. It only needs the order ID and status — but the REST endpoint returns the entire order object including all items, the customer details, timestamps, and more. That's wasted bandwidth and slower response times.</p>
+<pre class="code-block"><code>Client needs:  { "id": 42, "status": "CONFIRMED" }
+REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "CONFIRMED",
+                 "totalAmount": 129.99, "createdAt": "...", "items": [...] }
+                                                          ↑ wasted data</code></pre>
+<h3 id="under-fetching">Under-Fetching<a class="anchor-link" href="#under-fetching" title="Permanent link">¶</a></h3>
+<p><strong>Under-fetching</strong> happens when the client needs to make multiple API calls to gather all the data it needs.</p>
+<p>Imagine a dashboard that shows orders with customer names and product images. With REST, you might need:</p>
+<ol>
+<li><code>GET /api/orders</code> — get the orders (returns customer IDs, not names)</li>
+<li><code>GET /api/customers/7</code> — get customer details for order 1</li>
+<li><code>GET /api/customers/12</code> — get customer details for order 2</li>
+<li><code>GET /api/products/100</code> — get product details for the first item</li>
+</ol>
+<p>That's 4+ network round trips. Each one adds latency.</p>
+<h3 id="the-root-cause">The Root Cause<a class="anchor-link" href="#the-root-cause" title="Permanent link">¶</a></h3>
+<p>The problem is that REST endpoints return a <strong>fixed shape</strong>. The server decides what data to return, regardless of what the client actually needs. Different clients (web app, mobile app, analytics dashboard) have different needs, but they all get the same response.</p>
+<hr />
+<h2 id="3-what-is-graphql">3. What Is GraphQL?<a class="anchor-link" href="#3-what-is-graphql" title="Permanent link">¶</a></h2>
+<p><strong>GraphQL</strong> is a query language for your API. Instead of the server deciding what data to return, the <strong>client</strong> specifies exactly what it wants, and the server returns exactly that — nothing more, nothing less.</p>
+<p>Think of it like a restaurant:</p>
+<ul>
+<li><strong>REST</strong> is like a set menu: you get whatever the chef decided to put on the plate. You might not want the salad, but it's there.</li>
+<li><strong>GraphQL</strong> is like ordering a la carte: you pick exactly the dishes you want. Want just the steak? You get just the steak.</li>
+</ul>
+<h3 id="a-graphql-query-example">A GraphQL Query Example<a class="anchor-link" href="#a-graphql-query-example" title="Permanent link">¶</a></h3>
+<p>Instead of <code>GET /api/orders/42</code>, the client sends a <strong>query</strong> to a single GraphQL endpoint:</p>
+<pre class="code-block"><code>POST /graphql
+
+{
+  "query": "{ order(id: 42) { id status } }"
+}</code></pre>
+<p>The server responds with exactly those fields:</p>
+<pre class="code-block"><code class="language-json">{
+  "data": {
+    "order": {
+      "id": 42,
+      "status": "CONFIRMED"
+    }
+  }
+}</code></pre>
+<p>No over-fetching. The client asked for <code>id</code> and <code>status</code>, and that's all it got.</p>
+<h3 id="a-more-complex-query">A More Complex Query<a class="anchor-link" href="#a-more-complex-query" title="Permanent link">¶</a></h3>
+<p>The client can also ask for related data in a single request — no under-fetching:</p>
+<pre class="code-block"><code class="language-graphql">{
+  order(id: 42) {
+    id
+    status
+    customer {
+      id
+      name
+    }
+    items {
+      quantity
+      unitPrice
+      product {
+        id
+        name
+      }
+    }
+  }
+}</code></pre>
+<p>This single query replaces what would have taken 3+ REST calls. The server resolves all the relationships and returns the complete data in one response.</p>
+<hr />
+<h2 id="4-graphql-vs-rest-comparison">4. GraphQL vs REST: Comparison<a class="anchor-link" href="#4-graphql-vs-rest-comparison" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>REST</th>
+<th>GraphQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Endpoints</strong></td>
+<td>Many (<code>/api/orders</code>, <code>/api/customers</code>, etc.)</td>
+<td>One (<code>/graphql</code>)</td>
+</tr>
+<tr>
+<td><strong>Data shape</strong></td>
+<td>Fixed by the server</td>
+<td>Chosen by the client</td>
+</tr>
+<tr>
+<td><strong>Over-fetching</strong></td>
+<td>Common</td>
+<td>Eliminated — client asks for only what it needs</td>
+</tr>
+<tr>
+<td><strong>Under-fetching</strong></td>
+<td>Common — multiple calls needed for related data</td>
+<td>Eliminated — related data in one query</td>
+</tr>
+<tr>
+<td><strong>Versioning</strong></td>
+<td>URL versioning (<code>/v1/</code>, <code>/v2/</code>) or headers</td>
+<td>Schema evolution — add fields without breaking old clients</td>
+</tr>
+<tr>
+<td><strong>HTTP methods</strong></td>
+<td><code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code> for different operations</td>
+<td><code>POST</code> for everything (queries and mutations)</td>
+</tr>
+<tr>
+<td><strong>Caching</strong></td>
+<td>HTTP caching (browser, CDN)</td>
+<td>Needs custom caching (Apollo Client, etc.)</td>
+</tr>
+<tr>
+<td><strong>Learning curve</strong></td>
+<td>Lower — maps to HTTP concepts</td>
+<td>Higher — new query language, schema concepts</td>
+</tr>
+<tr>
+<td><strong>Best for</strong></td>
+<td>Simple CRUD APIs, resource-oriented services</td>
+<td>Complex data relationships, multiple client types</td>
+</tr>
+<tr>
+<td><strong>File uploads</strong></td>
+<td>Simple with <code>multipart/form-data</code></td>
+<td>Requires custom handling</td>
+</tr>
+</tbody>
+</table>
+<h3 id="when-to-use-graphql">When to Use GraphQL?<a class="anchor-link" href="#when-to-use-graphql" title="Permanent link">¶</a></h3>
+<ul>
+<li>You have multiple clients (web, iOS, Android) with different data needs</li>
+<li>Your data has complex relationships that require multiple REST calls to assemble</li>
+<li>You want to avoid versioning your API</li>
+<li>You want a single endpoint for the frontend to interact with</li>
+</ul>
+<h3 id="when-to-stay-with-rest">When to Stay with REST?<a class="anchor-link" href="#when-to-stay-with-rest" title="Permanent link">¶</a></h3>
+<ul>
+<li>Your API is consumed by other servers (machine-to-machine) where over-fetching doesn't matter</li>
+<li>You need HTTP-level caching</li>
+<li>Your API is simple CRUD with few relationships</li>
+<li>Your team is not familiar with GraphQL</li>
+</ul>
+<p>You can also use <strong>both</strong> — Spring Boot supports having REST and GraphQL endpoints in the same application.</p>
+<hr />
+<h2 id="5-core-graphql-concepts">5. Core GraphQL Concepts<a class="anchor-link" href="#5-core-graphql-concepts" title="Permanent link">¶</a></h2>
+<h3 id="schema">Schema<a class="anchor-link" href="#schema" title="Permanent link">¶</a></h3>
+<p>A <strong>schema</strong> is the contract of your GraphQL API. It defines what types exist, what queries are available, and what mutations you can perform. The schema is written in the <strong>Schema Definition Language (SDL)</strong> and lives in a <code>.graphqls</code> file.</p>
+<h3 id="types">Types<a class="anchor-link" href="#types" title="Permanent link">¶</a></h3>
+<p>A <strong>type</strong> defines the shape of an object in your API. It's like a Java class definition:</p>
+<pre class="code-block"><code class="language-graphql">type Order {
+    id: ID!
+    status: OrderStatus!
+    totalAmount: BigDecimal!
+    customer: Customer!
+    items: [OrderItem!]!
+}</code></pre>
+<ul>
+<li><code>ID</code>, <code>String</code>, <code>Int</code>, <code>Float</code>, <code>Boolean</code> are built-in <strong>scalar types</strong></li>
+<li><code>ID!</code> — the <code>!</code> means this field is <strong>non-nullable</strong> (required)</li>
+<li><code>[OrderItem!]!</code> — a non-nullable list of non-nullable items</li>
+<li><code>BigDecimal</code> — we can register custom scalars for types Java has but GraphQL doesn't (like <code>BigDecimal</code>, <code>Instant</code>)</li>
+<li><code>Customer</code> is a custom type we define ourselves</li>
+</ul>
+<h3 id="queries">Queries<a class="anchor-link" href="#queries" title="Permanent link">¶</a></h3>
+<p>A <strong>query</strong> reads data. It's the GraphQL equivalent of a <code>GET</code> request:</p>
+<pre class="code-block"><code class="language-graphql">type Query {
+    order(id: ID!): Order
+    orders(customerId: ID): [Order!]!
+    customer(id: ID!): Customer
+    products(category: String): [Product!]!
+}</code></pre>
+<h3 id="mutations">Mutations<a class="anchor-link" href="#mutations" title="Permanent link">¶</a></h3>
+<p>A <strong>mutation</strong> modifies data. It's the GraphQL equivalent of <code>POST</code>, <code>PUT</code>, or <code>DELETE</code>:</p>
+<pre class="code-block"><code class="language-graphql">type Mutation {
+    createOrder(input: CreateOrderInput!): Order!
+    confirmOrder(id: ID!): Order!
+    cancelOrder(id: ID!): Order!
+    createProduct(input: CreateProductInput!): Product!
+}</code></pre>
+<h3 id="subscriptions">Subscriptions<a class="anchor-link" href="#subscriptions" title="Permanent link">¶</a></h3>
+<p>A <strong>subscription</strong> is a real-time stream of data pushed from the server to the client over WebSockets. It's used for live updates like order status changes:</p>
+<pre class="code-block"><code class="language-graphql">type Subscription {
+    orderStatusChanged(orderId: ID): OrderStatusChangedEvent!
+}</code></pre>
+<p>We'll cover subscriptions briefly at the end of this module.</p>
+<hr />
+<h2 id="6-schema-definition-language-sdl">6. Schema Definition Language (SDL)<a class="anchor-link" href="#6-schema-definition-language-sdl" title="Permanent link">¶</a></h2>
+<p>Let's write the complete GraphQL schema for our Order Management System. Create a file at <code>src/main/resources/graphql/schema.graphqls</code>:</p>
+<pre class="code-block"><code class="language-graphql"># Custom scalars for types Java has but GraphQL doesn't
+scalar BigDecimal
+scalar Instant
+
+# --- Enums ---
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    SHIPPED
+    DELIVERED
+    CANCELLED
+}
+
+# --- Types ---
+
+type Customer {
+    id: ID!
+    name: String!
+    email: String!
+    address: String
+    createdAt: Instant!
+    orders: [Order!]!
+}
+
+type Product {
+    id: ID!
+    name: String!
+    price: BigDecimal!
+    stock: Int!
+    category: String!
+    createdAt: Instant!
+}
+
+type Order {
+    id: ID!
+    customer: Customer!
+    status: OrderStatus!
+    totalAmount: BigDecimal!
+    createdAt: Instant!
+    items: [OrderItem!]!
+}
+
+type OrderItem {
+    id: ID!
+    product: Product!
+    quantity: Int!
+    unitPrice: BigDecimal!
+}
+
+# --- Input Types (for mutations) ---
+
+input CreateOrderInput {
+    customerId: ID!
+    items: [CreateOrderItemInput!]!
+}
+
+input CreateOrderItemInput {
+    productId: ID!
+    quantity: Int!
+}
+
+input CreateCustomerInput {
+    name: String!
+    email: String!
+    address: String
+}
+
+input CreateProductInput {
+    name: String!
+    price: BigDecimal!
+    stock: Int!
+    category: String!
+}
+
+# --- Response type for status change ---
+
+type OrderStatusChangedEvent {
+    orderId: ID!
+    oldStatus: OrderStatus!
+    newStatus: OrderStatus!
+    changedAt: Instant!
+}
+
+# --- Queries (read operations) ---
+
+type Query {
+    # Get a single order by ID
+    order(id: ID!): Order
+
+    # Get all orders, optionally filtered by customer
+    orders(customerId: ID): [Order!]!
+
+    # Get a single customer by ID
+    customer(id: ID!): Customer
+
+    # Get all customers
+    customers: [Customer!]!
+
+    # Get a single product by ID
+    product(id: ID!): Product
+
+    # Get all products, optionally filtered by category
+    products(category: String): [Product!]!
+}
+
+# --- Mutations (write operations) ---
+
+type Mutation {
+    # Create a new order
+    createOrder(input: CreateOrderInput!): Order!
+
+    # Confirm a pending order
+    confirmOrder(id: ID!): Order!
+
+    # Cancel an order
+    cancelOrder(id: ID!): Order!
+
+    # Create a new customer
+    createCustomer(input: CreateCustomerInput!): Customer!
+
+    # Create a new product
+    createProduct(input: CreateProductInput!): Product!
+}
+
+# --- Subscriptions (real-time updates) ---
+
+type Subscription {
+    # Subscribe to order status changes, optionally for a specific order
+    orderStatusChanged(orderId: ID): OrderStatusChangedEvent!
+}</code></pre>
+<h3 id="key-points-about-the-schema">Key Points About the Schema<a class="anchor-link" href="#key-points-about-the-schema" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong><code>scalar BigDecimal</code> and <code>scalar Instant</code></strong> — these tell GraphQL that we have custom types. We'll register Java implementations for them in our Spring Boot configuration</li>
+<li><strong>Input types</strong> — mutations use <code>input</code> types instead of regular types. Inputs are for data going <strong>in</strong> to the API</li>
+<li><strong><code>ID!</code></strong> — the <code>ID</code> type is a string-serialized unique identifier. The <code>!</code> makes it non-nullable</li>
+<li><strong>Relationships</strong> — <code>Order</code> has a <code>customer</code> field of type <code>Customer</code>, and <code>Customer</code> has an <code>orders</code> field of type <code>[Order!]!</code>. This allows bidirectional traversal</li>
+<li><strong>The <code>Query</code> type is required</strong> — it defines all read operations</li>
+<li><strong>The <code>Mutation</code> type is optional but common</strong> — it defines all write operations</li>
+<li><strong>Arguments</strong> — queries can accept arguments: <code>order(id: ID!)</code>, <code>products(category: String)</code></li>
+</ol>
+<hr />
+<h2 id="7-adding-the-graphql-dependency">7. Adding the GraphQL Dependency<a class="anchor-link" href="#7-adding-the-graphql-dependency" title="Permanent link">¶</a></h2>
+<p>Add the Spring Boot GraphQL starter to your <code>pom.xml</code>:</p>
+<pre class="code-block"><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-graphql&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+<p>This gives you everything you need: the GraphQL Java engine, Spring integration, and the GraphiQL IDE (a browser-based tool for testing GraphQL queries).</p>
+<p>Enable GraphiQL in <code>application.yml</code>:</p>
+<pre class="code-block"><code class="language-yaml">spring:
+  graphql:
+    graphiql:
+      enabled: true
+      path: /graphiql</code></pre>
+<p>Now you can open <code>http://localhost:8080/graphiql</code> in your browser to test queries interactively.</p>
+<hr />
+<h2 id="8-custom-scalars">8. Custom Scalars<a class="anchor-link" href="#8-custom-scalars" title="Permanent link">¶</a></h2>
+<p>GraphQL has built-in scalars (<code>Int</code>, <code>Float</code>, <code>String</code>, <code>Boolean</code>, <code>ID</code>), but Java has types that GraphQL doesn't know about — <code>BigDecimal</code> and <code>Instant</code>. We need to register <strong>custom scalar adapters</strong> that tell GraphQL how to serialize and deserialize them.</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.config;
+
+import graphql.schema.Coercing;
+import graphql.schema.GraphQLScalarType;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.graphql.data.value.SelectedValueReplacer;
+import org.springframework.graphql.execution.RuntimeWiringConfigurer;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+
+@Configuration
+public class GraphQLConfig {
+
+    // Define the BigDecimal scalar — tells GraphQL how to handle BigDecimal values
+    @Bean
+    public GraphQLScalarType bigDecimalScalar() {
+        return GraphQLScalarType.newScalar()
+                .name("BigDecimal")
+                .description("Java BigDecimal as a string")
+                .coercing(new Coercing&lt;&gt;() {
+                    @Override
+                    public String serialize(Object dataFetcherResult) {
+                        if (dataFetcherResult instanceof BigDecimal bd) {
+                            return bd.toPlainString();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public BigDecimal parseValue(Object input) {
+                        if (input instanceof String s) {
+                            return new BigDecimal(s);
+                        }
+                        if (input instanceof Number n) {
+                            return BigDecimal.valueOf(n.doubleValue());
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public BigDecimal parseLiteral(Object input) {
+                        if (input instanceof org.springframework.graphql.java21runtime.value.Value.StringValue sv) {
+                            return new BigDecimal(sv.getValue());
+                        }
+                        return null;
+                    }
+                })
+                .build();
+    }
+
+    // Define the Instant scalar — tells GraphQL how to handle Instant values
+    @Bean
+    public GraphQLScalarType instantScalar() {
+        return GraphQLScalarType.newScalar()
+                .name("Instant")
+                .description("Java Instant as ISO-8601 string")
+                .coercing(new Coercing&lt;&gt;() {
+                    @Override
+                    public String serialize(Object dataFetcherResult) {
+                        if (dataFetcherResult instanceof Instant instant) {
+                            return instant.toString();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public Instant parseValue(Object input) {
+                        if (input instanceof String s) {
+                            return Instant.parse(s);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public Instant parseLiteral(Object input) {
+                        if (input instanceof org.springframework.graphql.java21runtime.value.Value.StringValue sv) {
+                            try {
+                                return Instant.parse(sv.getValue());
+                            } catch (DateTimeParseException e) {
+                                return null;
+                            }
+                        }
+                        return null;
+                    }
+                })
+                .build();
+    }
+
+    // Register the scalars with the GraphQL runtime
+    @Bean
+    public RuntimeWiringConfigurer runtimeWiringConfigurer(
+            GraphQLScalarType bigDecimalScalar,
+            GraphQLScalarType instantScalar) {
+        return wiringBuilder -&gt; wiringBuilder
+                .scalar(bigDecimalScalar)
+                .scalar(instantScalar);
+    }
+}</code></pre>
+<h3 id="what-is-a-coercing">What Is a Coercing?<a class="anchor-link" href="#what-is-a-coercing" title="Permanent link">¶</a></h3>
+<p>A <strong>Coercing</strong> object tells GraphQL three things:
+1. <strong><code>serialize</code></strong> — how to convert a Java object (e.g., <code>BigDecimal</code>) to something the client can read (e.g., a <code>String</code>)
+2. <strong><code>parseValue</code></strong> — how to convert a variable value from the client (e.g., <code>"129.99"</code>) to a Java object (e.g., <code>BigDecimal</code>)
+3. <strong><code>parseLiteral</code></strong> — how to convert a literal value from the query text (e.g., the <code>"129.99"</code> in the query itself) to a Java object</p>
+<hr />
+<h2 id="9-resolvers-in-spring-boot">9. Resolvers in Spring Boot<a class="anchor-link" href="#9-resolvers-in-spring-boot" title="Permanent link">¶</a></h2>
+<p>A <strong>resolver</strong> is a Java method that provides the data for a GraphQL field. When a client queries <code>order(id: 42)</code>, a resolver method is called to fetch that order.</p>
+<p>Spring Boot for GraphQL uses annotations to map resolver methods to schema fields:</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Maps To</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@QueryMapping</code></td>
+<td>Fields in the <code>Query</code> type</td>
+<td>Read data</td>
+</tr>
+<tr>
+<td><code>@MutationMapping</code></td>
+<td>Fields in the <code>Mutation</code> type</td>
+<td>Modify data</td>
+</tr>
+<tr>
+<td><code>@SchemaMapping</code></td>
+<td>Fields on any type</td>
+<td>Resolve a specific field on a type</td>
+</tr>
+</tbody>
+</table>
+<h3 id="query-resolvers">Query Resolvers<a class="anchor-link" href="#query-resolvers" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
+
+import com.example.ordermgmt.dto.OrderResponse;
+import com.example.ordermgmt.dto.CustomerResponse;
+import com.example.ordermgmt.dto.ProductResponse;
+import com.example.ordermgmt.service.OrderService;
+import com.example.ordermgmt.service.CustomerService;
+import com.example.ordermgmt.service.ProductService;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.stereotype.Controller;
+
+import java.util.List;
+
+@Controller
+public class OrderQueryResolver {
+
+    private final OrderService orderService;
+    private final CustomerService customerService;
+    private final ProductService productService;
+
+    public OrderQueryResolver(
+            OrderService orderService,
+            CustomerService customerService,
+            ProductService productService) {
+        this.orderService = orderService;
+        this.customerService = customerService;
+        this.productService = productService;
+    }
+
+    // Maps to: order(id: ID!): Order
+    @QueryMapping
+    public OrderResponse order(@Argument Long id) {
+        return orderService.getOrderById(id);
+    }
+
+    // Maps to: orders(customerId: ID): [Order!]!
+    @QueryMapping
+    public List&lt;OrderResponse&gt; orders(@Argument(required = false) Long customerId) {
+        if (customerId != null) {
+            return orderService.getOrdersByCustomer(customerId);
+        }
+        return orderService.getAllOrders();
+    }
+
+    // Maps to: customer(id: ID!): Customer
+    @QueryMapping
+    public CustomerResponse customer(@Argument Long id) {
+        return customerService.getCustomerById(id);
+    }
+
+    // Maps to: customers: [Customer!]!
+    @QueryMapping
+    public List&lt;CustomerResponse&gt; customers() {
+        return customerService.getAllCustomers();
+    }
+
+    // Maps to: product(id: ID!): Product
+    @QueryMapping
+    public ProductResponse product(@Argument Long id) {
+        return productService.getProductById(id);
+    }
+
+    // Maps to: products(category: String): [Product!]!
+    @QueryMapping
+    public List&lt;ProductResponse&gt; products(@Argument(required = false) String category) {
+        if (category != null) {
+            return productService.getProductsByCategory(category);
+        }
+        return productService.getAllProducts();
+    }
+}</code></pre>
+<h3 id="whats-happening-here">What's Happening Here?<a class="anchor-link" href="#whats-happening-here" title="Permanent link">¶</a></h3>
+<ol>
+<li><code>@Controller</code> — marks this class as a Spring component (like <code>@RestController</code> but for GraphQL)</li>
+<li><code>@QueryMapping</code> — tells Spring that this method resolves a field in the <code>Query</code> type. The method name must match the field name in the schema (e.g., <code>order()</code> maps to <code>order(id: ID!): Order</code>)</li>
+<li><code>@Argument</code> — extracts an argument from the GraphQL query. The parameter name must match the argument name in the schema</li>
+<li><code>@Argument(required = false)</code> — for optional arguments (the schema says <code>customerId: ID</code> without <code>!</code>, meaning it's nullable)</li>
+<li>The return type (<code>OrderResponse</code>, <code>List&lt;OrderResponse&gt;</code>, etc.) is serialized to JSON and returned to the client — but only the fields the client asked for</li>
+</ol>
+<h3 id="mutation-resolvers">Mutation Resolvers<a class="anchor-link" href="#mutation-resolvers" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
+
+import com.example.ordermgmt.dto.CreateOrderRequest;
+import com.example.ordermgmt.dto.CreateOrderItemRequest;
+import com.example.ordermgmt.dto.CreateCustomerRequest;
+import com.example.ordermgmt.dto.CreateProductRequest;
+import com.example.ordermgmt.dto.OrderResponse;
+import com.example.ordermgmt.dto.CustomerResponse;
+import com.example.ordermgmt.dto.ProductResponse;
+import com.example.ordermgmt.service.OrderService;
+import com.example.ordermgmt.service.CustomerService;
+import com.example.ordermgmt.service.ProductService;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.stereotype.Controller;
+
+import java.util.List;
+
+@Controller
+public class OrderMutationResolver {
+
+    private final OrderService orderService;
+    private final CustomerService customerService;
+    private final ProductService productService;
+
+    public OrderMutationResolver(
+            OrderService orderService,
+            CustomerService customerService,
+            ProductService productService) {
+        this.orderService = orderService;
+        this.customerService = customerService;
+        this.productService = productService;
+    }
+
+    // Maps to: createOrder(input: CreateOrderInput!): Order!
+    @MutationMapping
+    public OrderResponse createOrder(@Argument CreateOrderInput input) {
+        CreateOrderRequest request = new CreateOrderRequest(
+                input.customerId(),
+                input.items().stream()
+                        .map(item -&gt; new CreateOrderItemRequest(item.productId(), item.quantity()))
+                        .toList()
+        );
+        return orderService.createOrder(request);
+    }
+
+    // Maps to: confirmOrder(id: ID!): Order!
+    @MutationMapping
+    public OrderResponse confirmOrder(@Argument Long id) {
+        return orderService.confirmOrder(id);
+    }
+
+    // Maps to: cancelOrder(id: ID!): Order!
+    @MutationMapping
+    public OrderResponse cancelOrder(@Argument Long id) {
+        return orderService.cancelOrder(id);
+    }
+
+    // Maps to: createCustomer(input: CreateCustomerInput!): Customer!
+    @MutationMapping
+    public CustomerResponse createCustomer(@Argument CreateCustomerInput input) {
+        CreateCustomerRequest request = new CreateCustomerRequest(
+                input.name(), input.email(), input.address()
+        );
+        return customerService.createCustomer(request);
+    }
+
+    // Maps to: createProduct(input: CreateProductInput!): Product!
+    @MutationMapping
+    public ProductResponse createProduct(@Argument CreateProductInput input) {
+        CreateProductRequest request = new CreateProductRequest(
+                input.name(), input.price(), input.stock(), input.category()
+        );
+        return productService.createProduct(request);
+    }
+}</code></pre>
+<h3 id="input-records">Input Records<a class="anchor-link" href="#input-records" title="Permanent link">¶</a></h3>
+<p>The <code>@Argument</code> annotation can deserialize complex input types. We need Java records that match the input types in the schema:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+// Matches: input CreateOrderInput { customerId: ID!, items: [CreateOrderItemInput!]! }
+public record CreateOrderInput(
+        Long customerId,
+        List&lt;CreateOrderItemInput&gt; items
+) {}
+
+// Matches: input CreateOrderItemInput { productId: ID!, quantity: Int! }
+public record CreateOrderItemInput(
+        Long productId,
+        Integer quantity
+) {}
+
+// Matches: input CreateCustomerInput { name: String!, email: String!, address: String }
+public record CreateCustomerInput(
+        String name,
+        String email,
+        String address
+) {}
+
+// Matches: input CreateProductInput { name: String!, price: BigDecimal!, stock: Int!, category: String! }
+public record CreateProductInput(
+        String name,
+        BigDecimal price,
+        Integer stock,
+        String category
+) {}</code></pre>
+<h3 id="field-resolvers-with-schemamapping">Field Resolvers with @SchemaMapping<a class="anchor-link" href="#field-resolvers-with-schemamapping" title="Permanent link">¶</a></h3>
+<p>Sometimes a field on a type needs custom resolution logic. For example, what if <code>OrderResponse</code> doesn't have a <code>customer</code> field — the client can query for it but the service doesn't return it directly?</p>
+<p>Use <code>@SchemaMapping</code> to resolve individual fields:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
+
+import com.example.ordermgmt.dto.OrderResponse;
+import com.example.ordermgmt.dto.CustomerResponse;
+import com.example.ordermgmt.service.CustomerService;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class OrderFieldResolver {
+
+    private final CustomerService customerService;
+
+    public OrderFieldResolver(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
+    // When a client queries the "customer" field on an Order,
+    // this method is called to resolve it
+    @SchemaMapping(typeName = "Order", field = "customer")
+    public CustomerResponse resolveCustomer(OrderResponse order) {
+        // If the order already has a customer name, we might have it cached
+        // Otherwise, fetch from the customer service
+        return customerService.getCustomerById(order.customerId());
+    }
+}</code></pre>
+<p>This is called a <strong>field resolver</strong> — it resolves a single field on a type. Spring only calls this method if the client actually queries the <code>customer</code> field. If the client doesn't ask for <code>customer</code>, this method is never called — that's the power of GraphQL's selective fetching.</p>
+<hr />
+<h2 id="10-error-handling-in-graphql">10. Error Handling in GraphQL<a class="anchor-link" href="#10-error-handling-in-graphql" title="Permanent link">¶</a></h2>
+<p>Unlike REST, where each request returns a single HTTP status code, GraphQL uses HTTP 200 for most responses (even errors) and includes an <code>errors</code> array in the response body.</p>
+<h3 id="error-response-format">Error Response Format<a class="anchor-link" href="#error-response-format" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-json">{
+  "errors": [
+    {
+      "message": "Order not found: 999",
+      "path": ["order"],
+      "extensions": {
+        "classification": "NOT_FOUND"
+      }
+    }
+  ],
+  "data": null
+}</code></pre>
+<h3 id="partial-results">Partial Results<a class="anchor-link" href="#partial-results" title="Permanent link">¶</a></h3>
+<p>One of GraphQL's strengths is <strong>partial results</strong>. If a client queries for two things and one fails, the successful one is still returned:</p>
+<pre class="code-block"><code class="language-json">{
+  "data": {
+    "product": { "id": "1", "name": "Widget" }
+  },
+  "errors": [
+    {
+      "message": "Order not found: 999",
+      "path": ["order"]
+    }
+  ]
+}</code></pre>
+<p>The <code>product</code> query succeeded, the <code>order</code> query failed. The client gets both.</p>
+<h3 id="custom-exceptions-in-spring-boot-graphql">Custom Exceptions in Spring Boot GraphQL<a class="anchor-link" href="#custom-exceptions-in-spring-boot-graphql" title="Permanent link">¶</a></h3>
+<p>Spring Boot for GraphQL automatically translates exceptions into GraphQL errors. For better error classification, create a custom exception handler:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
+
+import com.example.ordermgmt.service.exception.OrderNotFoundException;
+import com.example.ordermgmt.service.exception.InsufficientStockException;
+import org.springframework.graphql.data.method.annotation.GraphQlExceptionHandler;
+import org.springframework.graphql.execution.ErrorType;
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class GraphQlExceptionHandler {
+
+    @GraphQlExceptionHandler
+    public GraphQlError handleOrderNotFound(OrderNotFoundException ex) {
+        return GraphQlError.newError()
+                .message(ex.getMessage())
+                .errorType(ErrorType.NOT_FOUND)
+                .build();
+    }
+
+    @GraphQlExceptionHandler
+    public GraphQlError handleInsufficientStock(InsufficientStockException ex) {
+        return GraphQlError.newError()
+                .message(ex.getMessage())
+                .errorType(ErrorType.BAD_REQUEST)
+                .build();
+    }
+}</code></pre>
+<p>This maps domain exceptions to appropriate GraphQL error types:
+- <code>NOT_FOUND</code> — for "entity not found" errors (HTTP 404 equivalent)
+- <code>BAD_REQUEST</code> — for validation errors (HTTP 400 equivalent)
+- <code>FORBIDDEN</code> — for authorization errors (HTTP 403 equivalent)
+- <code>INTERNAL_ERROR</code> — for unexpected errors (HTTP 500 equivalent)</p>
+<hr />
+<h2 id="11-the-n1-problem-and-dataloader">11. The N+1 Problem and DataLoader<a class="anchor-link" href="#11-the-n1-problem-and-dataloader" title="Permanent link">¶</a></h2>
+<h3 id="what-is-the-n1-problem">What Is the N+1 Problem?<a class="anchor-link" href="#what-is-the-n1-problem" title="Permanent link">¶</a></h3>
+<p>The N+1 problem is a performance issue that appears when resolving related data. Consider this query:</p>
+<pre class="code-block"><code class="language-graphql">{
+  orders {
+    id
+    customer {
+      id
+      name
+    }
+  }
+}</code></pre>
+<p>This asks for all orders, and for each order, the customer. Without optimization:</p>
+<ol>
+<li><strong>1 query</strong> to fetch all orders (e.g., 10 orders)</li>
+<li><strong>N queries</strong> (one per order) to fetch each customer by ID</li>
+</ol>
+<p>That's <strong>1 + N = 11 queries</strong> for 10 orders. If there are 100 orders, it's 101 queries. This is extremely slow.</p>
+<h3 id="how-dataloader-solves-it">How DataLoader Solves It<a class="anchor-link" href="#how-dataloader-solves-it" title="Permanent link">¶</a></h3>
+<p><strong>DataLoader</strong> is a batching utility. Instead of fetching each customer individually, DataLoader collects all the customer IDs from all the orders, fetches them in a <strong>single batch query</strong>, and distributes the results back.</p>
+<pre class="code-block"><code>Without DataLoader:         With DataLoader:
+[fetch orders]              [fetch orders]
+  [fetch customer 1]         [collect all customer IDs: 1, 3, 7]
+  [fetch customer 3]         [batch fetch customers WHERE id IN (1, 3, 7)]
+  [fetch customer 7]         [distribute results]
+  ...                        Total: 2 queries
+Total: 11+ queries</code></pre>
+<h3 id="implementing-dataloader-in-spring-boot">Implementing DataLoader in Spring Boot<a class="anchor-link" href="#implementing-dataloader-in-spring-boot" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
+
+import com.example.ordermgmt.domain.CustomerEntity;
+import com.example.ordermgmt.repository.CustomerRepository;
+import org.dataloader.BatchLoader;
+import org.dataloader.DataLoader;
+import org.dataloader.DataLoaderRegistry;
+import org.springframework.graphql.data.method.annotation.BatchMapping;
+import org.springframework.stereotype.Controller;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Controller
+public class OrderBatchResolver {
+
+    private final CustomerRepository customerRepository;
+
+    public OrderBatchResolver(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
+
+    // @BatchMapping automatically batches requests for the "customer" field
+    // on all Order entities being resolved in a single query
+    @BatchMapping(typeName = "Order", field = "customer")
+    public Map&lt;OrderEntity, CustomerEntity&gt; loadCustomers(List&lt;OrderEntity&gt; orders) {
+        // Collect all customer IDs from all orders
+        Set&lt;Long&gt; customerIds = orders.stream()
+                .map(order -&gt; order.getCustomer().getId())
+                .collect(Collectors.toSet());
+
+        // Fetch all customers in a single query
+        List&lt;CustomerEntity&gt; customers = customerRepository.findAllById(customerIds);
+
+        // Create a map: CustomerEntity by ID
+        Map&lt;Long, CustomerEntity&gt; customerById = customers.stream()
+                .collect(Collectors.toMap(CustomerEntity::getId, Function.identity()));
+
+        // Return a map: OrderEntity -&gt; CustomerEntity
+        return orders.stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        order -&gt; customerById.get(order.getCustomer().getId())
+                ));
+    }
+}</code></pre>
+<h3 id="what-batchmapping-does">What <code>@BatchMapping</code> Does<a class="anchor-link" href="#what-batchmapping-does" title="Permanent link">¶</a></h3>
+<ol>
+<li>When a query asks for <code>orders { customer { name } }</code>, Spring collects all the <code>OrderEntity</code> objects being resolved</li>
+<li>Instead of calling the resolver once per order, it calls <code>loadCustomers()</code> once with <strong>all</strong> orders</li>
+<li>The method fetches all customers in a single database query</li>
+<li>It returns a <code>Map&lt;OrderEntity, CustomerEntity&gt;</code> — Spring uses this to assign the right customer to each order</li>
+</ol>
+<p>This turns 101 queries into 2 queries.</p>
+<hr />
+<h2 id="12-graphql-subscriptions">12. GraphQL Subscriptions<a class="anchor-link" href="#12-graphql-subscriptions" title="Permanent link">¶</a></h2>
+<p>Subscriptions enable <strong>real-time updates</strong>. Instead of the client repeatedly polling for changes, the server pushes updates when they happen.</p>
+<p>For our Order Management System, the client can subscribe to order status changes:</p>
+<pre class="code-block"><code class="language-graphql">subscription {
+  orderStatusChanged {
+    orderId
+    oldStatus
+    newStatus
+    changedAt
+  }
+}</code></pre>
+<p>Subscriptions use <strong>WebSockets</strong> — a persistent connection between client and server. When an order's status changes (and the <code>OrderEventProducer</code> publishes an event from Module 06), the subscription pushes the update to all connected clients.</p>
+<h3 id="setting-up-subscriptions">Setting Up Subscriptions<a class="anchor-link" href="#setting-up-subscriptions" title="Permanent link">¶</a></h3>
+<p>Subscriptions require WebSocket support. Add the WebSocket starter dependency:</p>
+<pre class="code-block"><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-websocket&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+<p>Then create a subscription resolver. Spring Boot for GraphQL integrates with <strong>Reactor</strong> (which you'll learn about in Module 08) for subscriptions:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
+
+import com.example.ordermgmt.kafka.event.OrderStatusChangedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.SubscriptionMapping;
+import org.springframework.stereotype.Controller;
+import reactor.core.publisher.Sinks;
+
+import java.time.Instant;
+
+@Controller
+public class OrderSubscriptionResolver {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderSubscriptionResolver.class);
+
+    // A Sinks.Many is a reactive publisher that can emit items to multiple subscribers
+    // We'll cover this in detail in Module 08 (Reactor)
+    private final Sinks.Many&lt;OrderStatusChangedEvent&gt; statusChangedSink =
+            Sinks.many().multicast().onBackpressureBuffer();
+
+    @SubscriptionMapping
+    public reactor.core.publisher.Flux&lt;OrderStatusChangedEvent&gt; orderStatusChanged(
+            @Argument(required = false) Long orderId) {
+
+        if (orderId != null) {
+            // Filter to only events for the specified order
+            return statusChangedSink.asFlux()
+                    .filter(event -&gt; event.orderId().equals(orderId));
+        }
+
+        // No filter — send all status changes
+        return statusChangedSink.asFlux();
+    }
+
+    // Called by the Kafka consumer (Module 06) when a status change is received
+    public void publishStatusChange(Long orderId, String oldStatus, String newStatus) {
+        log.info("subscription_publish orderId={} {} -&gt; {}", orderId, oldStatus, newStatus);
+        statusChangedSink.tryEmitNext(new OrderStatusChangedEvent(
+                orderId, oldStatus, newStatus, Instant.now()
+        ));
+    }
+}</code></pre>
+<p>We'll dive deeper into <code>Flux</code>, <code>Sinks</code>, and reactive streams in Module 08. For now, understand that:
+- <code>Sinks.Many</code> is like a broadcaster — you push events into it and all subscribers receive them
+- <code>Flux</code> is a stream of data — the subscription returns a <code>Flux</code> that the client reads from in real-time</p>
+<hr />
+<h2 id="13-testing-graphql-with-graphiql">13. Testing GraphQL with GraphiQL<a class="anchor-link" href="#13-testing-graphql-with-graphiql" title="Permanent link">¶</a></h2>
+<p>Spring Boot includes <strong>GraphiQL</strong> — a browser-based IDE for writing and testing GraphQL queries.</p>
+<ol>
+<li>Start your application: <code>mvn spring-boot:run</code></li>
+<li>Open <code>http://localhost:8080/graphiql</code> in your browser</li>
+<li>Write queries and see results immediately</li>
+</ol>
+<h3 id="example-queries-to-try">Example Queries to Try<a class="anchor-link" href="#example-queries-to-try" title="Permanent link">¶</a></h3>
+<p><strong>Get an order with its customer and items:</strong></p>
+<pre class="code-block"><code class="language-graphql">query {
+  order(id: 1) {
+    id
+    status
+    totalAmount
+    customer {
+      id
+      name
+      email
+    }
+    items {
+      quantity
+      unitPrice
+      product {
+        id
+        name
+        category
+      }
+    }
+  }
+}</code></pre>
+<p><strong>List all pending orders:</strong></p>
+<pre class="code-block"><code class="language-graphql">query {
+  orders {
+    id
+    status
+    totalAmount
+    createdAt
+  }
+}</code></pre>
+<p><strong>Create a new order:</strong></p>
+<pre class="code-block"><code class="language-graphql">mutation {
+  createOrder(input: {
+    customerId: 1
+    items: [
+      { productId: 1, quantity: 2 }
+      { productId: 3, quantity: 1 }
+    ]
+  }) {
+    id
+    status
+    totalAmount
+    customer {
+      name
+    }
+  }
+}</code></pre>
+<p><strong>Confirm an order:</strong></p>
+<pre class="code-block"><code class="language-graphql">mutation {
+  confirmOrder(id: 1) {
+    id
+    status
+  }
+}</code></pre>
+<p><strong>Subscribe to order status changes:</strong></p>
+<pre class="code-block"><code class="language-graphql">subscription {
+  orderStatusChanged {
+    orderId
+    oldStatus
+    newStatus
+  }
+}</code></pre>
+<hr />
+<h2 id="14-security-overview-brief">14. Security Overview (Brief)<a class="anchor-link" href="#14-security-overview-brief" title="Permanent link">¶</a></h2>
+<p>GraphQL APIs need the same security measures as REST APIs:</p>
+<h3 id="authentication">Authentication<a class="anchor-link" href="#authentication" title="Permanent link">¶</a></h3>
+<p>Verify who the user is. Typically done with JWT tokens or session cookies — the same approach as REST. In Spring Boot, you can use Spring Security to protect the <code>/graphql</code> endpoint.</p>
+<h3 id="authorization">Authorization<a class="anchor-link" href="#authorization" title="Permanent link">¶</a></h3>
+<p>Verify what the user is allowed to do. In GraphQL, this means checking permissions at the resolver level:</p>
+<pre class="code-block"><code class="language-java">@MutationMapping
+public OrderResponse createOrder(@Argument CreateOrderInput input, Authentication auth) {
+    // Spring Security can inject the authenticated user
+    if (auth == null || !auth.isAuthenticated()) {
+        throw new AccessDeniedException("You must be logged in to create an order");
+    }
+    // ... proceed with creating the order
+}</code></pre>
+<h3 id="query-depth-limiting">Query Depth Limiting<a class="anchor-link" href="#query-depth-limiting" title="Permanent link">¶</a></h3>
+<p>A malicious client could send a deeply nested query that exhausts server resources:</p>
+<pre class="code-block"><code class="language-graphql"># This is a denial-of-service attack
+{ customer { orders { customer { orders { customer { orders { ... } } } } } } }</code></pre>
+<p>Configure a maximum query depth to prevent this:</p>
+<pre class="code-block"><code class="language-yaml">spring:
+  graphql:
+    schema:
+      inspection:
+        enabled: true</code></pre>
+<p>Add depth limiting through a custom <code>GraphQLInterceptor</code> or use libraries like <code>graphql-java-query-complexity</code>.</p>
+<h3 id="rate-limiting">Rate Limiting<a class="anchor-link" href="#rate-limiting" title="Permanent link">¶</a></h3>
+<p>GraphQL operates on a single endpoint, so traditional HTTP rate limiting (X requests per second) applies. However, a single GraphQL request can be much more expensive than a single REST request (querying all orders with all items with all products). Consider <strong>query complexity analysis</strong> — assigning a "cost" to each field and limiting the total cost per query.</p>
+<hr />
+<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
+<h3 id="exercise-1-add-a-delete-product-mutation">Exercise 1: Add a "Delete Product" Mutation<a class="anchor-link" href="#exercise-1-add-a-delete-product-mutation" title="Permanent link">¶</a></h3>
+<p>Add a <code>deleteProduct(id: ID!): Boolean!</code> mutation to the schema and implement the resolver.</p>
+<details>
+<summary>Hint</summary>
+
+Add `deleteProduct(id: ID!): Boolean!` to the `Mutation` type in `schema.graphqls`. In the mutation resolver, add a `@MutationMapping` method that calls `productService.deleteProduct(id)` and returns `true`. Handle the case where the product doesn't exist by throwing a `ProductNotFoundException`.
+</details>
+
+<h3 id="exercise-2-add-pagination-to-the-products-query">Exercise 2: Add Pagination to the Products Query<a class="anchor-link" href="#exercise-2-add-pagination-to-the-products-query" title="Permanent link">¶</a></h3>
+<p>Modify the <code>products</code> query to accept pagination arguments (<code>page</code> and <code>size</code>) and return paginated results.</p>
+<details>
+<summary>Hint</summary>
+
+Create a `ProductPage` type in the schema with `items`, `totalElements`, `totalPages`, and `currentPage` fields. Modify the query to accept `page: Int = 0` and `size: Int = 20`. In the resolver, use `PageRequest.of(page, size)` with the repository's `findAll(Pageable)` method.
+</details>
+
+<h3 id="exercise-3-add-a-field-resolver-for-order-age">Exercise 3: Add a Field Resolver for Order Age<a class="anchor-link" href="#exercise-3-add-a-field-resolver-for-order-age" title="Permanent link">¶</a></h3>
+<p>Add a computed field <code>ageInDays: Int!</code> to the <code>Order</code> type that calculates how many days have passed since the order was created.</p>
+<details>
+<summary>Hint</summary>
+
+Add `ageInDays: Int!` to the `Order` type in the schema. Create a field resolver with `@SchemaMapping(typeName = "Order", field = "ageInDays")` that takes an `OrderResponse`, gets its `createdAt()`, computes `Duration.between(createdAt, Instant.now()).toDays()`, and returns the result as an `int`.
+</details>
+
+<h3 id="exercise-4-implement-dataloader-for-products">Exercise 4: Implement DataLoader for Products<a class="anchor-link" href="#exercise-4-implement-dataloader-for-products" title="Permanent link">¶</a></h3>
+<p>The N+1 problem can also happen with products inside order items. Implement a <code>@BatchMapping</code> for the <code>product</code> field on <code>OrderItem</code>.</p>
+<details>
+<summary>Hint</summary>
+
+Follow the same pattern as the customer batch mapping. Create a `@BatchMapping(typeName = "OrderItem", field = "product")` method that receives `List<OrderItemEntity>`, collects all product IDs, fetches them with a single `productRepository.findAllById(ids)` call, and returns a `Map<OrderItemEntity, ProductEntity>`.
+</details>
+
+<hr />
+<h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
+<ul>
+<li><strong>GraphQL</strong> is a query language for APIs where the client specifies exactly what data it wants — eliminating over-fetching and under-fetching</li>
+<li>Unlike REST with multiple endpoints, GraphQL has a <strong>single endpoint</strong> (<code>/graphql</code>) and the client chooses which fields to return</li>
+<li>The <strong>Schema Definition Language (SDL)</strong> defines the API contract in a <code>.graphqls</code> file with types, inputs, enums, queries, mutations, and subscriptions</li>
+<li><strong>Queries</strong> read data (<code>@QueryMapping</code>), <strong>mutations</strong> modify data (<code>@MutationMapping</code>), and <strong>field resolvers</strong> (<code>@SchemaMapping</code>) resolve individual fields on types</li>
+<li><strong>Input types</strong> define the shape of mutation arguments; they're records in Java and <code>input</code> types in the schema</li>
+<li><strong>Custom scalars</strong> (<code>BigDecimal</code>, <code>Instant</code>) need a <code>Coercing</code> implementation to tell GraphQL how to serialize and deserialize them</li>
+<li>GraphQL returns <strong>partial results</strong> — one failed field doesn't block other fields; errors are in an <code>errors</code> array with data alongside</li>
+<li>The <strong>N+1 problem</strong> occurs when resolving related data (fetching customers for each order individually) — <strong>DataLoader</strong> (<code>@BatchMapping</code>) solves it by batching requests into a single database query</li>
+<li><strong>Subscriptions</strong> enable real-time updates over WebSockets, returning a <code>Flux</code> (reactive stream)</li>
+<li><strong>Security</strong> in GraphQL includes authentication, authorization at the resolver level, query depth limiting, and query complexity analysis</li>
+<li><strong>GraphiQL</strong> is a built-in browser IDE for testing GraphQL queries at <code>/graphiql</code></li>
+</ul>
+<hr />
+<h2 id="13-graphql-schema-design-best-practices">13. GraphQL Schema Design Best Practices<a class="anchor-link" href="#13-graphql-schema-design-best-practices" title="Permanent link">¶</a></h2>
+<h3 id="connection-relay-pagination">Connection / Relay Pagination<a class="anchor-link" href="#connection-relay-pagination" title="Permanent link">¶</a></h3>
+<p>Instead of returning a flat list, use the <strong>Connection pattern</strong> for paginated
+results:</p>
+<pre class="code-block"><code class="language-graphql">type Query {
+    orders(first: Int = 10, after: String): OrderConnection!
+}
+
+type OrderConnection {
+    edges: [OrderEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type OrderEdge {
+    node: Order!
+    cursor: String!
+}
+
+type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String
+    endCursor: String
+}</code></pre>
+<pre class="code-block"><code class="language-java">@QueryMapping
+public OrderConnection orders(@Argument Integer first, @Argument String after) {
+    List&lt;Order&gt; orders = orderService.findAll(first + 1, after);
+    boolean hasNextPage = orders.size() &gt; first;
+    if (hasNextPage) {
+        orders = orders.subList(0, first);
+    }
+    List&lt;OrderEdge&gt; edges = orders.stream()
+            .map(o -&gt; new OrderEdge(o, Base64.encode(o.getId().toString())))
+            .toList();
+    var pageInfo = new PageInfo(hasNextPage, false,
+            edges.isEmpty() ? null : edges.get(0).cursor(),
+            edges.isEmpty() ? null : edges.get(edges.size() - 1).cursor());
+    return new OrderConnection(edges, pageInfo, orderService.count());
+}</code></pre>
+<h3 id="input-types-vs-arguments">Input Types vs Arguments<a class="anchor-link" href="#input-types-vs-arguments" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-graphql"># GOOD — structured input type
+mutation CreateOrder($input: CreateOrderInput!) {
+    createOrder(input: $input): Order!
+}
+
+input CreateOrderInput {
+    customerId: ID!
+    items: [OrderItemInput!]!
+    shippingAddress: AddressInput
+}
+
+# BAD — too many flat arguments
+mutation CreateOrder(
+    customerId: ID!
+    itemIds: [ID!]!
+    quantities: [Int!]!
+    street: String
+    city: String
+    zipCode: String
+): Order</code></pre>
+<h3 id="deprecation">Deprecation<a class="anchor-link" href="#deprecation" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-graphql">type Order {
+    id: ID!
+    customerName: String! @deprecated(reason: "Use customer { name } instead")
+    customer: Customer!
+    amount: BigDecimal! @deprecated(reason: "Use totalAmount instead")
+    totalAmount: BigDecimal!
+}</code></pre>
+<hr />
+<h2 id="14-graphql-error-handling">14. GraphQL Error Handling<a class="anchor-link" href="#14-graphql-error-handling" title="Permanent link">¶</a></h2>
+<p>GraphQL returns 200 OK even when there are errors. Errors are included in the
+response body, alongside any partial data.</p>
+<h3 id="custom-error-extensions">Custom Error Extensions<a class="anchor-link" href="#custom-error-extensions" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">@ControllerAdvice
+public class GraphQLExceptionHandler {
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public GraphQLError handleNotFound(OrderNotFoundException ex) {
+        return GraphQLError.newError()
+                .message(ex.getMessage())
+                .path(List.of("order"))
+                .extensions(Map.of(
+                        "code", "ORDER_NOT_FOUND",
+                        "orderId", ex.getOrderId()
+                ))
+                .build();
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public GraphQLError handleStock(InsufficientStockException ex) {
+        return GraphQLError.newError()
+                .message(ex.getMessage())
+                .extensions(Map.of(
+                        "code", "INSUFFICIENT_STOCK",
+                        "productName", ex.getProductName(),
+                        "requested", ex.getRequested(),
+                        "available", ex.getAvailable()
+                ))
+                .build();
+    }
+}</code></pre>
+<h3 id="error-taxonomy">Error Taxonomy<a class="anchor-link" href="#error-taxonomy" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+<th>HTTP-agnostic?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NOT_FOUND</code></td>
+<td>Resource doesn't exist</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>VALIDATION_ERROR</code></td>
+<td>Invalid input</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>UNAUTHORIZED</code></td>
+<td>Authentication required</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>FORBIDDEN</code></td>
+<td>Not enough permissions</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>CONFLICT</code></td>
+<td>State conflict (e.g., duplicate)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>INTERNAL_ERROR</code></td>
+<td>Unexpected server error</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="15-graphql-security">15. GraphQL Security<a class="anchor-link" href="#15-graphql-security" title="Permanent link">¶</a></h2>
+<h3 id="query-depth-limiting_1">Query Depth Limiting<a class="anchor-link" href="#query-depth-limiting_1" title="Permanent link">¶</a></h3>
+<p>Malicious clients can send deeply nested queries to overload the server:</p>
+<pre class="code-block"><code class="language-graphql"># Attack: infinitely nested query
+query { orders { items { product { category { parent { products { items { product { ... }}}}}}}}}</code></pre>
+<p>Prevent with a depth limit:</p>
+<pre class="code-block"><code class="language-yaml">spring:
+  graphql:
+    schema:
+      inspection:
+        enabled: true
+    # Max query depth
+    max-query-depth: 7</code></pre>
+<h3 id="query-complexity-analysis">Query Complexity Analysis<a class="anchor-link" href="#query-complexity-analysis" title="Permanent link">¶</a></h3>
+<p>Assign a cost to each field and reject queries exceeding a budget:</p>
+<pre class="code-block"><code class="language-java">@Bean
+public GraphQLSchemaFactoryBean schemaFactory(GraphQLSchema schema) {
+    // Spring for GraphQL doesn't have built-in complexity analysis,
+    // but you can add it via a GraphQLInvocationInterceptor or use
+    // graphql-java-extended-scalars
+    return null;  // configure in custom instrumentations
+}</code></pre>
+<h3 id="authentication-in-resolvers">Authentication in Resolvers<a class="anchor-link" href="#authentication-in-resolvers" title="Permanent link">¶</a></h3>
+<p>GraphQL doesn't have built-in auth. Implement it at the resolver level:</p>
+<pre class="code-block"><code class="language-java">@QueryMapping
+public OrderResponse order(@Argument Long id, GraphQLServletContext context) {
+    var user = context.getRequest().getHeader("Authorization");
+    if (user == null) {
+        throw new UnauthorizedException("Authentication required");
+    }
+    var order = orderService.findById(id);
+    if (!order.customerId().equals(extractUserId(user))) {
+        throw new ForbiddenException("Not your order");
+    }
+    return order;
+}</code></pre>
+<hr />
+<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
+<ul>
+<li>
+<p><strong>[GraphQL for Java Developers: 01 - Why GraphQL]</strong> by Dan Vega — First video in a complete GraphQL for Java playlist covering schema, resolvers, and N+1
+  <a href="https://www.youtube.com/watch?v=xZSv67a9OYA">https://www.youtube.com/watch?v=xZSv67a9OYA</a></p>
+</li>
+<li>
+<p><strong>[Spring Boot and GraphQL Tutorial]</strong> by Amigoscode — Building a GraphQL API with Spring Boot from scratch
+  <a href="https://www.youtube.com/watch?v=uNB2N_w_ypo">https://www.youtube.com/watch?v=uNB2N_w_ypo</a></p>
+</li>
+</ul>
+<hr />
+<p>← <a href="06-kafka.html">Previous: Module 06</a> | <a href="08-reactor-pattern.html">Next: Module 08</a> →</p>
+      </article>
+
+      <div class="footer-nav"><a href="06-kafka.html" class="nav-link prev">← Kafka</a><a href="08-reactor-pattern.html" class="nav-link next">Reactor Pattern →</a></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script src="assets/search.js"></script>
+</body>
+</html>
