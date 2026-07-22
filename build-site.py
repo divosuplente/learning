@@ -8,7 +8,7 @@ from pathlib import Path
 import markdown
 
 COURSE_DIR = Path(__file__).parent / "java-spring-boot-course"
-OUTPUT_DIR = Path(__file__).parent / "site"
+OUTPUT_DIR = Path(__file__).parent / "docs"
 
 MODULES = [
     ("00-java-foundations", "00", "Java Foundations"),
