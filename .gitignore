@@ -1,0 +1,14 @@
+# Local databases / app data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+banks/
+
+# OS / editor cruft
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
