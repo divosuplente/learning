@@ -15,7 +15,7 @@
 ## Prerequisites
 
 - [Module 00: Java for Experienced Developers](./00-java-foundations.md) — you understand basic Java syntax, classes, records, and packages
-- No prior experience with build tools, Maven, or Spring Boot required
+- No prior experience with Maven or Spring Boot (build tool concepts from any ecosystem transfer)
 
 ---
 
@@ -86,7 +86,6 @@
   - [Child Module POM](#child-module-pom)
   - [Building Multi-Module Projects](#building-multi-module-projects)
 - [18. Maven Wrapper (mvnw)](#18-maven-wrapper-mvnw)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
 
 </details>
 
@@ -1319,13 +1318,6 @@ eliminating "works on my machine" build issues. The `mvnw` script and
 ---
 
 
-## Recommended YouTube Videos
-
-- **[Spring Boot Tutorial for Beginners - Crash Course using Spring Boot 3]** by Dan Vega — Covers project setup with Spring Initializr, Maven, and building a first app (3:43:52, 839K views)
-  https://www.youtube.com/watch?v=UgX5lgv4uVM
-
-- **[Spring Boot Tutorial for Beginners | Full Course 2025]** by Amigoscode — Modern setup with Java 21, IntelliJ, Maven, Docker, and PostgreSQL (1:11:19, 251K views)
-  https://www.youtube.com/watch?v=Cw0J6jYJtzw
 
 ---
 

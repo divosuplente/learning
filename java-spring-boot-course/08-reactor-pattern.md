@@ -2,19 +2,17 @@
 
 ## What You'll Learn
 
-- What **reactive programming** is and how it differs from imperative (blocking) code
-- Why the industry is moving toward reactive solutions (the C10K problem)
-- **Project Reactor** — the library that powers Spring WebFlux
-- Core reactive types: **Mono** (0-or-1 item) and **Flux** (0-to-N items)
-- Creating and combining reactive streams with static factories and operators
-- The **reactive stream contract**: `onNext`, `onError`, `onComplete`
-- **Backpressure** — what it is and how Reactor handles it
-- Threading and **schedulers** (`publishOn`, `subscribeOn`, `boundedElastic`)
+- The **reactive programming paradigm** — data streams, asynchronous propagation, and non-blocking execution
+- The **C10K problem** and why the industry moved toward reactive solutions
+- The **Reactive Streams specification** — `Publisher`, `Subscriber`, `Subscription`, and the lifecycle contract
+- **Backpressure** as a general concept — demand-driven flow control across any reactive library
+- How different implementations (Reactor, RxJava, Mutiny, Kotlin Flow) implement the same spec
+- **Project Reactor** — `Mono` and `Flux`, static factories, operators, schedulers
 - Error handling strategies (`onErrorReturn`, `onErrorResume`, `retry`, `retryWhen`)
 - **Hot vs. Cold publishers** and when to use each
-- Building reactive REST endpoints with **Spring WebFlux**
+- Building reactive REST endpoints with **Spring WebFlux** (built on top of Reactor)
 - Connecting reactive streams to **Kafka** and **R2DBC**
-- When **not** to use reactive programming
+- When **not** to use reactive programming (and what virtual threads offer instead)
 - Debugging reactive pipelines (`log`, `checkpoint`, `doOnNext`)
 
 ## Prerequisites
@@ -1251,13 +1249,6 @@ Flux<Order> cold = orderRepo.findAll();  // each subscriber gets all items
 ---
 
 
-## Recommended YouTube Videos
-
-- **[Creating a Reactive REST API with Spring Boot]** by Dan Vega — Introduction to building reactive REST APIs with WebFlux
-  https://www.youtube.com/watch?v=ZIjheoH_-9o
-
-- **[Using Spring Data R2DBC & PostgreSQL]** by Dan Vega — Reactive database access with R2DBC as an alternative to blocking JPA
-  https://www.youtube.com/watch?v=3LxtmlaX3Y0
 
 ---
 

@@ -105,19 +105,17 @@
         <h1 id="module-08-reactor-pattern">Module 08: Reactor Pattern<a class="anchor-link" href="#module-08-reactor-pattern" title="Permanent link">¶</a></h1>
 <h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
 <ul>
-<li>What <strong>reactive programming</strong> is and how it differs from imperative (blocking) code</li>
-<li>Why the industry is moving toward reactive solutions (the C10K problem)</li>
-<li><strong>Project Reactor</strong> — the library that powers Spring WebFlux</li>
-<li>Core reactive types: <strong>Mono</strong> (0-or-1 item) and <strong>Flux</strong> (0-to-N items)</li>
-<li>Creating and combining reactive streams with static factories and operators</li>
-<li>The <strong>reactive stream contract</strong>: <code>onNext</code>, <code>onError</code>, <code>onComplete</code></li>
-<li><strong>Backpressure</strong> — what it is and how Reactor handles it</li>
-<li>Threading and <strong>schedulers</strong> (<code>publishOn</code>, <code>subscribeOn</code>, <code>boundedElastic</code>)</li>
+<li>The <strong>reactive programming paradigm</strong> — data streams, asynchronous propagation, and non-blocking execution</li>
+<li>The <strong>C10K problem</strong> and why the industry moved toward reactive solutions</li>
+<li>The <strong>Reactive Streams specification</strong> — <code>Publisher</code>, <code>Subscriber</code>, <code>Subscription</code>, and the lifecycle contract</li>
+<li><strong>Backpressure</strong> as a general concept — demand-driven flow control across any reactive library</li>
+<li>How different implementations (Reactor, RxJava, Mutiny, Kotlin Flow) implement the same spec</li>
+<li><strong>Project Reactor</strong> — <code>Mono</code> and <code>Flux</code>, static factories, operators, schedulers</li>
 <li>Error handling strategies (<code>onErrorReturn</code>, <code>onErrorResume</code>, <code>retry</code>, <code>retryWhen</code>)</li>
 <li><strong>Hot vs. Cold publishers</strong> and when to use each</li>
-<li>Building reactive REST endpoints with <strong>Spring WebFlux</strong></li>
+<li>Building reactive REST endpoints with <strong>Spring WebFlux</strong> (built on top of Reactor)</li>
 <li>Connecting reactive streams to <strong>Kafka</strong> and <strong>R2DBC</strong></li>
-<li>When <strong>not</strong> to use reactive programming</li>
+<li>When <strong>not</strong> to use reactive programming (and what virtual threads offer instead)</li>
 <li>Debugging reactive pipelines (<code>log</code>, <code>checkpoint</code>, <code>doOnNext</code>)</li>
 </ul>
 <h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
@@ -1514,17 +1512,6 @@ Flux&lt;Order&gt; hot = orderRepo.findAll().share();
 // GOOD for cold data: just return the Flux
 Flux&lt;Order&gt; cold = orderRepo.findAll();  // each subscriber gets all items</code></pre>
 <hr />
-<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
-<ul>
-<li>
-<p><strong>[Creating a Reactive REST API with Spring Boot]</strong> by Dan Vega — Introduction to building reactive REST APIs with WebFlux
-  <a href="https://www.youtube.com/watch?v=ZIjheoH_-9o">https://www.youtube.com/watch?v=ZIjheoH_-9o</a></p>
-</li>
-<li>
-<p><strong>[Using Spring Data R2DBC &amp; PostgreSQL]</strong> by Dan Vega — Reactive database access with R2DBC as an alternative to blocking JPA
-  <a href="https://www.youtube.com/watch?v=3LxtmlaX3Y0">https://www.youtube.com/watch?v=3LxtmlaX3Y0</a></p>
-</li>
-</ul>
 <hr />
 <p>← <a href="07-graphql.html">Previous: Module 07 — GraphQL</a> | <a href="09-tdd.html">Next: Module 09 — Test-Driven Development</a> →</p>
       </article>

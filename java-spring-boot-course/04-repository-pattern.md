@@ -99,7 +99,6 @@
   - [Setup](#setup)
   - [Full Repository Test](#full-repository-test)
   - [@ServiceConnection](#serviceconnection)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
 
 </details>
 
@@ -1215,13 +1214,6 @@ No need for `@DynamicPropertySource` boilerplate.
 ---
 
 
-## Recommended YouTube Videos
-
-- **[Spring Boot Repository Layer + JPA + MySQL CRUD]** by Dan Vega — Building the repository layer with Spring Data JPA, covers entities and CRUD operations
-  https://www.youtube.com/watch?v=tM4DmyFlfOY
-
-- **[Spring Data JDBC Tutorial: How to simplify data access in Spring Boot]** by Dan Vega — Alternative data access approach with Spring Data JDBC
-  https://www.youtube.com/watch?v=l_T0nQNbFiM
 
 ---
 ← [Previous: Module 03 — Spring Boot Fundamentals](./03-spring-boot-fundamentals.md) | [Next: Module 05 — Service-Oriented Architecture](./05-service-oriented-architecture.md) →

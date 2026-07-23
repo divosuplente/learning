@@ -65,7 +65,6 @@
   - [Structured JSON Logging](#structured-json-logging)
   - [Micrometer Metrics](#micrometer-metrics)
   - [Custom Health Indicator](#custom-health-indicator)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
 - [What You Learned](#what-you-learned)
 
 </details>
@@ -2012,16 +2011,6 @@ Access at: `GET /actuator/health` → includes `kafka` health indicator.
 
 ---
 
-## Recommended YouTube Videos
-
-- **[Spring Boot Tutorial for Beginners - Crash Course using Spring Boot 3]** by Dan Vega — Full crash course that ties together all concepts used in this capstone (3:43:52, 840K views)
-  https://www.youtube.com/watch?v=UgX5lgv4uVM
-
-- **[Spring Boot Tutorial for Beginners | Full Course 2025]** by Amigoscode — Modern full course with Java 21, Docker, PostgreSQL, and JPA (1:11:19, 251K views)
-  https://www.youtube.com/watch?v=Cw0J6jYJtzw
-
-- **[Test Driven Development (TDD) in Spring]** by Dan Vega — TDD approach for testing REST controllers, essential for the capstone test section (51:09, 39K views)
-  https://www.youtube.com/watch?v=-H5sud1-K5A
 
 ---
 

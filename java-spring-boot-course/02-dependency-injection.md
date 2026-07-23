@@ -20,74 +20,34 @@
 ## Prerequisites
 
 - [Module 00: Java for Experienced Developers](./00-java-foundations.md) — you understand Java classes, records, interfaces, constructors
-- [Module 01: Build Tools & Project Setup](./01-build-tools-and-project-setup.md) — you have a working Spring Boot project with `application.yml`
-- No prior experience with Spring or dependency injection required
+- [Module 01: Build Tools & Project Setup](./01-build-tools-and-project-setup.md) — you have a Maven project scaffolded with `application.yml`
+- Understanding of DI concepts from any framework (Spring, Guice, .NET DI, etc.) is helpful but not required
 
 ---
 
 <details>
 <summary>Table of Contents</summary>
 
-- [What You'll Learn](#what-youll-learn)
-- [Prerequisites](#prerequisites)
-- [1. The Problem: Tight Coupling with new](#1-the-problem-tight-coupling-with-new)
-  - [Example: The Bad Way](#example-the-bad-way)
-  - [Why Is This Bad?](#why-is-this-bad)
-  - [The Fix: Dependency Injection](#the-fix-dependency-injection)
-- [2. What Is Dependency Injection?](#2-what-is-dependency-injection)
-  - [The Restaurant Analogy](#the-restaurant-analogy)
-- [3. Inversion of Control (IoC)](#3-inversion-of-control-ioc)
-  - [The Hollywood Principle](#the-hollywood-principle)
-- [4. The Spring IoC Container](#4-the-spring-ioc-container)
-  - [Key Terms](#key-terms)
-- [5. Types of Injection](#5-types-of-injection)
-  - [1. Constructor Injection (Preferred)](#1-constructor-injection-preferred)
-  - [2. Setter Injection (Rarely Used)](#2-setter-injection-rarely-used)
-  - [3. Field Injection (Avoid)](#3-field-injection-avoid)
-  - [Why Constructor Injection Is Preferred](#why-constructor-injection-is-preferred)
-- [6. Spring Stereotype Annotations](#6-spring-stereotype-annotations)
-  - [How Component Scanning Works](#how-component-scanning-works)
-  - [Example: Creating Beans](#example-creating-beans)
-- [7. @Autowired: Explicit vs. Implicit Wiring](#7-autowired-explicit-vs-implicit-wiring)
-- [8. Bean Scopes](#8-bean-scopes)
-  - [Setting a Scope](#setting-a-scope)
-- [9. Manual Bean Creation with @Configuration and @Bean](#9-manual-bean-creation-with-configuration-and-bean)
-  - [When to Use @Bean vs @Component](#when-to-use-bean-vs-component)
-- [10. Resolving Ambiguous Dependencies: @Qualifier and @Primary](#10-resolving-ambiguous-dependencies-qualifier-and-primary)
-  - [Using @Qualifier for Specific Selection](#using-qualifier-for-specific-selection)
-- [11. Circular Dependencies](#11-circular-dependencies)
-  - [How to Avoid Circular Dependencies](#how-to-avoid-circular-dependencies)
-- [12. Life-Cycle Hooks: @PostConstruct and @PreDestroy](#12-life-cycle-hooks-postconstruct-and-predestroy)
-  - [When to Use Each](#when-to-use-each)
-- [13. Wiring the Order Management Domain](#13-wiring-the-order-management-domain)
-  - [Domain Records (from Module 00)](#domain-records-from-module-00)
-  - [Repository Interfaces (stubs — real JPA in Module 04)](#repository-interfaces-stubs-real-jpa-in-module-04)
-  - [Service Layer](#service-layer)
-  - [Controller](#controller)
-  - [The Application Entry Point](#the-application-entry-point)
-  - [How Spring Wires Everything](#how-spring-wires-everything)
-- [What You Learned](#what-you-learned)
-- [12. Bean Lifecycle Callbacks in Depth](#12-bean-lifecycle-callbacks-in-depth)
-  - [The Bean Lifecycle (Simplified)](#the-bean-lifecycle-simplified)
-  - [@PostConstruct and @PreDestroy](#postconstruct-and-predestroy)
-  - [When to Use Each](#when-to-use-each)
-- [13. Conditional Bean Registration](#13-conditional-bean-registration)
-  - [@ConditionalOnProperty](#conditionalonproperty)
-  - [@ConditionalOnMissingBean](#conditionalonmissingbean)
-  - [@ConditionalOnClass](#conditionalonclass)
-  - [Combining Conditions](#combining-conditions)
-- [14. Bean Scopes in Practice](#14-bean-scopes-in-practice)
-  - [The Proxy Problem](#the-proxy-problem)
-- [15. Spring Bean Circular Dependencies](#15-spring-bean-circular-dependencies)
-  - [The Problem](#the-problem)
-  - [Solution 1: Redesign (Preferred)](#solution-1-redesign-preferred)
-  - [Solution 2: Use Events](#solution-2-use-events)
-- [16. Spring AOP (Aspect-Oriented Programming)](#16-spring-aop-aspect-oriented-programming)
-  - [How Spring Uses AOP Internally](#how-spring-uses-aop-internally)
-  - [Custom Aspect Example: Method Timing](#custom-aspect-example-method-timing)
-- [17. Spring Profiles and Environment Abstraction](#17-spring-profiles-and-environment-abstraction)
-  - [@Value with SpEL (Spring Expression Language)](#value-with-spel-spring-expression-language)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
+- 1. [The Problem: Tight Coupling with `new`](#the-problem-tight-coupling-with-new)
+- 2. [What Is Dependency Injection?](#what-is-dependency-injection)
+- 3. [Inversion of Control (IoC)](#inversion-of-control-ioc)
+- 4. [DI as a Pattern — Before Any Framework](#di-as-a-pattern-before-any-framework)
+- 5. [The Spring IoC Container](#the-spring-ioc-container)
+- 6. [Types of Injection](#types-of-injection)
+- 7. [Spring Stereotype Annotations](#spring-stereotype-annotations)
+- 8. [`@Autowired`: Explicit vs. Implicit Wiring](#autowired-explicit-vs-implicit-wiring)
+- 9. [Bean Scopes](#bean-scopes)
+- 10. [Manual Bean Creation with `@Configuration` and `@Bean`](#manual-bean-creation-with-configuration-and-bean)
+- 11. [Resolving Ambiguous Dependencies: `@Qualifier` and `@Primary`](#resolving-ambiguous-dependencies-qualifier-and-primary)
+- 12. [Circular Dependencies](#circular-dependencies)
+- 13. [Life-Cycle Hooks: `@PostConstruct` and `@PreDestroy`](#life-cycle-hooks-postconstruct-and-predestroy)
+- 14. [Wiring the Order Management Domain](#wiring-the-order-management-domain)
+- 15. [Bean Lifecycle Callbacks in Depth](#bean-lifecycle-callbacks-in-depth)
+- 16. [Conditional Bean Registration](#conditional-bean-registration)
+- 17. [Bean Scopes in Practice](#bean-scopes-in-practice)
+- 18. [Spring Bean Circular Dependencies](#spring-bean-circular-dependencies)
+- 19. [Spring AOP (Aspect-Oriented Programming)](#spring-aop-aspect-oriented-programming)
+- 20. [Spring Profiles and Environment Abstraction](#spring-profiles-and-environment-abstraction)
 
 </details>
 
@@ -178,8 +138,7 @@ Think of a restaurant kitchen:
 
 In software:
 - The **kitchen** is your class (e.g., `OrderService`)
-- The **ingredients** are dependencies (e.g., `CustomerRepository`)
-- The **supplier** is the Spring IoC container — it creates objects and delivers them to your classes
+- The **supplier** is the dependency injector — any framework or manual wiring that creates objects and delivers them to your classes
 
 ---
 
@@ -201,7 +160,80 @@ In traditional programming, your code calls the framework. In IoC, the framework
 
 ---
 
-## 4. The Spring IoC Container
+## 4. DI as a Pattern — Before Any Framework
+
+Dependency Injection is not a Spring invention. It's a general software design pattern that predates Spring by decades. Let's see how it works in plain Java and in other languages.
+
+### Manual DI in Plain Java
+
+Without any framework, you can do DI yourself. You create objects in one place and pass them where they're needed:
+
+```java
+// The "composition root" — where you wire everything
+public class Application {
+    public static void main(String[] args) {
+        // Create dependencies first
+        CustomerRepository customerRepo = new InMemoryCustomerRepository();
+        ProductRepository productRepo = new InMemoryProductRepository();
+        OrderRepository orderRepo = new InMemoryOrderRepository();
+
+        // Inject them
+        OrderService orderService = new OrderService(
+            customerRepo, productRepo, orderRepo
+        );
+
+        // Use the service
+        orderService.createOrder(request);
+    }
+}
+```
+
+This is **manual DI** (also called "poor man's DI"). It works perfectly for small apps. The wiring code lives in one place (the composition root), and the business classes know nothing about how their dependencies are created.
+
+### DI in Other Languages
+
+DI isn't Java-specific. Every modern ecosystem has a form of it:
+
+| Language/Ecosystem | DI Approach | Example |
+|---------------------|-------------|---------|
+| **Python** | Manual or via `injector`, `dependency-injector` libs | `def __init__(self, repo: CustomerRepo)` |
+| **JavaScript/Node.js** | Manual, or `InversifyJS`, or NestJS built-in | `constructor(private repo: CustomerRepo)` |
+| **C# / .NET** | Built-in `IServiceCollection` | `services.AddTransient<ICustomerRepo, CustomerRepo>()` |
+| **Go** | Manual (constructor functions) | `func NewOrderService(repo Repository) *OrderService` |
+| **Rust** | Manual or `shaku` crate | `fn new(repo: Arc<dyn Repo>) -> Self` |
+
+The pattern is always the same: **the caller provides dependencies; the receiver declares what it needs.** Frameworks just automate the wiring.
+
+<details>
+<summary>Deep Dive: Service Locator — The Alternative (and Why It's Worse)</summary>
+
+Before DI became standard, a common pattern was **Service Locator**: a central registry where objects register themselves and others look them up:
+
+```java
+// Service Locator pattern (NOT recommended)
+public class OrderService {
+    public Order createOrder(...) {
+        CustomerRepository repo = ServiceLocator.get(CustomerRepository.class);
+        // ...
+    }
+}
+```
+
+This looks simpler but has critical flaws:
+
+- **Hidden dependencies**: `OrderService` looks like it has no dependencies (no constructor params), but it secretly depends on `ServiceLocator` and every service it looks up.
+- **Harder to test**: You must configure the `ServiceLocator` in tests, which couples tests to the locator infrastructure.
+- **Problems spread over time**: As the codebase grows, every class reaching into the locator creates invisible coupling.
+
+DI (especially constructor injection) solves all three problems: dependencies are explicit, testable, and visible in the constructor signature.
+
+Martin Fowler's classic article "[Inversion of Control Containers and the Dependency Injection Pattern](https://martinfowler.com/articles/injection.html)" (2004) coined the term "Dependency Injection" and explains this distinction in detail.
+
+</details>
+
+---
+
+## 5. The Spring IoC Container
 
 The **Spring IoC container** is the "supplier" in our restaurant analogy. It:
 
@@ -220,7 +252,7 @@ The **Spring IoC container** is the "supplier" in our restaurant analogy. It:
 
 ---
 
-## 5. Types of Injection
+## 6. Types of Injection
 
 There are three ways to inject dependencies into a class:
 
@@ -298,7 +330,7 @@ public class OrderService {
 
 ---
 
-## 6. Spring Stereotype Annotations
+## 7. Spring Stereotype Annotations
 
 Spring uses **stereotype annotations** to mark classes as beans. When Spring starts, it scans your packages and finds all annotated classes:
 
@@ -342,7 +374,7 @@ public class CustomerService {
 
 ---
 
-## 7. `@Autowired`: Explicit vs. Implicit Wiring
+## 8. `@Autowired`: Explicit vs. Implicit Wiring
 
 The `@Autowired` annotation tells Spring to inject a dependency. But with constructor injection, it's **optional**:
 
@@ -368,7 +400,7 @@ You only need `@Autowired` when:
 
 ---
 
-## 8. Bean Scopes
+## 9. Bean Scopes
 
 A bean's **scope** determines how and when Spring creates instances:
 
@@ -395,7 +427,7 @@ Without `@Scope`, the default is **singleton** — one instance shared by everyt
 
 ---
 
-## 9. Manual Bean Creation with `@Configuration` and `@Bean`
+## 10. Manual Bean Creation with `@Configuration` and `@Bean`
 
 Sometimes you can't use stereotype annotations. For example, when you need to create a bean from a third-party library (you can't add `@Service` to a class you didn't write).
 
@@ -432,7 +464,7 @@ public class AppConfig {
 
 ---
 
-## 10. Resolving Ambiguous Dependencies: `@Qualifier` and `@Primary`
+## 11. Resolving Ambiguous Dependencies: `@Qualifier` and `@Primary`
 
 Sometimes you have multiple beans of the same type. For example, two `CustomerRepository` implementations (one for PostgreSQL, one for in-memory testing):
 
@@ -474,7 +506,7 @@ public class TestOrderService {
 
 ---
 
-## 11. Circular Dependencies
+## 12. Circular Dependencies
 
 A **circular dependency** happens when two beans depend on each other:
 
@@ -520,7 +552,7 @@ public class SharedLookupService {
 
 ---
 
-## 12. Life-Cycle Hooks: `@PostConstruct` and `@PreDestroy`
+## 13. Life-Cycle Hooks: `@PostConstruct` and `@PreDestroy`
 
 Spring lets you run code at specific points in a bean's life cycle:
 
@@ -573,7 +605,7 @@ Note: `@PostConstruct` and `@PreDestroy` come from `jakarta.annotation` (not `ja
 
 ---
 
-## 13. Wiring the Order Management Domain
+## 14. Wiring the Order Management Domain
 
 Let's wire our entire domain using Spring DI. Here's how it fits together:
 
@@ -782,7 +814,7 @@ When you start the application:
 
 ---
 
-## 12. Bean Lifecycle Callbacks in Depth
+## 15. Bean Lifecycle Callbacks in Depth
 
 Spring beans go through a well-defined lifecycle. Understanding it helps you
 hook into the right phase for initialization and cleanup.
@@ -850,7 +882,7 @@ public class OrderService {
 
 ---
 
-## 13. Conditional Bean Registration
+## 16. Conditional Bean Registration
 
 Spring Boot's auto-configuration is built on **conditional beans** — beans that are
 only created when specific conditions are met.
@@ -915,7 +947,7 @@ public CacheManager redisCacheManager() {
 
 ---
 
-## 14. Bean Scopes in Practice
+## 17. Bean Scopes in Practice
 
 | Scope | Lifecycle | Use Case |
 |-------|-----------|----------|
@@ -969,7 +1001,7 @@ public class OrderService {
 
 ---
 
-## 15. Spring Bean Circular Dependencies
+## 18. Spring Bean Circular Dependencies
 
 A **circular dependency** occurs when Bean A depends on Bean B, and Bean B
 depends on Bean A. Spring detects this and throws an error by default.
@@ -1048,7 +1080,7 @@ public class CustomerService {
 
 ---
 
-## 16. Spring AOP (Aspect-Oriented Programming)
+## 19. Spring AOP (Aspect-Oriented Programming)
 
 **AOP** lets you add cross-cutting concerns (logging, timing, security) without
 modifying business code.
@@ -1101,7 +1133,7 @@ code changes to those methods.
 
 ---
 
-## 17. Spring Profiles and Environment Abstraction
+## 20. Spring Profiles and Environment Abstraction
 
 The `Environment` abstraction lets you access configuration values programmatically:
 
@@ -1149,13 +1181,6 @@ public class OrderService {
 ---
 
 
-## Recommended YouTube Videos
-
-- **[Spring Tutorial 01 - Understanding Dependency Injection]** by Java Brains — The classic introduction to DI and IoC, 2.8M views
-  https://www.youtube.com/watch?v=GB8k2-Egfv0
-
-- **[Spring Framework]** (playlist) by Java Brains — Full Spring Framework course covering beans, bean factory, constructor injection, and more
-  https://www.youtube.com/playlist?list=PLC97BDEFDCDD169D7
 
 ---
 ← [Previous: Module 01 — Build Tools & Project Setup](./01-build-tools-and-project-setup.md) | [Next: Module 03 — Spring Boot Fundamentals](./03-spring-boot-fundamentals.md) →

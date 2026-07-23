@@ -79,7 +79,6 @@
   - [@CacheEvict — Remove from Cache](#cacheevict-remove-from-cache)
   - [@CachePut — Always Execute, Update Cache](#cacheput-always-execute-update-cache)
   - [When to Cache vs. When Not To](#when-to-cache-vs-when-not-to)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
 
 </details>
 
@@ -1365,13 +1364,6 @@ public Product updateStock(Long id, int newStock) {
 
 ---
 
-## Recommended YouTube Videos
-
-- **[Build a Clean Spring Boot Project Step by Step]** by Dan Vega — Covers project structure and layered architecture (controllers, services, repositories)
-  https://www.youtube.com/watch?v=rWhqxgBd2qA
-
-- **[Spring Boot Tutorial for Beginners | Full Course 2025]** by Amigoscode — Full course that naturally covers the service layer pattern, Docker, and JPA (1:11:19, 251K views)
-  https://www.youtube.com/watch?v=Cw0J6jYJtzw
 
 ---
 

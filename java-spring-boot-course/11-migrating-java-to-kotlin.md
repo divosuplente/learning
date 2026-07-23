@@ -71,7 +71,6 @@
   - [9.3 Testing Coroutines with runTest](#93-testing-coroutines-with-runtest)
 - [10. exercises](#10-exercises)
 - [What You Learned](#what-you-learned)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
 
 </details>
 
@@ -1086,13 +1085,6 @@ class CoroutineOrderServiceTest {
 
 ---
 
-## Recommended YouTube Videos
-
-- **[Full 2025 Kotlin Crash Course For Beginners]** by Philipp Lackner — Complete Kotlin tutorial from basics, 3 hours (3:11:50, 362K views)
-  https://www.youtube.com/watch?v=dzUc9vrsldM
-
-- **[Spring Boot with Kotlin Tutorial - Enterprise Backend Development for Beginners]** by CodeLucky — Spring Boot with Kotlin, covering data classes, REST controllers, JPA repositories, and exception handling
-  https://www.youtube.com/watch?v=jY5TesBSdRE
 
 ---
 

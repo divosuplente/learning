@@ -90,7 +90,6 @@
   - [Query Depth Limiting](#query-depth-limiting)
   - [Query Complexity Analysis](#query-complexity-analysis)
   - [Authentication in Resolvers](#authentication-in-resolvers)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
 
 </details>
 
@@ -1502,13 +1501,6 @@ public OrderResponse order(@Argument Long id, GraphQLServletContext context) {
 
 ---
 
-## Recommended YouTube Videos
-
-- **[GraphQL for Java Developers: 01 - Why GraphQL]** by Dan Vega — First video in a complete GraphQL for Java playlist covering schema, resolvers, and N+1
-  https://www.youtube.com/watch?v=xZSv67a9OYA
-
-- **[Spring Boot and GraphQL Tutorial]** by Amigoscode — Building a GraphQL API with Spring Boot from scratch
-  https://www.youtube.com/watch?v=uNB2N_w_ypo
 
 ---
 

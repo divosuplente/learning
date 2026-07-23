@@ -98,7 +98,6 @@
   - [Automatic Restart](#automatic-restart)
   - [Live Reload](#live-reload)
   - [Disabling DevTools in Production](#disabling-devtools-in-production)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
 
 </details>
 
@@ -1096,13 +1095,6 @@ It's only active when running from an IDE or with `mvn spring-boot:run`.
 ---
 
 
-## Recommended YouTube Videos
-
-- **[Build a Spring Boot 4 REST API in Minutes]** by Dan Vega — Quick REST API walkthrough with controllers, records, and CRUD (25:32, 21K views)
-  https://www.youtube.com/watch?v=klnxzL8oQdM
-
-- **[Spring Boot Tutorial for Beginners | Full Course 2025]** by Amigoscode — Full course covering REST APIs, Spring MVC, Docker, and JPA (1:11:19, 251K views)
-  https://www.youtube.com/watch?v=Cw0J6jYJtzw
 
 ---
 

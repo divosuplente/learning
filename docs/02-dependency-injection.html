@@ -123,73 +123,33 @@
 <h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
 <ul>
 <li><a href="00-java-foundations.html">Module 00: Java for Experienced Developers</a> — you understand Java classes, records, interfaces, constructors</li>
-<li><a href="01-build-tools-and-project-setup.html">Module 01: Build Tools &amp; Project Setup</a> — you have a working Spring Boot project with <code>application.yml</code></li>
-<li>No prior experience with Spring or dependency injection required</li>
+<li><a href="01-build-tools-and-project-setup.html">Module 01: Build Tools &amp; Project Setup</a> — you have a Maven project scaffolded with <code>application.yml</code></li>
+<li>Understanding of DI concepts from any framework (Spring, Guice, .NET DI, etc.) is helpful but not required</li>
 </ul>
 <hr />
 <details>
 <summary>Table of Contents</summary>
 
-- [What You'll Learn](#what-youll-learn)
-- [Prerequisites](#prerequisites)
-- [1. The Problem: Tight Coupling with new](#1-the-problem-tight-coupling-with-new)
-  - [Example: The Bad Way](#example-the-bad-way)
-  - [Why Is This Bad?](#why-is-this-bad)
-  - [The Fix: Dependency Injection](#the-fix-dependency-injection)
-- [2. What Is Dependency Injection?](#2-what-is-dependency-injection)
-  - [The Restaurant Analogy](#the-restaurant-analogy)
-- [3. Inversion of Control (IoC)](#3-inversion-of-control-ioc)
-  - [The Hollywood Principle](#the-hollywood-principle)
-- [4. The Spring IoC Container](#4-the-spring-ioc-container)
-  - [Key Terms](#key-terms)
-- [5. Types of Injection](#5-types-of-injection)
-  - [1. Constructor Injection (Preferred)](#1-constructor-injection-preferred)
-  - [2. Setter Injection (Rarely Used)](#2-setter-injection-rarely-used)
-  - [3. Field Injection (Avoid)](#3-field-injection-avoid)
-  - [Why Constructor Injection Is Preferred](#why-constructor-injection-is-preferred)
-- [6. Spring Stereotype Annotations](#6-spring-stereotype-annotations)
-  - [How Component Scanning Works](#how-component-scanning-works)
-  - [Example: Creating Beans](#example-creating-beans)
-- [7. @Autowired: Explicit vs. Implicit Wiring](#7-autowired-explicit-vs-implicit-wiring)
-- [8. Bean Scopes](#8-bean-scopes)
-  - [Setting a Scope](#setting-a-scope)
-- [9. Manual Bean Creation with @Configuration and @Bean](#9-manual-bean-creation-with-configuration-and-bean)
-  - [When to Use @Bean vs @Component](#when-to-use-bean-vs-component)
-- [10. Resolving Ambiguous Dependencies: @Qualifier and @Primary](#10-resolving-ambiguous-dependencies-qualifier-and-primary)
-  - [Using @Qualifier for Specific Selection](#using-qualifier-for-specific-selection)
-- [11. Circular Dependencies](#11-circular-dependencies)
-  - [How to Avoid Circular Dependencies](#how-to-avoid-circular-dependencies)
-- [12. Life-Cycle Hooks: @PostConstruct and @PreDestroy](#12-life-cycle-hooks-postconstruct-and-predestroy)
-  - [When to Use Each](#when-to-use-each)
-- [13. Wiring the Order Management Domain](#13-wiring-the-order-management-domain)
-  - [Domain Records (from Module 00)](#domain-records-from-module-00)
-  - [Repository Interfaces (stubs — real JPA in Module 04)](#repository-interfaces-stubs-real-jpa-in-module-04)
-  - [Service Layer](#service-layer)
-  - [Controller](#controller)
-  - [The Application Entry Point](#the-application-entry-point)
-  - [How Spring Wires Everything](#how-spring-wires-everything)
-- [What You Learned](#what-you-learned)
-- [12. Bean Lifecycle Callbacks in Depth](#12-bean-lifecycle-callbacks-in-depth)
-  - [The Bean Lifecycle (Simplified)](#the-bean-lifecycle-simplified)
-  - [@PostConstruct and @PreDestroy](#postconstruct-and-predestroy)
-  - [When to Use Each](#when-to-use-each)
-- [13. Conditional Bean Registration](#13-conditional-bean-registration)
-  - [@ConditionalOnProperty](#conditionalonproperty)
-  - [@ConditionalOnMissingBean](#conditionalonmissingbean)
-  - [@ConditionalOnClass](#conditionalonclass)
-  - [Combining Conditions](#combining-conditions)
-- [14. Bean Scopes in Practice](#14-bean-scopes-in-practice)
-  - [The Proxy Problem](#the-proxy-problem)
-- [15. Spring Bean Circular Dependencies](#15-spring-bean-circular-dependencies)
-  - [The Problem](#the-problem)
-  - [Solution 1: Redesign (Preferred)](#solution-1-redesign-preferred)
-  - [Solution 2: Use Events](#solution-2-use-events)
-- [16. Spring AOP (Aspect-Oriented Programming)](#16-spring-aop-aspect-oriented-programming)
-  - [How Spring Uses AOP Internally](#how-spring-uses-aop-internally)
-  - [Custom Aspect Example: Method Timing](#custom-aspect-example-method-timing)
-- [17. Spring Profiles and Environment Abstraction](#17-spring-profiles-and-environment-abstraction)
-  - [@Value with SpEL (Spring Expression Language)](#value-with-spel-spring-expression-language)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
+- 1. [The Problem: Tight Coupling with `new`](#the-problem-tight-coupling-with-new)
+- 2. [What Is Dependency Injection?](#what-is-dependency-injection)
+- 3. [Inversion of Control (IoC)](#inversion-of-control-ioc)
+- 4. [DI as a Pattern — Before Any Framework](#di-as-a-pattern-before-any-framework)
+- 5. [The Spring IoC Container](#the-spring-ioc-container)
+- 6. [Types of Injection](#types-of-injection)
+- 7. [Spring Stereotype Annotations](#spring-stereotype-annotations)
+- 8. [`@Autowired`: Explicit vs. Implicit Wiring](#autowired-explicit-vs-implicit-wiring)
+- 9. [Bean Scopes](#bean-scopes)
+- 10. [Manual Bean Creation with `@Configuration` and `@Bean`](#manual-bean-creation-with-configuration-and-bean)
+- 11. [Resolving Ambiguous Dependencies: `@Qualifier` and `@Primary`](#resolving-ambiguous-dependencies-qualifier-and-primary)
+- 12. [Circular Dependencies](#circular-dependencies)
+- 13. [Life-Cycle Hooks: `@PostConstruct` and `@PreDestroy`](#life-cycle-hooks-postconstruct-and-predestroy)
+- 14. [Wiring the Order Management Domain](#wiring-the-order-management-domain)
+- 15. [Bean Lifecycle Callbacks in Depth](#bean-lifecycle-callbacks-in-depth)
+- 16. [Conditional Bean Registration](#conditional-bean-registration)
+- 17. [Bean Scopes in Practice](#bean-scopes-in-practice)
+- 18. [Spring Bean Circular Dependencies](#spring-bean-circular-dependencies)
+- 19. [Spring AOP (Aspect-Oriented Programming)](#spring-aop-aspect-oriented-programming)
+- 20. [Spring Profiles and Environment Abstraction](#spring-profiles-and-environment-abstraction)
 
 </details>
 
@@ -264,8 +224,7 @@ public class OrderService {
 </ul>
 <p>In software:
 - The <strong>kitchen</strong> is your class (e.g., <code>OrderService</code>)
-- The <strong>ingredients</strong> are dependencies (e.g., <code>CustomerRepository</code>)
-- The <strong>supplier</strong> is the Spring IoC container — it creates objects and delivers them to your classes</p>
+- The <strong>supplier</strong> is the dependency injector — any framework or manual wiring that creates objects and delivers them to your classes</p>
 <hr />
 <h2 id="3-inversion-of-control-ioc">3. Inversion of Control (IoC)<a class="anchor-link" href="#3-inversion-of-control-ioc" title="Permanent link">¶</a></h2>
 <p><strong>Inversion of Control (IoC)</strong> is the broader principle behind DI. It means that the control over creating and managing objects is <strong>inverted</strong> — moved from your code to a framework or container.</p>
@@ -295,7 +254,94 @@ public class OrderService {
 </tbody>
 </table>
 <hr />
-<h2 id="4-the-spring-ioc-container">4. The Spring IoC Container<a class="anchor-link" href="#4-the-spring-ioc-container" title="Permanent link">¶</a></h2>
+<h2 id="4-di-as-a-pattern-before-any-framework">4. DI as a Pattern — Before Any Framework<a class="anchor-link" href="#4-di-as-a-pattern-before-any-framework" title="Permanent link">¶</a></h2>
+<p>Dependency Injection is not a Spring invention. It's a general software design pattern that predates Spring by decades. Let's see how it works in plain Java and in other languages.</p>
+<h3 id="manual-di-in-plain-java">Manual DI in Plain Java<a class="anchor-link" href="#manual-di-in-plain-java" title="Permanent link">¶</a></h3>
+<p>Without any framework, you can do DI yourself. You create objects in one place and pass them where they're needed:</p>
+<pre class="code-block"><code class="language-java">// The "composition root" — where you wire everything
+public class Application {
+    public static void main(String[] args) {
+        // Create dependencies first
+        CustomerRepository customerRepo = new InMemoryCustomerRepository();
+        ProductRepository productRepo = new InMemoryProductRepository();
+        OrderRepository orderRepo = new InMemoryOrderRepository();
+
+        // Inject them
+        OrderService orderService = new OrderService(
+            customerRepo, productRepo, orderRepo
+        );
+
+        // Use the service
+        orderService.createOrder(request);
+    }
+}</code></pre>
+<p>This is <strong>manual DI</strong> (also called "poor man's DI"). It works perfectly for small apps. The wiring code lives in one place (the composition root), and the business classes know nothing about how their dependencies are created.</p>
+<h3 id="di-in-other-languages">DI in Other Languages<a class="anchor-link" href="#di-in-other-languages" title="Permanent link">¶</a></h3>
+<p>DI isn't Java-specific. Every modern ecosystem has a form of it:</p>
+<table>
+<thead>
+<tr>
+<th>Language/Ecosystem</th>
+<th>DI Approach</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python</strong></td>
+<td>Manual or via <code>injector</code>, <code>dependency-injector</code> libs</td>
+<td><code>def __init__(self, repo: CustomerRepo)</code></td>
+</tr>
+<tr>
+<td><strong>JavaScript/Node.js</strong></td>
+<td>Manual, or <code>InversifyJS</code>, or NestJS built-in</td>
+<td><code>constructor(private repo: CustomerRepo)</code></td>
+</tr>
+<tr>
+<td><strong>C# / .NET</strong></td>
+<td>Built-in <code>IServiceCollection</code></td>
+<td><code>services.AddTransient&lt;ICustomerRepo, CustomerRepo&gt;()</code></td>
+</tr>
+<tr>
+<td><strong>Go</strong></td>
+<td>Manual (constructor functions)</td>
+<td><code>func NewOrderService(repo Repository) *OrderService</code></td>
+</tr>
+<tr>
+<td><strong>Rust</strong></td>
+<td>Manual or <code>shaku</code> crate</td>
+<td><code>fn new(repo: Arc&lt;dyn Repo&gt;) -&gt; Self</code></td>
+</tr>
+</tbody>
+</table>
+<p>The pattern is always the same: <strong>the caller provides dependencies; the receiver declares what it needs.</strong> Frameworks just automate the wiring.</p>
+<details>
+<summary>Deep Dive: Service Locator — The Alternative (and Why It's Worse)</summary>
+
+Before DI became standard, a common pattern was **Service Locator**: a central registry where objects register themselves and others look them up:
+
+<pre class="code-block"><code class="language-java">// Service Locator pattern (NOT recommended)
+public class OrderService {
+    public Order createOrder(...) {
+        CustomerRepository repo = ServiceLocator.get(CustomerRepository.class);
+        // ...
+    }
+}</code></pre>
+
+This looks simpler but has critical flaws:
+
+- **Hidden dependencies**: `OrderService` looks like it has no dependencies (no constructor params), but it secretly depends on `ServiceLocator` and every service it looks up.
+- **Harder to test**: You must configure the `ServiceLocator` in tests, which couples tests to the locator infrastructure.
+- **Problems spread over time**: As the codebase grows, every class reaching into the locator creates invisible coupling.
+
+DI (especially constructor injection) solves all three problems: dependencies are explicit, testable, and visible in the constructor signature.
+
+Martin Fowler's classic article "[Inversion of Control Containers and the Dependency Injection Pattern](https://martinfowler.com/articles/injection.html)" (2004) coined the term "Dependency Injection" and explains this distinction in detail.
+
+</details>
+
+<hr />
+<h2 id="5-the-spring-ioc-container">5. The Spring IoC Container<a class="anchor-link" href="#5-the-spring-ioc-container" title="Permanent link">¶</a></h2>
 <p>The <strong>Spring IoC container</strong> is the "supplier" in our restaurant analogy. It:</p>
 <ol>
 <li>Discovers all components (classes annotated with <code>@Component</code>, <code>@Service</code>, etc.)</li>
@@ -327,7 +373,7 @@ public class OrderService {
 </tbody>
 </table>
 <hr />
-<h2 id="5-types-of-injection">5. Types of Injection<a class="anchor-link" href="#5-types-of-injection" title="Permanent link">¶</a></h2>
+<h2 id="6-types-of-injection">6. Types of Injection<a class="anchor-link" href="#6-types-of-injection" title="Permanent link">¶</a></h2>
 <p>There are three ways to inject dependencies into a class:</p>
 <h3 id="1-constructor-injection-preferred">1. Constructor Injection (Preferred)<a class="anchor-link" href="#1-constructor-injection-preferred" title="Permanent link">¶</a></h3>
 <p>Dependencies are passed through the constructor:</p>
@@ -411,7 +457,7 @@ public class OrderService {
 </table>
 <p><strong>Rule: Always use constructor injection. Never use <code>@Autowired</code> on fields.</strong></p>
 <hr />
-<h2 id="6-spring-stereotype-annotations">6. Spring Stereotype Annotations<a class="anchor-link" href="#6-spring-stereotype-annotations" title="Permanent link">¶</a></h2>
+<h2 id="7-spring-stereotype-annotations">7. Spring Stereotype Annotations<a class="anchor-link" href="#7-spring-stereotype-annotations" title="Permanent link">¶</a></h2>
 <p>Spring uses <strong>stereotype annotations</strong> to mark classes as beans. When Spring starts, it scans your packages and finds all annotated classes:</p>
 <table>
 <thead>
@@ -470,7 +516,7 @@ public class CustomerService {
     }
 }</code></pre>
 <hr />
-<h2 id="7-autowired-explicit-vs-implicit-wiring">7. <code>@Autowired</code>: Explicit vs. Implicit Wiring<a class="anchor-link" href="#7-autowired-explicit-vs-implicit-wiring" title="Permanent link">¶</a></h2>
+<h2 id="8-autowired-explicit-vs-implicit-wiring">8. <code>@Autowired</code>: Explicit vs. Implicit Wiring<a class="anchor-link" href="#8-autowired-explicit-vs-implicit-wiring" title="Permanent link">¶</a></h2>
 <p>The <code>@Autowired</code> annotation tells Spring to inject a dependency. But with constructor injection, it's <strong>optional</strong>:</p>
 <pre class="code-block"><code class="language-java">@Service
 public class OrderService {
@@ -488,7 +534,7 @@ public class OrderService {
 - A class has multiple constructors (rare — usually a code smell)
 - Using setter or field injection (which we avoid)</p>
 <hr />
-<h2 id="8-bean-scopes">8. Bean Scopes<a class="anchor-link" href="#8-bean-scopes" title="Permanent link">¶</a></h2>
+<h2 id="9-bean-scopes">9. Bean Scopes<a class="anchor-link" href="#9-bean-scopes" title="Permanent link">¶</a></h2>
 <p>A bean's <strong>scope</strong> determines how and when Spring creates instances:</p>
 <table>
 <thead>
@@ -530,7 +576,7 @@ public class OrderCalculator {
 <p>Without <code>@Scope</code>, the default is <strong>singleton</strong> — one instance shared by everything. This is almost always what you want for services and repositories.</p>
 <p><strong>Important:</strong> With singleton scope, your beans must be <strong>stateless</strong> — they should not store data in instance fields (except constants and injected dependencies). If multiple threads access a singleton bean simultaneously and it has mutable state, you'll get race conditions.</p>
 <hr />
-<h2 id="9-manual-bean-creation-with-configuration-and-bean">9. Manual Bean Creation with <code>@Configuration</code> and <code>@Bean</code><a class="anchor-link" href="#9-manual-bean-creation-with-configuration-and-bean" title="Permanent link">¶</a></h2>
+<h2 id="10-manual-bean-creation-with-configuration-and-bean">10. Manual Bean Creation with <code>@Configuration</code> and <code>@Bean</code><a class="anchor-link" href="#10-manual-bean-creation-with-configuration-and-bean" title="Permanent link">¶</a></h2>
 <p>Sometimes you can't use stereotype annotations. For example, when you need to create a bean from a third-party library (you can't add <code>@Service</code> to a class you didn't write).</p>
 <p>Use <code>@Configuration</code> classes with <code>@Bean</code> methods:</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.config;
@@ -572,7 +618,7 @@ public class AppConfig {
 </tbody>
 </table>
 <hr />
-<h2 id="10-resolving-ambiguous-dependencies-qualifier-and-primary">10. Resolving Ambiguous Dependencies: <code>@Qualifier</code> and <code>@Primary</code><a class="anchor-link" href="#10-resolving-ambiguous-dependencies-qualifier-and-primary" title="Permanent link">¶</a></h2>
+<h2 id="11-resolving-ambiguous-dependencies-qualifier-and-primary">11. Resolving Ambiguous Dependencies: <code>@Qualifier</code> and <code>@Primary</code><a class="anchor-link" href="#11-resolving-ambiguous-dependencies-qualifier-and-primary" title="Permanent link">¶</a></h2>
 <p>Sometimes you have multiple beans of the same type. For example, two <code>CustomerRepository</code> implementations (one for PostgreSQL, one for in-memory testing):</p>
 <pre class="code-block"><code class="language-java">@Configuration
 public class AppConfig {
@@ -602,7 +648,7 @@ public class TestOrderService {
     }
 }</code></pre>
 <hr />
-<h2 id="11-circular-dependencies">11. Circular Dependencies<a class="anchor-link" href="#11-circular-dependencies" title="Permanent link">¶</a></h2>
+<h2 id="12-circular-dependencies">12. Circular Dependencies<a class="anchor-link" href="#12-circular-dependencies" title="Permanent link">¶</a></h2>
 <p>A <strong>circular dependency</strong> happens when two beans depend on each other:</p>
 <pre class="code-block"><code>OrderService → needs → CustomerService → needs → OrderService → ...</code></pre>
 <p>Spring cannot create either bean because it can't finish constructing one without the other.</p>
@@ -636,7 +682,7 @@ public class SharedLookupService {
     // This service contains the logic both needed
 }</code></pre>
 <hr />
-<h2 id="12-life-cycle-hooks-postconstruct-and-predestroy">12. Life-Cycle Hooks: <code>@PostConstruct</code> and <code>@PreDestroy</code><a class="anchor-link" href="#12-life-cycle-hooks-postconstruct-and-predestroy" title="Permanent link">¶</a></h2>
+<h2 id="13-life-cycle-hooks-postconstruct-and-predestroy">13. Life-Cycle Hooks: <code>@PostConstruct</code> and <code>@PreDestroy</code><a class="anchor-link" href="#13-life-cycle-hooks-postconstruct-and-predestroy" title="Permanent link">¶</a></h2>
 <p>Spring lets you run code at specific points in a bean's life cycle:</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
 
@@ -701,7 +747,7 @@ public class OrderService {
 </table>
 <p>Note: <code>@PostConstruct</code> and <code>@PreDestroy</code> come from <code>jakarta.annotation</code> (not <code>javax.annotation</code>) in Spring Boot 3.x.</p>
 <hr />
-<h2 id="13-wiring-the-order-management-domain">13. Wiring the Order Management Domain<a class="anchor-link" href="#13-wiring-the-order-management-domain" title="Permanent link">¶</a></h2>
+<h2 id="14-wiring-the-order-management-domain">14. Wiring the Order Management Domain<a class="anchor-link" href="#14-wiring-the-order-management-domain" title="Permanent link">¶</a></h2>
 <p>Let's wire our entire domain using Spring DI. Here's how it fits together:</p>
 <pre class="code-block"><code>OrderController
     depends on → OrderService
@@ -880,7 +926,7 @@ public class OrderManagementApplication {
 <li><code>@PostConstruct</code> and <code>@PreDestroy</code> (from <code>jakarta.annotation</code>) hook into the bean life cycle for initialization and cleanup</li>
 </ul>
 <hr />
-<h2 id="12-bean-lifecycle-callbacks-in-depth">12. Bean Lifecycle Callbacks in Depth<a class="anchor-link" href="#12-bean-lifecycle-callbacks-in-depth" title="Permanent link">¶</a></h2>
+<h2 id="15-bean-lifecycle-callbacks-in-depth">15. Bean Lifecycle Callbacks in Depth<a class="anchor-link" href="#15-bean-lifecycle-callbacks-in-depth" title="Permanent link">¶</a></h2>
 <p>Spring beans go through a well-defined lifecycle. Understanding it helps you
 hook into the right phase for initialization and cleanup.</p>
 <h3 id="the-bean-lifecycle-simplified">The Bean Lifecycle (Simplified)<a class="anchor-link" href="#the-bean-lifecycle-simplified" title="Permanent link">¶</a></h3>
@@ -958,7 +1004,7 @@ public class OrderService {
 </tbody>
 </table>
 <hr />
-<h2 id="13-conditional-bean-registration">13. Conditional Bean Registration<a class="anchor-link" href="#13-conditional-bean-registration" title="Permanent link">¶</a></h2>
+<h2 id="16-conditional-bean-registration">16. Conditional Bean Registration<a class="anchor-link" href="#16-conditional-bean-registration" title="Permanent link">¶</a></h2>
 <p>Spring Boot's auto-configuration is built on <strong>conditional beans</strong> — beans that are
 only created when specific conditions are met.</p>
 <h3 id="conditionalonproperty">@ConditionalOnProperty<a class="anchor-link" href="#conditionalonproperty" title="Permanent link">¶</a></h3>
@@ -1001,7 +1047,7 @@ public CacheManager redisCacheManager() {
     return new RedisCacheManager();
 }</code></pre>
 <hr />
-<h2 id="14-bean-scopes-in-practice">14. Bean Scopes in Practice<a class="anchor-link" href="#14-bean-scopes-in-practice" title="Permanent link">¶</a></h2>
+<h2 id="17-bean-scopes-in-practice">17. Bean Scopes in Practice<a class="anchor-link" href="#17-bean-scopes-in-practice" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -1073,7 +1119,7 @@ public class OrderService {
     }
 }</code></pre>
 <hr />
-<h2 id="15-spring-bean-circular-dependencies">15. Spring Bean Circular Dependencies<a class="anchor-link" href="#15-spring-bean-circular-dependencies" title="Permanent link">¶</a></h2>
+<h2 id="18-spring-bean-circular-dependencies">18. Spring Bean Circular Dependencies<a class="anchor-link" href="#18-spring-bean-circular-dependencies" title="Permanent link">¶</a></h2>
 <p>A <strong>circular dependency</strong> occurs when Bean A depends on Bean B, and Bean B
 depends on Bean A. Spring detects this and throws an error by default.</p>
 <h3 id="the-problem">The Problem<a class="anchor-link" href="#the-problem" title="Permanent link">¶</a></h3>
@@ -1135,7 +1181,7 @@ public class CustomerService {
     }
 }</code></pre>
 <hr />
-<h2 id="16-spring-aop-aspect-oriented-programming">16. Spring AOP (Aspect-Oriented Programming)<a class="anchor-link" href="#16-spring-aop-aspect-oriented-programming" title="Permanent link">¶</a></h2>
+<h2 id="19-spring-aop-aspect-oriented-programming">19. Spring AOP (Aspect-Oriented Programming)<a class="anchor-link" href="#19-spring-aop-aspect-oriented-programming" title="Permanent link">¶</a></h2>
 <p><strong>AOP</strong> lets you add cross-cutting concerns (logging, timing, security) without
 modifying business code.</p>
 <h3 id="how-spring-uses-aop-internally">How Spring Uses AOP Internally<a class="anchor-link" href="#how-spring-uses-aop-internally" title="Permanent link">¶</a></h3>
@@ -1178,7 +1224,7 @@ public class MethodTimerAspect {
 <p>Every method in <code>com.example.ordermgmt.service</code> now gets automatic timing without any
 code changes to those methods.</p>
 <hr />
-<h2 id="17-spring-profiles-and-environment-abstraction">17. Spring Profiles and Environment Abstraction<a class="anchor-link" href="#17-spring-profiles-and-environment-abstraction" title="Permanent link">¶</a></h2>
+<h2 id="20-spring-profiles-and-environment-abstraction">20. Spring Profiles and Environment Abstraction<a class="anchor-link" href="#20-spring-profiles-and-environment-abstraction" title="Permanent link">¶</a></h2>
 <p>The <code>Environment</code> abstraction lets you access configuration values programmatically:</p>
 <pre class="code-block"><code class="language-java">@Service
 public class FeatureFlagService {
@@ -1215,17 +1261,6 @@ public class OrderService {
     private String databaseUrl;
 }</code></pre>
 <hr />
-<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
-<ul>
-<li>
-<p><strong>[Spring Tutorial 01 - Understanding Dependency Injection]</strong> by Java Brains — The classic introduction to DI and IoC, 2.8M views
-  <a href="https://www.youtube.com/watch?v=GB8k2-Egfv0">https://www.youtube.com/watch?v=GB8k2-Egfv0</a></p>
-</li>
-<li>
-<p><strong>[Spring Framework]</strong> (playlist) by Java Brains — Full Spring Framework course covering beans, bean factory, constructor injection, and more
-  <a href="https://www.youtube.com/playlist?list=PLC97BDEFDCDD169D7">https://www.youtube.com/playlist?list=PLC97BDEFDCDD169D7</a></p>
-</li>
-</ul>
 <hr />
 <p>← <a href="01-build-tools-and-project-setup.html">Previous: Module 01 — Build Tools &amp; Project Setup</a> | <a href="03-spring-boot-fundamentals.html">Next: Module 03 — Spring Boot Fundamentals</a> →</p>
       </article>

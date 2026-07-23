@@ -111,7 +111,6 @@
   - [JaCoCo Configuration](#jacoco-configuration)
   - [What to Cover vs What Not To](#what-to-cover-vs-what-not-to)
   - [Mutation Testing with PIT](#mutation-testing-with-pit)
-- [Recommended YouTube Videos](#recommended-youtube-videos)
 
 </details>
 

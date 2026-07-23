@@ -9,7 +9,7 @@ A comprehensive course for active developers who need to learn Java and the surr
 - Programming experience in any language (Python, JS, C#, Go, etc.)
 - Basic understanding of HTTP, REST, and databases
 - A computer running macOS, Linux, or Windows
-- No prior Java experience required — but we move fast
+- No prior Java experience — but solid programming experience in any language is assumed
 
 ### Course Modules
 
