@@ -1,0 +1,68 @@
+---
+title: Backend Engineering Course
+description: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers
+template: splash
+hero:
+  tagline: Java and the backend ecosystem, from syntax to production.
+  actions:
+    - text: Start with Module 00
+      link: /00-java-foundations/
+      icon: right-arrow
+    - text: GitHub
+      link: https://github.com/divosuplente/learning
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Course Modules
+
+<CardGrid columns={3} stagger>
+	<Card title="00 — Java Foundations" icon="seti:java">
+		Records, generics, pattern matching, sealed classes, collections, OOP, functional interfaces.
+	</Card>
+	<Card title="01 — Build Tools" icon="seti:settings">
+		Maven, Gradle, Spring Initializr, project structure, conventions.
+	</Card>
+	<Card title="02 — Dependency Injection" icon="seti:settings">
+		DI as a pattern, Spring IoC container, bean lifecycle, scopes, qualifiers, AOP.
+	</Card>
+	<Card title="03 — Spring Boot" icon="seti:settings">
+		Auto-configuration, starter dependencies, application properties, profiles, actuator.
+	</Card>
+	<Card title="04 — Repository Pattern" icon="seti:database">
+		Spring Data JPA, repositories, custom queries, transactions, domain modeling.
+	</Card>
+	<Card title="05 — SOA" icon="seti:settings">
+		Service-oriented architecture, layering, DTOs, controllers, business logic separation.
+	</Card>
+	<Card title="06 — Kafka" icon="seti:settings">
+		Producers, consumers, topics, partitions, event-driven architecture, Kafka Streams.
+	</Card>
+	<Card title="07 — GraphQL" icon="seti:settings">
+		Schema-first design, queries, mutations, subscriptions, Spring for GraphQL.
+	</Card>
+	<Card title="08 — Reactor Pattern" icon="seti:settings">
+		Reactive Streams spec, Project Reactor, Mono/Flux, backpressure, WebFlux.
+	</Card>
+	<Card title="09 — TDD" icon="seti:settings">
+		JUnit 5, Mockito, test doubles, Spring Boot Test, integration testing, coverage.
+	</Card>
+	<Card title="10 — Capstone Project" icon="seti:settings">
+		Full-stack order management system using all technologies. Sealed classes, virtual threads, Kotlin preview.
+	</Card>
+	<Card title="11 — Kotlin Migration" icon="seti:kotlin">
+		Data classes, coroutines, null safety, interoperability, migration strategy.
+	</Card>
+</CardGrid>
+
+## Tools You'll Need
+
+| Tool | Version | Purpose |
+| --- | --- | --- |
+| JDK | 21+ | Java runtime and compiler |
+| Maven / Gradle | Latest | Build tool and dependency management |
+| IntelliJ IDEA Community | Latest | Code editor with Java support |
+| Docker Desktop | Latest | Running Kafka, Postgres locally |
+| Git | Latest | Version control |
