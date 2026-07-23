@@ -314,7 +314,9 @@ List<Order> orders = List.of(
     new Order("O001", new Product("P001", "Widget", 10, new BigDecimal("12.34")), new Customer("C001", "Alice", "alice@example.com", new BigDecimal("150.00")), new BigDecimal("123.40"), LocalDateTime.now()),
     new Order("O002", new Product("P002", "Gadget", 5, new BigDecimal("99.99")), new Customer("C002", "Bob", "bob@example.com", new BigDecimal("200.00")), new BigDecimal("199.98"), LocalDateTime.now())
 );
-```ensures the list cannot be modified after creation.
+```
+
+This ensures the list cannot be modified after creation.
 
 ---
 
@@ -382,24 +384,105 @@ public record Order(... ) {}
 - Keep **public** packages narrowly scoped (`model`, `api`, `util`).
 - Use **package‑private** (default) visibility for internal classes.
 
+## Deep Dive: Cross-Package Generics
+
+When working across packages, generics help maintain type safety:
+
+```java
+// In package com.example.model
+public record Customer(String id, String name, BigDecimal balance) {}
+
+// In package com.example.service
+public class CustomerService {
+    private final List<Customer> customers = new ArrayList<>();
+
+    public Optional<Customer> findById(String id) {
+        return customers.stream().filter(c -> c.id().equals(id)).findFirst();
+    }
+}
+```
+
+- Use bounded wildcards (`? extends T`, `? super T`) for flexible APIs.
+- Keep generic type parameters to 1-2 letters (`T`, `E`, `K`, `V`) for readability.
+- Prefer `List<T>` over `T[]` in public APIs — arrays are covariant and unsafe.
+
 ---
 
-## Deep Dive: Cross‑Package Generic Packages
-<>---
-! No! The above is a placeholder. Need to continue.
+## 9. Object-Oriented Programming (OOP)
 
----
+Java is fundamentally **object-oriented**: classes are blueprints for objects, and objects encapsulate state (fields) and behavior (methods).
 
-## 9. Object‑Oriented Programming (OOP)
+### Classes and Interfaces
 
-Java is fundamentally **object‑oriented**: classes are blueprints μικ‑
-***
+```java
+// Abstract class — cannot be instantiated, can have abstract methods
+public abstract class Animal {
+    private final String name;
+
+    protected Animal(String name) {
+        this.name = name;
+    }
+
+    public String getName() { return name; }
+
+    // Abstract method — subclasses must implement
+    public abstract String sound();
+}
+
+// Interface — a contract that classes can implement
+public interface Trainable {
+    String train(String command);
+}
+
+// Concrete class — extends Animal, implements Trainable
+public class Dog extends Animal implements Trainable {
+    public Dog(String name) {
+        super(name);
+    }
+
+    @Override
+    public String sound() {
+        return "Woof";
+    }
+
+    @Override
+    public String train(String command) {
+        return getName() + " learned: " + command;
+    }
+}
+```
+
+### Enums
+
+```java
+public enum OrderStatus {
+    PENDING,
+    CONFIRMED,
+    SHIPPED,
+    DELIVERED,
+    CANCELLED
+}
+```
+
+### Key OOP Principles
+
+- **Encapsulation** — private fields, public getters/setters (or records).
+- **Inheritance** — `extends` for classes, `implements` for interfaces.
+- **Polymorphism** — a `List<Animal>` can hold `Dog`, `Cat`, etc.; calling `sound()` dispatches to the right implementation.
+- **Abstraction** — abstract classes and interfaces define what, not how.
 
 ---
 
 ## What You Learned
 
-- See the module content above for key takeaways.
+- **Records** — immutable data carriers with minimal boilerplate.
+- **Generics** — type-safe reusable code; wildcards for flexible APIs.
+- **Pattern Matching** — expressive `switch` with type patterns and guards.
+- **`var`** — local type inference for cleaner code.
+- **Switch Expressions** — switch as an expression, not just a statement.
+- **Collections** — `List`, `Set`, `Map`, `Queue`, and Streams for functional transforms.
+- **Exception Handling** — checked vs unchecked, try-with-resources, custom exceptions.
+- **Packages** — namespace management, import strategy, visibility.
+- **OOP** — classes, interfaces, abstract classes, enums, and the four pillars.
 
----
-[Next: Module 01 — Build Tools & Project Setup](../01-build-tools-and-project-setup/) →
+
