@@ -206,7 +206,9 @@
 
 <h2 id="1-databases-relational-concepts-quick-refresher">1. Databases &amp; Relational Concepts (Quick Refresher)<a class="anchor-link" href="#1-databases-relational-concepts-quick-refresher" title="Permanent link">¶</a></h2>
 <p>A <strong>database</strong> is organized storage for your application's data. When your application shuts down, the data in memory (variables, objects) disappears. A database persists data — it saves it to disk so it survives restarts.</p>
-<h3 id="relational-databases">Relational Databases<a class="anchor-link" href="#relational-databases" title="Permanent link">¶</a></h3>
+<details id="relational-databases" class="submodule">
+<summary>Relational Databases<a class="anchor-link" href="#relational-databases" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The most common type of database is a <strong>relational database</strong> (RDBMS). It stores data in <strong>tables</strong> — think of a table as a spreadsheet:</p>
 <p><strong>customers table:</strong>
 | id | name | email | address |
@@ -219,7 +221,11 @@
 | 1 | Widget | 19.99 | 100 | Electronics |
 | 2 | Gadget | 49.99 | 50 | Electronics |
 | 3 | Book | 14.99 | 200 | Media |</p>
-<h3 id="key-concepts">Key Concepts<a class="anchor-link" href="#key-concepts" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="key-concepts" class="submodule">
+<summary>Key Concepts<a class="anchor-link" href="#key-concepts" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -250,7 +256,11 @@
 </tr>
 </tbody>
 </table>
-<h3 id="relationships">Relationships<a class="anchor-link" href="#relationships" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="relationships" class="submodule">
+<summary>Relationships<a class="anchor-link" href="#relationships" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Tables relate to each other:</p>
 <ul>
 <li>A <strong>customer</strong> can have many <strong>orders</strong> (one-to-many)</li>
@@ -261,10 +271,14 @@
 <pre class="code-block"><code>Customer 1 ────&lt; Order 1 ────&lt; OrderItem &gt;──── 1 Product
                                         &gt;──── 1 Product</code></pre>
 <p>We use <strong>PostgreSQL</strong> — a powerful, open-source relational database.</p>
+</div>
+</details>
 <hr />
 <h2 id="2-sql-crash-course">2. SQL Crash Course<a class="anchor-link" href="#2-sql-crash-course" title="Permanent link">¶</a></h2>
 <p><strong>SQL (Structured Query Language)</strong> is the language used to interact with relational databases. You don't need to be a SQL expert — that's what JPA does for you. But understanding the basics helps you understand what JPA does behind the scenes.</p>
-<h3 id="select-read-data">SELECT — Read Data<a class="anchor-link" href="#select-read-data" title="Permanent link">¶</a></h3>
+<details id="select-read-data" class="submodule">
+<summary>SELECT — Read Data<a class="anchor-link" href="#select-read-data" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-sql">-- Get all customers
 SELECT * FROM customers;
 
@@ -273,24 +287,48 @@ SELECT * FROM customers WHERE id = 1;
 
 -- Get only name and email
 SELECT name, email FROM customers WHERE id = 1;</code></pre>
-<h3 id="insert-create-data">INSERT — Create Data<a class="anchor-link" href="#insert-create-data" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="insert-create-data" class="submodule">
+<summary>INSERT — Create Data<a class="anchor-link" href="#insert-create-data" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-sql">INSERT INTO customers (name, email, address)
 VALUES ('Charlie', 'charlie@example.com', '789 Pine St');</code></pre>
-<h3 id="update-modify-data">UPDATE — Modify Data<a class="anchor-link" href="#update-modify-data" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="update-modify-data" class="submodule">
+<summary>UPDATE — Modify Data<a class="anchor-link" href="#update-modify-data" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-sql">UPDATE customers SET address = '999 New St' WHERE id = 1;</code></pre>
-<h3 id="delete-remove-data">DELETE — Remove Data<a class="anchor-link" href="#delete-remove-data" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="delete-remove-data" class="submodule">
+<summary>DELETE — Remove Data<a class="anchor-link" href="#delete-remove-data" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-sql">DELETE FROM customers WHERE id = 1;</code></pre>
-<h3 id="join-combine-data-from-multiple-tables">JOIN — Combine Data from Multiple Tables<a class="anchor-link" href="#join-combine-data-from-multiple-tables" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="join-combine-data-from-multiple-tables" class="submodule">
+<summary>JOIN — Combine Data from Multiple Tables<a class="anchor-link" href="#join-combine-data-from-multiple-tables" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-sql">-- Get orders with customer names
 SELECT o.id, o.status, c.name
 FROM orders o
 JOIN customers c ON o.customer_id = c.id;</code></pre>
-<h3 id="what-jpa-does">What JPA Does<a class="anchor-link" href="#what-jpa-does" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-jpa-does" class="submodule">
+<summary>What JPA Does<a class="anchor-link" href="#what-jpa-does" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>JPA generates SQL for you. Instead of writing <code>SELECT * FROM customers WHERE id = 1</code>, you call <code>customerRepository.findById(1L)</code> and JPA generates the SQL automatically.</p>
+</div>
+</details>
 <hr />
 <h2 id="3-what-is-the-repository-pattern">3. What Is the Repository Pattern?<a class="anchor-link" href="#3-what-is-the-repository-pattern" title="Permanent link">¶</a></h2>
 <p>The <strong>Repository Pattern</strong> separates data access logic from business logic. Instead of writing SQL queries scattered throughout your application, you put all data access in one place — the <strong>repository</strong>.</p>
-<h3 id="without-repository-pattern">Without Repository Pattern<a class="anchor-link" href="#without-repository-pattern" title="Permanent link">¶</a></h3>
+<details id="without-repository-pattern" class="submodule">
+<summary>Without Repository Pattern<a class="anchor-link" href="#without-repository-pattern" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// BAD — SQL everywhere
 public class OrderService {
     public Order createOrder(...) {
@@ -303,7 +341,11 @@ public class OrderService {
         // ... more SQL scattered everywhere
     }
 }</code></pre>
-<h3 id="with-repository-pattern">With Repository Pattern<a class="anchor-link" href="#with-repository-pattern" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="with-repository-pattern" class="submodule">
+<summary>With Repository Pattern<a class="anchor-link" href="#with-repository-pattern" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// GOOD — clean data access
 public class OrderService {
     private final OrderRepository orderRepository;
@@ -317,9 +359,13 @@ public class OrderService {
     }
 }</code></pre>
 <p>The service doesn't know SQL — it just tells the repository "save this" and "find that." The repository translates these calls into SQL.</p>
+</div>
+</details>
 <hr />
 <h2 id="4-orm-jpa-and-hibernate">4. ORM, JPA, and Hibernate<a class="anchor-link" href="#4-orm-jpa-and-hibernate" title="Permanent link">¶</a></h2>
-<h3 id="orm-object-relational-mapping">ORM (Object-Relational Mapping)<a class="anchor-link" href="#orm-object-relational-mapping" title="Permanent link">¶</a></h3>
+<details id="orm-object-relational-mapping" class="submodule">
+<summary>ORM (Object-Relational Mapping)<a class="anchor-link" href="#orm-object-relational-mapping" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Java works with <strong>objects</strong>. Databases work with <strong>tables and rows</strong>. There's a mismatch:</p>
 <ul>
 <li>Java object: <code>Order</code> has a <code>Customer</code> field (a reference to another object)</li>
@@ -328,17 +374,33 @@ public class OrderService {
 <p><strong>ORM</strong> bridges this gap. It maps Java objects to database tables automatically:
 - <code>order.getCustomer()</code> → SQL JOIN to fetch the customer
 - <code>orderRepository.save(order)</code> → INSERT into orders table</p>
-<h3 id="jpa-java-persistence-api">JPA (Java Persistence API)<a class="anchor-link" href="#jpa-java-persistence-api" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="jpa-java-persistence-api" class="submodule">
+<summary>JPA (Java Persistence API)<a class="anchor-link" href="#jpa-java-persistence-api" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>JPA</strong> is a specification (a set of interfaces) for ORM in Java. It defines annotations like <code>@Entity</code>, <code>@Id</code>, <code>@OneToMany</code> and the <code>EntityManager</code> interface. JPA itself doesn't do anything — it's just a contract.</p>
-<h3 id="hibernate">Hibernate<a class="anchor-link" href="#hibernate" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="hibernate" class="submodule">
+<summary>Hibernate<a class="anchor-link" href="#hibernate" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>Hibernate</strong> is the most popular <strong>implementation</strong> of JPA. It's the engine that actually does the work — it converts JPA annotations into SQL and executes it against the database.</p>
-<h3 id="spring-data-jpa">Spring Data JPA<a class="anchor-link" href="#spring-data-jpa" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="spring-data-jpa" class="submodule">
+<summary>Spring Data JPA<a class="anchor-link" href="#spring-data-jpa" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>Spring Data JPA</strong> is a Spring module that makes JPA even easier. It provides the <code>JpaRepository</code> interface — you just define an interface and Spring Data generates the implementation automatically at runtime.</p>
 <pre class="code-block"><code>Your Code → Spring Data JPA (interface) → JPA/Hibernate → SQL → PostgreSQL</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="5-jpa-entities">5. JPA Entities<a class="anchor-link" href="#5-jpa-entities" title="Permanent link">¶</a></h2>
 <p>A <strong>JPA entity</strong> is a Java class that maps to a database table. Each instance of the class represents a row in the table.</p>
-<h3 id="entity-anatomy">Entity Anatomy<a class="anchor-link" href="#entity-anatomy" title="Permanent link">¶</a></h3>
+<details id="entity-anatomy" class="submodule">
+<summary>Entity Anatomy<a class="anchor-link" href="#entity-anatomy" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Entity                          // Marks this class as a JPA entity
 @Table(name = "customers")       // Maps to the "customers" table
 public class CustomerEntity {
@@ -386,7 +448,11 @@ public class CustomerEntity {
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }</code></pre>
-<h3 id="key-annotations">Key Annotations<a class="anchor-link" href="#key-annotations" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="key-annotations" class="submodule">
+<summary>Key Annotations<a class="anchor-link" href="#key-annotations" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -433,15 +499,23 @@ public class CustomerEntity {
 </tr>
 </tbody>
 </table>
-<h3 id="why-not-records">Why Not Records?<a class="anchor-link" href="#why-not-records" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="why-not-records" class="submodule">
+<summary>Why Not Records?<a class="anchor-link" href="#why-not-records" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>JPA entities <strong>cannot be records</strong> because JPA expects to:
 1. Create instances with a no-argument constructor
 2. Set fields via setters (or field access)
 3. Use lazy-loading proxies (which require subclassing)</p>
 <p>Records are immutable and final — they can't be subclassed or modified. So entities use traditional classes with getters and setters. We use records for DTOs (which don't need persistence).</p>
+</div>
+</details>
 <hr />
 <h2 id="6-creating-all-domain-entities">6. Creating All Domain Entities<a class="anchor-link" href="#6-creating-all-domain-entities" title="Permanent link">¶</a></h2>
-<h3 id="productentity">ProductEntity<a class="anchor-link" href="#productentity" title="Permanent link">¶</a></h3>
+<details id="productentity" class="submodule">
+<summary>ProductEntity<a class="anchor-link" href="#productentity" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
 
 import jakarta.persistence.*;
@@ -499,7 +573,11 @@ public class ProductEntity {
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }</code></pre>
-<h3 id="orderstatus-enum">OrderStatus Enum<a class="anchor-link" href="#orderstatus-enum" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="orderstatus-enum" class="submodule">
+<summary>OrderStatus Enum<a class="anchor-link" href="#orderstatus-enum" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
 
 public enum OrderStatus {
@@ -509,7 +587,11 @@ public enum OrderStatus {
     DELIVERED,
     CANCELLED
 }</code></pre>
-<h3 id="orderentity">OrderEntity<a class="anchor-link" href="#orderentity" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="orderentity" class="submodule">
+<summary>OrderEntity<a class="anchor-link" href="#orderentity" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
 
 import jakarta.persistence.*;
@@ -569,7 +651,11 @@ public class OrderEntity {
     public List&lt;OrderItemEntity&gt; getItems() { return items; }
     public void setItems(List&lt;OrderItemEntity&gt; items) { this.items = items; }
 }</code></pre>
-<h3 id="orderitementity">OrderItemEntity<a class="anchor-link" href="#orderitementity" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="orderitementity" class="submodule">
+<summary>OrderItemEntity<a class="anchor-link" href="#orderitementity" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
 
 import jakarta.persistence.*;
@@ -614,7 +700,11 @@ public class OrderItemEntity {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 }</code></pre>
-<h3 id="understanding-relationships">Understanding Relationships<a class="anchor-link" href="#understanding-relationships" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="understanding-relationships" class="submodule">
+<summary>Understanding Relationships<a class="anchor-link" href="#understanding-relationships" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code>CustomerEntity  1 ───&lt; OrderEntity  1 ───&lt; OrderItemEntity  &gt;─── 1  ProductEntity
                  │                    │                                │
             @ManyToOne             @ManyToOne                      @ManyToOne
@@ -626,10 +716,14 @@ public class OrderItemEntity {
 <li><code>orphanRemoval = true</code> — when you remove an item from the list, it's deleted from the database.</li>
 <li><code>fetch = FetchType.LAZY</code> — the related entity is loaded only when accessed (not when the order is loaded). This avoids unnecessary queries.</li>
 </ul>
+</div>
+</details>
 <hr />
 <h2 id="7-spring-data-repositories">7. Spring Data Repositories<a class="anchor-link" href="#7-spring-data-repositories" title="Permanent link">¶</a></h2>
 <p>Spring Data JPA provides the <code>JpaRepository</code> interface. You only define the interface — Spring generates the implementation at runtime.</p>
-<h3 id="customerrepository">CustomerRepository<a class="anchor-link" href="#customerrepository" title="Permanent link">¶</a></h3>
+<details id="customerrepository" class="submodule">
+<summary>CustomerRepository<a class="anchor-link" href="#customerrepository" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
 
 import com.example.ordermgmt.domain.CustomerEntity;
@@ -649,7 +743,11 @@ public interface CustomerRepository extends JpaRepository&lt;CustomerEntity, Lon
     // The % wildcards must be in the argument, not the method name
     // findByEmail method already above
 }</code></pre>
-<h3 id="productrepository">ProductRepository<a class="anchor-link" href="#productrepository" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="productrepository" class="submodule">
+<summary>ProductRepository<a class="anchor-link" href="#productrepository" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
 
 import com.example.ordermgmt.domain.ProductEntity;
@@ -671,7 +769,11 @@ public interface ProductRepository extends JpaRepository&lt;ProductEntity, Long&
     // SELECT * FROM products WHERE name CONTAINS ? (case-insensitive)
     List&lt;ProductEntity&gt; findByNameContainingIgnoreCase(String name);
 }</code></pre>
-<h3 id="orderrepository">OrderRepository<a class="anchor-link" href="#orderrepository" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="orderrepository" class="submodule">
+<summary>OrderRepository<a class="anchor-link" href="#orderrepository" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
 
 import com.example.ordermgmt.domain.OrderEntity;
@@ -704,7 +806,11 @@ public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; 
            nativeQuery = true)
     List&lt;OrderEntity&gt; findHighValueOrders(@Param("amount") java.math.BigDecimal amount);
 }</code></pre>
-<h3 id="what-does-jparepository-give-you-for-free">What Does <code>JpaRepository</code> Give You for Free?<a class="anchor-link" href="#what-does-jparepository-give-you-for-free" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-does-jparepository-give-you-for-free" class="submodule">
+<summary>What Does <code>JpaRepository</code> Give You for Free?<a class="anchor-link" href="#what-does-jparepository-give-you-for-free" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Without writing any implementation, <code>JpaRepository</code> gives you:</p>
 <table>
 <thead>
@@ -748,7 +854,11 @@ public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; 
 </tr>
 </tbody>
 </table>
-<h3 id="derived-query-methods">Derived Query Methods<a class="anchor-link" href="#derived-query-methods" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="derived-query-methods" class="submodule">
+<summary>Derived Query Methods<a class="anchor-link" href="#derived-query-methods" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Spring Data can generate queries from method names:</p>
 <table>
 <thead>
@@ -789,6 +899,8 @@ public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; 
 - Field names must match the entity's field names exactly
 - Conditions are connected with <code>And</code>, <code>Or</code>
 - Sorting is added with <code>OrderByFieldNameAsc</code> or <code>OrderByFieldNameDesc</code></p>
+</div>
+</details>
 <hr />
 <h2 id="8-pagination-and-sorting-in-repositories">8. Pagination and Sorting in Repositories<a class="anchor-link" href="#8-pagination-and-sorting-in-repositories" title="Permanent link">¶</a></h2>
 <pre class="code-block"><code class="language-java">// In the repository interface:
@@ -807,7 +919,9 @@ page.hasPrevious();         // Is there a previous page?</code></pre>
 <hr />
 <h2 id="9-the-n1-problem">9. The N+1 Problem<a class="anchor-link" href="#9-the-n1-problem" title="Permanent link">¶</a></h2>
 <p>The <strong>N+1 problem</strong> is a common performance issue with JPA. It happens when you fetch a list of entities and then access their relationships.</p>
-<h3 id="the-problem">The Problem<a class="anchor-link" href="#the-problem" title="Permanent link">¶</a></h3>
+<details id="the-problem" class="submodule">
+<summary>The Problem<a class="anchor-link" href="#the-problem" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// 1 query: fetch 10 orders
 List&lt;OrderEntity&gt; orders = orderRepository.findAll();
 // SELECT * FROM orders LIMIT 10
@@ -818,7 +932,11 @@ for (OrderEntity order : orders) {
     // SELECT * FROM customers WHERE id = ?
 }</code></pre>
 <p><strong>1 query for orders + 10 queries for customers = 11 queries!</strong> This is very slow for hundreds of orders.</p>
-<h3 id="solution-1-join-fetch">Solution 1: JOIN FETCH<a class="anchor-link" href="#solution-1-join-fetch" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="solution-1-join-fetch" class="submodule">
+<summary>Solution 1: JOIN FETCH<a class="anchor-link" href="#solution-1-join-fetch" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Use <code>@Query</code> with <code>JOIN FETCH</code> to fetch related data in a single query:</p>
 <pre class="code-block"><code class="language-java">@Query("SELECT o FROM OrderEntity o JOIN FETCH o.customer WHERE o.status = :status")
 List&lt;OrderEntity&gt; findByStatusWithCustomer(@Param("status") OrderStatus status);</code></pre>
@@ -827,14 +945,22 @@ List&lt;OrderEntity&gt; findByStatusWithCustomer(@Param("status") OrderStatus st
 JOIN customers c ON o.customer_id = c.id
 WHERE o.status = ?</code></pre></p>
 <p><strong>11 queries → 1 query.</strong></p>
-<h3 id="solution-2-entitygraph">Solution 2: @EntityGraph<a class="anchor-link" href="#solution-2-entitygraph" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="solution-2-entitygraph" class="submodule">
+<summary>Solution 2: @EntityGraph<a class="anchor-link" href="#solution-2-entitygraph" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@EntityGraph(attributePaths = {"customer", "items", "items.product"})
 @Query("SELECT o FROM OrderEntity o WHERE o.status = :status")
 List&lt;OrderEntity&gt; findByStatusWithAllRelations(@Param("status") OrderStatus status);</code></pre>
 <p><code>@EntityGraph</code> tells JPA to fetch the specified relationships eagerly (in one query) without writing the JOIN in the query.</p>
+</div>
+</details>
 <hr />
 <h2 id="10-configuring-postgresql">10. Configuring PostgreSQL<a class="anchor-link" href="#10-configuring-postgresql" title="Permanent link">¶</a></h2>
-<h3 id="applicationyml-already-set-up-in-module-01">application.yml (already set up in Module 01)<a class="anchor-link" href="#applicationyml-already-set-up-in-module-01" title="Permanent link">¶</a></h3>
+<details id="applicationyml-already-set-up-in-module-01" class="submodule">
+<summary>application.yml (already set up in Module 01)<a class="anchor-link" href="#applicationyml-already-set-up-in-module-01" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-yaml">spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/ordermgmt
@@ -849,7 +975,11 @@ List&lt;OrderEntity&gt; findByStatusWithAllRelations(@Param("status") OrderStatu
     properties:
       hibernate:
         format_sql: true     # Pretty-print SQL</code></pre>
-<h3 id="what-ddl-auto-does">What <code>ddl-auto</code> Does<a class="anchor-link" href="#what-ddl-auto-does" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-ddl-auto-does" class="submodule">
+<summary>What <code>ddl-auto</code> Does<a class="anchor-link" href="#what-ddl-auto-does" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -880,7 +1010,11 @@ List&lt;OrderEntity&gt; findByStatusWithAllRelations(@Param("status") OrderStatu
 </tr>
 </tbody>
 </table>
-<h3 id="using-bigdecimal-in-postgresql">Using BigDecimal in PostgreSQL<a class="anchor-link" href="#using-bigdecimal-in-postgresql" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="using-bigdecimal-in-postgresql" class="submodule">
+<summary>Using BigDecimal in PostgreSQL<a class="anchor-link" href="#using-bigdecimal-in-postgresql" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>PostgreSQL has a <code>NUMERIC</code> type that maps perfectly to Java's <code>BigDecimal</code>. We use <code>precision</code> and <code>scale</code> on <code>@Column</code>:</p>
 <pre class="code-block"><code class="language-java">@Column(precision = 10, scale = 2)
 private BigDecimal price;</code></pre>
@@ -889,6 +1023,8 @@ private BigDecimal price;</code></pre>
 <li><code>scale = 2</code> — 2 digits after the decimal point</li>
 <li>Maps to <code>NUMERIC(10, 2)</code> in PostgreSQL — always use BigDecimal for money</li>
 </ul>
+</div>
+</details>
 <hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
@@ -906,7 +1042,9 @@ private BigDecimal price;</code></pre>
 </ul>
 <hr />
 <h2 id="11-jpa-entity-relationships-deep-dive">11. JPA Entity Relationships Deep Dive<a class="anchor-link" href="#11-jpa-entity-relationships-deep-dive" title="Permanent link">¶</a></h2>
-<h3 id="one-to-one">One-to-One<a class="anchor-link" href="#one-to-one" title="Permanent link">¶</a></h3>
+<details id="one-to-one" class="submodule">
+<summary>One-to-One<a class="anchor-link" href="#one-to-one" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Entity
 public class Order {
     @Id
@@ -928,7 +1066,11 @@ public class ShippingAddress {
     private String city;
     private String zipCode;
 }</code></pre>
-<h3 id="cascade-types">Cascade Types<a class="anchor-link" href="#cascade-types" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="cascade-types" class="submodule">
+<summary>Cascade Types<a class="anchor-link" href="#cascade-types" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -963,7 +1105,11 @@ public class ShippingAddress {
 </tr>
 </tbody>
 </table>
-<h3 id="fetch-strategies">Fetch Strategies<a class="anchor-link" href="#fetch-strategies" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="fetch-strategies" class="submodule">
+<summary>Fetch Strategies<a class="anchor-link" href="#fetch-strategies" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -992,7 +1138,11 @@ private List&lt;OrderItem&gt; items;
 // GOOD — loads items only when .getItems() is called
 @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
 private List&lt;OrderItem&gt; items;</code></pre>
-<h3 id="the-n1-problem-recap-with-solution">The N+1 Problem (Recap with Solution)<a class="anchor-link" href="#the-n1-problem-recap-with-solution" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="the-n1-problem-recap-with-solution" class="submodule">
+<summary>The N+1 Problem (Recap with Solution)<a class="anchor-link" href="#the-n1-problem-recap-with-solution" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// This triggers 1 query for orders + N queries for items (N+1 problem)
 List&lt;Order&gt; orders = orderRepository.findAll();
 for (Order order : orders) {
@@ -1002,9 +1152,13 @@ for (Order order : orders) {
 // Solution: JOIN FETCH in the repository
 @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items")
 List&lt;Order&gt; findAllWithItems();  // single query</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="12-jpql-and-native-queries">12. JPQL and Native Queries<a class="anchor-link" href="#12-jpql-and-native-queries" title="Permanent link">¶</a></h2>
-<h3 id="jpql-java-persistence-query-language">JPQL (Java Persistence Query Language)<a class="anchor-link" href="#jpql-java-persistence-query-language" title="Permanent link">¶</a></h3>
+<details id="jpql-java-persistence-query-language" class="submodule">
+<summary>JPQL (Java Persistence Query Language)<a class="anchor-link" href="#jpql-java-persistence-query-language" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>JPQL looks like SQL but operates on <strong>entities</strong>, not tables:</p>
 <pre class="code-block"><code class="language-java">@Repository
 public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; {
@@ -1022,12 +1176,20 @@ public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; 
     @Query("SELECT SUM(o.totalAmount) FROM OrderEntity o WHERE o.status = 'CONFIRMED'")
     BigDecimal getTotalConfirmedRevenue();
 }</code></pre>
-<h3 id="native-sql-queries">Native SQL Queries<a class="anchor-link" href="#native-sql-queries" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="native-sql-queries" class="submodule">
+<summary>Native SQL Queries<a class="anchor-link" href="#native-sql-queries" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When JPQL can't express what you need:</p>
 <pre class="code-block"><code class="language-java">@Query(value = "SELECT * FROM orders WHERE EXTRACT(MONTH FROM created_at) = :month",
        nativeQuery = true)
 List&lt;OrderEntity&gt; findByMonth(@Param("month") int month);</code></pre>
-<h3 id="pagination-and-sorting">Pagination and Sorting<a class="anchor-link" href="#pagination-and-sorting" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="pagination-and-sorting" class="submodule">
+<summary>Pagination and Sorting<a class="anchor-link" href="#pagination-and-sorting" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// Spring Data provides Pageable — no need to write pagination logic
 Page&lt;OrderEntity&gt; findByStatus(OrderStatus status, Pageable pageable);
 
@@ -1039,9 +1201,13 @@ page.getContent();       // list of orders on this page
 page.getTotalElements(); // total count
 page.getTotalPages();   // total page count
 page.hasNext();         // is there a next page?</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="13-database-indexing-and-performance">13. Database Indexing and Performance<a class="anchor-link" href="#13-database-indexing-and-performance" title="Permanent link">¶</a></h2>
-<h3 id="adding-indexes">Adding Indexes<a class="anchor-link" href="#adding-indexes" title="Permanent link">¶</a></h3>
+<details id="adding-indexes" class="submodule">
+<summary>Adding Indexes<a class="anchor-link" href="#adding-indexes" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Entity
 @Table(name = "orders", indexes = {
     @Index(name = "idx_order_status", columnList = "status"),
@@ -1049,7 +1215,11 @@ page.hasNext();         // is there a next page?</code></pre>
     @Index(name = "idx_order_created_at", columnList = "created_at")
 })
 public class OrderEntity { ... }</code></pre>
-<h3 id="when-to-index">When to Index<a class="anchor-link" href="#when-to-index" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="when-to-index" class="submodule">
+<summary>When to Index<a class="anchor-link" href="#when-to-index" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -1091,7 +1261,11 @@ public class OrderEntity { ... }</code></pre>
 </tr>
 </tbody>
 </table>
-<h3 id="common-performance-issues">Common Performance Issues<a class="anchor-link" href="#common-performance-issues" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="common-performance-issues" class="submodule">
+<summary>Common Performance Issues<a class="anchor-link" href="#common-performance-issues" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// BAD — can't use index on UPPER(name)
 @Query("SELECT p FROM ProductEntity p WHERE UPPER(p.name) = UPPER(:name)")
 ProductEntity findByNameIgnoreCase(@Param("name") String name);
@@ -1099,11 +1273,15 @@ ProductEntity findByNameIgnoreCase(@Param("name") String name);
 // GOOD — use ILIKE or store a normalized column
 @Query("SELECT p FROM ProductEntity p WHERE LOWER(p.name) = LOWER(:name)")
 ProductEntity findByNameIgnoreCase(@Param("name") String name);</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="14-flyway-database-migrations">14. Flyway Database Migrations<a class="anchor-link" href="#14-flyway-database-migrations" title="Permanent link">¶</a></h2>
 <p>In production, you should <strong>never</strong> use <code>ddl-auto: update</code>. Instead, use a
 migration tool like <strong>Flyway</strong> to manage schema changes in version control.</p>
-<h3 id="adding-flyway">Adding Flyway<a class="anchor-link" href="#adding-flyway" title="Permanent link">¶</a></h3>
+<details id="adding-flyway" class="submodule">
+<summary>Adding Flyway<a class="anchor-link" href="#adding-flyway" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.flywaydb&lt;/groupId&gt;
     &lt;artifactId&gt;flyway-core&lt;/artifactId&gt;
@@ -1112,7 +1290,11 @@ migration tool like <strong>Flyway</strong> to manage schema changes in version 
     &lt;groupId&gt;org.flywaydb&lt;/groupId&gt;
     &lt;artifactId&gt;flyway-database-postgresql&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
-<h3 id="migration-files">Migration Files<a class="anchor-link" href="#migration-files" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="migration-files" class="submodule">
+<summary>Migration Files<a class="anchor-link" href="#migration-files" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code>src/main/resources/db/migration/
 ├── V1__create_tables.sql
 ├── V2__add_index_on_orders.sql
@@ -1154,21 +1336,33 @@ CREATE TABLE order_items (
 <p><strong>V2__add_index_on_orders.sql:</strong>
 <pre class="code-block"><code class="language-sql">CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_customer_status ON orders(customer_id, status);</code></pre></p>
-<h3 id="how-flyway-works">How Flyway Works<a class="anchor-link" href="#how-flyway-works" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="how-flyway-works" class="submodule">
+<summary>How Flyway Works<a class="anchor-link" href="#how-flyway-works" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>On application startup, Flyway checks the <code>flyway_schema_history</code> table</li>
 <li>It compares migration files against the table</li>
 <li>Unexecuted migrations are run <strong>in order</strong> (V1, V2, V3...)</li>
 <li>Each migration is wrapped in a transaction — all or nothing</li>
 </ol>
-<h3 id="flyway-configuration">Flyway Configuration<a class="anchor-link" href="#flyway-configuration" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="flyway-configuration" class="submodule">
+<summary>Flyway Configuration<a class="anchor-link" href="#flyway-configuration" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-yaml">spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true  # allow running on an existing database
     validate-on-migrate: true   # verify checksums of applied migrations</code></pre>
-<h3 id="why-flyway-over-ddl-auto">Why Flyway Over ddl-auto<a class="anchor-link" href="#why-flyway-over-ddl-auto" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="why-flyway-over-ddl-auto" class="submodule">
+<summary>Why Flyway Over ddl-auto<a class="anchor-link" href="#why-flyway-over-ddl-auto" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -1199,13 +1393,21 @@ CREATE INDEX idx_orders_customer_status ON orders(customer_id, status);</code></
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="15-testing-jpa-repositories-with-testcontainers">15. Testing JPA Repositories with Testcontainers<a class="anchor-link" href="#15-testing-jpa-repositories-with-testcontainers" title="Permanent link">¶</a></h2>
-<h3 id="what-is-testcontainers">What Is Testcontainers?<a class="anchor-link" href="#what-is-testcontainers" title="Permanent link">¶</a></h3>
+<details id="what-is-testcontainers" class="submodule">
+<summary>What Is Testcontainers?<a class="anchor-link" href="#what-is-testcontainers" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Testcontainers is a Java library that <strong>starts real Docker containers</strong> during
 tests. Instead of an in-memory H2 database that doesn't match production, you
 test against a real PostgreSQL instance.</p>
-<h3 id="setup">Setup<a class="anchor-link" href="#setup" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="setup" class="submodule">
+<summary>Setup<a class="anchor-link" href="#setup" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.testcontainers&lt;/groupId&gt;
     &lt;artifactId&gt;postgresql&lt;/artifactId&gt;
@@ -1216,7 +1418,11 @@ test against a real PostgreSQL instance.</p>
     &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
-<h3 id="full-repository-test">Full Repository Test<a class="anchor-link" href="#full-repository-test" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="full-repository-test" class="submodule">
+<summary>Full Repository Test<a class="anchor-link" href="#full-repository-test" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
 
 import com.example.ordermgmt.domain.*;
@@ -1307,10 +1513,16 @@ class OrderRepositoryFullTest {
                 .isEqualByComparingTo(new BigDecimal("49.98"));
     }
 }</code></pre>
-<h3 id="serviceconnection">@ServiceConnection<a class="anchor-link" href="#serviceconnection" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="serviceconnection" class="submodule">
+<summary>@ServiceConnection<a class="anchor-link" href="#serviceconnection" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Spring Boot 3.1+ introduced <code>@ServiceConnection</code> — it automatically wires the
 container's database URL, username, and password into your Spring configuration.
 No need for <code>@DynamicPropertySource</code> boilerplate.</p>
+</div>
+</details>
 <hr />
 <hr />
 <p>← <a href="03-spring-boot-fundamentals.html">Previous: Module 03 — Spring Boot Fundamentals</a> | <a href="05-service-oriented-architecture.html">Next: Module 05 — Service-Oriented Architecture</a> →</p>

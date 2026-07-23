@@ -2,13 +2,16 @@
 
 ## What You'll Learn
 
-- How to assemble a complete Order Management System using all technologies from the course
+- How to assemble a complete Order Management System using **all technologies from every module**
+- How to use **sealed classes** (Module 00) for exhaustive domain modeling
+- How **layered architecture** (Module 05) organizes the codebase
+- How to configure **JPA, GraphQL, Kafka, WebFlux, Docker, and Testcontainers**
 - How REST and GraphQL APIs coexist in one Spring Boot application
 - How to publish Kafka events from domain services and consume them
-- How to stream order-status updates with Spring WebFlux (reactive programming)
-- How to structure a project with layered architecture (Controller, Service, Repository, Domain)
-- How to configure JPA, GraphQL, Kafka, WebFlux, Docker, and Testcontainers
-- How to test all layers (unit, integration, Kafka, reactive)
+- How to stream order-status updates with **Spring WebFlux** (Module 08)
+- How to use **Java 21 virtual threads** as an alternative to reactive in blocking endpoint
+- How to test all layers (unit, integration, Kafka, reactive) — Module 09
+- How to prepare for **Kotlin migration** (Module 11) with Kotlin-friendly patterns
 - How to run and test the application with curl and GraphQL queries
 
 ## Prerequisites
@@ -2012,12 +2015,310 @@ Access at: `GET /actuator/health` → includes `kafka` health indicator.
 ---
 
 
+## 27. Sealed Classes for Domain Modeling
+
+Java 21 sealed classes let us model the domain exhaustively — the compiler guarantees we handle every case. We'll refactor `OrderStatus` and event types to use sealed interfaces.
+
+### Sealed Order Events
+
+```java
+package com.example.ordermgmt.kafka.event;
+
+// Sealed interface: only these permitted types are valid order events
+public sealed interface OrderEvent
+        permits OrderCreatedEvent, OrderStatusChangedEvent, OrderCancelledEvent {
+
+    Long orderId();
+    Instant timestamp();
+}
+
+public record OrderCreatedEvent(
+        Long orderId,
+        Long customerId,
+        BigDecimal totalAmount,
+        Instant timestamp
+) implements OrderEvent {}
+
+public record OrderStatusChangedEvent(
+        Long orderId,
+        OrderStatus oldStatus,
+        OrderStatus newStatus,
+        Instant timestamp
+) implements OrderEvent {}
+
+public record OrderCancelledEvent(
+        Long orderId,
+        String reason,
+        Instant timestamp
+) implements OrderEvent {}
+```
+
+### Pattern Matching on Sealed Events
+
+The Kafka consumer can now use pattern matching switch — the compiler enforces exhaustiveness:
+
+```java
+@KafkaListener(topics = "order-events", groupId = "ordermgmt-group")
+public void handleEvent(OrderEvent event) {
+    switch (event) {
+        case OrderCreatedEvent e -> {
+            log.info("Order created: orderId={}, total={}", e.orderId(), e.totalAmount());
+            notificationService.sendOrderConfirmation(e);
+        }
+        case OrderStatusChangedEvent e -> {
+            log.info("Status changed: orderId={} {}→{}", e.orderId(), e.oldStatus(), e.newStatus());
+            analyticsService.recordStatusChange(e);
+        }
+        case OrderCancelledEvent e -> {
+            log.info("Order cancelled: orderId={}, reason={}", e.orderId(), e.reason());
+            notificationService.sendCancellationNotice(e);
+        }
+        // No default needed — the compiler knows all permitted subtypes
+    }
+}
+```
+
+If someone later adds `OrderRefundedEvent implements OrderEvent`, the switch fails to compile until the new case is handled. This is **exhaustive domain modeling** — the compiler catches missing cases.
+
+<details>
+<summary>Deep Dive: Sealed Classes vs Enums</summary>
+
+Sealed interfaces are more powerful than enums:
+
+- **Enums** are singletons — one instance per value. You can't attach per-instance data.
+- **Sealed classes/interfaces** allow per-instance fields. `OrderCreatedEvent` carries `totalAmount`, `OrderCancelledEvent` carries `reason` — different data per variant.
+- **Records + sealed = algebraic data types** — the functional programming concept where types are composed of "or" (sealed) and "and" (records) relationships.
+
+Use enums when all variants share the same shape. Use sealed when variants have different fields.
+
+</details>
+
+---
+
+## 28. Virtual Threads for Blocking Endpoints
+
+Java 21's **virtual threads** (Project Loom) give us a third concurrency model alongside Spring MVC (thread-per-request) and Spring WebFlux (reactive). Virtual threads allow blocking code to scale without the cognitive overhead of reactive pipelines.
+
+### When to Use Virtual Threads vs Reactive
+
+| Scenario | Recommended Approach | Why |
+|----------|----------------------|-----|
+| Simple CRUD REST endpoint | Virtual threads | Blocking code is simpler to read and debug |
+| Streaming data to client (SSE/WebSocket) | WebFlux (Flux) | Reactive streams handle streaming naturally |
+| Kafka consumer with complex processing | Either | Virtual threads for blocking DB calls, reactive for backpressure |
+| Aggregating multiple async data sources | Reactive (Flux.merge/zip) | Composing async streams is reactive's strength |
+| Legacy library that blocks (JDBC driver) | Virtual threads | Cannot make blocking code reactive without wrapping |
+
+### Enabling Virtual Threads
+
+In `application.yml`:
+
+```yaml
+spring:
+  threads:
+    virtual:
+      enabled: true
+```
+
+Spring Boot 3.2+ automatically uses virtual threads for HTTP request handling when this flag is set. Tomcat creates virtual threads instead of platform threads — each request gets a virtual thread that costs ~a few KB instead of ~1MB.
+
+### Mixing Virtual Threads and Reactive
+
+You can have both in the same application:
+
+```java
+package com.example.ordermgmt.controller;
+
+import com.example.ordermgmt.dto.OrderResponse;
+import com.example.ordermgmt.service.OrderService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    // This endpoint runs on a virtual thread (blocking, but scales)
+    @GetMapping
+    public List<OrderResponse> listOrders() {
+        return orderService.getAllOrders(); // blocks on JPA, but on a virtual thread
+    }
+
+    // The reactive endpoint in OrderFluxController handles streaming
+    // on Netty event loop (non-blocking Flux)
+}
+```
+
+This is the practical answer to "should I use virtual threads or reactive?": **use both, each where it fits.**
+
+### Configuring Tomcat + Virtual Threads
+
+For the blocking REST endpoints, we configure Tomcat to use virtual threads:
+
+```java
+package com.example.ordermgmt.config;
+
+import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.concurrent.Executors;
+
+@Configuration
+public class VirtualThreadConfig {
+
+    @Bean
+    public TomcatProtocolHandlerCustomizer<?> protocolHandlerVirtualThreadExecutorCustomizer() {
+        return protocolHandler -> {
+            protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
+        };
+    }
+}
+```
+
+Now every HTTP request to `/api/orders/*` runs on a virtual thread. You can block freely (JPA calls, REST client calls) without worrying about thread exhaustion.
+
+<details>
+<summary>Deep Dive: Virtual Thread Pitfalls</summary>
+
+Virtual threads are cheap, but they're not free. Watch out for:
+
+- **Synchronized blocks**: Virtual threads pinned to their carrier thread inside `synchronized`. Use `ReentrantLock` instead if a virtual thread might block inside a lock.
+- **Thread-local overuse**: Virtual threads support `ThreadLocal`, but millions of virtual threads with thread-locals consume real memory. Prefer passing context explicitly.
+- **`Object.wait()`**: Also pins the virtual thread. Use `java.util.concurrent` locks instead.
+
+```java
+// BAD: pins the virtual thread
+synchronized (lock) {
+    condition.await(); // pins!
+}
+
+// GOOD: does not pin
+ReentrantLock lock = new ReentrantLock();
+lock.lock();
+try {
+    condition.await(); // does NOT pin
+} finally {
+    lock.unlock();
+}
+```
+
+</details>
+
+---
+
+## 29. Preparing for Kotlin Migration (Module 11 Preview)
+
+The capstone is written in Java, but the codebase is structured to make a future Kotlin migration (covered in Module 11) straightforward. Here's what makes the code Kotlin-ready:
+
+### Patterns That Migrate Cleanly
+
+| Java Pattern (This Module) | Kotlin Equivalent (Module 11) | Why It Migrates Cleanly |
+|----------------------------|-------------------------------|------------------------|
+| Records (`record OrderResponse(...)`) | `data class OrderResponse(...)` | Same concept, one-line conversion |
+| Constructor injection | Constructor injection | Identical — Kotlin supports it natively |
+| Sealed interfaces | `sealed interface` / `sealed class` | Kotlin had sealed classes before Java |
+| `var` local variables | `val` / `var` | Kotlin's version is more expressive (val = immutable) |
+| Pattern matching switch | `when` expression | Kotlin's `when` is more flexible |
+| `Optional<T>` | Nullable `T?` | Kotlin's null safety replaces Optional |
+
+### Records Are Already Kotlin-Friendly
+
+Our DTOs are records — when migrated to Kotlin, they become `data class` with one line change:
+
+```java
+// Java (current)
+public record OrderResponse(
+        Long id,
+        Long customerId,
+        String customerName,
+        OrderStatus status,
+        BigDecimal totalAmount,
+        Instant createdAt
+) {}
+```
+
+```kotlin
+// Kotlin (after migration — Module 11)
+data class OrderResponse(
+    val id: Long?,
+    val customerId: Long,
+    val customerName: String,
+    val status: OrderStatus,
+    val totalAmount: BigDecimal,
+    val createdAt: Instant
+)
+```
+
+### Sealed Events Map Directly to Kotlin
+
+Our sealed `OrderEvent` interface (section 27 above) becomes even more natural in Kotlin:
+
+```kotlin
+sealed interface OrderEvent {
+    val orderId: Long
+    val timestamp: Instant
+}
+
+data class OrderCreatedEvent(
+    override val orderId: Long,
+    val customerId: Long,
+    val totalAmount: BigDecimal,
+    override val timestamp: Instant
+) : OrderEvent
+
+// Exhaustive when:
+fun handleEvent(event: OrderEvent) = when (event) {
+    is OrderCreatedEvent -> println("Created: ${event.orderId}")
+    is OrderStatusChangedEvent -> println("Changed: ${event.orderId}")
+    is OrderCancelledEvent -> println("Cancelled: ${event.orderId}")
+    // No else needed — sealed guarantees exhaustiveness
+}
+```
+
+### What to Avoid (Anti-patterns for Migration)
+
+Patterns that make Kotlin migration harder:
+
+- **Field injection** (`@Autowired` on fields) — Kotlin classes are final by default; field injection requires proxies. Use constructor injection (which we do throughout).
+- **Lombok** — we don't use it; records replace Lombok's `@Data`/`@Builder`. Lombok has poor Kotlin interop.
+- **Mutable state in services** — services are stateless with `final` fields. This maps to Kotlin `val` properties.
+- **Static utility methods** — prefer instance methods or companion objects. Kotlin doesn't have `static`; it uses `companion object`.
+
+### Migration Strategy Preview
+
+Module 11 covers the full migration, but the high-level strategy is:
+
+1. **Start with DTOs** — records → data classes (mechanical, safe)
+2. **Then entities** — JPA entities need `no-arg` constructor plugin, but otherwise convert cleanly
+3. **Then services** — constructor injection maps directly, `val` replaces `final`
+4. **Then controllers** — `@RestController` + routing annotations are identical
+5. **Finally, replace Reactor with coroutines** — `suspend fun` replaces `Mono<T>`/`Flux<T>`
+
+The capstone codebase is structured so each of these steps is independent.
+
+---
+
 ---
 
 
 ## What You Learned
 
-- See the module content above for key takeaways.
+- How to assemble a complete Order Management System using **all concepts from all modules**
+- **Sealed interfaces** + records for exhaustive, compiler-checked domain modeling
+- **Virtual threads** as a third concurrency model alongside MVC and WebFlux
+- How to **mix blocking (virtual threads) and reactive (WebFlux)** in the same application
+- How sealed events make **pattern matching in Kafka consumers** exhaustive and safe
+- Why the codebase structure (records, constructor injection, no Lombok) **prepares for Kotlin migration**
+- How Java sealed types map directly to **Kotlin sealed classes** — the migration is structural
+- When to choose virtual threads vs reactive streams (use both, each where it fits)
 
 ---
 

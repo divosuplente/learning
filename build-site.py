@@ -80,6 +80,61 @@ def fix_links(html: str) -> str:
     return html
 
 
+def make_submodules_collapsible(html: str) -> str:
+    """Wrap H3+ subsections inside <details> blocks for collapsible submodules.
+
+    Each H3 heading becomes a <summary>, and everything until the next H3 or H2
+    is the collapsible body. H2 sections stay always-visible (they're the main
+    sections), H3 sections become collapsible submodules.
+    """
+    lines = html.split('\n')
+    result = []
+    in_details = False
+    current_summary = ""
+
+    for i, line in enumerate(lines):
+        # Detect H3 heading
+        h3_match = re.match(r'^<h3\s+id="([^"]*)"[^>]*>(.+?)</h3>$', line.strip())
+        # Detect H2 heading (closes any open details)
+        h2_match = re.match(r'^<h2\s+id="([^"]*)"[^>]*>(.+?)</h2>$', line.strip())
+        # Detect <hr> (closes any open details)
+        hr_match = line.strip() == '<hr />'
+
+        if h2_match or hr_match:
+            # Close any open details block
+            if in_details:
+                result.append('</div>')
+                result.append('</details>')
+                in_details = False
+            result.append(line)
+            continue
+
+        if h3_match:
+            # Close previous details if open
+            if in_details:
+                result.append('</div>')
+                result.append('</details>')
+
+            heading_id = h3_match.group(1)
+            heading_text = h3_match.group(2)
+            result.append(f'<details id="{heading_id}" class="submodule">')
+            result.append(f'<summary>{heading_text}</summary>')
+            result.append('<div class="submodule-body">')
+            in_details = True
+            continue
+
+        # If we're inside a details block, add the line
+        # If not inside details, add normally
+        result.append(line)
+
+    # Close any remaining open details
+    if in_details:
+        result.append('</div>')
+        result.append('</details>')
+
+    return '\n'.join(result)
+
+
 def build_search_index(pages_data: list[dict]) -> str:
     """Build a JSON search index."""
     return json.dumps(pages_data, ensure_ascii=False)
@@ -268,6 +323,9 @@ def main():
 
         # Fix internal links
         html_body = fix_links(html_body)
+
+        # Make H3 subsections collapsible submodules
+        html_body = make_submodules_collapsible(html_body)
 
         page_html = render_page(name, html_body, MODULES, current_module=slug)
         out_path = OUTPUT_DIR / f"{slug}.html"
@@ -737,6 +795,43 @@ body {
 }
 
 .content details p { padding: 0.75rem 1rem; }
+
+/* ---- Collapsible submodules (H3 sections) ---- */
+.content details.submodule {
+  margin: 0;
+  border: none;
+  border-left: 3px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.content details.submodule > summary {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  padding: 0.625rem 0.75rem;
+  border-radius: 0;
+  border-bottom: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.content details.submodule > summary:hover {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.content details.submodule[open] > summary {
+  border-bottom-color: var(--border);
+  color: var(--accent-light);
+}
+
+.content details.submodule .submodule-body {
+  padding: 0.75rem 0.75rem 0.75rem 1.25rem;
+}
+
+.content details.submodule .submodule-body > *:first-child {
+  margin-top: 0;
+}
 
 /* ---- Task list ---- */
 .content .task-list-item {

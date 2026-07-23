@@ -205,7 +205,9 @@
 
 <h2 id="1-what-is-spring-boot">1. What Is Spring Boot?<a class="anchor-link" href="#1-what-is-spring-boot" title="Permanent link">¶</a></h2>
 <p><strong>Spring Boot</strong> is a framework that makes building Java applications faster and easier. It is built on top of the <strong>Spring Framework</strong>, which has been the most popular Java framework since 2003.</p>
-<h3 id="the-problem-spring-boot-solves">The Problem Spring Boot Solves<a class="anchor-link" href="#the-problem-spring-boot-solves" title="Permanent link">¶</a></h3>
+<details id="the-problem-spring-boot-solves" class="submodule">
+<summary>The Problem Spring Boot Solves<a class="anchor-link" href="#the-problem-spring-boot-solves" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Plain Spring requires a lot of manual setup:
 - Write XML configuration files
 - Manually configure every bean
@@ -213,7 +215,11 @@
 - Manage dependency versions by hand
 - Configure database connections manually</p>
 <p>Spring Boot eliminates all this boilerplate. It uses <strong>convention over configuration</strong> — instead of telling Spring everything, you follow conventions and Spring Boot fills in the details automatically.</p>
-<h3 id="key-features">Key Features<a class="anchor-link" href="#key-features" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="key-features" class="submodule">
+<summary>Key Features<a class="anchor-link" href="#key-features" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -244,10 +250,14 @@
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="2-auto-configuration">2. Auto-Configuration<a class="anchor-link" href="#2-auto-configuration" title="Permanent link">¶</a></h2>
 <p><strong>Auto-configuration</strong> is Spring Boot's magic. When you add a dependency to your <code>pom.xml</code>, Spring Boot automatically creates and configures the necessary beans.</p>
-<h3 id="how-it-works">How It Works<a class="anchor-link" href="#how-it-works" title="Permanent link">¶</a></h3>
+<details id="how-it-works" class="submodule">
+<summary>How It Works<a class="anchor-link" href="#how-it-works" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>Spring Boot scans your classpath (all the JAR files in your project)</li>
 <li>If it finds <code>spring-boot-starter-web</code>, it configures an embedded Tomcat server, Spring MVC, and JSON serialization</li>
@@ -255,7 +265,11 @@
 <li>If it finds <code>postgresql</code> driver, it configures a PostgreSQL connection</li>
 </ol>
 <p>You don't write any configuration code for this — it just works.</p>
-<h3 id="springbootapplication"><code>@SpringBootApplication</code><a class="anchor-link" href="#springbootapplication" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="springbootapplication" class="submodule">
+<summary><code>@SpringBootApplication</code><a class="anchor-link" href="#springbootapplication" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt;
 
 import org.springframework.boot.SpringApplication;
@@ -296,10 +310,14 @@ public class OrderManagementApplication {
 2. Runs auto-configuration
 3. Starts the embedded Tomcat server on port 8080
 4. Your application is ready to receive requests</p>
+</div>
+</details>
 <hr />
 <h2 id="3-creating-rest-endpoints">3. Creating REST Endpoints<a class="anchor-link" href="#3-creating-rest-endpoints" title="Permanent link">¶</a></h2>
 <p>A <strong>REST endpoint</strong> is a URL that your application responds to. For example, <code>GET /api/orders</code> returns a list of orders.</p>
-<h3 id="restcontroller"><code>@RestController</code><a class="anchor-link" href="#restcontroller" title="Permanent link">¶</a></h3>
+<details id="restcontroller" class="submodule">
+<summary><code>@RestController</code><a class="anchor-link" href="#restcontroller" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
 
 import org.springframework.web.bind.annotation.*;
@@ -314,7 +332,11 @@ public class OrderController {
 <li><code>@RestController</code> — marks this class as a controller that returns data (JSON) instead of HTML pages. It's shorthand for <code>@Controller</code> + <code>@ResponseBody</code>.</li>
 <li><code>@RequestMapping("/api/orders")</code> — all URLs in this controller start with <code>/api/orders</code>.</li>
 </ul>
-<h3 id="http-method-mappings">HTTP Method Mappings<a class="anchor-link" href="#http-method-mappings" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="http-method-mappings" class="submodule">
+<summary>HTTP Method Mappings<a class="anchor-link" href="#http-method-mappings" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -357,7 +379,11 @@ public class OrderController {
 </tr>
 </tbody>
 </table>
-<h3 id="a-complete-crud-controller">A Complete CRUD Controller<a class="anchor-link" href="#a-complete-crud-controller" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="a-complete-crud-controller" class="submodule">
+<summary>A Complete CRUD Controller<a class="anchor-link" href="#a-complete-crud-controller" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
 
 import com.example.ordermgmt.dto.CreateOrderRequest;
@@ -417,16 +443,24 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="4-request-parameters">4. Request Parameters<a class="anchor-link" href="#4-request-parameters" title="Permanent link">¶</a></h2>
-<h3 id="pathvariable"><code>@PathVariable</code><a class="anchor-link" href="#pathvariable" title="Permanent link">¶</a></h3>
+<details id="pathvariable" class="submodule">
+<summary><code>@PathVariable</code><a class="anchor-link" href="#pathvariable" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Extracts a value from the URL path:</p>
 <pre class="code-block"><code class="language-java">// GET /api/orders/42
 @GetMapping("/{id}")
 public ResponseEntity&lt;OrderResponse&gt; getOrder(@PathVariable Long id) {
     // id = 42
 }</code></pre>
-<h3 id="requestparam"><code>@RequestParam</code><a class="anchor-link" href="#requestparam" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="requestparam" class="submodule">
+<summary><code>@RequestParam</code><a class="anchor-link" href="#requestparam" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Extracts a query parameter from the URL:</p>
 <pre class="code-block"><code class="language-java">// GET /api/orders?customerId=7&amp;status=PENDING
 @GetMapping
@@ -436,7 +470,11 @@ public ResponseEntity&lt;List&lt;OrderResponse&gt;&gt; listOrders(
     // customerId = 7 (or null if not provided)
     // status = "PENDING" (or null if not provided)
 }</code></pre>
-<h3 id="requestbody"><code>@RequestBody</code><a class="anchor-link" href="#requestbody" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="requestbody" class="submodule">
+<summary><code>@RequestBody</code><a class="anchor-link" href="#requestbody" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Extracts the request body (JSON) and converts it to a Java object:</p>
 <pre class="code-block"><code class="language-java">// POST /api/orders with JSON body: {"customerId": 7, "items": [...]}
 @PostMapping
@@ -444,13 +482,19 @@ public ResponseEntity&lt;OrderResponse&gt; createOrder(@Valid @RequestBody Creat
     // request.customerId() = 7
     // request.items() = list of items
 }</code></pre>
-<h3 id="requestheader"><code>@RequestHeader</code><a class="anchor-link" href="#requestheader" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="requestheader" class="submodule">
+<summary><code>@RequestHeader</code><a class="anchor-link" href="#requestheader" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Extracts an HTTP header:</p>
 <pre class="code-block"><code class="language-java">@GetMapping
 public ResponseEntity&lt;List&lt;OrderResponse&gt;&gt; listOrders(
         @RequestHeader(value = "Authorization", required = false) String authHeader) {
     // authHeader = "Bearer eyJhbGc..." (or null)
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="5-http-responses-with-responseentity">5. HTTP Responses with <code>ResponseEntity</code><a class="anchor-link" href="#5-http-responses-with-responseentity" title="Permanent link">¶</a></h2>
 <p><code>ResponseEntity&lt;T&gt;</code> lets you control both the response body and the HTTP status code:</p>
@@ -468,7 +512,9 @@ return ResponseEntity.notFound().build();
 
 // 400 Bad Request with a body
 return ResponseEntity.badRequest().body(errorResponse);</code></pre>
-<h3 id="common-http-status-codes">Common HTTP Status Codes<a class="anchor-link" href="#common-http-status-codes" title="Permanent link">¶</a></h3>
+<details id="common-http-status-codes" class="submodule">
+<summary>Common HTTP Status Codes<a class="anchor-link" href="#common-http-status-codes" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -515,10 +561,14 @@ return ResponseEntity.badRequest().body(errorResponse);</code></pre>
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="6-input-validation-with-jakarta-bean-validation">6. Input Validation with Jakarta Bean Validation<a class="anchor-link" href="#6-input-validation-with-jakarta-bean-validation" title="Permanent link">¶</a></h2>
 <p><strong>Bean Validation</strong> (JSR 380) is a Java standard for validating input. Spring Boot integrates it with the <code>@Valid</code> annotation.</p>
-<h3 id="important-jakartavalidation-not-javaxvalidation">Important: <code>jakarta.validation</code> not <code>javax.validation</code><a class="anchor-link" href="#important-jakartavalidation-not-javaxvalidation" title="Permanent link">¶</a></h3>
+<details id="important-jakartavalidation-not-javaxvalidation" class="submodule">
+<summary>Important: <code>jakarta.validation</code> not <code>javax.validation</code><a class="anchor-link" href="#important-jakartavalidation-not-javaxvalidation" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Spring Boot 3.x uses <strong>Jakarta EE</strong> (the renamed Java EE). All imports use <code>jakarta.*</code> instead of <code>javax.*</code>:</p>
 <pre class="code-block"><code class="language-java">// CORRECT — Spring Boot 3.x (Jakarta)
 import jakarta.validation.Valid;
@@ -528,7 +578,11 @@ import jakarta.validation.constraints.NotNull;
 // WRONG — Spring Boot 2.x (Java EE, no longer used)
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;</code></pre>
-<h3 id="validation-annotations">Validation Annotations<a class="anchor-link" href="#validation-annotations" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="validation-annotations" class="submodule">
+<summary>Validation Annotations<a class="anchor-link" href="#validation-annotations" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -590,7 +644,11 @@ import javax.validation.constraints.NotBlank;</code></pre>
 </tr>
 </tbody>
 </table>
-<h3 id="dtos-with-validation">DTOs with Validation<a class="anchor-link" href="#dtos-with-validation" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="dtos-with-validation" class="submodule">
+<summary>DTOs with Validation<a class="anchor-link" href="#dtos-with-validation" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.dto;
 
 import jakarta.validation.constraints.Min;
@@ -620,7 +678,11 @@ public record CreateOrderItemRequest(
         @Min(value = 1, message = "Quantity must be at least 1")
         Integer quantity
 ) {}</code></pre>
-<h3 id="how-validation-works">How Validation Works<a class="anchor-link" href="#how-validation-works" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="how-validation-works" class="submodule">
+<summary>How Validation Works<a class="anchor-link" href="#how-validation-works" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When you add <code>@Valid</code> to a parameter:</p>
 <pre class="code-block"><code class="language-java">@PostMapping
 public ResponseEntity&lt;OrderResponse&gt; createOrder(@Valid @RequestBody CreateOrderRequest request) {</code></pre>
@@ -629,10 +691,14 @@ public ResponseEntity&lt;OrderResponse&gt; createOrder(@Valid @RequestBody Creat
 2. Runs all validation annotations on the fields
 3. If any validation fails, Spring returns a <strong>400 Bad Request</strong> response automatically — the method is never called
 4. If all validations pass, the method runs normally</p>
+</div>
+</details>
 <hr />
 <h2 id="7-exception-handling-with-restcontrolleradvice">7. Exception Handling with <code>@RestControllerAdvice</code><a class="anchor-link" href="#7-exception-handling-with-restcontrolleradvice" title="Permanent link">¶</a></h2>
 <p>Without exception handling, when your service throws an exception, Spring Boot returns an ugly 500 error with a stack trace. We want to return clean, structured error responses instead.</p>
-<h3 id="custom-error-response">Custom Error Response<a class="anchor-link" href="#custom-error-response" title="Permanent link">¶</a></h3>
+<details id="custom-error-response" class="submodule">
+<summary>Custom Error Response<a class="anchor-link" href="#custom-error-response" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.dto;
 
 import java.time.Instant;
@@ -643,7 +709,11 @@ public record ErrorResponse(
         String error,
         String message
 ) {}</code></pre>
-<h3 id="global-exception-handler">Global Exception Handler<a class="anchor-link" href="#global-exception-handler" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="global-exception-handler" class="submodule">
+<summary>Global Exception Handler<a class="anchor-link" href="#global-exception-handler" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
 
 import com.example.ordermgmt.dto.ErrorResponse;
@@ -678,14 +748,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }</code></pre>
-<h3 id="what-restcontrolleradvice-does">What <code>@RestControllerAdvice</code> Does<a class="anchor-link" href="#what-restcontrolleradvice-does" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-restcontrolleradvice-does" class="submodule">
+<summary>What <code>@RestControllerAdvice</code> Does<a class="anchor-link" href="#what-restcontrolleradvice-does" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ul>
 <li><code>@RestControllerAdvice</code> is a global exception handler. It catches exceptions thrown by <strong>any</strong> controller method.</li>
 <li><code>@ExceptionHandler(X.class)</code> catches exceptions of type <code>X</code>.</li>
 <li>You can have multiple handler methods for different exception types.</li>
 <li>The handler returns a <code>ResponseEntity</code> with the appropriate HTTP status code and error body.</li>
 </ul>
-<h3 id="adding-domain-exception-handling">Adding Domain Exception Handling<a class="anchor-link" href="#adding-domain-exception-handling" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="adding-domain-exception-handling" class="submodule">
+<summary>Adding Domain Exception Handling<a class="anchor-link" href="#adding-domain-exception-handling" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Later (Module 05), you'll add domain exceptions:</p>
 <pre class="code-block"><code class="language-java">@ExceptionHandler(OrderNotFoundException.class)
 public ResponseEntity&lt;ErrorResponse&gt; handleOrderNotFound(OrderNotFoundException ex) {
@@ -693,21 +771,33 @@ public ResponseEntity&lt;ErrorResponse&gt; handleOrderNotFound(OrderNotFoundExce
             Instant.now(), 404, "Not Found", ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="8-dtos-data-transfer-objects">8. DTOs (Data Transfer Objects)<a class="anchor-link" href="#8-dtos-data-transfer-objects" title="Permanent link">¶</a></h2>
 <p>A <strong>DTO</strong> is a simple object that defines the shape of data sent to or received from the API. We use Java records for DTOs (learned in Module 00).</p>
-<h3 id="why-use-dtos-instead-of-entities">Why Use DTOs Instead of Entities?<a class="anchor-link" href="#why-use-dtos-instead-of-entities" title="Permanent link">¶</a></h3>
+<details id="why-use-dtos-instead-of-entities" class="submodule">
+<summary>Why Use DTOs Instead of Entities?<a class="anchor-link" href="#why-use-dtos-instead-of-entities" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><strong>Security</strong> — entities may have fields the client shouldn't see or set (like <code>id</code>, <code>createdAt</code>)</li>
 <li><strong>Different shapes</strong> — a request needs <code>customerId</code> + <code>items</code>, but a response needs <code>id</code>, <code>status</code>, <code>totalAmount</code>, <code>customerName</code></li>
 <li><strong>Decoupling</strong> — your API stays stable even if your database schema changes</li>
 </ol>
-<h3 id="request-dto">Request DTO<a class="anchor-link" href="#request-dto" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="request-dto" class="submodule">
+<summary>Request DTO<a class="anchor-link" href="#request-dto" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">public record CreateOrderRequest(
         @NotNull Long customerId,
         @NotEmpty List&lt;CreateOrderItemRequest&gt; items
 ) {}</code></pre>
-<h3 id="response-dto">Response DTO<a class="anchor-link" href="#response-dto" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="response-dto" class="submodule">
+<summary>Response DTO<a class="anchor-link" href="#response-dto" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">public record OrderResponse(
         Long id,
         Long customerId,
@@ -733,10 +823,14 @@ public ResponseEntity&lt;ErrorResponse&gt; handleOrderNotFound(OrderNotFoundExce
     }
 }</code></pre>
 <p>The <code>from()</code> method is a <strong>factory method</strong> — it creates a DTO from an entity. This keeps the conversion logic in one place.</p>
+</div>
+</details>
 <hr />
 <h2 id="9-pagination-and-sorting">9. Pagination and Sorting<a class="anchor-link" href="#9-pagination-and-sorting" title="Permanent link">¶</a></h2>
 <p>When a list could contain thousands of items, you don't want to return all of them at once. <strong>Pagination</strong> splits results into pages (e.g., 20 items per page).</p>
-<h3 id="using-pageable">Using <code>Pageable</code><a class="anchor-link" href="#using-pageable" title="Permanent link">¶</a></h3>
+<details id="using-pageable" class="submodule">
+<summary>Using <code>Pageable</code><a class="anchor-link" href="#using-pageable" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@GetMapping
 public ResponseEntity&lt;List&lt;OrderResponse&gt;&gt; listOrders(
         @RequestParam(defaultValue = "0") int page,
@@ -756,13 +850,21 @@ public ResponseEntity&lt;List&lt;OrderResponse&gt;&gt; listOrders(
 <li><code>sortBy</code> — field name to sort by</li>
 <li><code>direction</code> — "asc" or "desc"</li>
 </ul>
-<h3 id="request-example">Request Example<a class="anchor-link" href="#request-example" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="request-example" class="submodule">
+<summary>Request Example<a class="anchor-link" href="#request-example" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code>GET /api/orders?page=0&amp;size=10&amp;sortBy=createdAt&amp;direction=desc</code></pre>
 <p>Returns the 10 most recent orders.</p>
+</div>
+</details>
 <hr />
 <h2 id="10-logging-with-slf4j">10. Logging with SLF4J<a class="anchor-link" href="#10-logging-with-slf4j" title="Permanent link">¶</a></h2>
 <p><strong>SLF4J</strong> (Simple Logging Facade for Java) is Java's standard logging API. Spring Boot includes it by default.</p>
-<h3 id="setting-up-logging">Setting Up Logging<a class="anchor-link" href="#setting-up-logging" title="Permanent link">¶</a></h3>
+<details id="setting-up-logging" class="submodule">
+<summary>Setting Up Logging<a class="anchor-link" href="#setting-up-logging" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Never use <code>System.out.println()</code> in production code. Always use a logger:</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
 
@@ -788,7 +890,11 @@ public class OrderController {
         }
     }
 }</code></pre>
-<h3 id="log-levels">Log Levels<a class="anchor-link" href="#log-levels" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="log-levels" class="submodule">
+<summary>Log Levels<a class="anchor-link" href="#log-levels" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -825,14 +931,22 @@ public class OrderController {
 </tr>
 </tbody>
 </table>
-<h3 id="what-not-to-log">What Not to Log<a class="anchor-link" href="#what-not-to-log" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-not-to-log" class="submodule">
+<summary>What Not to Log<a class="anchor-link" href="#what-not-to-log" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>Never log sensitive data:</strong> passwords, API keys, credit card numbers, personal data (PII).</p>
 <pre class="code-block"><code class="language-java">// BAD
 log.info("user_login password={}", password);
 
 // GOOD
 log.info("user_login userId={}", userId);</code></pre>
-<h3 id="slf4j-syntax">SLF4J Syntax<a class="anchor-link" href="#slf4j-syntax" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="slf4j-syntax" class="submodule">
+<summary>SLF4J Syntax<a class="anchor-link" href="#slf4j-syntax" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// GOOD — use {} placeholders (SLF4J fills them in)
 log.info("order_created orderId={} total={}", orderId, total);
 
@@ -841,15 +955,23 @@ log.info("order_created orderId=" + orderId + " total=" + total);</code></pre>
 <p>The <code>{}</code> placeholder approach is preferred because:
 1. It's faster — the string is only built if the log level is enabled
 2. It's cleaner — no <code>+</code> operators and quoting issues</p>
+</div>
+</details>
 <hr />
 <h2 id="11-spring-boot-actuator">11. Spring Boot Actuator<a class="anchor-link" href="#11-spring-boot-actuator" title="Permanent link">¶</a></h2>
 <p><strong>Actuator</strong> is a Spring Boot module that provides production-ready features: health checks, metrics, and monitoring.</p>
-<h3 id="adding-actuator">Adding Actuator<a class="anchor-link" href="#adding-actuator" title="Permanent link">¶</a></h3>
+<details id="adding-actuator" class="submodule">
+<summary>Adding Actuator<a class="anchor-link" href="#adding-actuator" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
     &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
-<h3 id="available-endpoints">Available Endpoints<a class="anchor-link" href="#available-endpoints" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="available-endpoints" class="submodule">
+<summary>Available Endpoints<a class="anchor-link" href="#available-endpoints" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -886,14 +1008,22 @@ log.info("order_created orderId=" + orderId + " total=" + total);</code></pre>
 </tr>
 </tbody>
 </table>
-<h3 id="exposing-endpoints">Exposing Endpoints<a class="anchor-link" href="#exposing-endpoints" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="exposing-endpoints" class="submodule">
+<summary>Exposing Endpoints<a class="anchor-link" href="#exposing-endpoints" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>By default, only <code>/actuator/health</code> is exposed. To expose more endpoints:</p>
 <pre class="code-block"><code class="language-yaml">management:
   endpoints:
     web:
       exposure:
         include: health,info,metrics,env</code></pre>
-<h3 id="custom-health-check">Custom Health Check<a class="anchor-link" href="#custom-health-check" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="custom-health-check" class="submodule">
+<summary>Custom Health Check<a class="anchor-link" href="#custom-health-check" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.config;
 
 import org.springframework.boot.actuate.health.Health;
@@ -915,6 +1045,8 @@ public class DatabaseHealthIndicator implements HealthIndicator {
     }
 }</code></pre>
 <p>Now <code>GET /actuator/health</code> includes <code>"database": {"status": "UP", "details": {"database": "reachable"}}</code>.</p>
+</div>
+</details>
 <hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
@@ -934,7 +1066,9 @@ public class DatabaseHealthIndicator implements HealthIndicator {
 <h2 id="11-content-negotiation-and-media-types">11. Content Negotiation and Media Types<a class="anchor-link" href="#11-content-negotiation-and-media-types" title="Permanent link">¶</a></h2>
 <p>Spring Boot can serve the same endpoint in multiple formats (JSON, XML, etc.)
 based on the <code>Accept</code> header sent by the client.</p>
-<h3 id="producing-json-and-xml">Producing JSON and XML<a class="anchor-link" href="#producing-json-and-xml" title="Permanent link">¶</a></h3>
+<details id="producing-json-and-xml" class="submodule">
+<summary>Producing JSON and XML<a class="anchor-link" href="#producing-json-and-xml" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -951,23 +1085,35 @@ curl -H "Accept: application/json" http://localhost:8080/api/orders/1
 # Same endpoint, client requests XML
 curl -H "Accept: application/xml" http://localhost:8080/api/orders/1
 # → &lt;OrderResponse&gt;&lt;id&gt;1&lt;/id&gt;&lt;customerName&gt;Alice&lt;/customerName&gt;...&lt;/OrderResponse&gt;</code></pre>
-<h3 id="adding-xml-support">Adding XML Support<a class="anchor-link" href="#adding-xml-support" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="adding-xml-support" class="submodule">
+<summary>Adding XML Support<a class="anchor-link" href="#adding-xml-support" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Add the Jackson XML dependency:</p>
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;com.fasterxml.jackson.dataformat&lt;/groupId&gt;
     &lt;artifactId&gt;jackson-dataformat-xml&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="12-cross-origin-resource-sharing-cors">12. Cross-Origin Resource Sharing (CORS)<a class="anchor-link" href="#12-cross-origin-resource-sharing-cors" title="Permanent link">¶</a></h2>
 <p>Browsers block JavaScript from making requests to a different origin than the page
 that served it. <strong>CORS</strong> is the mechanism that lets your API explicitly allow
 cross-origin requests.</p>
-<h3 id="per-controller-cors">Per-Controller CORS<a class="anchor-link" href="#per-controller-cors" title="Permanent link">¶</a></h3>
+<details id="per-controller-cors" class="submodule">
+<summary>Per-Controller CORS<a class="anchor-link" href="#per-controller-cors" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@RestController
 @RequestMapping("/api/orders")
 @CrossOrigin(origins = "http://localhost:3000")  // React dev server
 public class OrderController { ... }</code></pre>
-<h3 id="global-cors-configuration">Global CORS Configuration<a class="anchor-link" href="#global-cors-configuration" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="global-cors-configuration" class="submodule">
+<summary>Global CORS Configuration<a class="anchor-link" href="#global-cors-configuration" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Configuration
 public class CorsConfig implements WebMvcConfigurer {
     @Override
@@ -980,15 +1126,23 @@ public class CorsConfig implements WebMvcConfigurer {
                 .maxAge(3600);  // cache preflight for 1 hour
     }
 }</code></pre>
-<h3 id="how-cors-works">How CORS Works<a class="anchor-link" href="#how-cors-works" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="how-cors-works" class="submodule">
+<summary>How CORS Works<a class="anchor-link" href="#how-cors-works" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>Browser sends a <strong>preflight</strong> <code>OPTIONS</code> request before the actual request</li>
 <li>Server responds with allowed origins, methods, and headers</li>
 <li>If the actual request's origin is allowed, browser sends it</li>
 </ol>
+</div>
+</details>
 <hr />
 <h2 id="13-spring-boot-configuration-properties">13. Spring Boot Configuration Properties<a class="anchor-link" href="#13-spring-boot-configuration-properties" title="Permanent link">¶</a></h2>
-<h3 id="configurationproperties-type-safe-configuration">@ConfigurationProperties — Type-Safe Configuration<a class="anchor-link" href="#configurationproperties-type-safe-configuration" title="Permanent link">¶</a></h3>
+<details id="configurationproperties-type-safe-configuration" class="submodule">
+<summary>@ConfigurationProperties — Type-Safe Configuration<a class="anchor-link" href="#configurationproperties-type-safe-configuration" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-yaml"># application.yml
 ordermgmt:
   pagination:
@@ -1008,7 +1162,11 @@ public record OrderMgmtProperties(
 <pre class="code-block"><code class="language-java">@Configuration
 @EnableConfigurationProperties(OrderMgmtProperties.class)
 public class AppConfig { }</code></pre>
-<h3 id="using-in-services">Using in Services<a class="anchor-link" href="#using-in-services" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="using-in-services" class="submodule">
+<summary>Using in Services<a class="anchor-link" href="#using-in-services" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Service
 public class OrderService {
     private final OrderMgmtProperties properties;
@@ -1023,7 +1181,11 @@ public class OrderService {
         return repo.findAll(PageRequest.of(page, pageSize)).getContent();
     }
 }</code></pre>
-<h3 id="value-vs-configurationproperties">@Value vs @ConfigurationProperties<a class="anchor-link" href="#value-vs-configurationproperties" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="value-vs-configurationproperties" class="submodule">
+<summary>@Value vs @ConfigurationProperties<a class="anchor-link" href="#value-vs-configurationproperties" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -1056,11 +1218,15 @@ private int defaultPageSize;
 
 // @ConfigurationProperties — type-safe and clean
 // (as shown above)</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="14-understanding-spring-boot-auto-configuration">14. Understanding Spring Boot Auto-Configuration<a class="anchor-link" href="#14-understanding-spring-boot-auto-configuration" title="Permanent link">¶</a></h2>
 <p>Spring Boot's "magic" is <strong>auto-configuration</strong> — it automatically configures
 beans based on what's on your classpath.</p>
-<h3 id="how-it-works_1">How It Works<a class="anchor-link" href="#how-it-works_1" title="Permanent link">¶</a></h3>
+<details id="how-it-works_1" class="submodule">
+<summary>How It Works<a class="anchor-link" href="#how-it-works_1" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>Spring Boot scans the classpath for specific classes</li>
 <li>If a class is present, the corresponding auto-configuration kicks in</li>
@@ -1085,7 +1251,11 @@ public class DataSourceAutoConfiguration {
         return ds;
     }
 }</code></pre>
-<h3 id="discovering-auto-configuration">Discovering Auto-Configuration<a class="anchor-link" href="#discovering-auto-configuration" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="discovering-auto-configuration" class="submodule">
+<summary>Discovering Auto-Configuration<a class="anchor-link" href="#discovering-auto-configuration" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-bash"># See all auto-configuration decisions at startup
 java -jar app.jar --debug
 
@@ -1093,22 +1263,34 @@ java -jar app.jar --debug
 debug: true</code></pre>
 <p>This prints a "CONDITIONS EVALUATION REPORT" showing which auto-configurations
 matched and which didn't, with reasons.</p>
-<h3 id="excluding-auto-configuration">Excluding Auto-Configuration<a class="anchor-link" href="#excluding-auto-configuration" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="excluding-auto-configuration" class="submodule">
+<summary>Excluding Auto-Configuration<a class="anchor-link" href="#excluding-auto-configuration" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@SpringBootApplication(exclude = {
     DataSourceAutoConfiguration.class,       // don't auto-configure a datasource
     HibernateJpaAutoConfiguration.class      // don't auto-configure JPA
 })
 public class OrderManagementApplication { ... }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="15-spring-boot-actuator-deep-dive">15. Spring Boot Actuator Deep Dive<a class="anchor-link" href="#15-spring-boot-actuator-deep-dive" title="Permanent link">¶</a></h2>
 <p>Actuator provides <strong>production-ready</strong> endpoints for monitoring and managing
 your application.</p>
-<h3 id="enabling-actuator">Enabling Actuator<a class="anchor-link" href="#enabling-actuator" title="Permanent link">¶</a></h3>
+<details id="enabling-actuator" class="submodule">
+<summary>Enabling Actuator<a class="anchor-link" href="#enabling-actuator" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
     &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
-<h3 id="key-endpoints">Key Endpoints<a class="anchor-link" href="#key-endpoints" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="key-endpoints" class="submodule">
+<summary>Key Endpoints<a class="anchor-link" href="#key-endpoints" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -1170,7 +1352,11 @@ your application.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="exposing-endpoints_1">Exposing Endpoints<a class="anchor-link" href="#exposing-endpoints_1" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="exposing-endpoints_1" class="submodule">
+<summary>Exposing Endpoints<a class="anchor-link" href="#exposing-endpoints_1" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>By default, only <code>health</code> and <code>info</code> are exposed over HTTP. To expose more:</p>
 <pre class="code-block"><code class="language-yaml">management:
   endpoints:
@@ -1181,7 +1367,11 @@ your application.</p>
   endpoint:
     health:
       show-details: always  # show database, disk space, etc. details</code></pre>
-<h3 id="changing-log-level-at-runtime-no-restart">Changing Log Level at Runtime (No Restart!)<a class="anchor-link" href="#changing-log-level-at-runtime-no-restart" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="changing-log-level-at-runtime-no-restart" class="submodule">
+<summary>Changing Log Level at Runtime (No Restart!)<a class="anchor-link" href="#changing-log-level-at-runtime-no-restart" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-bash"># View current log level
 curl http://localhost:8080/actuator/loggers/com.example.ordermgmt
 
@@ -1189,7 +1379,11 @@ curl http://localhost:8080/actuator/loggers/com.example.ordermgmt
 curl -X POST http://localhost:8080/actuator/loggers/com.example.ordermgmt \
      -H "Content-Type: application/json" \
      -d '{"configuredLevel": "DEBUG"}'</code></pre>
-<h3 id="build-info-endpoint">Build Info Endpoint<a class="anchor-link" href="#build-info-endpoint" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="build-info-endpoint" class="submodule">
+<summary>Build Info Endpoint<a class="anchor-link" href="#build-info-endpoint" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Add the <code>build-info</code> goal to expose build metadata:</p>
 <pre class="code-block"><code class="language-xml">&lt;plugin&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
@@ -1202,6 +1396,8 @@ curl -X POST http://localhost:8080/actuator/loggers/com.example.ordermgmt \
 &lt;/plugin&gt;</code></pre>
 <pre class="code-block"><code class="language-bash">curl http://localhost:8080/actuator/info
 # → {"build":{"version":"1.0.0","artifact":"ordermgmt","name":"Order Management System","time":"2025-01-15T10:00:00Z"}}</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="16-spring-boot-devtools">16. Spring Boot DevTools<a class="anchor-link" href="#16-spring-boot-devtools" title="Permanent link">¶</a></h2>
 <p>DevTools provides development-time features that speed up your workflow.</p>
@@ -1211,16 +1407,28 @@ curl -X POST http://localhost:8080/actuator/loggers/com.example.ordermgmt \
     &lt;scope&gt;runtime&lt;/scope&gt;
     &lt;optional&gt;true&lt;/optional&gt;
 &lt;/dependency&gt;</code></pre>
-<h3 id="automatic-restart">Automatic Restart<a class="anchor-link" href="#automatic-restart" title="Permanent link">¶</a></h3>
+<details id="automatic-restart" class="submodule">
+<summary>Automatic Restart<a class="anchor-link" href="#automatic-restart" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When a file on the classpath changes, DevTools <strong>automatically restarts</strong> the
 application. The restart is fast (~1-2 seconds) because only the application
 classes are reloaded — the Spring context is not rebuilt from scratch.</p>
-<h3 id="live-reload">Live Reload<a class="anchor-link" href="#live-reload" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="live-reload" class="submodule">
+<summary>Live Reload<a class="anchor-link" href="#live-reload" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>DevTools triggers a <strong>browser refresh</strong> when resources change (HTML, CSS, JS).
 Install the <a href="http://livereload.com/">LiveReload browser extension</a> to use this.</p>
-<h3 id="disabling-devtools-in-production">Disabling DevTools in Production<a class="anchor-link" href="#disabling-devtools-in-production" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="disabling-devtools-in-production" class="submodule">
+<summary>Disabling DevTools in Production<a class="anchor-link" href="#disabling-devtools-in-production" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>DevTools is automatically disabled when running as a packaged JAR (<code>java -jar app.jar</code>).
 It's only active when running from an IDE or with <code>mvn spring-boot:run</code>.</p>
+</div>
+</details>
 <hr />
 <hr />
 <p>← <a href="02-dependency-injection.html">Previous: Module 02 — Dependency Injection</a> | <a href="04-repository-pattern.html">Next: Module 04 — Repository Pattern</a> →</p>

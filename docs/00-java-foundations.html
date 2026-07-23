@@ -140,7 +140,9 @@ public record Customer(
 - Automatic <code>equals</code>, <code>hashCode</code>, <code>toString</code>
 - Immutability by default (helps thread‑safety)
 - Compact constructors (compact, single‑line)</p>
-<h3 id="compact-constructor-with-variable-arguments">Compact Constructor with Variable Arguments<a class="anchor-link" href="#compact-constructor-with-variable-arguments" title="Permanent link">¶</a></h3>
+<details id="compact-constructor-with-variable-arguments" class="submodule">
+<summary>Compact Constructor with Variable Arguments<a class="anchor-link" href="#compact-constructor-with-variable-arguments" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">public record Order(
         String id,
         Product product,
@@ -155,7 +157,11 @@ public record Customer(
         this.timestamp = timestamp;
     }
 }</code></pre>
-<h3 id="nested-records-composition">Nested Records – Composition<a class="anchor-link" href="#nested-records-composition" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="nested-records-composition" class="submodule">
+<summary>Nested Records – Composition<a class="anchor-link" href="#nested-records-composition" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">public record Product(
         String sku,
         String name,
@@ -170,6 +176,8 @@ public record Customer(
 <blockquote>
 <p><strong>Note</strong>: Records are <strong>reference types</strong>; they cannot be annotated with <code>@Entity</code> (for JPA) without a wrapper, but are perfect for pure‑model domain layers.</p>
 </blockquote>
+</div>
+</details>
 <hr />
 <h2 id="deep-dive-record-advantages">Deep Dive: Record Advantages<a class="anchor-link" href="#deep-dive-record-advantages" title="Permanent link">¶</a></h2>
 <details>
@@ -197,7 +205,9 @@ class Box&lt;T&gt; {
 stringBox.add("hello"); // compile‑time checked
 Box&lt;Integer&gt; intBox = new Box&lt;&gt;();
 intBox.add("oops"); // ❌ compile‑time error</code></pre>
-<h3 id="generic-supertypes-wildcards">Generic Super‑Types &amp; Wildcards<a class="anchor-link" href="#generic-supertypes-wildcards" title="Permanent link">¶</a></h3>
+<details id="generic-supertypes-wildcards" class="submodule">
+<summary>Generic Super‑Types &amp; Wildcards<a class="anchor-link" href="#generic-supertypes-wildcards" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">public class Statistics&lt;T extends Number&gt; {
     private final List&lt;T&gt; data = new ArrayList&lt;&gt;();
     public double average() {
@@ -214,6 +224,8 @@ intBox.add("oops"); // ❌ compile‑time error</code></pre>
 <blockquote>
 <p><strong>Tip</strong>: When forwarding generics, use <code>extends</code> for value‑semantics and <code>interface</code> for method‑semantics.</p>
 </blockquote>
+</div>
+</details>
 <hr />
 <h2 id="deep-dive-limitations-of-generics">Deep Dive: Limitations of Generics<a class="anchor-link" href="#deep-dive-limitations-of-generics" title="Permanent link">¶</a></h2>
 <details>
@@ -242,7 +254,9 @@ public String quadrant(Point p) {
         _ -&gt; "elsewhere";
     };
 }</code></pre>
-<h3 id="pattern-matching-with-var">Pattern Matching with <code>var</code><a class="anchor-link" href="#pattern-matching-with-var" title="Permanent link">¶</a></h3>
+<details id="pattern-matching-with-var" class="submodule">
+<summary>Pattern Matching with <code>var</code><a class="anchor-link" href="#pattern-matching-with-var" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">public static void main(String[] args) {
     var person = new Customer("C001", "Alice", "alice@example.com", BigDecimal.valueOf(150.00));
     System.out.println(person.name()); // Invoke getter on record
@@ -250,6 +264,8 @@ public String quadrant(Point p) {
 <blockquote>
 <p><strong>Caveat</strong>: Pattern matching is exhaustive; the underscore (<code>_</code>) pattern catches all unmatched cases.</p>
 </blockquote>
+</div>
+</details>
 <hr />
 <h2 id="deep-dive-performance-considerations">Deep Dive: Performance Considerations<a class="anchor-link" href="#deep-dive-performance-considerations" title="Permanent link">¶</a></h2>
 <details>
@@ -266,12 +282,18 @@ var price = 19.99;           // double
 var name = "Bob";           // String
 var flag = true;             // boolean
 var beans = List.of(1,2,3); // List&lt;Integer&gt;</code></pre>
-<h3 id="when-to-prefer-var">When to Prefer <code>var</code><a class="anchor-link" href="#when-to-prefer-var" title="Permanent link">¶</a></h3>
+<details id="when-to-prefer-var" class="submodule">
+<summary>When to Prefer <code>var</code><a class="anchor-link" href="#when-to-prefer-var" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ul>
 <li>In one‑line locals where the inferred type is obvious.</li>
 <li>In generic code where the generic type parameter is not needed explicitly.</li>
 </ul>
-<h3 id="when-to-avoid-var">When to Avoid <code>var</code><a class="anchor-link" href="#when-to-avoid-var" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="when-to-avoid-var" class="submodule">
+<summary>When to Avoid <code>var</code><a class="anchor-link" href="#when-to-avoid-var" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ul>
 <li><strong>ISO‑compliance</strong>: private static methods must be <code>static</code> and <code>private</code>; <code>var</code> does not eliminate staticness.</li>
 <li><strong>Large method bodies</strong>: adding <code>var</code> in many places can obscure intent.</li>
@@ -280,6 +302,8 @@ var beans = List.of(1,2,3); // List&lt;Integer&gt;</code></pre>
 <blockquote>
 <p><strong>Best practice</strong>: Limit <code>var</code> usage to the top of the method, and never on parameters.</p>
 </blockquote>
+</div>
+</details>
 <hr />
 <h2 id="deep-dive-var-and-lambdas">Deep Dive: <code>var</code> and Lambdas<a class="anchor-link" href="#deep-dive-var-and-lambdas" title="Permanent link">¶</a></h2>
 <details>
@@ -301,12 +325,18 @@ Supplier&lt;String&gt; supplier = () -&gt; {
         default -&gt; "Hello";
     };
 }</code></pre>
-<h3 id="guard-clauses-and-return-values">Guard Clauses and Return Values<a class="anchor-link" href="#guard-clauses-and-return-values" title="Permanent link">¶</a></h3>
+<details id="guard-clauses-and-return-values" class="submodule">
+<summary>Guard Clauses and Return Values<a class="anchor-link" href="#guard-clauses-and-return-values" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ul>
 <li>Use <code>return</code> directly inside a case when returning a literal.</li>
 <li>Guard clauses (<code>case &gt;0</code>) enable concise range checks.</li>
 </ul>
-<h3 id="nested-switch-expressions">Nested Switch Expressions<a class="anchor-link" href="#nested-switch-expressions" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="nested-switch-expressions" class="submodule">
+<summary>Nested Switch Expressions<a class="anchor-link" href="#nested-switch-expressions" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">public String orderStatus(Order order) {
     return switch (order.type()) {
         case CART, FAVOURITE -&gt; {
@@ -321,6 +351,8 @@ Supplier&lt;String&gt; supplier = () -&gt; {
         default -&gt; "Pending";
     };
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="deep-dive-switch-vs-traditional-if">Deep Dive: Switch vs. Traditional <code>if</code><a class="anchor-link" href="#deep-dive-switch-vs-traditional-if" title="Permanent link">¶</a></h2>
 <details>
@@ -350,18 +382,26 @@ pricing.put("DOG", new BigDecimal("199.99"));</code></pre>
     .map(BigDecimal::stripTrailingZeros)
     .sorted()
     .collect(Collectors.toList());</code></pre>
-<h3 id="lazy-evaluation">Lazy Evaluation<a class="anchor-link" href="#lazy-evaluation" title="Permanent link">¶</a></h3>
+<details id="lazy-evaluation" class="submodule">
+<summary>Lazy Evaluation<a class="anchor-link" href="#lazy-evaluation" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ul>
 <li>Streams are evaluated lazily; operations like <code>filter</code>, <code>map</code> are deferred until <code>collect</code> or <code>forEach</code> is called.</li>
 <li>This can improve performance for large data sets and enable <strong>parallel streams</strong>.</li>
 </ul>
 <pre class="code-block"><code class="language-java">prices.parallelStream().filter(p -&gt; p.compareTo(new BigDecimal("100")) &gt; 0)
       .forEach(p -&gt; System.out.println(p));</code></pre>
-<h3 id="common-pitfalls">Common Pitfalls<a class="anchor-link" href="#common-pitfalls" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="common-pitfalls" class="submodule">
+<summary>Common Pitfalls<a class="anchor-link" href="#common-pitfalls" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ul>
 <li>Using mutable collectors (<code>Collectors combined</code>), forgetting to close streams, or unnoticed side‑effects.</li>
 <li>Avoid collecting unless necessary – keep the pipeline in memory‑efficient form.</li>
 </ul>
+</div>
+</details>
 <hr />
 <h2 id="deep-dive-collections-with-records">Deep Dive: Collections with Records<a class="anchor-link" href="#deep-dive-collections-with-records" title="Permanent link">¶</a></h2>
 <details>

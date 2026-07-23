@@ -203,14 +203,20 @@
 
 <h2 id="1-synchronous-vs-asynchronous-communication">1. Synchronous vs Asynchronous Communication<a class="anchor-link" href="#1-synchronous-vs-asynchronous-communication" title="Permanent link">¶</a></h2>
 <p>When two parts of a system need to communicate, there are two fundamental approaches:</p>
-<h3 id="synchronous-communication">Synchronous Communication<a class="anchor-link" href="#synchronous-communication" title="Permanent link">¶</a></h3>
+<details id="synchronous-communication" class="submodule">
+<summary>Synchronous Communication<a class="anchor-link" href="#synchronous-communication" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The caller sends a request and <strong>waits</strong> for a response before continuing. Like making a phone call — you wait on the line until the other person responds.</p>
 <pre class="code-block"><code>Order Service ──"create order"──&gt; Payment Service
                 &lt;──"confirmed"──
                 (waiting...)</code></pre>
 <p><strong>Pros:</strong> Simple to understand. You get an immediate result.</p>
 <p><strong>Cons:</strong> If the payment service is slow or down, the order service is stuck waiting. The services are <strong>tightly coupled</strong> — a failure in one cascades to the other.</p>
-<h3 id="asynchronous-communication">Asynchronous Communication<a class="anchor-link" href="#asynchronous-communication" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="asynchronous-communication" class="submodule">
+<summary>Asynchronous Communication<a class="anchor-link" href="#asynchronous-communication" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The sender publishes a message and <strong>continues immediately</strong> without waiting for a response. Like sending an email — you send it and move on with your day.</p>
 <pre class="code-block"><code>Order Service ──"order created"──&gt; [Message Broker] ──&gt; Payment Service
                                        │
@@ -219,7 +225,11 @@
                                        └──&gt; Analytics Service</code></pre>
 <p><strong>Pros:</strong> The sender doesn't wait. The receiver processes at its own pace. Multiple receivers can react to the same event. Services are <strong>loosely coupled</strong>.</p>
 <p><strong>Cons:</strong> More complex. You need a message broker. eventual consistency (things happen eventually, not immediately). Harder to debug.</p>
-<h3 id="when-to-use-which">When to Use Which?<a class="anchor-link" href="#when-to-use-which" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="when-to-use-which" class="submodule">
+<summary>When to Use Which?<a class="anchor-link" href="#when-to-use-which" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -251,6 +261,8 @@
 </tbody>
 </table>
 <p><strong>Apache Kafka</strong> is the most popular tool for asynchronous, event-driven communication in modern backend systems.</p>
+</div>
+</details>
 <hr />
 <h2 id="2-what-is-apache-kafka">2. What Is Apache Kafka?<a class="anchor-link" href="#2-what-is-apache-kafka" title="Permanent link">¶</a></h2>
 <p><strong>Apache Kafka</strong> is a distributed event streaming platform. Think of it as a post office for your applications:</p>
@@ -266,7 +278,9 @@
 <li><strong>Scalable</strong> — can run as a cluster of servers</li>
 <li><strong>Reliable</strong> — messages can be replicated across multiple servers</li>
 </ul>
-<h3 id="kafka-analogy-a-newsstand">Kafka Analogy: A Newsstand<a class="anchor-link" href="#kafka-analogy-a-newsstand" title="Permanent link">¶</a></h3>
+<details id="kafka-analogy-a-newsstand" class="submodule">
+<summary>Kafka Analogy: A Newsstand<a class="anchor-link" href="#kafka-analogy-a-newsstand" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Imagine a newsstand:</p>
 <ol>
 <li>Publishers (producers) deliver newspapers to the newsstand</li>
@@ -275,15 +289,23 @@
 <li>Subscribers (consumers) come to the newsstand and read the sections they're interested in</li>
 <li>Each subscriber remembers where they stopped reading (offset) so they don't miss anything</li>
 </ol>
+</div>
+</details>
 <hr />
 <h2 id="3-core-kafka-concepts">3. Core Kafka Concepts<a class="anchor-link" href="#3-core-kafka-concepts" title="Permanent link">¶</a></h2>
-<h3 id="topic">Topic<a class="anchor-link" href="#topic" title="Permanent link">¶</a></h3>
+<details id="topic" class="submodule">
+<summary>Topic<a class="anchor-link" href="#topic" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>topic</strong> is a category or feed to which messages are published. Topics are like folders for your messages.</p>
 <pre class="code-block"><code>Topic: order-events
 ├── Partition 0: [msg1, msg2, msg3, msg4, msg5]
 ├── Partition 1: [msg1, msg2, msg3]
 └── Partition 2: [msg1, msg2, msg3, msg4, msg5, msg6, msg7]</code></pre>
-<h3 id="partition">Partition<a class="anchor-link" href="#partition" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="partition" class="submodule">
+<summary>Partition<a class="anchor-link" href="#partition" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Each topic is split into one or more <strong>partitions</strong>. A partition is an ordered, append-only log of messages. Partitions allow Kafka to scale — multiple partitions can be distributed across multiple servers.</p>
 <pre class="code-block"><code>Topic: order-events (3 partitions)
 
@@ -291,11 +313,19 @@ Partition 0:  [OrderCreated] [OrderConfirmed] [OrderShipped]
 Partition 1:  [OrderCreated] [OrderCancelled]
 Partition 2:  [OrderCreated] [OrderConfirmed] [OrderShipped] [OrderDelivered]</code></pre>
 <p>Messages within a single partition are <strong>ordered</strong> — you read them in the order they were written. But across partitions, there is no guaranteed order.</p>
-<h3 id="offset">Offset<a class="anchor-link" href="#offset" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="offset" class="submodule">
+<summary>Offset<a class="anchor-link" href="#offset" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>An <strong>offset</strong> is a sequential number that identifies each message within a partition. It's like a page number in a book.</p>
 <pre class="code-block"><code>Partition 0:  [msg at offset 0] [msg at offset 1] [msg at offset 2] [msg at offset 3]</code></pre>
 <p>Consumers track their offset — they remember "I've read up to offset 5" so they know where to resume.</p>
-<h3 id="consumer-group">Consumer Group<a class="anchor-link" href="#consumer-group" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="consumer-group" class="submodule">
+<summary>Consumer Group<a class="anchor-link" href="#consumer-group" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>consumer group</strong> is a set of consumers that work together to read messages from a topic. Each partition is assigned to exactly one consumer within a group.</p>
 <pre class="code-block"><code>Topic: order-events (3 partitions)
 
@@ -307,18 +337,34 @@ Consumer Group "notification-service":
 Consumer Group "analytics-service":
   Consumer 1 → reads Partition 0, 1, 2 (single consumer reads all)</code></pre>
 <p>This is how Kafka scales: add more consumers to a group, and they share the load automatically.</p>
-<h3 id="broker">Broker<a class="anchor-link" href="#broker" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="broker" class="submodule">
+<summary>Broker<a class="anchor-link" href="#broker" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>broker</strong> is a Kafka server. A Kafka cluster consists of one or more brokers. For development, one broker is enough. In production, you typically run 3 or more brokers for reliability.</p>
 <pre class="code-block"><code>Kafka Cluster:
 ┌──────────┐  ┌──────────┐  ┌──────────┐
 │ Broker 1 │  │ Broker 2 │  │ Broker 3 │
 │(leader)  │  │(follower)│  │(follower)│
 └──────────┘  └──────────┘  └──────────┘</code></pre>
-<h3 id="producer">Producer<a class="anchor-link" href="#producer" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="producer" class="submodule">
+<summary>Producer<a class="anchor-link" href="#producer" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>producer</strong> is an application that sends messages to Kafka topics. In our system, the <code>OrderService</code> will be a producer — when an order is created, it sends an <code>OrderCreatedEvent</code> message to Kafka.</p>
-<h3 id="consumer">Consumer<a class="anchor-link" href="#consumer" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="consumer" class="submodule">
+<summary>Consumer<a class="anchor-link" href="#consumer" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>consumer</strong> is an application that reads messages from Kafka topics. In our system, we'll create an <code>OrderEventConsumer</code> that reads order events and simulates sending confirmation emails.</p>
-<h3 id="architecture-diagram">Architecture Diagram<a class="anchor-link" href="#architecture-diagram" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="architecture-diagram" class="submodule">
+<summary>Architecture Diagram<a class="anchor-link" href="#architecture-diagram" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code>┌──────────────┐                    ┌───────────────────┐
 │  Order       │  produces          │   Kafka Cluster    │
 │  Service     │───────────────────&gt;│                     │
@@ -337,6 +383,8 @@ Consumer Group "analytics-service":
 │  (Consumer)  │                    │                     │
 └──────────────┘                    └───────────────────┘
                 (Different consumer groups)</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="4-setting-up-kafka-locally-with-docker">4. Setting Up Kafka Locally with Docker<a class="anchor-link" href="#4-setting-up-kafka-locally-with-docker" title="Permanent link">¶</a></h2>
 <p>To run Kafka on your machine, we use <strong>Docker Compose</strong> — a tool that defines and runs multi-container Docker applications. You learned about Docker in Module 01.</p>
@@ -369,14 +417,20 @@ services:
 <p>You should see a startup log ending with something like "Kafka Server started".</p>
 <hr />
 <h2 id="5-spring-boot-kafka-configuration">5. Spring Boot Kafka Configuration<a class="anchor-link" href="#5-spring-boot-kafka-configuration" title="Permanent link">¶</a></h2>
-<h3 id="adding-the-kafka-dependency">Adding the Kafka Dependency<a class="anchor-link" href="#adding-the-kafka-dependency" title="Permanent link">¶</a></h3>
+<details id="adding-the-kafka-dependency" class="submodule">
+<summary>Adding the Kafka Dependency<a class="anchor-link" href="#adding-the-kafka-dependency" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Add the Spring Boot Kafka starter to your <code>pom.xml</code>:</p>
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.springframework.kafka&lt;/groupId&gt;
     &lt;artifactId&gt;spring-kafka&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 <p>Spring Boot's dependency management will automatically pick the right version.</p>
-<h3 id="applicationyml-configuration">application.yml Configuration<a class="anchor-link" href="#applicationyml-configuration" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="applicationyml-configuration" class="submodule">
+<summary>application.yml Configuration<a class="anchor-link" href="#applicationyml-configuration" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-yaml">spring:
   kafka:
     # Address of the Kafka broker
@@ -410,7 +464,11 @@ services:
       # Trust the packages we deserialize from
       properties:
         spring.json.trusted.packages: "com.example.ordermgmt.kafka.event"</code></pre>
-<h3 id="what-are-serializers-and-deserializers">What Are Serializers and Deserializers?<a class="anchor-link" href="#what-are-serializers-and-deserializers" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-are-serializers-and-deserializers" class="submodule">
+<summary>What Are Serializers and Deserializers?<a class="anchor-link" href="#what-are-serializers-and-deserializers" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When you send a Java object to Kafka, it needs to be converted to bytes (because Kafka stores bytes, not Java objects). This is called <strong>serialization</strong>. When reading a message from Kafka, it needs to be converted from bytes back to a Java object — this is called <strong>deserialization</strong>.</p>
 <table>
 <thead>
@@ -434,6 +492,8 @@ services:
 </tbody>
 </table>
 <p>We use <code>JsonSerializer</code> and <code>JsonDeserializer</code> because JSON is human-readable and works well with Java records.</p>
+</div>
+</details>
 <hr />
 <h2 id="6-defining-kafka-events">6. Defining Kafka Events<a class="anchor-link" href="#6-defining-kafka-events" title="Permanent link">¶</a></h2>
 <p>First, let's define the event messages that will be sent through Kafka. These are simple records (learned in Module 00):</p>
@@ -535,15 +595,23 @@ public class OrderEventProducer {
                 });
     }
 }</code></pre>
-<h3 id="whats-happening-here">What's Happening Here?<a class="anchor-link" href="#whats-happening-here" title="Permanent link">¶</a></h3>
+<details id="whats-happening-here" class="submodule">
+<summary>What's Happening Here?<a class="anchor-link" href="#whats-happening-here" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><code>KafkaTemplate&lt;String, Object&gt;</code> — the <code>String</code> is the key type, <code>Object</code> is the value type (we send different event types to the same topic)</li>
 <li><code>kafkaTemplate.send(topic, key, value)</code> — sends a message, returns a <code>CompletableFuture</code> (an async result)</li>
 <li>The <strong>key</strong> is the <code>orderId</code> — Kafka uses the key to decide which partition to send the message to. Using the order ID as the key means all events for the same order go to the same partition, preserving their order</li>
 <li><code>whenComplete(...)</code> — handles success and failure. On success, logs the partition and offset. On failure, logs the error</li>
 </ol>
-<h3 id="why-use-a-key">Why Use a Key?<a class="anchor-link" href="#why-use-a-key" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="why-use-a-key" class="submodule">
+<summary>Why Use a Key?<a class="anchor-link" href="#why-use-a-key" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>If you send messages without a key, Kafka distributes them round-robin across partitions. This is fine for independent messages. But for related events (e.g., "order created" then "order confirmed" for the same order), you want them in the same partition to guarantee ordering. Using the order ID as the key ensures this — Kafka hashes the key to determine the partition, and the same key always goes to the same partition.</p>
+</div>
+</details>
 <hr />
 <h2 id="8-integrating-the-producer-with-the-service">8. Integrating the Producer with the Service<a class="anchor-link" href="#8-integrating-the-producer-with-the-service" title="Permanent link">¶</a></h2>
 <p>Now let's update <code>OrderService</code> to publish events when orders change:</p>
@@ -677,13 +745,19 @@ public class OrderEventConsumer {
                 event.orderId(), event.oldStatus(), event.newStatus());
     }
 }</code></pre>
-<h3 id="whats-happening-here_1">What's Happening Here?<a class="anchor-link" href="#whats-happening-here_1" title="Permanent link">¶</a></h3>
+<details id="whats-happening-here_1" class="submodule">
+<summary>What's Happening Here?<a class="anchor-link" href="#whats-happening-here_1" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><code>@KafkaListener(topics = "order-events", groupId = "...")</code> — tells Spring to listen to the <code>order-events</code> topic as part of a consumer group</li>
 <li>The <strong>method parameter type</strong> (<code>OrderCreatedEvent</code>, <code>OrderStatusChangedEvent</code>) tells Spring which deserialized type to expect. Spring's <code>JsonDeserializer</code> reads a <code>__TypeId__</code> header that the <code>JsonSerializer</code> adds, and uses it to determine which Java type to deserialize to</li>
 <li>Spring automatically calls this method whenever a new message arrives — you don't need to poll manually</li>
 </ol>
-<h3 id="multiple-consumers-different-consumer-groups">Multiple Consumers (Different Consumer Groups)<a class="anchor-link" href="#multiple-consumers-different-consumer-groups" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="multiple-consumers-different-consumer-groups" class="submodule">
+<summary>Multiple Consumers (Different Consumer Groups)<a class="anchor-link" href="#multiple-consumers-different-consumer-groups" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>If you want both a notification service and an analytics service to process order events independently, create listeners with different group IDs:</p>
 <pre class="code-block"><code class="language-java">@Component
 public class AnalyticsConsumer {
@@ -701,6 +775,8 @@ public class AnalyticsConsumer {
     }
 }</code></pre>
 <p>Because this consumer has a different <code>groupId</code> ("analytics-group"), Kafka delivers <strong>every</strong> message to it independently of the notification consumer. Each consumer group maintains its own offset.</p>
+</div>
+</details>
 <hr />
 <h2 id="10-serialization-and-deserialization-in-detail">10. Serialization and Deserialization in Detail<a class="anchor-link" href="#10-serialization-and-deserialization-in-detail" title="Permanent link">¶</a></h2>
 <p>The <code>JsonSerializer</code> (producer side) and <code>JsonDeserializer</code> (consumer side) handle converting between Java objects and JSON. Here's how it works:</p>
@@ -727,7 +803,9 @@ Kafka ──&gt; JSON bytes──&gt;│ JsonDeserializer│───&gt;│  Ja
 <hr />
 <h2 id="11-error-handling">11. Error Handling<a class="anchor-link" href="#11-error-handling" title="Permanent link">¶</a></h2>
 <p>What happens when a consumer fails to process a message? The message isn't lost — Kafka keeps it. But the consumer will keep trying and failing, creating an infinite loop. This is called a <strong>poison pill</strong>.</p>
-<h3 id="dead-letter-queue-dlq">Dead Letter Queue (DLQ)<a class="anchor-link" href="#dead-letter-queue-dlq" title="Permanent link">¶</a></h3>
+<details id="dead-letter-queue-dlq" class="submodule">
+<summary>Dead Letter Queue (DLQ)<a class="anchor-link" href="#dead-letter-queue-dlq" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>Dead Letter Queue</strong> is a special topic where failed messages are sent after exhausting retries. The main processing continues with the next message, and the failed messages can be inspected and reprocessed later.</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.kafka;
 
@@ -779,7 +857,11 @@ public class OrderEventConsumer {
         // - Fix the data and re-publish the message
     }
 }</code></pre>
-<h3 id="how-it-works">How It Works<a class="anchor-link" href="#how-it-works" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="how-it-works" class="submodule">
+<summary>How It Works<a class="anchor-link" href="#how-it-works" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>A message arrives at the <code>order-events</code> topic</li>
 <li>The consumer tries to process it — if it throws an exception, the <code>@RetryableTopic</code> annotation catches it</li>
@@ -787,27 +869,43 @@ public class OrderEventConsumer {
 <li>After 3 failed attempts, the message is sent to <code>order-events-dlt</code> (the dead letter topic)</li>
 <li>The <code>handleDlt</code> method receives messages that exhausted all retries for manual investigation</li>
 </ol>
+</div>
+</details>
 <hr />
 <h2 id="12-delivery-semantics">12. Delivery Semantics<a class="anchor-link" href="#12-delivery-semantics" title="Permanent link">¶</a></h2>
 <p>Kafka offers three delivery guarantees. Understanding them helps you design reliable consumers.</p>
-<h3 id="at-most-once">At-Most-Once<a class="anchor-link" href="#at-most-once" title="Permanent link">¶</a></h3>
+<details id="at-most-once" class="submodule">
+<summary>At-Most-Once<a class="anchor-link" href="#at-most-once" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Messages might be lost but never duplicated. The consumer reads a message and commits the offset <strong>before</strong> processing it. If the consumer crashes during processing, the message is lost.</p>
 <pre class="code-block"><code>[read msg] → [commit offset] → [process] → [CRASH!]
                                         message is lost</code></pre>
 <p><strong>Use when:</strong> losing occasional messages is acceptable (e.g., non-critical analytics).</p>
-<h3 id="at-least-once-default">At-Least-Once (Default)<a class="anchor-link" href="#at-least-once-default" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="at-least-once-default" class="submodule">
+<summary>At-Least-Once (Default)<a class="anchor-link" href="#at-least-once-default" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Messages are never lost but might be duplicated. The consumer reads a message, processes it, and <strong>then</strong> commits the offset. If the consumer crashes after processing but before committing, it will re-read the message.</p>
 <pre class="code-block"><code>[read msg] → [process] → [CRASH before commit!]
                          message will be re-delivered on restart</code></pre>
 <p><strong>Use when:</strong> you can't lose messages and you can handle duplicates (most common case).</p>
 <p><strong>This is the default in Spring Boot Kafka.</strong></p>
-<h3 id="exactly-once">Exactly-Once<a class="anchor-link" href="#exactly-once" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="exactly-once" class="submodule">
+<summary>Exactly-Once<a class="anchor-link" href="#exactly-once" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Messages are neither lost nor duplicated. This requires Kafka transactions, which add complexity and reduce throughput. Spring Boot supports this through <code>KafkaTemplate.executeInTransaction()</code> and transactional consumers.</p>
 <p><strong>Use when:</strong> duplicates would cause serious problems (e.g., financial transactions where a duplicate means double-charging).</p>
+</div>
+</details>
 <hr />
 <h2 id="13-idempotent-consumers">13. Idempotent Consumers<a class="anchor-link" href="#13-idempotent-consumers" title="Permanent link">¶</a></h2>
 <p>Since the default delivery semantic is <strong>at-least-once</strong>, your consumers will occasionally receive the same message twice. Because of this, your consumers must be <strong>idempotent</strong> — processing the same message multiple times must have the same effect as processing it once.</p>
-<h3 id="what-is-idempotency">What Is Idempotency?<a class="anchor-link" href="#what-is-idempotency" title="Permanent link">¶</a></h3>
+<details id="what-is-idempotency" class="submodule">
+<summary>What Is Idempotency?<a class="anchor-link" href="#what-is-idempotency" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>An operation is idempotent if doing it once has the same result as doing it many times:</p>
 <table>
 <thead>
@@ -835,7 +933,11 @@ public class OrderEventConsumer {
 </tr>
 </tbody>
 </table>
-<h3 id="making-consumers-idempotent">Making Consumers Idempotent<a class="anchor-link" href="#making-consumers-idempotent" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="making-consumers-idempotent" class="submodule">
+<summary>Making Consumers Idempotent<a class="anchor-link" href="#making-consumers-idempotent" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Component
 public class OrderEventConsumer {
 
@@ -862,6 +964,8 @@ public class OrderEventConsumer {
     }
 }</code></pre>
 <p>The key idea: <strong>check if the work was already done before doing it.</strong> This requires a way to identify whether a message was processed — typically using a unique ID (like the order ID) and a database check.</p>
+</div>
+</details>
 <hr />
 <h2 id="14-kafka-streams-overview">14. Kafka Streams Overview<a class="anchor-link" href="#14-kafka-streams-overview" title="Permanent link">¶</a></h2>
 <p><strong>Kafka Streams</strong> is a library for building real-time stream processing applications on top of Kafka. It lets you transform, filter, aggregate, and join data streams.</p>
@@ -911,13 +1015,17 @@ KTable&lt;String, Long&gt; orderCounts = orders
 </ul>
 <hr />
 <h2 id="10-kafka-consumer-groups-and-partition-rebalancing">10. Kafka Consumer Groups and Partition Rebalancing<a class="anchor-link" href="#10-kafka-consumer-groups-and-partition-rebalancing" title="Permanent link">¶</a></h2>
-<h3 id="consumer-groups">Consumer Groups<a class="anchor-link" href="#consumer-groups" title="Permanent link">¶</a></h3>
+<details id="consumer-groups" class="submodule">
+<summary>Consumer Groups<a class="anchor-link" href="#consumer-groups" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>consumer group</strong> is a set of consumers that jointly process messages from one
 or more topics. Kafka distributes partitions among the group's consumers:</p>
 <p>```
 Topic: order-created (3 partitions)</p>
 <p>Consumer Group: ordermgmt-group
   Consumer A  ← <a href="05-service-oriented-architecture.html">Previous: Module 05 — Service-Oriented Architecture</a> | <a href="07-graphql.html">Next: Module 07 — GraphQL</a> →</p>
+</div>
+</details>
       </article>
 
       <div class="footer-nav"><a href="05-service-oriented-architecture.html" class="nav-link prev">← Service-Oriented Architecture</a><a href="07-graphql.html" class="nav-link next">GraphQL →</a></div>

@@ -105,13 +105,16 @@
         <h1 id="module-10-capstone-project">Module 10: Capstone Project<a class="anchor-link" href="#module-10-capstone-project" title="Permanent link">¶</a></h1>
 <h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
 <ul>
-<li>How to assemble a complete Order Management System using all technologies from the course</li>
+<li>How to assemble a complete Order Management System using <strong>all technologies from every module</strong></li>
+<li>How to use <strong>sealed classes</strong> (Module 00) for exhaustive domain modeling</li>
+<li>How <strong>layered architecture</strong> (Module 05) organizes the codebase</li>
+<li>How to configure <strong>JPA, GraphQL, Kafka, WebFlux, Docker, and Testcontainers</strong></li>
 <li>How REST and GraphQL APIs coexist in one Spring Boot application</li>
 <li>How to publish Kafka events from domain services and consume them</li>
-<li>How to stream order-status updates with Spring WebFlux (reactive programming)</li>
-<li>How to structure a project with layered architecture (Controller, Service, Repository, Domain)</li>
-<li>How to configure JPA, GraphQL, Kafka, WebFlux, Docker, and Testcontainers</li>
-<li>How to test all layers (unit, integration, Kafka, reactive)</li>
+<li>How to stream order-status updates with <strong>Spring WebFlux</strong> (Module 08)</li>
+<li>How to use <strong>Java 21 virtual threads</strong> as an alternative to reactive in blocking endpoint</li>
+<li>How to test all layers (unit, integration, Kafka, reactive) — Module 09</li>
+<li>How to prepare for <strong>Kotlin migration</strong> (Module 11) with Kotlin-friendly patterns</li>
 <li>How to run and test the application with curl and GraphQL queries</li>
 </ul>
 <h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
@@ -182,7 +185,9 @@ platform. It manages:</p>
 <li><strong>REST + GraphQL</strong> APIs for clients</li>
 <li><strong>Reactive streaming</strong> for real-time order status updates</li>
 </ul>
-<h3 id="architecture-diagram">Architecture Diagram<a class="anchor-link" href="#architecture-diagram" title="Permanent link">¶</a></h3>
+<details id="architecture-diagram" class="submodule">
+<summary>Architecture Diagram<a class="anchor-link" href="#architecture-diagram" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code>┌────────────────┐   ┌────────────────┐   ┌────────────────┐
 │  REST Client   │   │  GraphQL       │   │  Reactive     │
 │  (curl, browser)│   │  Client       │   │  Subscriber   │
@@ -220,6 +225,8 @@ platform. It manages:</p>
                        │Consumer         │
                        │(notifications) │
                        └───────────────┘</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="2-complete-project-structure">2. Complete Project Structure<a class="anchor-link" href="#2-complete-project-structure" title="Permanent link">¶</a></h2>
 <pre class="code-block"><code>ordermgmt/
@@ -1779,7 +1786,9 @@ curl -X PUT http://localhost:8080/api/orders/1/status \
 <hr />
 <h2 id="24-api-versioning-strategy">24. API Versioning Strategy<a class="anchor-link" href="#24-api-versioning-strategy" title="Permanent link">¶</a></h2>
 <p>API versioning lets you evolve your API without breaking existing clients.</p>
-<h3 id="url-based-versioning">URL-Based Versioning<a class="anchor-link" href="#url-based-versioning" title="Permanent link">¶</a></h3>
+<details id="url-based-versioning" class="submodule">
+<summary>URL-Based Versioning<a class="anchor-link" href="#url-based-versioning" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@RestController
 @RequestMapping("/api/v1/orders")
 public class OrderControllerV1 {
@@ -1802,21 +1811,33 @@ curl http://localhost:8080/api/v1/orders/1
 
 # V2 client (new fields, different shape)
 curl http://localhost:8080/api/v2/orders/1</code></pre>
-<h3 id="header-based-versioning">Header-Based Versioning<a class="anchor-link" href="#header-based-versioning" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="header-based-versioning" class="submodule">
+<summary>Header-Based Versioning<a class="anchor-link" href="#header-based-versioning" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@GetMapping(value = "/api/orders/{id}", headers = "X-API-Version=1")
 public ResponseEntity&lt;OrderResponseV1&gt; findByIdV1(@PathVariable Long id) { ... }
 
 @GetMapping(value = "/api/orders/{id}", headers = "X-API-Version=2")
 public ResponseEntity&lt;OrderResponseV2&gt; findByIdV2(@PathVariable Long id) { ... }</code></pre>
 <pre class="code-block"><code class="language-bash">curl -H "X-API-Version: 2" http://localhost:8080/api/orders/1</code></pre>
-<h3 id="content-negotiation-versioning">Content Negotiation Versioning<a class="anchor-link" href="#content-negotiation-versioning" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="content-negotiation-versioning" class="submodule">
+<summary>Content Negotiation Versioning<a class="anchor-link" href="#content-negotiation-versioning" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@GetMapping(value = "/api/orders/{id}", produces = "application/vnd.ordermgmt.v1+json")
 public ResponseEntity&lt;OrderResponseV1&gt; findByIdV1(@PathVariable Long id) { ... }
 
 @GetMapping(value = "/api/orders/{id}", produces = "application/vnd.ordermgmt.v2+json")
 public ResponseEntity&lt;OrderResponseV2&gt; findByIdV2(@PathVariable Long id) { ... }</code></pre>
 <pre class="code-block"><code class="language-bash">curl -H "Accept: application/vnd.ordermgmt.v2+json" http://localhost:8080/api/orders/1</code></pre>
-<h3 id="comparison">Comparison<a class="anchor-link" href="#comparison" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="comparison" class="submodule">
+<summary>Comparison<a class="anchor-link" href="#comparison" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -1843,9 +1864,13 @@ public ResponseEntity&lt;OrderResponseV2&gt; findByIdV2(@PathVariable Long id) {
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="25-docker-production-best-practices">25. Docker Production Best Practices<a class="anchor-link" href="#25-docker-production-best-practices" title="Permanent link">¶</a></h2>
-<h3 id="multi-stage-build">Multi-Stage Build<a class="anchor-link" href="#multi-stage-build" title="Permanent link">¶</a></h3>
+<details id="multi-stage-build" class="submodule">
+<summary>Multi-Stage Build<a class="anchor-link" href="#multi-stage-build" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-dockerfile"># Stage 1: Build
 FROM maven:3-eclipse-temurin-21 AS builder
 WORKDIR /app
@@ -1872,7 +1897,11 @@ HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
 
 EXPOSE 8080
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]</code></pre>
-<h3 id="key-production-practices">Key Production Practices<a class="anchor-link" href="#key-production-practices" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="key-production-practices" class="submodule">
+<summary>Key Production Practices<a class="anchor-link" href="#key-production-practices" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -1907,9 +1936,13 @@ ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]</code></pre>
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="26-observability-and-monitoring">26. Observability and Monitoring<a class="anchor-link" href="#26-observability-and-monitoring" title="Permanent link">¶</a></h2>
-<h3 id="structured-json-logging">Structured JSON Logging<a class="anchor-link" href="#structured-json-logging" title="Permanent link">¶</a></h3>
+<details id="structured-json-logging" class="submodule">
+<summary>Structured JSON Logging<a class="anchor-link" href="#structured-json-logging" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// In application.yml — use Logback's JSON encoder
 # Add dependency: net.logstash.logback:logstash-logback-encoder</code></pre>
 <pre class="code-block"><code class="language-xml">&lt;!-- logback-spring.xml --&gt;
@@ -1925,7 +1958,11 @@ ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]</code></pre>
 &lt;/configuration&gt;</code></pre>
 <p>Output:
 <pre class="code-block"><code class="language-json">{"@timestamp":"2025-01-15T10:30:00Z","level":"INFO","logger":"c.e.o.service.OrderService","message":"Creating order","service":"ordermgmt","version":"1.0.0"}</code></pre></p>
-<h3 id="micrometer-metrics">Micrometer Metrics<a class="anchor-link" href="#micrometer-metrics" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="micrometer-metrics" class="submodule">
+<summary>Micrometer Metrics<a class="anchor-link" href="#micrometer-metrics" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Spring Boot Actuator + Micrometer exposes metrics at <code>/actuator/metrics</code>:</p>
 <pre class="code-block"><code class="language-java">@Service
 public class OrderService {
@@ -1948,7 +1985,11 @@ public class OrderService {
         });
     }
 }</code></pre>
-<h3 id="custom-health-indicator">Custom Health Indicator<a class="anchor-link" href="#custom-health-indicator" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="custom-health-indicator" class="submodule">
+<summary>Custom Health Indicator<a class="anchor-link" href="#custom-health-indicator" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Component
 public class KafkaHealthIndicator implements HealthIndicator {
 
@@ -1973,11 +2014,358 @@ public class KafkaHealthIndicator implements HealthIndicator {
     }
 }</code></pre>
 <p>Access at: <code>GET /actuator/health</code> → includes <code>kafka</code> health indicator.</p>
+</div>
+</details>
+<hr />
+<h2 id="27-sealed-classes-for-domain-modeling">27. Sealed Classes for Domain Modeling<a class="anchor-link" href="#27-sealed-classes-for-domain-modeling" title="Permanent link">¶</a></h2>
+<p>Java 21 sealed classes let us model the domain exhaustively — the compiler guarantees we handle every case. We'll refactor <code>OrderStatus</code> and event types to use sealed interfaces.</p>
+<details id="sealed-order-events" class="submodule">
+<summary>Sealed Order Events<a class="anchor-link" href="#sealed-order-events" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.kafka.event;
+
+// Sealed interface: only these permitted types are valid order events
+public sealed interface OrderEvent
+        permits OrderCreatedEvent, OrderStatusChangedEvent, OrderCancelledEvent {
+
+    Long orderId();
+    Instant timestamp();
+}
+
+public record OrderCreatedEvent(
+        Long orderId,
+        Long customerId,
+        BigDecimal totalAmount,
+        Instant timestamp
+) implements OrderEvent {}
+
+public record OrderStatusChangedEvent(
+        Long orderId,
+        OrderStatus oldStatus,
+        OrderStatus newStatus,
+        Instant timestamp
+) implements OrderEvent {}
+
+public record OrderCancelledEvent(
+        Long orderId,
+        String reason,
+        Instant timestamp
+) implements OrderEvent {}</code></pre>
+</div>
+</details>
+<details id="pattern-matching-on-sealed-events" class="submodule">
+<summary>Pattern Matching on Sealed Events<a class="anchor-link" href="#pattern-matching-on-sealed-events" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<p>The Kafka consumer can now use pattern matching switch — the compiler enforces exhaustiveness:</p>
+<pre class="code-block"><code class="language-java">@KafkaListener(topics = "order-events", groupId = "ordermgmt-group")
+public void handleEvent(OrderEvent event) {
+    switch (event) {
+        case OrderCreatedEvent e -&gt; {
+            log.info("Order created: orderId={}, total={}", e.orderId(), e.totalAmount());
+            notificationService.sendOrderConfirmation(e);
+        }
+        case OrderStatusChangedEvent e -&gt; {
+            log.info("Status changed: orderId={} {}→{}", e.orderId(), e.oldStatus(), e.newStatus());
+            analyticsService.recordStatusChange(e);
+        }
+        case OrderCancelledEvent e -&gt; {
+            log.info("Order cancelled: orderId={}, reason={}", e.orderId(), e.reason());
+            notificationService.sendCancellationNotice(e);
+        }
+        // No default needed — the compiler knows all permitted subtypes
+    }
+}</code></pre>
+<p>If someone later adds <code>OrderRefundedEvent implements OrderEvent</code>, the switch fails to compile until the new case is handled. This is <strong>exhaustive domain modeling</strong> — the compiler catches missing cases.</p>
+<details>
+<summary>Deep Dive: Sealed Classes vs Enums</summary>
+
+Sealed interfaces are more powerful than enums:
+
+- **Enums** are singletons — one instance per value. You can't attach per-instance data.
+- **Sealed classes/interfaces** allow per-instance fields. `OrderCreatedEvent` carries `totalAmount`, `OrderCancelledEvent` carries `reason` — different data per variant.
+- **Records + sealed = algebraic data types** — the functional programming concept where types are composed of "or" (sealed) and "and" (records) relationships.
+
+Use enums when all variants share the same shape. Use sealed when variants have different fields.
+
+</details>
+
+</div>
+</details>
+<hr />
+<h2 id="28-virtual-threads-for-blocking-endpoints">28. Virtual Threads for Blocking Endpoints<a class="anchor-link" href="#28-virtual-threads-for-blocking-endpoints" title="Permanent link">¶</a></h2>
+<p>Java 21's <strong>virtual threads</strong> (Project Loom) give us a third concurrency model alongside Spring MVC (thread-per-request) and Spring WebFlux (reactive). Virtual threads allow blocking code to scale without the cognitive overhead of reactive pipelines.</p>
+<details id="when-to-use-virtual-threads-vs-reactive" class="submodule">
+<summary>When to Use Virtual Threads vs Reactive<a class="anchor-link" href="#when-to-use-virtual-threads-vs-reactive" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommended Approach</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple CRUD REST endpoint</td>
+<td>Virtual threads</td>
+<td>Blocking code is simpler to read and debug</td>
+</tr>
+<tr>
+<td>Streaming data to client (SSE/WebSocket)</td>
+<td>WebFlux (Flux)</td>
+<td>Reactive streams handle streaming naturally</td>
+</tr>
+<tr>
+<td>Kafka consumer with complex processing</td>
+<td>Either</td>
+<td>Virtual threads for blocking DB calls, reactive for backpressure</td>
+</tr>
+<tr>
+<td>Aggregating multiple async data sources</td>
+<td>Reactive (Flux.merge/zip)</td>
+<td>Composing async streams is reactive's strength</td>
+</tr>
+<tr>
+<td>Legacy library that blocks (JDBC driver)</td>
+<td>Virtual threads</td>
+<td>Cannot make blocking code reactive without wrapping</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details id="enabling-virtual-threads" class="submodule">
+<summary>Enabling Virtual Threads<a class="anchor-link" href="#enabling-virtual-threads" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<p>In <code>application.yml</code>:</p>
+<pre class="code-block"><code class="language-yaml">spring:
+  threads:
+    virtual:
+      enabled: true</code></pre>
+<p>Spring Boot 3.2+ automatically uses virtual threads for HTTP request handling when this flag is set. Tomcat creates virtual threads instead of platform threads — each request gets a virtual thread that costs ~a few KB instead of ~1MB.</p>
+</div>
+</details>
+<details id="mixing-virtual-threads-and-reactive" class="submodule">
+<summary>Mixing Virtual Threads and Reactive<a class="anchor-link" href="#mixing-virtual-threads-and-reactive" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<p>You can have both in the same application:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
+
+import com.example.ordermgmt.dto.OrderResponse;
+import com.example.ordermgmt.service.OrderService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    // This endpoint runs on a virtual thread (blocking, but scales)
+    @GetMapping
+    public List&lt;OrderResponse&gt; listOrders() {
+        return orderService.getAllOrders(); // blocks on JPA, but on a virtual thread
+    }
+
+    // The reactive endpoint in OrderFluxController handles streaming
+    // on Netty event loop (non-blocking Flux)
+}</code></pre>
+<p>This is the practical answer to "should I use virtual threads or reactive?": <strong>use both, each where it fits.</strong></p>
+</div>
+</details>
+<details id="configuring-tomcat-virtual-threads" class="submodule">
+<summary>Configuring Tomcat + Virtual Threads<a class="anchor-link" href="#configuring-tomcat-virtual-threads" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<p>For the blocking REST endpoints, we configure Tomcat to use virtual threads:</p>
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.config;
+
+import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.concurrent.Executors;
+
+@Configuration
+public class VirtualThreadConfig {
+
+    @Bean
+    public TomcatProtocolHandlerCustomizer&lt;?&gt; protocolHandlerVirtualThreadExecutorCustomizer() {
+        return protocolHandler -&gt; {
+            protocolHandler.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
+        };
+    }
+}</code></pre>
+<p>Now every HTTP request to <code>/api/orders/*</code> runs on a virtual thread. You can block freely (JPA calls, REST client calls) without worrying about thread exhaustion.</p>
+<details>
+<summary>Deep Dive: Virtual Thread Pitfalls</summary>
+
+Virtual threads are cheap, but they're not free. Watch out for:
+
+- **Synchronized blocks**: Virtual threads pinned to their carrier thread inside `synchronized`. Use `ReentrantLock` instead if a virtual thread might block inside a lock.
+- **Thread-local overuse**: Virtual threads support `ThreadLocal`, but millions of virtual threads with thread-locals consume real memory. Prefer passing context explicitly.
+- **`Object.wait()`**: Also pins the virtual thread. Use `java.util.concurrent` locks instead.
+
+<pre class="code-block"><code class="language-java">// BAD: pins the virtual thread
+synchronized (lock) {
+    condition.await(); // pins!
+}
+
+// GOOD: does not pin
+ReentrantLock lock = new ReentrantLock();
+lock.lock();
+try {
+    condition.await(); // does NOT pin
+} finally {
+    lock.unlock();
+}</code></pre>
+
+</details>
+
+</div>
+</details>
+<hr />
+<h2 id="29-preparing-for-kotlin-migration-module-11-preview">29. Preparing for Kotlin Migration (Module 11 Preview)<a class="anchor-link" href="#29-preparing-for-kotlin-migration-module-11-preview" title="Permanent link">¶</a></h2>
+<p>The capstone is written in Java, but the codebase is structured to make a future Kotlin migration (covered in Module 11) straightforward. Here's what makes the code Kotlin-ready:</p>
+<details id="patterns-that-migrate-cleanly" class="submodule">
+<summary>Patterns That Migrate Cleanly<a class="anchor-link" href="#patterns-that-migrate-cleanly" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<table>
+<thead>
+<tr>
+<th>Java Pattern (This Module)</th>
+<th>Kotlin Equivalent (Module 11)</th>
+<th>Why It Migrates Cleanly</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Records (<code>record OrderResponse(...)</code>)</td>
+<td><code>data class OrderResponse(...)</code></td>
+<td>Same concept, one-line conversion</td>
+</tr>
+<tr>
+<td>Constructor injection</td>
+<td>Constructor injection</td>
+<td>Identical — Kotlin supports it natively</td>
+</tr>
+<tr>
+<td>Sealed interfaces</td>
+<td><code>sealed interface</code> / <code>sealed class</code></td>
+<td>Kotlin had sealed classes before Java</td>
+</tr>
+<tr>
+<td><code>var</code> local variables</td>
+<td><code>val</code> / <code>var</code></td>
+<td>Kotlin's version is more expressive (val = immutable)</td>
+</tr>
+<tr>
+<td>Pattern matching switch</td>
+<td><code>when</code> expression</td>
+<td>Kotlin's <code>when</code> is more flexible</td>
+</tr>
+<tr>
+<td><code>Optional&lt;T&gt;</code></td>
+<td>Nullable <code>T?</code></td>
+<td>Kotlin's null safety replaces Optional</td>
+</tr>
+</tbody>
+</table>
+</div>
+</details>
+<details id="records-are-already-kotlin-friendly" class="submodule">
+<summary>Records Are Already Kotlin-Friendly<a class="anchor-link" href="#records-are-already-kotlin-friendly" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<p>Our DTOs are records — when migrated to Kotlin, they become <code>data class</code> with one line change:</p>
+<pre class="code-block"><code class="language-java">// Java (current)
+public record OrderResponse(
+        Long id,
+        Long customerId,
+        String customerName,
+        OrderStatus status,
+        BigDecimal totalAmount,
+        Instant createdAt
+) {}</code></pre>
+<pre class="code-block"><code class="language-kotlin">// Kotlin (after migration — Module 11)
+data class OrderResponse(
+    val id: Long?,
+    val customerId: Long,
+    val customerName: String,
+    val status: OrderStatus,
+    val totalAmount: BigDecimal,
+    val createdAt: Instant
+)</code></pre>
+</div>
+</details>
+<details id="sealed-events-map-directly-to-kotlin" class="submodule">
+<summary>Sealed Events Map Directly to Kotlin<a class="anchor-link" href="#sealed-events-map-directly-to-kotlin" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<p>Our sealed <code>OrderEvent</code> interface (section 27 above) becomes even more natural in Kotlin:</p>
+<pre class="code-block"><code class="language-kotlin">sealed interface OrderEvent {
+    val orderId: Long
+    val timestamp: Instant
+}
+
+data class OrderCreatedEvent(
+    override val orderId: Long,
+    val customerId: Long,
+    val totalAmount: BigDecimal,
+    override val timestamp: Instant
+) : OrderEvent
+
+// Exhaustive when:
+fun handleEvent(event: OrderEvent) = when (event) {
+    is OrderCreatedEvent -&gt; println("Created: ${event.orderId}")
+    is OrderStatusChangedEvent -&gt; println("Changed: ${event.orderId}")
+    is OrderCancelledEvent -&gt; println("Cancelled: ${event.orderId}")
+    // No else needed — sealed guarantees exhaustiveness
+}</code></pre>
+</div>
+</details>
+<details id="what-to-avoid-anti-patterns-for-migration" class="submodule">
+<summary>What to Avoid (Anti-patterns for Migration)<a class="anchor-link" href="#what-to-avoid-anti-patterns-for-migration" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<p>Patterns that make Kotlin migration harder:</p>
+<ul>
+<li><strong>Field injection</strong> (<code>@Autowired</code> on fields) — Kotlin classes are final by default; field injection requires proxies. Use constructor injection (which we do throughout).</li>
+<li><strong>Lombok</strong> — we don't use it; records replace Lombok's <code>@Data</code>/<code>@Builder</code>. Lombok has poor Kotlin interop.</li>
+<li><strong>Mutable state in services</strong> — services are stateless with <code>final</code> fields. This maps to Kotlin <code>val</code> properties.</li>
+<li><strong>Static utility methods</strong> — prefer instance methods or companion objects. Kotlin doesn't have <code>static</code>; it uses <code>companion object</code>.</li>
+</ul>
+</div>
+</details>
+<details id="migration-strategy-preview" class="submodule">
+<summary>Migration Strategy Preview<a class="anchor-link" href="#migration-strategy-preview" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
+<p>Module 11 covers the full migration, but the high-level strategy is:</p>
+<ol>
+<li><strong>Start with DTOs</strong> — records → data classes (mechanical, safe)</li>
+<li><strong>Then entities</strong> — JPA entities need <code>no-arg</code> constructor plugin, but otherwise convert cleanly</li>
+<li><strong>Then services</strong> — constructor injection maps directly, <code>val</code> replaces <code>final</code></li>
+<li><strong>Then controllers</strong> — <code>@RestController</code> + routing annotations are identical</li>
+<li><strong>Finally, replace Reactor with coroutines</strong> — <code>suspend fun</code> replaces <code>Mono&lt;T&gt;</code>/<code>Flux&lt;T&gt;</code></li>
+</ol>
+<p>The capstone codebase is structured so each of these steps is independent.</p>
+</div>
+</details>
 <hr />
 <hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
-<li>See the module content above for key takeaways.</li>
+<li>How to assemble a complete Order Management System using <strong>all concepts from all modules</strong></li>
+<li><strong>Sealed interfaces</strong> + records for exhaustive, compiler-checked domain modeling</li>
+<li><strong>Virtual threads</strong> as a third concurrency model alongside MVC and WebFlux</li>
+<li>How to <strong>mix blocking (virtual threads) and reactive (WebFlux)</strong> in the same application</li>
+<li>How sealed events make <strong>pattern matching in Kafka consumers</strong> exhaustive and safe</li>
+<li>Why the codebase structure (records, constructor injection, no Lombok) <strong>prepares for Kotlin migration</strong></li>
+<li>How Java sealed types map directly to <strong>Kotlin sealed classes</strong> — the migration is structural</li>
+<li>When to choose virtual threads vs reactive streams (use both, each where it fits)</li>
 </ul>
 <hr />
 <p>← <a href="09-tdd.html">Previous: Module 09 — Test-Driven Development</a> | <a href="11-migrating-java-to-kotlin.html">Next: Module 11 — Migrating Java to Kotlin</a> →</p>

@@ -431,6 +431,43 @@ body {
 
 .content details p { padding: 0.75rem 1rem; }
 
+/* ---- Collapsible submodules (H3 sections) ---- */
+.content details.submodule {
+  margin: 0;
+  border: none;
+  border-left: 3px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.content details.submodule > summary {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  padding: 0.625rem 0.75rem;
+  border-radius: 0;
+  border-bottom: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.content details.submodule > summary:hover {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.content details.submodule[open] > summary {
+  border-bottom-color: var(--border);
+  color: var(--accent-light);
+}
+
+.content details.submodule .submodule-body {
+  padding: 0.75rem 0.75rem 0.75rem 1.25rem;
+}
+
+.content details.submodule .submodule-body > *:first-child {
+  margin-top: 0;
+}
+
 /* ---- Task list ---- */
 .content .task-list-item {
   list-style: none;

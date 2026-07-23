@@ -155,7 +155,9 @@
 
 <h2 id="1-the-problem-tight-coupling-with-new">1. The Problem: Tight Coupling with <code>new</code><a class="anchor-link" href="#1-the-problem-tight-coupling-with-new" title="Permanent link">¶</a></h2>
 <p>When a class creates its own dependencies using the <code>new</code> keyword, it becomes <strong>tightly coupled</strong> — it can't function without those specific implementations.</p>
-<h3 id="example-the-bad-way">Example: The Bad Way<a class="anchor-link" href="#example-the-bad-way" title="Permanent link">¶</a></h3>
+<details id="example-the-bad-way" class="submodule">
+<summary>Example: The Bad Way<a class="anchor-link" href="#example-the-bad-way" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
 
 import com.example.ordermgmt.domain.Customer;
@@ -186,14 +188,22 @@ public class OrderService {
         return customerRepository.findById(id);
     }
 }</code></pre>
-<h3 id="why-is-this-bad">Why Is This Bad?<a class="anchor-link" href="#why-is-this-bad" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="why-is-this-bad" class="submodule">
+<summary>Why Is This Bad?<a class="anchor-link" href="#why-is-this-bad" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><strong>Tight coupling</strong> — <code>OrderService</code> is permanently bound to these specific repository implementations. You can't swap them without rewriting <code>OrderService</code>.</li>
 <li><strong>Hard to test</strong> — In a unit test, you can't replace the real repositories with mocks (fake versions). You'd need a real database to test <code>findCustomer()</code>.</li>
 <li><strong>Hidden dependencies</strong> — Someone who calls <code>new OrderService()</code> has no idea it needs three repositories. The dependencies are hidden inside the constructor.</li>
 <li><strong>No flexibility</strong> — If you later need a different <code>CustomerRepository</code> (e.g., one that caches results), you'd have to change <code>OrderService</code> itself.</li>
 </ol>
-<h3 id="the-fix-dependency-injection">The Fix: Dependency Injection<a class="anchor-link" href="#the-fix-dependency-injection" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="the-fix-dependency-injection" class="submodule">
+<summary>The Fix: Dependency Injection<a class="anchor-link" href="#the-fix-dependency-injection" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Instead of <code>OrderService</code> creating its own dependencies, it <strong>receives</strong> them from outside:</p>
 <pre class="code-block"><code class="language-java">// GOOD: OrderService receives its dependencies through the constructor
 public class OrderService {
@@ -213,10 +223,14 @@ public class OrderService {
     }
 }</code></pre>
 <p>Now <code>OrderService</code> doesn't know or care <strong>how</strong> the repositories are created. It just declares "I need these three things" and someone else provides them. This is <strong>dependency injection</strong>.</p>
+</div>
+</details>
 <hr />
 <h2 id="2-what-is-dependency-injection">2. What Is Dependency Injection?<a class="anchor-link" href="#2-what-is-dependency-injection" title="Permanent link">¶</a></h2>
 <p><strong>Dependency Injection (DI)</strong> is a design pattern where an object receives its dependencies from an external source instead of creating them itself.</p>
-<h3 id="the-restaurant-analogy">The Restaurant Analogy<a class="anchor-link" href="#the-restaurant-analogy" title="Permanent link">¶</a></h3>
+<details id="the-restaurant-analogy" class="submodule">
+<summary>The Restaurant Analogy<a class="anchor-link" href="#the-restaurant-analogy" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Think of a restaurant kitchen:</p>
 <ul>
 <li><strong>Without DI:</strong> The kitchen grows its own tomatoes, raises its own chickens, and bakes its own bread. If the tomato crop fails, the kitchen can't make any tomato dishes.</li>
@@ -225,10 +239,14 @@ public class OrderService {
 <p>In software:
 - The <strong>kitchen</strong> is your class (e.g., <code>OrderService</code>)
 - The <strong>supplier</strong> is the dependency injector — any framework or manual wiring that creates objects and delivers them to your classes</p>
+</div>
+</details>
 <hr />
 <h2 id="3-inversion-of-control-ioc">3. Inversion of Control (IoC)<a class="anchor-link" href="#3-inversion-of-control-ioc" title="Permanent link">¶</a></h2>
 <p><strong>Inversion of Control (IoC)</strong> is the broader principle behind DI. It means that the control over creating and managing objects is <strong>inverted</strong> — moved from your code to a framework or container.</p>
-<h3 id="the-hollywood-principle">The Hollywood Principle<a class="anchor-link" href="#the-hollywood-principle" title="Permanent link">¶</a></h3>
+<details id="the-hollywood-principle" class="submodule">
+<summary>The Hollywood Principle<a class="anchor-link" href="#the-hollywood-principle" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>IoC is sometimes called the <strong>Hollywood Principle</strong>: <em>"Don't call us, we'll call you."</em></p>
 <p>In traditional programming, your code calls the framework. In IoC, the framework calls your code. You don't go looking for your dependencies — the container pushes them to you.</p>
 <table>
@@ -253,10 +271,14 @@ public class OrderService {
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="4-di-as-a-pattern-before-any-framework">4. DI as a Pattern — Before Any Framework<a class="anchor-link" href="#4-di-as-a-pattern-before-any-framework" title="Permanent link">¶</a></h2>
 <p>Dependency Injection is not a Spring invention. It's a general software design pattern that predates Spring by decades. Let's see how it works in plain Java and in other languages.</p>
-<h3 id="manual-di-in-plain-java">Manual DI in Plain Java<a class="anchor-link" href="#manual-di-in-plain-java" title="Permanent link">¶</a></h3>
+<details id="manual-di-in-plain-java" class="submodule">
+<summary>Manual DI in Plain Java<a class="anchor-link" href="#manual-di-in-plain-java" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Without any framework, you can do DI yourself. You create objects in one place and pass them where they're needed:</p>
 <pre class="code-block"><code class="language-java">// The "composition root" — where you wire everything
 public class Application {
@@ -276,7 +298,11 @@ public class Application {
     }
 }</code></pre>
 <p>This is <strong>manual DI</strong> (also called "poor man's DI"). It works perfectly for small apps. The wiring code lives in one place (the composition root), and the business classes know nothing about how their dependencies are created.</p>
-<h3 id="di-in-other-languages">DI in Other Languages<a class="anchor-link" href="#di-in-other-languages" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="di-in-other-languages" class="submodule">
+<summary>DI in Other Languages<a class="anchor-link" href="#di-in-other-languages" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>DI isn't Java-specific. Every modern ecosystem has a form of it:</p>
 <table>
 <thead>
@@ -340,6 +366,8 @@ Martin Fowler's classic article "[Inversion of Control Containers and the Depend
 
 </details>
 
+</div>
+</details>
 <hr />
 <h2 id="5-the-spring-ioc-container">5. The Spring IoC Container<a class="anchor-link" href="#5-the-spring-ioc-container" title="Permanent link">¶</a></h2>
 <p>The <strong>Spring IoC container</strong> is the "supplier" in our restaurant analogy. It:</p>
@@ -349,7 +377,9 @@ Martin Fowler's classic article "[Inversion of Control Containers and the Depend
 <li>Figures out which beans depend on which other beans</li>
 <li>Injects the dependencies</li>
 </ol>
-<h3 id="key-terms">Key Terms<a class="anchor-link" href="#key-terms" title="Permanent link">¶</a></h3>
+<details id="key-terms" class="submodule">
+<summary>Key Terms<a class="anchor-link" href="#key-terms" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -372,10 +402,14 @@ Martin Fowler's classic article "[Inversion of Control Containers and the Depend
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="6-types-of-injection">6. Types of Injection<a class="anchor-link" href="#6-types-of-injection" title="Permanent link">¶</a></h2>
 <p>There are three ways to inject dependencies into a class:</p>
-<h3 id="1-constructor-injection-preferred">1. Constructor Injection (Preferred)<a class="anchor-link" href="#1-constructor-injection-preferred" title="Permanent link">¶</a></h3>
+<details id="1-constructor-injection-preferred" class="submodule">
+<summary>1. Constructor Injection (Preferred)<a class="anchor-link" href="#1-constructor-injection-preferred" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Dependencies are passed through the constructor:</p>
 <pre class="code-block"><code class="language-java">@Service
 public class OrderService {
@@ -396,7 +430,11 @@ public class OrderService {
 - You can't create an <code>OrderService</code> without its dependencies — the compiler enforces it
 - Easy to test — just pass mocks to the constructor in tests
 - Spring doesn't need <code>@Autowired</code> — if a class has one constructor, Spring uses it automatically</p>
-<h3 id="2-setter-injection-rarely-used">2. Setter Injection (Rarely Used)<a class="anchor-link" href="#2-setter-injection-rarely-used" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="2-setter-injection-rarely-used" class="submodule">
+<summary>2. Setter Injection (Rarely Used)<a class="anchor-link" href="#2-setter-injection-rarely-used" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Dependencies are set via setter methods:</p>
 <pre class="code-block"><code class="language-java">@Service
 public class OrderService {
@@ -409,7 +447,11 @@ public class OrderService {
     }
 }</code></pre>
 <p><strong>Cons:</strong> The dependency can be changed at any time (not <code>final</code>), and you can create an <code>OrderService</code> in an invalid state (without its dependencies).</p>
-<h3 id="3-field-injection-avoid">3. Field Injection (Avoid)<a class="anchor-link" href="#3-field-injection-avoid" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="3-field-injection-avoid" class="submodule">
+<summary>3. Field Injection (Avoid)<a class="anchor-link" href="#3-field-injection-avoid" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Dependencies are injected directly into fields:</p>
 <pre class="code-block"><code class="language-java">@Service
 public class OrderService {
@@ -418,7 +460,11 @@ public class OrderService {
     private CustomerRepository customerRepository;
 }</code></pre>
 <p><strong>Cons:</strong> The field can't be <code>final</code> (so it's mutable), you can't test without Spring (you'd need reflection to set the field), and it hides dependencies from the constructor signature.</p>
-<h3 id="why-constructor-injection-is-preferred">Why Constructor Injection Is Preferred<a class="anchor-link" href="#why-constructor-injection-is-preferred" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="why-constructor-injection-is-preferred" class="submodule">
+<summary>Why Constructor Injection Is Preferred<a class="anchor-link" href="#why-constructor-injection-is-preferred" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -456,6 +502,8 @@ public class OrderService {
 </tbody>
 </table>
 <p><strong>Rule: Always use constructor injection. Never use <code>@Autowired</code> on fields.</strong></p>
+</div>
+</details>
 <hr />
 <h2 id="7-spring-stereotype-annotations">7. Spring Stereotype Annotations<a class="anchor-link" href="#7-spring-stereotype-annotations" title="Permanent link">¶</a></h2>
 <p>Spring uses <strong>stereotype annotations</strong> to mark classes as beans. When Spring starts, it scans your packages and finds all annotated classes:</p>
@@ -491,7 +539,9 @@ public class OrderService {
 </tbody>
 </table>
 <p>Functionally, these annotations are almost identical — they all register the class as a Spring bean. The different names are for <strong>semantic clarity</strong> — they communicate the role of the class.</p>
-<h3 id="how-component-scanning-works">How Component Scanning Works<a class="anchor-link" href="#how-component-scanning-works" title="Permanent link">¶</a></h3>
+<details id="how-component-scanning-works" class="submodule">
+<summary>How Component Scanning Works<a class="anchor-link" href="#how-component-scanning-works" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Remember from Module 01, the <code>@SpringBootApplication</code> annotation includes <code>@ComponentScan</code>. This tells Spring:</p>
 <ol>
 <li>Look in the package <code>com.example.ordermgmt</code> and all sub-packages</li>
@@ -499,7 +549,11 @@ public class OrderService {
 <li>Create a bean (instance) for each</li>
 <li>Wire the beans together based on their constructor parameters</li>
 </ol>
-<h3 id="example-creating-beans">Example: Creating Beans<a class="anchor-link" href="#example-creating-beans" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="example-creating-beans" class="submodule">
+<summary>Example: Creating Beans<a class="anchor-link" href="#example-creating-beans" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// Spring finds this and creates a bean of type CustomerService
 @Service
 public class CustomerService {
@@ -515,6 +569,8 @@ public class CustomerService {
         return customerRepository.findById(id);
     }
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="8-autowired-explicit-vs-implicit-wiring">8. <code>@Autowired</code>: Explicit vs. Implicit Wiring<a class="anchor-link" href="#8-autowired-explicit-vs-implicit-wiring" title="Permanent link">¶</a></h2>
 <p>The <code>@Autowired</code> annotation tells Spring to inject a dependency. But with constructor injection, it's <strong>optional</strong>:</p>
@@ -567,7 +623,9 @@ public class OrderService {
 </tr>
 </tbody>
 </table>
-<h3 id="setting-a-scope">Setting a Scope<a class="anchor-link" href="#setting-a-scope" title="Permanent link">¶</a></h3>
+<details id="setting-a-scope" class="submodule">
+<summary>Setting a Scope<a class="anchor-link" href="#setting-a-scope" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Service
 @Scope("prototype")  // A new instance every time it's injected
 public class OrderCalculator {
@@ -575,6 +633,8 @@ public class OrderCalculator {
 }</code></pre>
 <p>Without <code>@Scope</code>, the default is <strong>singleton</strong> — one instance shared by everything. This is almost always what you want for services and repositories.</p>
 <p><strong>Important:</strong> With singleton scope, your beans must be <strong>stateless</strong> — they should not store data in instance fields (except constants and injected dependencies). If multiple threads access a singleton bean simultaneously and it has mutable state, you'll get race conditions.</p>
+</div>
+</details>
 <hr />
 <h2 id="10-manual-bean-creation-with-configuration-and-bean">10. Manual Bean Creation with <code>@Configuration</code> and <code>@Bean</code><a class="anchor-link" href="#10-manual-bean-creation-with-configuration-and-bean" title="Permanent link">¶</a></h2>
 <p>Sometimes you can't use stereotype annotations. For example, when you need to create a bean from a third-party library (you can't add <code>@Service</code> to a class you didn't write).</p>
@@ -598,7 +658,9 @@ public class AppConfig {
         return calculator;
     }
 }</code></pre>
-<h3 id="when-to-use-bean-vs-component">When to Use <code>@Bean</code> vs <code>@Component</code><a class="anchor-link" href="#when-to-use-bean-vs-component" title="Permanent link">¶</a></h3>
+<details id="when-to-use-bean-vs-component" class="submodule">
+<summary>When to Use <code>@Bean</code> vs <code>@Component</code><a class="anchor-link" href="#when-to-use-bean-vs-component" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -617,6 +679,8 @@ public class AppConfig {
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="11-resolving-ambiguous-dependencies-qualifier-and-primary">11. Resolving Ambiguous Dependencies: <code>@Qualifier</code> and <code>@Primary</code><a class="anchor-link" href="#11-resolving-ambiguous-dependencies-qualifier-and-primary" title="Permanent link">¶</a></h2>
 <p>Sometimes you have multiple beans of the same type. For example, two <code>CustomerRepository</code> implementations (one for PostgreSQL, one for in-memory testing):</p>
@@ -635,7 +699,9 @@ public class AppConfig {
     }
 }</code></pre>
 <p>When <code>OrderService</code> asks for a <code>CustomerRepository</code>, Spring sees two options. <code>@Primary</code> tells it to use the PostgreSQL one by default.</p>
-<h3 id="using-qualifier-for-specific-selection">Using <code>@Qualifier</code> for Specific Selection<a class="anchor-link" href="#using-qualifier-for-specific-selection" title="Permanent link">¶</a></h3>
+<details id="using-qualifier-for-specific-selection" class="submodule">
+<summary>Using <code>@Qualifier</code> for Specific Selection<a class="anchor-link" href="#using-qualifier-for-specific-selection" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>If you want a specific bean (not the primary one), use <code>@Qualifier</code>:</p>
 <pre class="code-block"><code class="language-java">@Service
 public class TestOrderService {
@@ -647,12 +713,16 @@ public class TestOrderService {
         // Gets the in-memory version, not the primary one
     }
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="12-circular-dependencies">12. Circular Dependencies<a class="anchor-link" href="#12-circular-dependencies" title="Permanent link">¶</a></h2>
 <p>A <strong>circular dependency</strong> happens when two beans depend on each other:</p>
 <pre class="code-block"><code>OrderService → needs → CustomerService → needs → OrderService → ...</code></pre>
 <p>Spring cannot create either bean because it can't finish constructing one without the other.</p>
-<h3 id="how-to-avoid-circular-dependencies">How to Avoid Circular Dependencies<a class="anchor-link" href="#how-to-avoid-circular-dependencies" title="Permanent link">¶</a></h3>
+<details id="how-to-avoid-circular-dependencies" class="submodule">
+<summary>How to Avoid Circular Dependencies<a class="anchor-link" href="#how-to-avoid-circular-dependencies" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The solution is usually a <strong>design change</strong>: if <code>OrderService</code> and <code>CustomerService</code> need to call each other, they're probably doing too much. Split the responsibility:</p>
 <pre class="code-block"><code class="language-java">// BAD: circular dependency
 @Service
@@ -681,6 +751,8 @@ public class CustomerService {
 public class SharedLookupService {
     // This service contains the logic both needed
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="13-life-cycle-hooks-postconstruct-and-predestroy">13. Life-Cycle Hooks: <code>@PostConstruct</code> and <code>@PreDestroy</code><a class="anchor-link" href="#13-life-cycle-hooks-postconstruct-and-predestroy" title="Permanent link">¶</a></h2>
 <p>Spring lets you run code at specific points in a bean's life cycle:</p>
@@ -718,7 +790,9 @@ public class OrderService {
         log.info("pre_destroy — cleaning up resources");
     }
 }</code></pre>
-<h3 id="when-to-use-each">When to Use Each<a class="anchor-link" href="#when-to-use-each" title="Permanent link">¶</a></h3>
+<details id="when-to-use-each" class="submodule">
+<summary>When to Use Each<a class="anchor-link" href="#when-to-use-each" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -746,6 +820,8 @@ public class OrderService {
 </tbody>
 </table>
 <p>Note: <code>@PostConstruct</code> and <code>@PreDestroy</code> come from <code>jakarta.annotation</code> (not <code>javax.annotation</code>) in Spring Boot 3.x.</p>
+</div>
+</details>
 <hr />
 <h2 id="14-wiring-the-order-management-domain">14. Wiring the Order Management Domain<a class="anchor-link" href="#14-wiring-the-order-management-domain" title="Permanent link">¶</a></h2>
 <p>Let's wire our entire domain using Spring DI. Here's how it fits together:</p>
@@ -754,7 +830,9 @@ public class OrderService {
         depends on → OrderRepository
         depends on → ProductRepository
         depends on → CustomerRepository</code></pre>
-<h3 id="domain-records-from-module-00">Domain Records (from Module 00)<a class="anchor-link" href="#domain-records-from-module-00" title="Permanent link">¶</a></h3>
+<details id="domain-records-from-module-00" class="submodule">
+<summary>Domain Records (from Module 00)<a class="anchor-link" href="#domain-records-from-module-00" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
 
 import java.math.BigDecimal;
@@ -778,7 +856,11 @@ public record Order(
 public enum OrderStatus {
     PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
 }</code></pre>
-<h3 id="repository-interfaces-stubs-real-jpa-in-module-04">Repository Interfaces (stubs — real JPA in Module 04)<a class="anchor-link" href="#repository-interfaces-stubs-real-jpa-in-module-04" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="repository-interfaces-stubs-real-jpa-in-module-04" class="submodule">
+<summary>Repository Interfaces (stubs — real JPA in Module 04)<a class="anchor-link" href="#repository-interfaces-stubs-real-jpa-in-module-04" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
 
 import com.example.ordermgmt.domain.Customer;
@@ -802,7 +884,11 @@ public class CustomerRepository {
         return new ArrayList&lt;&gt;(store.values());
     }
 }</code></pre>
-<h3 id="service-layer">Service Layer<a class="anchor-link" href="#service-layer" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="service-layer" class="submodule">
+<summary>Service Layer<a class="anchor-link" href="#service-layer" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
 
 import com.example.ordermgmt.domain.*;
@@ -860,7 +946,11 @@ public class OrderService {
         return saved;
     }
 }</code></pre>
-<h3 id="controller">Controller<a class="anchor-link" href="#controller" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="controller" class="submodule">
+<summary>Controller<a class="anchor-link" href="#controller" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
 
 import com.example.ordermgmt.domain.Order;
@@ -885,7 +975,11 @@ public class OrderController {
         return orderService.createOrder(request.customerId(), request.items());
     }
 }</code></pre>
-<h3 id="the-application-entry-point">The Application Entry Point<a class="anchor-link" href="#the-application-entry-point" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="the-application-entry-point" class="submodule">
+<summary>The Application Entry Point<a class="anchor-link" href="#the-application-entry-point" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>This was created by Spring Initializr in Module 01:</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt;
 
@@ -899,7 +993,11 @@ public class OrderManagementApplication {
         SpringApplication.run(OrderManagementApplication.class, args);
     }
 }</code></pre>
-<h3 id="how-spring-wires-everything">How Spring Wires Everything<a class="anchor-link" href="#how-spring-wires-everything" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="how-spring-wires-everything" class="submodule">
+<summary>How Spring Wires Everything<a class="anchor-link" href="#how-spring-wires-everything" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When you start the application:</p>
 <ol>
 <li>Spring scans <code>com.example.ordermgmt.*</code> for annotated classes</li>
@@ -909,6 +1007,8 @@ public class OrderManagementApplication {
 <li>All beans are registered in the application context, ready to use</li>
 </ol>
 <p><strong>You didn't write a single <code>new</code> statement for any of these objects.</strong> Spring created and connected them all automatically.</p>
+</div>
+</details>
 <hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
@@ -929,7 +1029,9 @@ public class OrderManagementApplication {
 <h2 id="15-bean-lifecycle-callbacks-in-depth">15. Bean Lifecycle Callbacks in Depth<a class="anchor-link" href="#15-bean-lifecycle-callbacks-in-depth" title="Permanent link">¶</a></h2>
 <p>Spring beans go through a well-defined lifecycle. Understanding it helps you
 hook into the right phase for initialization and cleanup.</p>
-<h3 id="the-bean-lifecycle-simplified">The Bean Lifecycle (Simplified)<a class="anchor-link" href="#the-bean-lifecycle-simplified" title="Permanent link">¶</a></h3>
+<details id="the-bean-lifecycle-simplified" class="submodule">
+<summary>The Bean Lifecycle (Simplified)<a class="anchor-link" href="#the-bean-lifecycle-simplified" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code>1. Instantiation — Spring creates the bean instance (constructor)
 2. Property injection — Spring sets dependencies (@Autowired)
 3. BeanNameAware.setBeanName()
@@ -943,7 +1045,11 @@ hook into the right phase for initialization and cleanup.</p>
 10. @PreDestroy — custom cleanup
 11. DisposableBean.destroy()
 12. Custom destroy method (@Bean(destroyMethod = "..."))</code></pre>
-<h3 id="postconstruct-and-predestroy">@PostConstruct and @PreDestroy<a class="anchor-link" href="#postconstruct-and-predestroy" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="postconstruct-and-predestroy" class="submodule">
+<summary>@PostConstruct and @PreDestroy<a class="anchor-link" href="#postconstruct-and-predestroy" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
@@ -972,7 +1078,11 @@ public class OrderService {
         connectionPool.close();
     }
 }</code></pre>
-<h3 id="when-to-use-each_1">When to Use Each<a class="anchor-link" href="#when-to-use-each_1" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="when-to-use-each_1" class="submodule">
+<summary>When to Use Each<a class="anchor-link" href="#when-to-use-each_1" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -1003,11 +1113,15 @@ public class OrderService {
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="16-conditional-bean-registration">16. Conditional Bean Registration<a class="anchor-link" href="#16-conditional-bean-registration" title="Permanent link">¶</a></h2>
 <p>Spring Boot's auto-configuration is built on <strong>conditional beans</strong> — beans that are
 only created when specific conditions are met.</p>
-<h3 id="conditionalonproperty">@ConditionalOnProperty<a class="anchor-link" href="#conditionalonproperty" title="Permanent link">¶</a></h3>
+<details id="conditionalonproperty" class="submodule">
+<summary>@ConditionalOnProperty<a class="anchor-link" href="#conditionalonproperty" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Configuration
 public class FeatureConfig {
 
@@ -1021,14 +1135,22 @@ public class FeatureConfig {
 ordermgmt:
   audit:
     enabled: true  # set to false to disable the audit bean</code></pre>
-<h3 id="conditionalonmissingbean">@ConditionalOnMissingBean<a class="anchor-link" href="#conditionalonmissingbean" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="conditionalonmissingbean" class="submodule">
+<summary>@ConditionalOnMissingBean<a class="anchor-link" href="#conditionalonmissingbean" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Bean
 @ConditionalOnMissingBean(OrderRepository.class)
 public OrderRepository defaultOrderRepository() {
     // Only created if no other OrderRepository bean exists
     return new InMemoryOrderRepository();
 }</code></pre>
-<h3 id="conditionalonclass">@ConditionalOnClass<a class="anchor-link" href="#conditionalonclass" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="conditionalonclass" class="submodule">
+<summary>@ConditionalOnClass<a class="anchor-link" href="#conditionalonclass" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Configuration
 @ConditionalOnClass(name = "org.postgresql.ds.PGSimpleDataSource")
 public class PostgresAutoConfig {
@@ -1038,7 +1160,11 @@ public class PostgresAutoConfig {
         return new HikariDataSource();
     }
 }</code></pre>
-<h3 id="combining-conditions">Combining Conditions<a class="anchor-link" href="#combining-conditions" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="combining-conditions" class="submodule">
+<summary>Combining Conditions<a class="anchor-link" href="#combining-conditions" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Bean
 @ConditionalOnProperty(name = "ordermgmt.cache.type", havingValue = "redis")
 @ConditionalOnClass(name = "redis.clients.jedis.Jedis")
@@ -1046,6 +1172,8 @@ public class PostgresAutoConfig {
 public CacheManager redisCacheManager() {
     return new RedisCacheManager();
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="17-bean-scopes-in-practice">17. Bean Scopes in Practice<a class="anchor-link" href="#17-bean-scopes-in-practice" title="Permanent link">¶</a></h2>
 <table>
@@ -1101,7 +1229,9 @@ public class OrderBuilder {
         return built;
     }
 }</code></pre>
-<h3 id="the-proxy-problem">The Proxy Problem<a class="anchor-link" href="#the-proxy-problem" title="Permanent link">¶</a></h3>
+<details id="the-proxy-problem" class="submodule">
+<summary>The Proxy Problem<a class="anchor-link" href="#the-proxy-problem" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When a singleton injects a prototype, Spring creates the prototype <strong>once</strong> at
 injection time — not on every use. To get a fresh prototype each time:</p>
 <pre class="code-block"><code class="language-java">@Service
@@ -1118,11 +1248,15 @@ public class OrderService {
         return builder.withCustomer(customer).build();
     }
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="18-spring-bean-circular-dependencies">18. Spring Bean Circular Dependencies<a class="anchor-link" href="#18-spring-bean-circular-dependencies" title="Permanent link">¶</a></h2>
 <p>A <strong>circular dependency</strong> occurs when Bean A depends on Bean B, and Bean B
 depends on Bean A. Spring detects this and throws an error by default.</p>
-<h3 id="the-problem">The Problem<a class="anchor-link" href="#the-problem" title="Permanent link">¶</a></h3>
+<details id="the-problem" class="submodule">
+<summary>The Problem<a class="anchor-link" href="#the-problem" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Service
 public class OrderService {
     private final CustomerService customerService;
@@ -1141,7 +1275,11 @@ public class CustomerService {
     }
 }
 // Spring fails: "The dependencies of some of the beans form a cycle"</code></pre>
-<h3 id="solution-1-redesign-preferred">Solution 1: Redesign (Preferred)<a class="anchor-link" href="#solution-1-redesign-preferred" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="solution-1-redesign-preferred" class="submodule">
+<summary>Solution 1: Redesign (Preferred)<a class="anchor-link" href="#solution-1-redesign-preferred" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Extract the shared logic into a third service that both depend on:</p>
 <pre class="code-block"><code class="language-java">@Service
 public class OrderLookupService {
@@ -1160,7 +1298,11 @@ public class CustomerService {
     private final OrderLookupService lookup;  // no cycle
     public CustomerService(OrderLookupService lookup) { this.lookup = lookup; }
 }</code></pre>
-<h3 id="solution-2-use-events">Solution 2: Use Events<a class="anchor-link" href="#solution-2-use-events" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="solution-2-use-events" class="submodule">
+<summary>Solution 2: Use Events<a class="anchor-link" href="#solution-2-use-events" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Instead of A calling B, A publishes an event that B listens to:</p>
 <pre class="code-block"><code class="language-java">@Service
 public class OrderService {
@@ -1180,17 +1322,25 @@ public class CustomerService {
         // React to the event instead of being called directly
     }
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="19-spring-aop-aspect-oriented-programming">19. Spring AOP (Aspect-Oriented Programming)<a class="anchor-link" href="#19-spring-aop-aspect-oriented-programming" title="Permanent link">¶</a></h2>
 <p><strong>AOP</strong> lets you add cross-cutting concerns (logging, timing, security) without
 modifying business code.</p>
-<h3 id="how-spring-uses-aop-internally">How Spring Uses AOP Internally<a class="anchor-link" href="#how-spring-uses-aop-internally" title="Permanent link">¶</a></h3>
+<details id="how-spring-uses-aop-internally" class="submodule">
+<summary>How Spring Uses AOP Internally<a class="anchor-link" href="#how-spring-uses-aop-internally" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Spring uses AOP to implement:
 - <code>@Transactional</code> — wraps methods in transaction begin/commit/rollback
 - <code>@Async</code> — runs methods on a separate thread
 - <code>@Cacheable</code> — intercepts method calls to check cache first
 - <code>@Secured</code> / <code>@PreAuthorize</code> — checks permissions before method execution</p>
-<h3 id="custom-aspect-example-method-timing">Custom Aspect Example: Method Timing<a class="anchor-link" href="#custom-aspect-example-method-timing" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="custom-aspect-example-method-timing" class="submodule">
+<summary>Custom Aspect Example: Method Timing<a class="anchor-link" href="#custom-aspect-example-method-timing" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.slf4j.*;
@@ -1223,6 +1373,8 @@ public class MethodTimerAspect {
 }</code></pre>
 <p>Every method in <code>com.example.ordermgmt.service</code> now gets automatic timing without any
 code changes to those methods.</p>
+</div>
+</details>
 <hr />
 <h2 id="20-spring-profiles-and-environment-abstraction">20. Spring Profiles and Environment Abstraction<a class="anchor-link" href="#20-spring-profiles-and-environment-abstraction" title="Permanent link">¶</a></h2>
 <p>The <code>Environment</code> abstraction lets you access configuration values programmatically:</p>
@@ -1244,7 +1396,9 @@ public class FeatureFlagService {
         return profiles.length &gt; 0 ? profiles[0] : "default";
     }
 }</code></pre>
-<h3 id="value-with-spel-spring-expression-language">@Value with SpEL (Spring Expression Language)<a class="anchor-link" href="#value-with-spel-spring-expression-language" title="Permanent link">¶</a></h3>
+<details id="value-with-spel-spring-expression-language" class="submodule">
+<summary>@Value with SpEL (Spring Expression Language)<a class="anchor-link" href="#value-with-spel-spring-expression-language" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Service
 public class OrderService {
 
@@ -1260,6 +1414,8 @@ public class OrderService {
     @Value("${DATABASE_URL:jdbc:postgresql://localhost:5432/ordermgmt}")
     private String databaseUrl;
 }</code></pre>
+</div>
+</details>
 <hr />
 <hr />
 <p>← <a href="01-build-tools-and-project-setup.html">Previous: Module 01 — Build Tools &amp; Project Setup</a> | <a href="03-spring-boot-fundamentals.html">Next: Module 03 — Spring Boot Fundamentals</a> →</p>

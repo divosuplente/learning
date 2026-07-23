@@ -201,7 +201,9 @@
 <li><strong>Test</strong> — compile and run your test code</li>
 </ol>
 <p>You could do all this manually with terminal commands, but it would be tedious and error-prone. A <strong>build tool</strong> automates these steps.</p>
-<h3 id="analogy">Analogy<a class="anchor-link" href="#analogy" title="Permanent link">¶</a></h3>
+<details id="analogy" class="submodule">
+<summary>Analogy<a class="anchor-link" href="#analogy" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Think of a build tool as a kitchen assistant. You write the recipe (your code), and the assistant:
 - Goes to the store to buy ingredients (downloads dependencies)
 - Prepares them (compiles the code)
@@ -209,15 +211,23 @@
 - Follows your recipe (runs the application)
 - Tastes the dish (runs tests)</p>
 <p>The two most popular build tools for Java are <strong>Maven</strong> and <strong>Gradle</strong>. This course uses <strong>Maven</strong> because it's simpler to start with and widely used in enterprise environments.</p>
+</div>
+</details>
 <hr />
 <h2 id="2-installing-the-jdk-with-sdkman">2. Installing the JDK with SDKMAN<a class="anchor-link" href="#2-installing-the-jdk-with-sdkman" title="Permanent link">¶</a></h2>
 <p>Before we can build anything, we need the JDK (Java Development Kit) installed. In Module 00, you installed it directly. Now let's do it the professional way using <strong>SDKMAN</strong> — a tool for managing Java versions.</p>
-<h3 id="installing-sdkman">Installing SDKMAN<a class="anchor-link" href="#installing-sdkman" title="Permanent link">¶</a></h3>
+<details id="installing-sdkman" class="submodule">
+<summary>Installing SDKMAN<a class="anchor-link" href="#installing-sdkman" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>macOS / Linux:</strong>
 <pre class="code-block"><code class="language-bash">curl -s "https://get.sdkman.io" | bash
 source "$HOME/.sdkman/bin/sdkman-init.sh"</code></pre></p>
 <p><strong>Windows:</strong> Use <a href="https://scoop.sh/">Scoop</a> or <a href="https://chocolatey.org/">Chocolatey</a> instead, or install the JDK manually from <a href="https://adoptium.net/">Adoptium</a>.</p>
-<h3 id="installing-java-21-with-sdkman">Installing Java 21 with SDKMAN<a class="anchor-link" href="#installing-java-21-with-sdkman" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="installing-java-21-with-sdkman" class="submodule">
+<summary>Installing Java 21 with SDKMAN<a class="anchor-link" href="#installing-java-21-with-sdkman" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-bash"># List available Java versions
 sdk list java
 
@@ -231,6 +241,8 @@ java -version
 # Set it as the default
 sdk use java 21.0.4-tem</code></pre>
 <p>SDKMAN lets you install multiple JDK versions and switch between them — useful when working on different projects that require different Java versions.</p>
+</div>
+</details>
 <hr />
 <h2 id="3-what-is-maven">3. What Is Maven?<a class="anchor-link" href="#3-what-is-maven" title="Permanent link">¶</a></h2>
 <p><strong>Maven</strong> is a build automation tool for Java projects. It uses an XML file called <code>pom.xml</code> (Project Object Model) to describe:
@@ -238,15 +250,23 @@ sdk use java 21.0.4-tem</code></pre>
 - What external libraries (dependencies) your project needs
 - What plugins to use (for compiling, testing, packaging)
 - What Java version to target</p>
-<h3 id="installing-maven">Installing Maven<a class="anchor-link" href="#installing-maven" title="Permanent link">¶</a></h3>
+<details id="installing-maven" class="submodule">
+<summary>Installing Maven<a class="anchor-link" href="#installing-maven" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>macOS (Homebrew):</strong>
 <pre class="code-block"><code class="language-bash">brew install maven</code></pre></p>
 <p><strong>Linux (Ubuntu/Debian):</strong>
 <pre class="code-block"><code class="language-bash">sudo apt install maven</code></pre></p>
 <p><strong>Windows:</strong> Download from <a href="https://maven.apache.org/download.cgi">https://maven.apache.org/download.cgi</a> and add to PATH.</p>
-<h3 id="verifying-maven">Verifying Maven<a class="anchor-link" href="#verifying-maven" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="verifying-maven" class="submodule">
+<summary>Verifying Maven<a class="anchor-link" href="#verifying-maven" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-bash">mvn -version
 # Apache Maven 3.9.x</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="4-maven-coordinates">4. Maven Coordinates<a class="anchor-link" href="#4-maven-coordinates" title="Permanent link">¶</a></h2>
 <p>Every Maven project is identified by three coordinates:</p>
@@ -284,7 +304,9 @@ sdk use java 21.0.4-tem</code></pre>
 <hr />
 <h2 id="5-spring-initializr">5. Spring Initializr<a class="anchor-link" href="#5-spring-initializr" title="Permanent link">¶</a></h2>
 <p><strong>Spring Initializr</strong> (pronounced "init-ee-al-izer") is a web tool that generates a Spring Boot project skeleton for you. Instead of creating all the files manually, you fill in a form and download a ready-to-use project.</p>
-<h3 id="using-spring-initializr">Using Spring Initializr<a class="anchor-link" href="#using-spring-initializr" title="Permanent link">¶</a></h3>
+<details id="using-spring-initializr" class="submodule">
+<summary>Using Spring Initializr<a class="anchor-link" href="#using-spring-initializr" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>Go to <a href="https://start.spring.io">https://start.spring.io</a></li>
 <li>Fill in the form:</li>
@@ -307,7 +329,11 @@ sdk use java 21.0.4-tem</code></pre>
 <li>Click <strong>Generate</strong></li>
 <li>Download and unzip the project</li>
 </ol>
-<h3 id="what-spring-initializr-creates">What Spring Initializr Creates<a class="anchor-link" href="#what-spring-initializr-creates" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-spring-initializr-creates" class="submodule">
+<summary>What Spring Initializr Creates<a class="anchor-link" href="#what-spring-initializr-creates" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When you unzip the downloaded file, you get:</p>
 <pre class="code-block"><code>ordermgmt/
 ├── src/
@@ -330,7 +356,11 @@ sdk use java 21.0.4-tem</code></pre>
 ├── mvnw                       (Maven wrapper script — lets you run Maven without installing it)
 ├── mvnw.cmd                   (Maven wrapper for Windows)
 └── .gitignore</code></pre>
-<h3 id="the-main-application-class">The Main Application Class<a class="anchor-link" href="#the-main-application-class" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="the-main-application-class" class="submodule">
+<summary>The Main Application Class<a class="anchor-link" href="#the-main-application-class" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt;
 
 import org.springframework.boot.SpringApplication;
@@ -356,7 +386,11 @@ public class OrderManagementApplication {
         SpringApplication.run(OrderManagementApplication.class, args);
     }
 }</code></pre>
-<h3 id="what-does-springbootapplication-do">What Does <code>@SpringBootApplication</code> Do?<a class="anchor-link" href="#what-does-springbootapplication-do" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-does-springbootapplication-do" class="submodule">
+<summary>What Does <code>@SpringBootApplication</code> Do?<a class="anchor-link" href="#what-does-springbootapplication-do" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>This single annotation does three things (you'll learn about each in later modules):</p>
 <ol>
 <li><strong><code>@Configuration</code></strong> — marks this class as a configuration class (Module 02)</li>
@@ -364,6 +398,8 @@ public class OrderManagementApplication {
 <li><strong><code>@ComponentScan</code></strong> — tells Spring to scan the <code>com.example.ordermgmt</code> package and sub-packages for Spring components (Module 02)</li>
 </ol>
 <p>For now, just know that this annotation is the starting point of every Spring Boot application.</p>
+</div>
+</details>
 <hr />
 <h2 id="6-the-pomxml-complete-file">6. The <code>pom.xml</code> — Complete File<a class="anchor-link" href="#6-the-pomxml-complete-file" title="Permanent link">¶</a></h2>
 <p>The <code>pom.xml</code> (Project Object Model) is the heart of a Maven project. Here's the complete, correct <code>pom.xml</code> for our Order Management System:</p>
@@ -483,7 +519,9 @@ public class OrderManagementApplication {
         &lt;/plugins&gt;
     &lt;/build&gt;
 &lt;/project&gt;</code></pre>
-<h3 id="pomxml-anatomy">pom.xml Anatomy<a class="anchor-link" href="#pomxml-anatomy" title="Permanent link">¶</a></h3>
+<details id="pomxml-anatomy" class="submodule">
+<summary>pom.xml Anatomy<a class="anchor-link" href="#pomxml-anatomy" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Let's break down each section:</p>
 <h4 id="parent">Parent<a class="anchor-link" href="#parent" title="Permanent link">¶</a></h4>
 <pre class="code-block"><code class="language-xml">&lt;parent&gt;
@@ -520,6 +558,8 @@ public class OrderManagementApplication {
 <p>This means you can distribute your entire application as one file and run it with:</p>
 <pre class="code-block"><code class="language-bash">java -jar ordermgmt-0.0.1-SNAPSHOT.jar</code></pre>
 <p>No need to install Maven, download dependencies, or set up a classpath. The <code>spring-boot-maven-plugin</code> creates this fat JAR when you run <code>mvn package</code>.</p>
+</div>
+</details>
 <hr />
 <h2 id="7-project-structure">7. Project Structure<a class="anchor-link" href="#7-project-structure" title="Permanent link">¶</a></h2>
 <p>Spring Boot follows a convention for project layout:</p>
@@ -551,7 +591,9 @@ public class OrderManagementApplication {
 │               └── repository/
 ├── pom.xml                                  # Maven build file
 └── docker-compose.yml                      # Docker setup for local dev (Module 06)</code></pre>
-<h3 id="key-rules">Key Rules<a class="anchor-link" href="#key-rules" title="Permanent link">¶</a></h3>
+<details id="key-rules" class="submodule">
+<summary>Key Rules<a class="anchor-link" href="#key-rules" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><strong><code>src/main/java</code></strong> — all production Java code goes here</li>
 <li><strong><code>src/main/resources</code></strong> — all non-code files go here (config, schemas, static files)</li>
@@ -559,10 +601,14 @@ public class OrderManagementApplication {
 <li><strong>Package naming</strong> — always use <code>com.example.ordermgmt.*</code> as the base package</li>
 <li><strong>One public class per file</strong> — Java requires the file name to match the public class name</li>
 </ol>
+</div>
+</details>
 <hr />
 <h2 id="8-applicationyml">8. application.yml<a class="anchor-link" href="#8-applicationyml" title="Permanent link">¶</a></h2>
 <p>Spring Boot reads its configuration from a file in <code>src/main/resources/</code>. You can use either <code>.properties</code> or <code>.yml</code> format. We use <strong>YAML</strong> because it's more readable and supports nested properties.</p>
-<h3 id="rename-applicationproperties-to-applicationyml">Rename <code>application.properties</code> to <code>application.yml</code><a class="anchor-link" href="#rename-applicationproperties-to-applicationyml" title="Permanent link">¶</a></h3>
+<details id="rename-applicationproperties-to-applicationyml" class="submodule">
+<summary>Rename <code>application.properties</code> to <code>application.yml</code><a class="anchor-link" href="#rename-applicationproperties-to-applicationyml" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Delete the auto-generated <code>application.properties</code> file and create <code>application.yml</code>:</p>
 <pre class="code-block"><code class="language-yaml"># Server configuration
 server:
@@ -629,7 +675,11 @@ logging:
   level:
     com.example.ordermgmt: DEBUG    # Debug-level logging for our code
     org.hibernate.SQL: DEBUG        # Show SQL queries</code></pre>
-<h3 id="yaml-vs-properties">YAML vs Properties<a class="anchor-link" href="#yaml-vs-properties" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="yaml-vs-properties" class="submodule">
+<summary>YAML vs Properties<a class="anchor-link" href="#yaml-vs-properties" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The same configuration in <code>.properties</code> format looks like this:</p>
 <pre class="code-block"><code class="language-properties">server.port=8080
 spring.application.name=Order Management System
@@ -639,13 +689,21 @@ spring.datasource.password=postgres
 spring.jpa.show-sql=true
 spring.jpa.hibernate.ddl-auto=update</code></pre>
 <p>YAML is more readable and supports nesting, so we use it throughout the course.</p>
+</div>
+</details>
 <hr />
 <h2 id="9-running-the-application">9. Running the Application<a class="anchor-link" href="#9-running-the-application" title="Permanent link">¶</a></h2>
-<h3 id="from-the-command-line-maven">From the Command Line (Maven)<a class="anchor-link" href="#from-the-command-line-maven" title="Permanent link">¶</a></h3>
+<details id="from-the-command-line-maven" class="submodule">
+<summary>From the Command Line (Maven)<a class="anchor-link" href="#from-the-command-line-maven" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-bash"># In the project root directory:
 mvn spring-boot:run</code></pre>
 <p>This compiles the code, starts the Spring Boot application, and watches for changes. When you modify a file, DevTools automatically restarts the application.</p>
-<h3 id="building-a-jar">Building a JAR<a class="anchor-link" href="#building-a-jar" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="building-a-jar" class="submodule">
+<summary>Building a JAR<a class="anchor-link" href="#building-a-jar" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-bash"># Compile, test, and package into a JAR:
 mvn clean package
 
@@ -654,14 +712,22 @@ mvn clean package
 
 # Run the JAR:
 java -jar target/ordermgmt-0.0.1-SNAPSHOT.jar</code></pre>
-<h3 id="from-intellij-idea">From IntelliJ IDEA<a class="anchor-link" href="#from-intellij-idea" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="from-intellij-idea" class="submodule">
+<summary>From IntelliJ IDEA<a class="anchor-link" href="#from-intellij-idea" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>Open the project in IntelliJ (File → Open → select the project folder)</li>
 <li>Find <code>OrderManagementApplication.java</code></li>
 <li>Click the green play button next to the class name or the <code>main</code> method</li>
 <li>IntelliJ runs the application</li>
 </ol>
-<h3 id="verifying-it-works">Verifying It Works<a class="anchor-link" href="#verifying-it-works" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="verifying-it-works" class="submodule">
+<summary>Verifying It Works<a class="anchor-link" href="#verifying-it-works" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Once the application starts, open your browser and go to:</p>
 <pre class="code-block"><code>http://localhost:8080/actuator/health</code></pre>
 <p>You should see:
@@ -672,10 +738,14 @@ java -jar target/ordermgmt-0.0.1-SNAPSHOT.jar</code></pre>
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
     &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre></p>
+</div>
+</details>
 <hr />
 <h2 id="10-spring-boot-devtools">10. Spring Boot DevTools<a class="anchor-link" href="#10-spring-boot-devtools" title="Permanent link">¶</a></h2>
 <p><strong>Spring Boot DevTools</strong> is a development-time tool that makes coding faster:</p>
-<h3 id="hot-reload">Hot Reload<a class="anchor-link" href="#hot-reload" title="Permanent link">¶</a></h3>
+<details id="hot-reload" class="submodule">
+<summary>Hot Reload<a class="anchor-link" href="#hot-reload" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When you change a Java file and save it, DevTools automatically restarts the application. This is called a <strong>hot restart</strong> — it's much faster than a full restart because Spring Boot only reloades changed classes.</p>
 <p>DevTools is already included in our <code>pom.xml</code>:
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
@@ -689,7 +759,11 @@ java -jar target/ordermgmt-0.0.1-SNAPSHOT.jar</code></pre>
 <li><code>&lt;optional&gt;true&lt;/optional&gt;</code> — not passed to other projects that depend on this one</li>
 <li>DevTools is automatically disabled in production builds</li>
 </ul>
-<h3 id="automatic-restart-in-intellij">Automatic Restart in IntelliJ<a class="anchor-link" href="#automatic-restart-in-intellij" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="automatic-restart-in-intellij" class="submodule">
+<summary>Automatic Restart in IntelliJ<a class="anchor-link" href="#automatic-restart-in-intellij" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>For DevTools to detect changes, IntelliJ must "build" the project. To enable automatic building:</p>
 <ol>
 <li>Settings → Build, Execution, Deployment → Compiler</li>
@@ -698,13 +772,17 @@ java -jar target/ordermgmt-0.0.1-SNAPSHOT.jar</code></pre>
 <li>Check "Allow auto-make to start even if developed application is currently running"</li>
 </ol>
 <p>Now, every time you save a file (<code>Cmd+S</code> / <code>Ctrl+S</code>), the application restarts within seconds.</p>
+</div>
+</details>
 <hr />
 <h2 id="11-spring-profiles">11. Spring Profiles<a class="anchor-link" href="#11-spring-profiles" title="Permanent link">¶</a></h2>
 <p><strong>Profiles</strong> let you have different configuration for different environments (development, testing, production). For example:
 - <strong>Dev:</strong> use a local PostgreSQL, enable SQL logging, enable DevTools
 - <strong>Test:</strong> use a Testcontainers PostgreSQL, disable SQL logging
 - <strong>Prod:</strong> use a remote PostgreSQL, disable SQL logging, disable DevTools</p>
-<h3 id="creating-profile-files">Creating Profile Files<a class="anchor-link" href="#creating-profile-files" title="Permanent link">¶</a></h3>
+<details id="creating-profile-files" class="submodule">
+<summary>Creating Profile Files<a class="anchor-link" href="#creating-profile-files" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Create separate files for each profile:</p>
 <p><strong><code>application.yml</code></strong> (default — loaded for all profiles):
 <pre class="code-block"><code class="language-yaml">server:
@@ -747,7 +825,11 @@ logging:
 logging:
   level:
     com.example.ordermgmt: INFO</code></pre></p>
-<h3 id="activating-a-profile">Activating a Profile<a class="anchor-link" href="#activating-a-profile" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="activating-a-profile" class="submodule">
+<summary>Activating a Profile<a class="anchor-link" href="#activating-a-profile" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>Command line:</strong>
 <pre class="code-block"><code class="language-bash">java -jar ordermgmt.jar --spring.profiles.active=prod</code></pre></p>
 <p><strong>Environment variable:</strong>
@@ -763,19 +845,29 @@ java -jar ordermgmt.jar</code></pre></p>
 class OrderManagementApplicationTests {
     // Tests run with the test profile
 }</code></pre></p>
-<h3 id="how-profiles-work">How Profiles Work<a class="anchor-link" href="#how-profiles-work" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="how-profiles-work" class="submodule">
+<summary>How Profiles Work<a class="anchor-link" href="#how-profiles-work" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>Spring Boot loads <code>application.yml</code> first (always)</li>
 <li>Then it loads <code>application-{profile}.yml</code>, which overrides any matching properties</li>
 <li>The result is a merged configuration</li>
 </ol>
 <p>For example, if <code>application.yml</code> has <code>server.port=8080</code> and <code>application-prod.yml</code> has <code>server.port=9090</code>, the production environment uses port 9090.</p>
-<h3 id="environment-variables-in-yaml">Environment Variables in YAML<a class="anchor-link" href="#environment-variables-in-yaml" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="environment-variables-in-yaml" class="submodule">
+<summary>Environment Variables in YAML<a class="anchor-link" href="#environment-variables-in-yaml" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>In production, you should never put passwords in files. Use environment variables:</p>
 <pre class="code-block"><code class="language-yaml">spring:
   datasource:
     password: ${DATABASE_PASSWORD}</code></pre>
 <p>The <code>${DATABASE_PASSWORD}</code> syntax reads the value from the environment variable <code>DATABASE_PASSWORD</code>. If it's not set, Spring Boot will fail to start (which is better than falling back to a default password).</p>
+</div>
+</details>
 <hr />
 <h2 id="12-maven-commands-cheatsheet">12. Maven Commands Cheatsheet<a class="anchor-link" href="#12-maven-commands-cheatsheet" title="Permanent link">¶</a></h2>
 <table>
@@ -840,7 +932,9 @@ class OrderManagementApplicationTests {
 <h2 id="13-maven-dependency-scope-deep-dive">13. Maven Dependency Scope Deep Dive<a class="anchor-link" href="#13-maven-dependency-scope-deep-dive" title="Permanent link">¶</a></h2>
 <p>Maven dependencies have <strong>scopes</strong> that control when they're available during the
 build lifecycle and whether they're included in the final JAR.</p>
-<h3 id="the-five-scopes">The Five Scopes<a class="anchor-link" href="#the-five-scopes" title="Permanent link">¶</a></h3>
+<details id="the-five-scopes" class="submodule">
+<summary>The Five Scopes<a class="anchor-link" href="#the-five-scopes" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -916,7 +1010,11 @@ build lifecycle and whether they're included in the final JAR.</p>
     &lt;artifactId&gt;jakarta.servlet-api&lt;/artifactId&gt;
     &lt;scope&gt;provided&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
-<h3 id="transitive-dependencies">Transitive Dependencies<a class="anchor-link" href="#transitive-dependencies" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="transitive-dependencies" class="submodule">
+<summary>Transitive Dependencies<a class="anchor-link" href="#transitive-dependencies" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When you depend on library A, and A depends on library B, Maven automatically
 includes B (transitive dependency). But conflicts arise when different dependencies
 pull in different versions of the same library:</p>
@@ -934,7 +1032,11 @@ pull in different versions of the same library:</p>
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/dependencyManagement&gt;</code></pre>
-<h3 id="excluding-transitive-dependencies">Excluding Transitive Dependencies<a class="anchor-link" href="#excluding-transitive-dependencies" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="excluding-transitive-dependencies" class="submodule">
+<summary>Excluding Transitive Dependencies<a class="anchor-link" href="#excluding-transitive-dependencies" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;com.example&lt;/groupId&gt;
     &lt;artifactId&gt;custom-library&lt;/artifactId&gt;
@@ -946,11 +1048,15 @@ pull in different versions of the same library:</p>
         &lt;/exclusion&gt;
     &lt;/exclusions&gt;
 &lt;/dependency&gt;</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="14-maven-plugin-configuration">14. Maven Plugin Configuration<a class="anchor-link" href="#14-maven-plugin-configuration" title="Permanent link">¶</a></h2>
 <p>Plugins extend Maven's build lifecycle. The two most important are the <strong>compiler
 plugin</strong> and the <strong>surefire plugin</strong> (for tests).</p>
-<h3 id="compiler-plugin">Compiler Plugin<a class="anchor-link" href="#compiler-plugin" title="Permanent link">¶</a></h3>
+<details id="compiler-plugin" class="submodule">
+<summary>Compiler Plugin<a class="anchor-link" href="#compiler-plugin" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;plugin&gt;
     &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
     &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
@@ -966,7 +1072,11 @@ plugin</strong> and the <strong>surefire plugin</strong> (for tests).</p>
 &lt;/plugin&gt;</code></pre>
 <p>The <code>-parameters</code> flag is essential for Spring Boot — it lets Spring resolve
 constructor parameter names without <code>@Param</code> annotations.</p>
-<h3 id="surefire-plugin-test-execution">Surefire Plugin (Test Execution)<a class="anchor-link" href="#surefire-plugin-test-execution" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="surefire-plugin-test-execution" class="submodule">
+<summary>Surefire Plugin (Test Execution)<a class="anchor-link" href="#surefire-plugin-test-execution" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;plugin&gt;
     &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
     &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
@@ -981,7 +1091,11 @@ constructor parameter names without <code>@Param</code> annotations.</p>
         &lt;/argLine&gt;
     &lt;/configuration&gt;
 &lt;/plugin&gt;</code></pre>
-<h3 id="spring-boot-maven-plugin">Spring Boot Maven Plugin<a class="anchor-link" href="#spring-boot-maven-plugin" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="spring-boot-maven-plugin" class="submodule">
+<summary>Spring Boot Maven Plugin<a class="anchor-link" href="#spring-boot-maven-plugin" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;plugin&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
     &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
@@ -1001,11 +1115,15 @@ constructor parameter names without <code>@Param</code> annotations.</p>
         &lt;/execution&gt;
     &lt;/executions&gt;
 &lt;/plugin&gt;</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="15-spring-boot-profiles-in-practice">15. Spring Boot Profiles in Practice<a class="anchor-link" href="#15-spring-boot-profiles-in-practice" title="Permanent link">¶</a></h2>
 <p>Profiles let you have different configuration for different environments
 (development, staging, production).</p>
-<h3 id="profile-specific-configuration-files">Profile-Specific Configuration Files<a class="anchor-link" href="#profile-specific-configuration-files" title="Permanent link">¶</a></h3>
+<details id="profile-specific-configuration-files" class="submodule">
+<summary>Profile-Specific Configuration Files<a class="anchor-link" href="#profile-specific-configuration-files" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code>src/main/resources/
 ├── application.yml            # shared config (all profiles)
 ├── application-dev.yml        # dev profile overrides
@@ -1045,7 +1163,11 @@ logging:
   level:
     com.example.ordermgmt: INFO
     org.hibernate.SQL: WARN</code></pre></p>
-<h3 id="activating-profiles">Activating Profiles<a class="anchor-link" href="#activating-profiles" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="activating-profiles" class="submodule">
+<summary>Activating Profiles<a class="anchor-link" href="#activating-profiles" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-bash"># Command line
 java -jar app.jar --spring.profiles.active=dev
 
@@ -1057,7 +1179,11 @@ java -jar app.jar
 spring:
   profiles:
     active: dev</code></pre>
-<h3 id="profile-on-beans">@Profile on Beans<a class="anchor-link" href="#profile-on-beans" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="profile-on-beans" class="submodule">
+<summary>@Profile on Beans<a class="anchor-link" href="#profile-on-beans" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Configuration
 public class DataSourceConfig {
 
@@ -1079,11 +1205,15 @@ public class DataSourceConfig {
         return ds;
     }
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="16-gradle-an-alternative-to-maven">16. Gradle — An Alternative to Maven<a class="anchor-link" href="#16-gradle-an-alternative-to-maven" title="Permanent link">¶</a></h2>
 <p><strong>Gradle</strong> is the other major build tool in the Java ecosystem. It uses a
 <strong>Groovy or Kotlin DSL</strong> instead of XML, making it more concise and programmatic.</p>
-<h3 id="gradle-vs-maven">Gradle vs Maven<a class="anchor-link" href="#gradle-vs-maven" title="Permanent link">¶</a></h3>
+<details id="gradle-vs-maven" class="submodule">
+<summary>Gradle vs Maven<a class="anchor-link" href="#gradle-vs-maven" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -1125,7 +1255,11 @@ public class DataSourceConfig {
 </tr>
 </tbody>
 </table>
-<h3 id="buildgradlekts-kotlin-dsl">build.gradle.kts (Kotlin DSL)<a class="anchor-link" href="#buildgradlekts-kotlin-dsl" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="buildgradlekts-kotlin-dsl" class="submodule">
+<summary>build.gradle.kts (Kotlin DSL)<a class="anchor-link" href="#buildgradlekts-kotlin-dsl" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-kotlin">plugins {
     java
     id("org.springframework.boot") version "3.3.4"
@@ -1155,7 +1289,11 @@ dependencies {
 tasks.withType&lt;Test&gt; {
     useJUnitPlatform()
 }</code></pre>
-<h3 id="when-to-choose-gradle">When to Choose Gradle<a class="anchor-link" href="#when-to-choose-gradle" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="when-to-choose-gradle" class="submodule">
+<summary>When to Choose Gradle<a class="anchor-link" href="#when-to-choose-gradle" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ul>
 <li>You need <strong>build performance</strong> (incremental compilation, build cache)</li>
 <li>You're building <strong>Android</strong> apps</li>
@@ -1166,11 +1304,15 @@ tasks.withType&lt;Test&gt; {
 - Your team already knows Maven (switching has a cost)
 - You need maximum <strong>reproducibility</strong> (Maven builds are more deterministic)
 - You're working in a <strong>corporate environment</strong> with Maven CI/CD pipelines</p>
+</div>
+</details>
 <hr />
 <h2 id="17-multi-module-maven-projects">17. Multi-Module Maven Projects<a class="anchor-link" href="#17-multi-module-maven-projects" title="Permanent link">¶</a></h2>
 <p>For larger applications, splitting code into multiple Maven modules improves
 organization and reusability.</p>
-<h3 id="project-structure">Project Structure<a class="anchor-link" href="#project-structure" title="Permanent link">¶</a></h3>
+<details id="project-structure" class="submodule">
+<summary>Project Structure<a class="anchor-link" href="#project-structure" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code>ordermgmt-parent/
 ├── pom.xml                      (parent POM — packaging: pom)
 ├── ordermgmt-domain/
@@ -1188,7 +1330,11 @@ organization and reusability.</p>
 └── ordermgmt-app/
     ├── pom.xml
     └── src/main/java/           (main application class, config)</code></pre>
-<h3 id="parent-pom">Parent POM<a class="anchor-link" href="#parent-pom" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="parent-pom" class="submodule">
+<summary>Parent POM<a class="anchor-link" href="#parent-pom" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;project&gt;
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
     &lt;groupId&gt;com.example&lt;/groupId&gt;
@@ -1226,7 +1372,11 @@ organization and reusability.</p>
         &lt;/dependencies&gt;
     &lt;/dependencyManagement&gt;
 &lt;/project&gt;</code></pre>
-<h3 id="child-module-pom">Child Module POM<a class="anchor-link" href="#child-module-pom" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="child-module-pom" class="submodule">
+<summary>Child Module POM<a class="anchor-link" href="#child-module-pom" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;project&gt;
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
     &lt;parent&gt;
@@ -1252,7 +1402,11 @@ organization and reusability.</p>
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
 &lt;/project&gt;</code></pre>
-<h3 id="building-multi-module-projects">Building Multi-Module Projects<a class="anchor-link" href="#building-multi-module-projects" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="building-multi-module-projects" class="submodule">
+<summary>Building Multi-Module Projects<a class="anchor-link" href="#building-multi-module-projects" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-bash"># Build all modules from the parent
 mvn clean package
 
@@ -1261,6 +1415,8 @@ mvn clean package -pl ordermgmt-service -am
 
 # Skip tests across all modules
 mvn clean install -DskipTests</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="18-maven-wrapper-mvnw">18. Maven Wrapper (mvnw)<a class="anchor-link" href="#18-maven-wrapper-mvnw" title="Permanent link">¶</a></h2>
 <p>The Maven Wrapper lets you run Maven without installing it globally — the

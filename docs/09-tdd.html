@@ -218,7 +218,9 @@
 
 <h2 id="1-what-is-testing-why-do-we-test">1. What Is Testing? Why Do We Test?<a class="anchor-link" href="#1-what-is-testing-why-do-we-test" title="Permanent link">¶</a></h2>
 <p><strong>Testing</strong> is the deliberate execution of your code to verify it does what you intend it to do. You write a piece of code, then you write another piece of code that calls the first piece and checks whether the result is correct.</p>
-<h3 id="why-test">Why Test?<a class="anchor-link" href="#why-test" title="Permanent link">¶</a></h3>
+<details id="why-test" class="submodule">
+<summary>Why Test?<a class="anchor-link" href="#why-test" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -253,7 +255,11 @@
 </tr>
 </tbody>
 </table>
-<h3 id="what-happens-without-tests">What Happens Without Tests?<a class="anchor-link" href="#what-happens-without-tests" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-happens-without-tests" class="submodule">
+<summary>What Happens Without Tests?<a class="anchor-link" href="#what-happens-without-tests" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>You write code and manually test it (click through the UI or use curl)</li>
 <li>It works, so you move on</li>
@@ -264,23 +270,37 @@
 <li>You spend hours debugging because you don't remember how the old code works</li>
 </ol>
 <p>Tests prevent steps 3 through 7.</p>
+</div>
+</details>
 <hr />
 <h2 id="2-types-of-tests">2. Types of Tests<a class="anchor-link" href="#2-types-of-tests" title="Permanent link">¶</a></h2>
-<h3 id="unit-tests">Unit Tests<a class="anchor-link" href="#unit-tests" title="Permanent link">¶</a></h3>
+<details id="unit-tests" class="submodule">
+<summary>Unit Tests<a class="anchor-link" href="#unit-tests" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>unit test</strong> tests a single piece of code (a single method or class) in isolation. All external dependencies are replaced with <strong>mocks</strong> (fake versions that return predetermined values).</p>
 <p><strong>Analogy:</strong> Testing a single car part on a workbench — you test whether the alternator produces electricity, without needing the entire car.</p>
 <p><strong>Speed:</strong> milliseconds. You can run hundreds per second.</p>
 <p><strong>Example:</strong> Testing that <code>OrderService.createOrder()</code> throws <code>InsufficientStockException</code> when stock is too low, with a mocked repository that returns a product with low stock.</p>
-<h3 id="integration-tests">Integration Tests<a class="anchor-link" href="#integration-tests" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="integration-tests" class="submodule">
+<summary>Integration Tests<a class="anchor-link" href="#integration-tests" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>An <strong>integration test</strong> tests how multiple components work together. Dependencies are real, not mocked.</p>
 <p><strong>Analogy:</strong> Installing the alternator in the car and testing whether the battery charges when the engine runs.</p>
 <p><strong>Speed:</strong> seconds. They start a Spring context and talk to a real (or test) database.</p>
 <p><strong>Example:</strong> Testing that <code>OrderService.createOrder()</code> saves the order to a real PostgreSQL database running in a Docker container, and the order can be retrieved afterward.</p>
-<h3 id="end-to-end-e2e-tests">End-to-End (E2E) Tests<a class="anchor-link" href="#end-to-end-e2e-tests" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="end-to-end-e2e-tests" class="submodule">
+<summary>End-to-End (E2E) Tests<a class="anchor-link" href="#end-to-end-e2e-tests" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>An <strong>E2E test</strong> tests the entire system from the outside, simulating a real user.</p>
 <p><strong>Analogy:</strong> Driving the car on the road to see if it starts, accelerates, and brakes.</p>
 <p><strong>Speed:</strong> minutes. They start the entire application and make real HTTP requests.</p>
 <p><strong>Example:</strong> Sending a <code>POST /api/orders</code> request to a running server and verifying the response, the database state, and that a Kafka event was published.</p>
+</div>
+</details>
 <hr />
 <h2 id="3-the-test-pyramid">3. The Test Pyramid<a class="anchor-link" href="#3-the-test-pyramid" title="Permanent link">¶</a></h2>
 <p>The <strong>test pyramid</strong> is a guideline for how many of each test type you should have:</p>
@@ -321,7 +341,9 @@
 <hr />
 <h2 id="4-what-is-tdd">4. What Is TDD?<a class="anchor-link" href="#4-what-is-tdd" title="Permanent link">¶</a></h2>
 <p><strong>Test-Driven Development (TDD)</strong> is a development practice where you write the test <strong>before</strong> you write the production code. This sounds backwards, but it's incredibly powerful.</p>
-<h3 id="the-red-green-refactor-cycle">The Red-Green-Refactor Cycle<a class="anchor-link" href="#the-red-green-refactor-cycle" title="Permanent link">¶</a></h3>
+<details id="the-red-green-refactor-cycle" class="submodule">
+<summary>The Red-Green-Refactor Cycle<a class="anchor-link" href="#the-red-green-refactor-cycle" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>TDD follows a three-step cycle:</p>
 <pre class="code-block"><code>    ┌──────────┐
     │   RED    │  Write a test that fails (because the code doesn't exist yet)
@@ -339,7 +361,11 @@
 <p><strong>Red:</strong> You write a test that describes what you want the code to do. You run it. It fails because the code doesn't exist yet. This is called "red" because the test runner shows red (failure).</p>
 <p><strong>Green:</strong> You write the minimum code to make the test pass. This isn't about perfect code — it's about making the test pass as quickly as possible. You run the test. It passes (green).</p>
 <p><strong>Refactor:</strong> Now that the test passes, you improve the code — rename variables, extract methods, remove duplication — without changing behavior. You run the test after each change. It stays green, proving you didn't break anything.</p>
-<h3 id="why-tdd">Why TDD?<a class="anchor-link" href="#why-tdd" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="why-tdd" class="submodule">
+<summary>Why TDD?<a class="anchor-link" href="#why-tdd" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><strong>You never forget to write tests</strong> — they come first, not last</li>
 <li><strong>The code is testable by design</strong> — if you write the test first, the code is naturally testable</li>
@@ -347,10 +373,14 @@
 <li><strong>Instant feedback</strong> — you know within seconds whether your code works</li>
 <li><strong>Living documentation</strong> — tests describe what the code does, in executable form</li>
 </ol>
+</div>
+</details>
 <hr />
 <h2 id="5-junit-5">5. JUnit 5<a class="anchor-link" href="#5-junit-5" title="Permanent link">¶</a></h2>
 <p><strong>JUnit 5</strong> is the most popular testing framework for Java. It provides annotations and classes for writing and running tests.</p>
-<h3 id="core-annotations">Core Annotations<a class="anchor-link" href="#core-annotations" title="Permanent link">¶</a></h3>
+<details id="core-annotations" class="submodule">
+<summary>Core Annotations<a class="anchor-link" href="#core-annotations" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -397,7 +427,11 @@
 </tr>
 </tbody>
 </table>
-<h3 id="a-simple-test-class">A Simple Test Class<a class="anchor-link" href="#a-simple-test-class" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="a-simple-test-class" class="submodule">
+<summary>A Simple Test Class<a class="anchor-link" href="#a-simple-test-class" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
 
 import org.junit.jupiter.api.DisplayName;
@@ -441,7 +475,11 @@ class OrderCalculatorTest {
         assertThat(total).isEqualByComparingTo("0.00");
     }
 }</code></pre>
-<h3 id="the-arrange-act-assert-pattern">The Arrange-Act-Assert Pattern<a class="anchor-link" href="#the-arrange-act-assert-pattern" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="the-arrange-act-assert-pattern" class="submodule">
+<summary>The Arrange-Act-Assert Pattern<a class="anchor-link" href="#the-arrange-act-assert-pattern" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Notice the pattern in each test:</p>
 <ol>
 <li><strong>Arrange</strong> — set up the data and preconditions</li>
@@ -449,7 +487,11 @@ class OrderCalculatorTest {
 <li><strong>Assert</strong> — verify the result is correct</li>
 </ol>
 <p>This three-part structure makes tests easy to read. You can always find the "act" line — it's where the method under test is called.</p>
-<h3 id="parameterized-tests">Parameterized Tests<a class="anchor-link" href="#parameterized-tests" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="parameterized-tests" class="submodule">
+<summary>Parameterized Tests<a class="anchor-link" href="#parameterized-tests" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When you want to test the same logic with different inputs, use <code>@ParameterizedTest</code>:</p>
 <pre class="code-block"><code class="language-java">@ParameterizedTest
 @DisplayName("Should calculate total correctly for various inputs")
@@ -467,7 +509,11 @@ void shouldCalculateTotalCorrectly(String unitPrice, int quantity, String expect
     assertThat(total).isEqualByComparingTo(expectedTotal);
 }</code></pre>
 <p>This runs the same test 4 times with different inputs. Each row is one test execution.</p>
-<h3 id="nested-tests">Nested Tests<a class="anchor-link" href="#nested-tests" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="nested-tests" class="submodule">
+<summary>Nested Tests<a class="anchor-link" href="#nested-tests" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Group related tests in inner classes with <code>@Nested</code>:</p>
 <pre class="code-block"><code class="language-java">@DisplayName("OrderCalculator")
 class OrderCalculatorTest {
@@ -508,10 +554,14 @@ class OrderCalculatorTest {
     &gt; should return zero when quantity is zero
   &gt; calculateGrandTotal
     &gt; should sum all item totals</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="6-assertj">6. AssertJ<a class="anchor-link" href="#6-assertj" title="Permanent link">¶</a></h2>
 <p><strong>AssertJ</strong> is a fluent assertion library that makes assertions more readable than JUnit's built-in assertions.</p>
-<h3 id="comparison">Comparison<a class="anchor-link" href="#comparison" title="Permanent link">¶</a></h3>
+<details id="comparison" class="submodule">
+<summary>Comparison<a class="anchor-link" href="#comparison" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// JUnit built-in assertion — hard to read
 assertEquals(149.97, total.doubleValue(), 0.001);
 assertTrue(orders.size() &gt; 0);
@@ -523,7 +573,11 @@ assertThat(total).isEqualByComparingTo("149.97");
 assertThat(orders).isNotEmpty();
 assertThat(customer).isNotNull();
 assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);</code></pre>
-<h3 id="useful-assertj-assertions">Useful AssertJ Assertions<a class="anchor-link" href="#useful-assertj-assertions" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="useful-assertj-assertions" class="submodule">
+<summary>Useful AssertJ Assertions<a class="anchor-link" href="#useful-assertj-assertions" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// Strings
 assertThat(name).isNotBlank();
 assertThat(name).startsWith("Alice");
@@ -548,17 +602,25 @@ assertThatThrownBy(() -&gt; orderService.confirmOrder(999L))
 assertThat(total).isEqualByComparingTo("149.97");
 assertThat(total).isPositive();
 assertThat(total).isGreaterThan(new BigDecimal("100.00"));</code></pre>
-<h3 id="why-assertj-over-junit-assertions">Why AssertJ Over JUnit Assertions?<a class="anchor-link" href="#why-assertj-over-junit-assertions" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="why-assertj-over-junit-assertions" class="submodule">
+<summary>Why AssertJ Over JUnit Assertions?<a class="anchor-link" href="#why-assertj-over-junit-assertions" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><strong>Readability:</strong> <code>assertThat(orders).hasSize(3)</code> reads like a sentence</li>
 <li><strong>Chainability:</strong> You can chain assertions: <code>assertThat(name).isNotBlank().startsWith("A")</code></li>
 <li><strong>Better error messages:</strong> When an assertion fails, AssertJ shows exactly what went wrong: <code>Expected size: 3 but was: 5</code></li>
 <li><strong>Type safety:</strong> The compiler knows the type, so you get autocomplete</li>
 </ol>
+</div>
+</details>
 <hr />
 <h2 id="7-mockito">7. Mockito<a class="anchor-link" href="#7-mockito" title="Permanent link">¶</a></h2>
 <p><strong>Mockito</strong> is a library for creating <strong>mocks</strong> — fake versions of your dependencies that you control. In unit tests, you don't want to use a real database (too slow, too complex). Instead, you mock the repository and tell it what to return.</p>
-<h3 id="core-mockito-concepts">Core Mockito Concepts<a class="anchor-link" href="#core-mockito-concepts" title="Permanent link">¶</a></h3>
+<details id="core-mockito-concepts" class="submodule">
+<summary>Core Mockito Concepts<a class="anchor-link" href="#core-mockito-concepts" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -593,7 +655,11 @@ assertThat(total).isGreaterThan(new BigDecimal("100.00"));</code></pre>
 </tr>
 </tbody>
 </table>
-<h3 id="a-mocked-unit-test">A Mocked Unit Test<a class="anchor-link" href="#a-mocked-unit-test" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="a-mocked-unit-test" class="submodule">
+<summary>A Mocked Unit Test<a class="anchor-link" href="#a-mocked-unit-test" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
 
 import com.example.ordermgmt.domain.CustomerEntity;
@@ -638,14 +704,22 @@ class OrderServiceTest {
     // Note: In a real test, you'd also mock the OrderEventProducer
     // and anything else OrderService depends on.
 }</code></pre>
-<h3 id="whats-happening-here">What's Happening Here?<a class="anchor-link" href="#whats-happening-here" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="whats-happening-here" class="submodule">
+<summary>What's Happening Here?<a class="anchor-link" href="#whats-happening-here" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><code>@ExtendWith(MockitoExtension.class)</code> — tells JUnit to use Mockito for this test class</li>
 <li><code>@Mock</code> — creates a mock implementation of each repository. The mocks return <code>null</code> or <code>Optional.empty()</code> by default</li>
 <li><code>@InjectMocks</code> — creates a real <code>OrderService</code> instance and injects the mock repositories through its constructor</li>
 <li>The <code>OrderService</code> thinks it's talking to real repositories, but it's actually talking to mocks that we control</li>
 </ol>
-<h3 id="when-thenreturn-stubs">When-ThenReturn: Stubs<a class="anchor-link" href="#when-thenreturn-stubs" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="when-thenreturn-stubs" class="submodule">
+<summary>When-ThenReturn: Stubs<a class="anchor-link" href="#when-thenreturn-stubs" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><code>when(...).thenReturn(...)</code> tells a mock what to return when a method is called:</p>
 <pre class="code-block"><code class="language-java">@Test
 @DisplayName("Should throw when customer is not found")
@@ -658,7 +732,11 @@ void shouldThrowWhenCustomerNotFound() {
             .isInstanceOf(CustomerNotFoundException.class)
             .hasMessageContaining("999");
 }</code></pre>
-<h3 id="verifying-interactions">Verifying Interactions<a class="anchor-link" href="#verifying-interactions" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="verifying-interactions" class="submodule">
+<summary>Verifying Interactions<a class="anchor-link" href="#verifying-interactions" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><code>verify(mock).method(args)</code> checks that a method was called on the mock:</p>
 <pre class="code-block"><code class="language-java">@Test
 @DisplayName("Should save order when customer exists")
@@ -680,7 +758,11 @@ void shouldSaveOrderWhenCustomerExists() {
     // Verify that the repository was called
     verify(orderRepository).findById(1L);
 }</code></pre>
-<h3 id="argument-matchers">Argument Matchers<a class="anchor-link" href="#argument-matchers" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="argument-matchers" class="submodule">
+<summary>Argument Matchers<a class="anchor-link" href="#argument-matchers" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>When you don't care about the exact argument, use matchers:</p>
 <pre class="code-block"><code class="language-java">// any() matches any argument
 when(productRepository.findById(any())).thenReturn(Optional.of(product));
@@ -688,10 +770,14 @@ when(orderRepository.save(any())).thenAnswer(invocation -&gt; invocation.getArgu
 
 // eq() for specific values when using any() for others
 verify(orderRepository).save(any(OrderEntity.class));</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="8-tdd-walkthrough-building-ordercalculator">8. TDD Walkthrough: Building OrderCalculator<a class="anchor-link" href="#8-tdd-walkthrough-building-ordercalculator" title="Permanent link">¶</a></h2>
 <p>Let's follow TDD to build an <code>OrderCalculator</code> — a class that calculates order totals.</p>
-<h3 id="step-1-red-write-a-failing-test">Step 1: Red — Write a Failing Test<a class="anchor-link" href="#step-1-red-write-a-failing-test" title="Permanent link">¶</a></h3>
+<details id="step-1-red-write-a-failing-test" class="submodule">
+<summary>Step 1: Red — Write a Failing Test<a class="anchor-link" href="#step-1-red-write-a-failing-test" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -723,7 +809,11 @@ class OrderCalculatorTest {
     }
 }</code></pre>
 <p><strong>Run the test.</strong> It fails because <code>OrderCalculator</code> doesn't exist.</p>
-<h3 id="step-2-green-write-the-minimum-code">Step 2: Green — Write the Minimum Code<a class="anchor-link" href="#step-2-green-write-the-minimum-code" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-2-green-write-the-minimum-code" class="submodule">
+<summary>Step 2: Green — Write the Minimum Code<a class="anchor-link" href="#step-2-green-write-the-minimum-code" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
 
 import java.math.BigDecimal;
@@ -735,7 +825,11 @@ public class OrderCalculator {
     }
 }</code></pre>
 <p><strong>Run the test.</strong> It passes.</p>
-<h3 id="step-3-red-add-another-test">Step 3: Red — Add Another Test<a class="anchor-link" href="#step-3-red-add-another-test" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-3-red-add-another-test" class="submodule">
+<summary>Step 3: Red — Add Another Test<a class="anchor-link" href="#step-3-red-add-another-test" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Test
 @DisplayName("Should return zero when quantity is zero")
 void shouldReturnZeroWhenQuantityIsZero() {
@@ -747,7 +841,11 @@ void shouldReturnZeroWhenQuantityIsZero() {
     assertThat(total).isEqualByComparingTo("0.00");
 }</code></pre>
 <p><strong>Run the test.</strong> It passes (because <code>BigDecimal.valueOf(0)</code> gives zero, and multiplying by zero gives zero).</p>
-<h3 id="step-4-red-test-for-negative-quantity">Step 4: Red — Test for Negative Quantity<a class="anchor-link" href="#step-4-red-test-for-negative-quantity" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-4-red-test-for-negative-quantity" class="submodule">
+<summary>Step 4: Red — Test for Negative Quantity<a class="anchor-link" href="#step-4-red-test-for-negative-quantity" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Test
 @DisplayName("Should throw when quantity is negative")
 void shouldThrowWhenQuantityIsNegative() {
@@ -759,7 +857,11 @@ void shouldThrowWhenQuantityIsNegative() {
             .hasMessage("Quantity must be non-negative");
 }</code></pre>
 <p><strong>Run the test.</strong> It fails — no exception is thrown.</p>
-<h3 id="step-5-green-add-validation">Step 5: Green — Add Validation<a class="anchor-link" href="#step-5-green-add-validation" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-5-green-add-validation" class="submodule">
+<summary>Step 5: Green — Add Validation<a class="anchor-link" href="#step-5-green-add-validation" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">public BigDecimal calculateTotal(BigDecimal unitPrice, int quantity) {
     if (quantity &lt; 0) {
         throw new IllegalArgumentException("Quantity must be non-negative");
@@ -767,7 +869,11 @@ void shouldThrowWhenQuantityIsNegative() {
     return unitPrice.multiply(BigDecimal.valueOf(quantity));
 }</code></pre>
 <p><strong>Run the tests.</strong> All pass.</p>
-<h3 id="step-6-red-test-for-null-price">Step 6: Red — Test for Null Price<a class="anchor-link" href="#step-6-red-test-for-null-price" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-6-red-test-for-null-price" class="submodule">
+<summary>Step 6: Red — Test for Null Price<a class="anchor-link" href="#step-6-red-test-for-null-price" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Test
 @DisplayName("Should throw when unit price is null")
 void shouldThrowWhenUnitPriceIsNull() {
@@ -776,7 +882,11 @@ void shouldThrowWhenUnitPriceIsNull() {
             .hasMessage("Unit price must not be null");
 }</code></pre>
 <p><strong>Run the test.</strong> It fails.</p>
-<h3 id="step-7-green-add-null-check">Step 7: Green — Add Null Check<a class="anchor-link" href="#step-7-green-add-null-check" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-7-green-add-null-check" class="submodule">
+<summary>Step 7: Green — Add Null Check<a class="anchor-link" href="#step-7-green-add-null-check" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">public BigDecimal calculateTotal(BigDecimal unitPrice, int quantity) {
     if (unitPrice == null) {
         throw new NullPointerException("Unit price must not be null");
@@ -787,7 +897,11 @@ void shouldThrowWhenUnitPriceIsNull() {
     return unitPrice.multiply(BigDecimal.valueOf(quantity));
 }</code></pre>
 <p><strong>Run the tests.</strong> All pass.</p>
-<h3 id="step-8-refactor">Step 8: Refactor<a class="anchor-link" href="#step-8-refactor" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-8-refactor" class="submodule">
+<summary>Step 8: Refactor<a class="anchor-link" href="#step-8-refactor" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The code is already clean. Maybe add <code>Objects.requireNonNull</code> for the null check:</p>
 <pre class="code-block"><code class="language-java">import java.util.Objects;
 
@@ -799,10 +913,14 @@ public BigDecimal calculateTotal(BigDecimal unitPrice, int quantity) {
     return unitPrice.multiply(BigDecimal.valueOf(quantity));
 }</code></pre>
 <p><strong>Run the tests.</strong> Still green. Refactoring is safe because tests protect us.</p>
+</div>
+</details>
 <hr />
 <h2 id="9-tdd-walkthrough-building-orderservice">9. TDD Walkthrough: Building OrderService<a class="anchor-link" href="#9-tdd-walkthrough-building-orderservice" title="Permanent link">¶</a></h2>
 <p>Now let's build a piece of <code>OrderService</code> using TDD, with mocked repositories.</p>
-<h3 id="step-1-red-write-a-test-for-should-create-order">Step 1: Red — Write a Test for "Should Create Order"<a class="anchor-link" href="#step-1-red-write-a-test-for-should-create-order" title="Permanent link">¶</a></h3>
+<details id="step-1-red-write-a-test-for-should-create-order" class="submodule">
+<summary>Step 1: Red — Write a Test for "Should Create Order"<a class="anchor-link" href="#step-1-red-write-a-test-for-should-create-order" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
 
 import com.example.ordermgmt.domain.CustomerEntity;
@@ -891,10 +1009,18 @@ class OrderServiceTest {
     }
 }</code></pre>
 <p><strong>Run the test.</strong> It fails because <code>OrderService.createOrder()</code> doesn't exist yet.</p>
-<h3 id="step-2-green-implement-createorder">Step 2: Green — Implement <code>createOrder</code><a class="anchor-link" href="#step-2-green-implement-createorder" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-2-green-implement-createorder" class="submodule">
+<summary>Step 2: Green — Implement <code>createOrder</code><a class="anchor-link" href="#step-2-green-implement-createorder" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>(We already wrote the full <code>OrderService</code> in Module 05. For TDD practice, you would write it incrementally — but even with the full implementation, the test verifies the behavior is correct.)</p>
 <p><strong>Run the test.</strong> It passes.</p>
-<h3 id="step-3-red-test-for-should-throw-when-customer-not-found">Step 3: Red — Test for "Should Throw When Customer Not Found"<a class="anchor-link" href="#step-3-red-test-for-should-throw-when-customer-not-found" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-3-red-test-for-should-throw-when-customer-not-found" class="submodule">
+<summary>Step 3: Red — Test for "Should Throw When Customer Not Found"<a class="anchor-link" href="#step-3-red-test-for-should-throw-when-customer-not-found" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Test
 @DisplayName("Should throw CustomerNotFoundException when customer does not exist")
 void shouldThrowWhenCustomerNotFound() {
@@ -909,7 +1035,11 @@ void shouldThrowWhenCustomerNotFound() {
             .hasMessageContaining("999");
 }</code></pre>
 <p><strong>Run.</strong> If the test passes, the exception is already thrown. If not, add the check.</p>
-<h3 id="step-4-red-test-for-should-throw-when-stock-is-insufficient">Step 4: Red — Test for "Should Throw When Stock Is Insufficient"<a class="anchor-link" href="#step-4-red-test-for-should-throw-when-stock-is-insufficient" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="step-4-red-test-for-should-throw-when-stock-is-insufficient" class="submodule">
+<summary>Step 4: Red — Test for "Should Throw When Stock Is Insufficient"<a class="anchor-link" href="#step-4-red-test-for-should-throw-when-stock-is-insufficient" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@Test
 @DisplayName("Should throw InsufficientStockException when stock is insufficient")
 void shouldThrowWhenStockInsufficient() {
@@ -936,6 +1066,8 @@ void shouldThrowWhenStockInsufficient() {
             .hasMessageContaining("requested=5");
 }</code></pre>
 <p><strong>Run.</strong> Verify it passes (the check was already implemented).</p>
+</div>
+</details>
 <hr />
 <h2 id="10-spring-boot-test-slices">10. Spring Boot Test Slices<a class="anchor-link" href="#10-spring-boot-test-slices" title="Permanent link">¶</a></h2>
 <p>Spring Boot provides <strong>test slices</strong> — specialized test configurations that load only the parts of the application you need for each test type. This makes tests faster than loading the entire application.</p>
@@ -975,7 +1107,9 @@ void shouldThrowWhenStockInsufficient() {
 </tr>
 </tbody>
 </table>
-<h3 id="web-layer-tests-with-mockmvc">Web Layer Tests with MockMvc<a class="anchor-link" href="#web-layer-tests-with-mockmvc" title="Permanent link">¶</a></h3>
+<details id="web-layer-tests-with-mockmvc" class="submodule">
+<summary>Web Layer Tests with MockMvc<a class="anchor-link" href="#web-layer-tests-with-mockmvc" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><code>@WebMvcTest</code> loads a controller and its MVC infrastructure without starting a full server:</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.controller;
 
@@ -1078,7 +1212,11 @@ class OrderControllerTest {
                 .andExpect(status().isBadRequest());
     }
 }</code></pre>
-<h3 id="whats-happening-here_1">What's Happening Here?<a class="anchor-link" href="#whats-happening-here_1" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="whats-happening-here_1" class="submodule">
+<summary>What's Happening Here?<a class="anchor-link" href="#whats-happening-here_1" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><code>@WebMvcTest(OrderController.class)</code> — loads only <code>OrderController</code> and its MVC dependencies</li>
 <li><code>@MockBean</code> — replaces the real <code>OrderService</code> with a Mockito mock</li>
@@ -1086,7 +1224,11 @@ class OrderControllerTest {
 <li><code>jsonPath("$.id").value(1)</code> — checks a JSON field in the response using JSONPath expressions</li>
 <li>The validation test (<code>shouldReturn400WhenCustomerIdIsNull</code>) tests that <code>@Valid</code> on the controller correctly rejects invalid input — no service is involved</li>
 </ol>
-<h3 id="repository-tests-with-datajpatest">Repository Tests with @DataJpaTest<a class="anchor-link" href="#repository-tests-with-datajpatest" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="repository-tests-with-datajpatest" class="submodule">
+<summary>Repository Tests with @DataJpaTest<a class="anchor-link" href="#repository-tests-with-datajpatest" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
 
 import com.example.ordermgmt.domain.CustomerEntity;
@@ -1174,7 +1316,11 @@ class OrderRepositoryTest {
                 .containsExactlyInAnyOrder(OrderStatus.PENDING, OrderStatus.CONFIRMED);
     }
 }</code></pre>
-<h3 id="whats-happening-here_2">What's Happening Here?<a class="anchor-link" href="#whats-happening-here_2" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="whats-happening-here_2" class="submodule">
+<summary>What's Happening Here?<a class="anchor-link" href="#whats-happening-here_2" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><code>@DataJpaTest</code> — loads only JPA infrastructure (Hibernate, entity manager, repositories)</li>
 <li><code>@Testcontainers</code> — starts a real PostgreSQL Docker container</li>
@@ -1183,10 +1329,14 @@ class OrderRepositoryTest {
 <li>The test saves an entity, finds it again, and verifies the data</li>
 </ol>
 <p><strong>Why Testcontainers?</strong> An in-memory database (like H2) behaves differently from PostgreSQL. SQL that works in H2 might fail in PostgreSQL. Testcontainers gives you a <strong>real</strong> PostgreSQL in Docker, so your tests match production behavior.</p>
+</div>
+</details>
 <hr />
 <h2 id="11-jacoco-measuring-test-coverage">11. JaCoCo: Measuring Test Coverage<a class="anchor-link" href="#11-jacoco-measuring-test-coverage" title="Permanent link">¶</a></h2>
 <p><strong>JaCoCo</strong> (Java Code Coverage) measures how much of your code is exercised by tests. It reports the percentage of lines, branches, and methods covered.</p>
-<h3 id="adding-jacoco-to-maven">Adding JaCoCo to Maven<a class="anchor-link" href="#adding-jacoco-to-maven" title="Permanent link">¶</a></h3>
+<details id="adding-jacoco-to-maven" class="submodule">
+<summary>Adding JaCoCo to Maven<a class="anchor-link" href="#adding-jacoco-to-maven" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Add to your <code>pom.xml</code>:</p>
 <pre class="code-block"><code class="language-xml">&lt;plugin&gt;
     &lt;groupId&gt;org.jacoco&lt;/groupId&gt;
@@ -1227,23 +1377,35 @@ class OrderRepositoryTest {
         &lt;/execution&gt;
     &lt;/executions&gt;
 &lt;/plugin&gt;</code></pre>
-<h3 id="running-coverage">Running Coverage<a class="anchor-link" href="#running-coverage" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="running-coverage" class="submodule">
+<summary>Running Coverage<a class="anchor-link" href="#running-coverage" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-bash">mvn verify</code></pre>
 <p>This runs all tests and generates a coverage report at <code>target/site/jacoco/index.html</code>. Open it in your browser to see:
 - Line coverage: percentage of code lines executed by tests
 - Branch coverage: percentage of <code>if</code>/<code>else</code> branches taken
 - Method coverage: percentage of methods called</p>
 <p>The <code>check</code> goal <strong>fails the build</strong> if coverage drops below 80% — ensuring the team maintains quality.</p>
+</div>
+</details>
 <hr />
 <h2 id="12-testing-kafka-consumers">12. Testing Kafka Consumers<a class="anchor-link" href="#12-testing-kafka-consumers" title="Permanent link">¶</a></h2>
 <p>Spring Boot provides <code>@EmbeddedKafka</code> for testing Kafka without a Docker container:</p>
-<h3 id="adding-test-dependencies">Adding Test Dependencies<a class="anchor-link" href="#adding-test-dependencies" title="Permanent link">¶</a></h3>
+<details id="adding-test-dependencies" class="submodule">
+<summary>Adding Test Dependencies<a class="anchor-link" href="#adding-test-dependencies" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.springframework.kafka&lt;/groupId&gt;
     &lt;artifactId&gt;spring-kafka-test&lt;/artifactId&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
-<h3 id="kafka-consumer-test">Kafka Consumer Test<a class="anchor-link" href="#kafka-consumer-test" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="kafka-consumer-test" class="submodule">
+<summary>Kafka Consumer Test<a class="anchor-link" href="#kafka-consumer-test" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.kafka;
 
 import com.example.ordermgmt.kafka.event.OrderCreatedEvent;
@@ -1294,16 +1456,24 @@ class OrderEventConsumerTest {
         // or use CountDownLatch for deterministic waiting)
     }
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="13-testing-reactive-streams-with-stepverifier">13. Testing Reactive Streams with StepVerifier<a class="anchor-link" href="#13-testing-reactive-streams-with-stepverifier" title="Permanent link">¶</a></h2>
 <p>For testing Mono and Flux (from Module 08), use <strong>StepVerifier</strong> from the <code>reactor-test</code> library:</p>
-<h3 id="adding-the-dependency">Adding the Dependency<a class="anchor-link" href="#adding-the-dependency" title="Permanent link">¶</a></h3>
+<details id="adding-the-dependency" class="submodule">
+<summary>Adding the Dependency<a class="anchor-link" href="#adding-the-dependency" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;io.projectreactor&lt;/groupId&gt;
     &lt;artifactId&gt;reactor-test&lt;/artifactId&gt;
     &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
-<h3 id="stepverifier-example">StepVerifier Example<a class="anchor-link" href="#stepverifier-example" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="stepverifier-example" class="submodule">
+<summary>StepVerifier Example<a class="anchor-link" href="#stepverifier-example" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.reactive;
 
 import org.junit.jupiter.api.Test;
@@ -1361,15 +1531,23 @@ class ReactiveServiceTest {
                 .verifyComplete();
     }
 }</code></pre>
-<h3 id="what-stepverifier-does">What StepVerifier Does<a class="anchor-link" href="#what-stepverifier-does" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-stepverifier-does" class="submodule">
+<summary>What StepVerifier Does<a class="anchor-link" href="#what-stepverifier-does" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>StepVerifier subscribes to the reactive stream and verifies each event as it arrives:
 - <code>expectNext(value)</code> — checks the next emitted item
 - <code>expectError(Exception.class)</code> — checks that the stream throws an error
 - <code>verifyComplete()</code> — checks that the stream completed successfully
 - <code>verify()</code> — starts the verification (blocking) and checks everything asserted above</p>
+</div>
+</details>
 <hr />
 <h2 id="14-anti-patterns-to-avoid">14. Anti-Patterns to Avoid<a class="anchor-link" href="#14-anti-patterns-to-avoid" title="Permanent link">¶</a></h2>
-<h3 id="testing-implementation-details">Testing Implementation Details<a class="anchor-link" href="#testing-implementation-details" title="Permanent link">¶</a></h3>
+<details id="testing-implementation-details" class="submodule">
+<summary>Testing Implementation Details<a class="anchor-link" href="#testing-implementation-details" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// BAD — testing how the code works, not what it does
 @Test
 void shouldCallRepositorySaveExactlyOnce() {
@@ -1377,12 +1555,20 @@ void shouldCallRepositorySaveExactlyOnce() {
     verify(orderRepository, times(1)).save(any());
 }</code></pre>
 <p>If you later optimize the code to batch saves, this test breaks even though the behavior didn't change. Test <strong>behavior</strong>, not implementation.</p>
-<h3 id="over-mocking">Over-Mocking<a class="anchor-link" href="#over-mocking" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="over-mocking" class="submodule">
+<summary>Over-Mocking<a class="anchor-link" href="#over-mocking" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// BAD — mocking everything, including the class under test
 @Mock
 OrderService orderService; // Don't mock the class you're testing!</code></pre>
 <p>If you mock the class under test, you're testing the mock, not the real code. Mock only dependencies <strong>of</strong> the class under test.</p>
-<h3 id="brittle-tests">Brittle Tests<a class="anchor-link" href="#brittle-tests" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="brittle-tests" class="submodule">
+<summary>Brittle Tests<a class="anchor-link" href="#brittle-tests" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// BAD — depends on exact date/time, breaks if run at a different time
 @Test
 void shouldSetCreatedAtToNow() {
@@ -1390,7 +1576,11 @@ void shouldSetCreatedAtToNow() {
     assertThat(response.createdAt()).isEqualTo(Instant.now());
 }</code></pre>
 <p>Use a <code>Clock</code> dependency or test that <code>createdAt</code> is "close to now" rather than exactly now.</p>
-<h3 id="testing-getters-and-setters">Testing Getters and Setters<a class="anchor-link" href="#testing-getters-and-setters" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="testing-getters-and-setters" class="submodule">
+<summary>Testing Getters and Setters<a class="anchor-link" href="#testing-getters-and-setters" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// BAD — testing that a getter returns what the setter set
 @Test
 void shouldReturnName() {
@@ -1399,6 +1589,8 @@ void shouldReturnName() {
     assertThat(customer.getName()).isEqualTo("Alice");
 }</code></pre>
 <p>Getters and setters are generated by the compiler or Lombok. Testing them tests the framework, not your code.</p>
+</div>
+</details>
 <hr />
 <h2 id="15-best-practices-summary">15. Best Practices Summary<a class="anchor-link" href="#15-best-practices-summary" title="Permanent link">¶</a></h2>
 <table>
@@ -1470,7 +1662,9 @@ void shouldReturnName() {
 </ul>
 <hr />
 <h2 id="15-test-smells-and-anti-patterns">15. Test Smells and Anti-Patterns<a class="anchor-link" href="#15-test-smells-and-anti-patterns" title="Permanent link">¶</a></h2>
-<h3 id="testing-implementation-details-white-box-testing">Testing Implementation Details (White-Box Testing)<a class="anchor-link" href="#testing-implementation-details-white-box-testing" title="Permanent link">¶</a></h3>
+<details id="testing-implementation-details-white-box-testing" class="submodule">
+<summary>Testing Implementation Details (White-Box Testing)<a class="anchor-link" href="#testing-implementation-details-white-box-testing" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// BAD: testing the internal implementation
 @Test
 void test_internal_method_order() {
@@ -1487,7 +1681,11 @@ void createOrder_publishes_one_event() {
     service.createOrder(request);
     verify(producer, times(1)).publishOrderCreated(any());  // stable contract
 }</code></pre>
-<h3 id="excessive-mocking-mock-everything-anti-pattern">Excessive Mocking (Mock Everything Anti-Pattern)<a class="anchor-link" href="#excessive-mocking-mock-everything-anti-pattern" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="excessive-mocking-mock-everything-anti-pattern" class="submodule">
+<summary>Excessive Mocking (Mock Everything Anti-Pattern)<a class="anchor-link" href="#excessive-mocking-mock-everything-anti-pattern" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// BAD: mocking a data class / record
 OrderResponse mockDto = mock(OrderResponse.class);  // mocks a simple DTO
 when(mockDto.customerName()).thenReturn("Alice");
@@ -1497,17 +1695,27 @@ OrderResponse dto = new OrderResponse(1L, "Alice", OrderStatus.PENDING, ...);</c
 <p><strong>Rule:</strong> Only mock types you <strong>don't own</strong> (external services, databases) or
 types that are <strong>expensive to construct</strong>. Data classes and records should be
 instantiated directly.</p>
-<h3 id="brittle-assertions">Brittle Assertions<a class="anchor-link" href="#brittle-assertions" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="brittle-assertions" class="submodule">
+<summary>Brittle Assertions<a class="anchor-link" href="#brittle-assertions" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">// BAD: exact date comparison — breaks if test runs at different time
 assertEquals(Instant.parse("2025-01-15T10:00:00Z"), order.getCreatedAt());
 
 // GOOD: assert the order was created recently
 assertThat(order.getCreatedAt())
         .isCloseTo(Instant.now(), within(1, ChronoUnit.SECONDS));</code></pre>
-<h3 id="test-pyramid-vs-ice-cream-cone">Test Pyramid vs Ice Cream Cone<a class="anchor-link" href="#test-pyramid-vs-ice-cream-cone" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="test-pyramid-vs-ice-cream-cone" class="submodule">
+<summary>Test Pyramid vs Ice Cream Cone<a class="anchor-link" href="#test-pyramid-vs-ice-cream-cone" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>```
        /\
       /E2E          ← <a href="08-reactor-pattern.html">Previous: Module 08 — Reactor Pattern</a> | <a href="10-capstone-project.html">Next: Module 10 — Capstone Project</a> →</p>
+</div>
+</details>
       </article>
 
       <div class="footer-nav"><a href="08-reactor-pattern.html" class="nav-link prev">← Reactor Pattern</a><a href="10-capstone-project.html" class="nav-link next">Capstone Project →</a></div>

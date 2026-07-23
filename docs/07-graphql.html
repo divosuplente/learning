@@ -220,14 +220,20 @@ Response:
 <p>REST works well and is widely used. But it has limitations.</p>
 <hr />
 <h2 id="2-problems-with-rest">2. Problems with REST<a class="anchor-link" href="#2-problems-with-rest" title="Permanent link">¶</a></h2>
-<h3 id="over-fetching">Over-Fetching<a class="anchor-link" href="#over-fetching" title="Permanent link">¶</a></h3>
+<details id="over-fetching" class="submodule">
+<summary>Over-Fetching<a class="anchor-link" href="#over-fetching" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>Over-fetching</strong> happens when the API returns more data than the client needs.</p>
 <p>Imagine a mobile app that shows a list of orders. It only needs the order ID and status — but the REST endpoint returns the entire order object including all items, the customer details, timestamps, and more. That's wasted bandwidth and slower response times.</p>
 <pre class="code-block"><code>Client needs:  { "id": 42, "status": "CONFIRMED" }
 REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "CONFIRMED",
                  "totalAmount": 129.99, "createdAt": "...", "items": [...] }
                                                           ↑ wasted data</code></pre>
-<h3 id="under-fetching">Under-Fetching<a class="anchor-link" href="#under-fetching" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="under-fetching" class="submodule">
+<summary>Under-Fetching<a class="anchor-link" href="#under-fetching" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>Under-fetching</strong> happens when the client needs to make multiple API calls to gather all the data it needs.</p>
 <p>Imagine a dashboard that shows orders with customer names and product images. With REST, you might need:</p>
 <ol>
@@ -237,8 +243,14 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "
 <li><code>GET /api/products/100</code> — get product details for the first item</li>
 </ol>
 <p>That's 4+ network round trips. Each one adds latency.</p>
-<h3 id="the-root-cause">The Root Cause<a class="anchor-link" href="#the-root-cause" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="the-root-cause" class="submodule">
+<summary>The Root Cause<a class="anchor-link" href="#the-root-cause" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The problem is that REST endpoints return a <strong>fixed shape</strong>. The server decides what data to return, regardless of what the client actually needs. Different clients (web app, mobile app, analytics dashboard) have different needs, but they all get the same response.</p>
+</div>
+</details>
 <hr />
 <h2 id="3-what-is-graphql">3. What Is GraphQL?<a class="anchor-link" href="#3-what-is-graphql" title="Permanent link">¶</a></h2>
 <p><strong>GraphQL</strong> is a query language for your API. Instead of the server deciding what data to return, the <strong>client</strong> specifies exactly what it wants, and the server returns exactly that — nothing more, nothing less.</p>
@@ -247,7 +259,9 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "
 <li><strong>REST</strong> is like a set menu: you get whatever the chef decided to put on the plate. You might not want the salad, but it's there.</li>
 <li><strong>GraphQL</strong> is like ordering a la carte: you pick exactly the dishes you want. Want just the steak? You get just the steak.</li>
 </ul>
-<h3 id="a-graphql-query-example">A GraphQL Query Example<a class="anchor-link" href="#a-graphql-query-example" title="Permanent link">¶</a></h3>
+<details id="a-graphql-query-example" class="submodule">
+<summary>A GraphQL Query Example<a class="anchor-link" href="#a-graphql-query-example" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Instead of <code>GET /api/orders/42</code>, the client sends a <strong>query</strong> to a single GraphQL endpoint:</p>
 <pre class="code-block"><code>POST /graphql
 
@@ -264,7 +278,11 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "
   }
 }</code></pre>
 <p>No over-fetching. The client asked for <code>id</code> and <code>status</code>, and that's all it got.</p>
-<h3 id="a-more-complex-query">A More Complex Query<a class="anchor-link" href="#a-more-complex-query" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="a-more-complex-query" class="submodule">
+<summary>A More Complex Query<a class="anchor-link" href="#a-more-complex-query" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The client can also ask for related data in a single request — no under-fetching:</p>
 <pre class="code-block"><code class="language-graphql">{
   order(id: 42) {
@@ -285,6 +303,8 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "
   }
 }</code></pre>
 <p>This single query replaces what would have taken 3+ REST calls. The server resolves all the relationships and returns the complete data in one response.</p>
+</div>
+</details>
 <hr />
 <h2 id="4-graphql-vs-rest-comparison">4. GraphQL vs REST: Comparison<a class="anchor-link" href="#4-graphql-vs-rest-comparison" title="Permanent link">¶</a></h2>
 <table>
@@ -348,14 +368,20 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "
 </tr>
 </tbody>
 </table>
-<h3 id="when-to-use-graphql">When to Use GraphQL?<a class="anchor-link" href="#when-to-use-graphql" title="Permanent link">¶</a></h3>
+<details id="when-to-use-graphql" class="submodule">
+<summary>When to Use GraphQL?<a class="anchor-link" href="#when-to-use-graphql" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ul>
 <li>You have multiple clients (web, iOS, Android) with different data needs</li>
 <li>Your data has complex relationships that require multiple REST calls to assemble</li>
 <li>You want to avoid versioning your API</li>
 <li>You want a single endpoint for the frontend to interact with</li>
 </ul>
-<h3 id="when-to-stay-with-rest">When to Stay with REST?<a class="anchor-link" href="#when-to-stay-with-rest" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="when-to-stay-with-rest" class="submodule">
+<summary>When to Stay with REST?<a class="anchor-link" href="#when-to-stay-with-rest" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ul>
 <li>Your API is consumed by other servers (machine-to-machine) where over-fetching doesn't matter</li>
 <li>You need HTTP-level caching</li>
@@ -363,11 +389,19 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "
 <li>Your team is not familiar with GraphQL</li>
 </ul>
 <p>You can also use <strong>both</strong> — Spring Boot supports having REST and GraphQL endpoints in the same application.</p>
+</div>
+</details>
 <hr />
 <h2 id="5-core-graphql-concepts">5. Core GraphQL Concepts<a class="anchor-link" href="#5-core-graphql-concepts" title="Permanent link">¶</a></h2>
-<h3 id="schema">Schema<a class="anchor-link" href="#schema" title="Permanent link">¶</a></h3>
+<details id="schema" class="submodule">
+<summary>Schema<a class="anchor-link" href="#schema" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>schema</strong> is the contract of your GraphQL API. It defines what types exist, what queries are available, and what mutations you can perform. The schema is written in the <strong>Schema Definition Language (SDL)</strong> and lives in a <code>.graphqls</code> file.</p>
-<h3 id="types">Types<a class="anchor-link" href="#types" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="types" class="submodule">
+<summary>Types<a class="anchor-link" href="#types" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>type</strong> defines the shape of an object in your API. It's like a Java class definition:</p>
 <pre class="code-block"><code class="language-graphql">type Order {
     id: ID!
@@ -383,7 +417,11 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "
 <li><code>BigDecimal</code> — we can register custom scalars for types Java has but GraphQL doesn't (like <code>BigDecimal</code>, <code>Instant</code>)</li>
 <li><code>Customer</code> is a custom type we define ourselves</li>
 </ul>
-<h3 id="queries">Queries<a class="anchor-link" href="#queries" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="queries" class="submodule">
+<summary>Queries<a class="anchor-link" href="#queries" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>query</strong> reads data. It's the GraphQL equivalent of a <code>GET</code> request:</p>
 <pre class="code-block"><code class="language-graphql">type Query {
     order(id: ID!): Order
@@ -391,7 +429,11 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "
     customer(id: ID!): Customer
     products(category: String): [Product!]!
 }</code></pre>
-<h3 id="mutations">Mutations<a class="anchor-link" href="#mutations" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="mutations" class="submodule">
+<summary>Mutations<a class="anchor-link" href="#mutations" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>mutation</strong> modifies data. It's the GraphQL equivalent of <code>POST</code>, <code>PUT</code>, or <code>DELETE</code>:</p>
 <pre class="code-block"><code class="language-graphql">type Mutation {
     createOrder(input: CreateOrderInput!): Order!
@@ -399,12 +441,18 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice", "status": "
     cancelOrder(id: ID!): Order!
     createProduct(input: CreateProductInput!): Product!
 }</code></pre>
-<h3 id="subscriptions">Subscriptions<a class="anchor-link" href="#subscriptions" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="subscriptions" class="submodule">
+<summary>Subscriptions<a class="anchor-link" href="#subscriptions" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>subscription</strong> is a real-time stream of data pushed from the server to the client over WebSockets. It's used for live updates like order status changes:</p>
 <pre class="code-block"><code class="language-graphql">type Subscription {
     orderStatusChanged(orderId: ID): OrderStatusChangedEvent!
 }</code></pre>
 <p>We'll cover subscriptions briefly at the end of this module.</p>
+</div>
+</details>
 <hr />
 <h2 id="6-schema-definition-language-sdl">6. Schema Definition Language (SDL)<a class="anchor-link" href="#6-schema-definition-language-sdl" title="Permanent link">¶</a></h2>
 <p>Let's write the complete GraphQL schema for our Order Management System. Create a file at <code>src/main/resources/graphql/schema.graphqls</code>:</p>
@@ -539,7 +587,9 @@ type Subscription {
     # Subscribe to order status changes, optionally for a specific order
     orderStatusChanged(orderId: ID): OrderStatusChangedEvent!
 }</code></pre>
-<h3 id="key-points-about-the-schema">Key Points About the Schema<a class="anchor-link" href="#key-points-about-the-schema" title="Permanent link">¶</a></h3>
+<details id="key-points-about-the-schema" class="submodule">
+<summary>Key Points About the Schema<a class="anchor-link" href="#key-points-about-the-schema" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><strong><code>scalar BigDecimal</code> and <code>scalar Instant</code></strong> — these tell GraphQL that we have custom types. We'll register Java implementations for them in our Spring Boot configuration</li>
 <li><strong>Input types</strong> — mutations use <code>input</code> types instead of regular types. Inputs are for data going <strong>in</strong> to the API</li>
@@ -549,6 +599,8 @@ type Subscription {
 <li><strong>The <code>Mutation</code> type is optional but common</strong> — it defines all write operations</li>
 <li><strong>Arguments</strong> — queries can accept arguments: <code>order(id: ID!)</code>, <code>products(category: String)</code></li>
 </ol>
+</div>
+</details>
 <hr />
 <h2 id="7-adding-the-graphql-dependency">7. Adding the GraphQL Dependency<a class="anchor-link" href="#7-adding-the-graphql-dependency" title="Permanent link">¶</a></h2>
 <p>Add the Spring Boot GraphQL starter to your <code>pom.xml</code>:</p>
@@ -668,11 +720,15 @@ public class GraphQLConfig {
                 .scalar(instantScalar);
     }
 }</code></pre>
-<h3 id="what-is-a-coercing">What Is a Coercing?<a class="anchor-link" href="#what-is-a-coercing" title="Permanent link">¶</a></h3>
+<details id="what-is-a-coercing" class="submodule">
+<summary>What Is a Coercing?<a class="anchor-link" href="#what-is-a-coercing" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A <strong>Coercing</strong> object tells GraphQL three things:
 1. <strong><code>serialize</code></strong> — how to convert a Java object (e.g., <code>BigDecimal</code>) to something the client can read (e.g., a <code>String</code>)
 2. <strong><code>parseValue</code></strong> — how to convert a variable value from the client (e.g., <code>"129.99"</code>) to a Java object (e.g., <code>BigDecimal</code>)
 3. <strong><code>parseLiteral</code></strong> — how to convert a literal value from the query text (e.g., the <code>"129.99"</code> in the query itself) to a Java object</p>
+</div>
+</details>
 <hr />
 <h2 id="9-resolvers-in-spring-boot">9. Resolvers in Spring Boot<a class="anchor-link" href="#9-resolvers-in-spring-boot" title="Permanent link">¶</a></h2>
 <p>A <strong>resolver</strong> is a Java method that provides the data for a GraphQL field. When a client queries <code>order(id: 42)</code>, a resolver method is called to fetch that order.</p>
@@ -703,7 +759,9 @@ public class GraphQLConfig {
 </tr>
 </tbody>
 </table>
-<h3 id="query-resolvers">Query Resolvers<a class="anchor-link" href="#query-resolvers" title="Permanent link">¶</a></h3>
+<details id="query-resolvers" class="submodule">
+<summary>Query Resolvers<a class="anchor-link" href="#query-resolvers" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
 
 import com.example.ordermgmt.dto.OrderResponse;
@@ -776,7 +834,11 @@ public class OrderQueryResolver {
         return productService.getAllProducts();
     }
 }</code></pre>
-<h3 id="whats-happening-here">What's Happening Here?<a class="anchor-link" href="#whats-happening-here" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="whats-happening-here" class="submodule">
+<summary>What's Happening Here?<a class="anchor-link" href="#whats-happening-here" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li><code>@Controller</code> — marks this class as a Spring component (like <code>@RestController</code> but for GraphQL)</li>
 <li><code>@QueryMapping</code> — tells Spring that this method resolves a field in the <code>Query</code> type. The method name must match the field name in the schema (e.g., <code>order()</code> maps to <code>order(id: ID!): Order</code>)</li>
@@ -784,7 +846,11 @@ public class OrderQueryResolver {
 <li><code>@Argument(required = false)</code> — for optional arguments (the schema says <code>customerId: ID</code> without <code>!</code>, meaning it's nullable)</li>
 <li>The return type (<code>OrderResponse</code>, <code>List&lt;OrderResponse&gt;</code>, etc.) is serialized to JSON and returned to the client — but only the fields the client asked for</li>
 </ol>
-<h3 id="mutation-resolvers">Mutation Resolvers<a class="anchor-link" href="#mutation-resolvers" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="mutation-resolvers" class="submodule">
+<summary>Mutation Resolvers<a class="anchor-link" href="#mutation-resolvers" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
 
 import com.example.ordermgmt.dto.CreateOrderRequest;
@@ -861,7 +927,11 @@ public class OrderMutationResolver {
         return productService.createProduct(request);
     }
 }</code></pre>
-<h3 id="input-records">Input Records<a class="anchor-link" href="#input-records" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="input-records" class="submodule">
+<summary>Input Records<a class="anchor-link" href="#input-records" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The <code>@Argument</code> annotation can deserialize complex input types. We need Java records that match the input types in the schema:</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
 
@@ -894,7 +964,11 @@ public record CreateProductInput(
         Integer stock,
         String category
 ) {}</code></pre>
-<h3 id="field-resolvers-with-schemamapping">Field Resolvers with @SchemaMapping<a class="anchor-link" href="#field-resolvers-with-schemamapping" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="field-resolvers-with-schemamapping" class="submodule">
+<summary>Field Resolvers with @SchemaMapping<a class="anchor-link" href="#field-resolvers-with-schemamapping" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Sometimes a field on a type needs custom resolution logic. For example, what if <code>OrderResponse</code> doesn't have a <code>customer</code> field — the client can query for it but the service doesn't return it directly?</p>
 <p>Use <code>@SchemaMapping</code> to resolve individual fields:</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
@@ -924,10 +998,14 @@ public class OrderFieldResolver {
     }
 }</code></pre>
 <p>This is called a <strong>field resolver</strong> — it resolves a single field on a type. Spring only calls this method if the client actually queries the <code>customer</code> field. If the client doesn't ask for <code>customer</code>, this method is never called — that's the power of GraphQL's selective fetching.</p>
+</div>
+</details>
 <hr />
 <h2 id="10-error-handling-in-graphql">10. Error Handling in GraphQL<a class="anchor-link" href="#10-error-handling-in-graphql" title="Permanent link">¶</a></h2>
 <p>Unlike REST, where each request returns a single HTTP status code, GraphQL uses HTTP 200 for most responses (even errors) and includes an <code>errors</code> array in the response body.</p>
-<h3 id="error-response-format">Error Response Format<a class="anchor-link" href="#error-response-format" title="Permanent link">¶</a></h3>
+<details id="error-response-format" class="submodule">
+<summary>Error Response Format<a class="anchor-link" href="#error-response-format" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-json">{
   "errors": [
     {
@@ -940,7 +1018,11 @@ public class OrderFieldResolver {
   ],
   "data": null
 }</code></pre>
-<h3 id="partial-results">Partial Results<a class="anchor-link" href="#partial-results" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="partial-results" class="submodule">
+<summary>Partial Results<a class="anchor-link" href="#partial-results" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>One of GraphQL's strengths is <strong>partial results</strong>. If a client queries for two things and one fails, the successful one is still returned:</p>
 <pre class="code-block"><code class="language-json">{
   "data": {
@@ -954,7 +1036,11 @@ public class OrderFieldResolver {
   ]
 }</code></pre>
 <p>The <code>product</code> query succeeded, the <code>order</code> query failed. The client gets both.</p>
-<h3 id="custom-exceptions-in-spring-boot-graphql">Custom Exceptions in Spring Boot GraphQL<a class="anchor-link" href="#custom-exceptions-in-spring-boot-graphql" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="custom-exceptions-in-spring-boot-graphql" class="submodule">
+<summary>Custom Exceptions in Spring Boot GraphQL<a class="anchor-link" href="#custom-exceptions-in-spring-boot-graphql" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Spring Boot for GraphQL automatically translates exceptions into GraphQL errors. For better error classification, create a custom exception handler:</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
 
@@ -988,9 +1074,13 @@ public class GraphQlExceptionHandler {
 - <code>BAD_REQUEST</code> — for validation errors (HTTP 400 equivalent)
 - <code>FORBIDDEN</code> — for authorization errors (HTTP 403 equivalent)
 - <code>INTERNAL_ERROR</code> — for unexpected errors (HTTP 500 equivalent)</p>
+</div>
+</details>
 <hr />
 <h2 id="11-the-n1-problem-and-dataloader">11. The N+1 Problem and DataLoader<a class="anchor-link" href="#11-the-n1-problem-and-dataloader" title="Permanent link">¶</a></h2>
-<h3 id="what-is-the-n1-problem">What Is the N+1 Problem?<a class="anchor-link" href="#what-is-the-n1-problem" title="Permanent link">¶</a></h3>
+<details id="what-is-the-n1-problem" class="submodule">
+<summary>What Is the N+1 Problem?<a class="anchor-link" href="#what-is-the-n1-problem" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>The N+1 problem is a performance issue that appears when resolving related data. Consider this query:</p>
 <pre class="code-block"><code class="language-graphql">{
   orders {
@@ -1007,7 +1097,11 @@ public class GraphQlExceptionHandler {
 <li><strong>N queries</strong> (one per order) to fetch each customer by ID</li>
 </ol>
 <p>That's <strong>1 + N = 11 queries</strong> for 10 orders. If there are 100 orders, it's 101 queries. This is extremely slow.</p>
-<h3 id="how-dataloader-solves-it">How DataLoader Solves It<a class="anchor-link" href="#how-dataloader-solves-it" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="how-dataloader-solves-it" class="submodule">
+<summary>How DataLoader Solves It<a class="anchor-link" href="#how-dataloader-solves-it" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>DataLoader</strong> is a batching utility. Instead of fetching each customer individually, DataLoader collects all the customer IDs from all the orders, fetches them in a <strong>single batch query</strong>, and distributes the results back.</p>
 <pre class="code-block"><code>Without DataLoader:         With DataLoader:
 [fetch orders]              [fetch orders]
@@ -1016,7 +1110,11 @@ public class GraphQlExceptionHandler {
   [fetch customer 7]         [distribute results]
   ...                        Total: 2 queries
 Total: 11+ queries</code></pre>
-<h3 id="implementing-dataloader-in-spring-boot">Implementing DataLoader in Spring Boot<a class="anchor-link" href="#implementing-dataloader-in-spring-boot" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="implementing-dataloader-in-spring-boot" class="submodule">
+<summary>Implementing DataLoader in Spring Boot<a class="anchor-link" href="#implementing-dataloader-in-spring-boot" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.graphql;
 
 import com.example.ordermgmt.domain.CustomerEntity;
@@ -1066,7 +1164,11 @@ public class OrderBatchResolver {
                 ));
     }
 }</code></pre>
-<h3 id="what-batchmapping-does">What <code>@BatchMapping</code> Does<a class="anchor-link" href="#what-batchmapping-does" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="what-batchmapping-does" class="submodule">
+<summary>What <code>@BatchMapping</code> Does<a class="anchor-link" href="#what-batchmapping-does" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <ol>
 <li>When a query asks for <code>orders { customer { name } }</code>, Spring collects all the <code>OrderEntity</code> objects being resolved</li>
 <li>Instead of calling the resolver once per order, it calls <code>loadCustomers()</code> once with <strong>all</strong> orders</li>
@@ -1074,6 +1176,8 @@ public class OrderBatchResolver {
 <li>It returns a <code>Map&lt;OrderEntity, CustomerEntity&gt;</code> — Spring uses this to assign the right customer to each order</li>
 </ol>
 <p>This turns 101 queries into 2 queries.</p>
+</div>
+</details>
 <hr />
 <h2 id="12-graphql-subscriptions">12. GraphQL Subscriptions<a class="anchor-link" href="#12-graphql-subscriptions" title="Permanent link">¶</a></h2>
 <p>Subscriptions enable <strong>real-time updates</strong>. Instead of the client repeatedly polling for changes, the server pushes updates when they happen.</p>
@@ -1087,7 +1191,9 @@ public class OrderBatchResolver {
   }
 }</code></pre>
 <p>Subscriptions use <strong>WebSockets</strong> — a persistent connection between client and server. When an order's status changes (and the <code>OrderEventProducer</code> publishes an event from Module 06), the subscription pushes the update to all connected clients.</p>
-<h3 id="setting-up-subscriptions">Setting Up Subscriptions<a class="anchor-link" href="#setting-up-subscriptions" title="Permanent link">¶</a></h3>
+<details id="setting-up-subscriptions" class="submodule">
+<summary>Setting Up Subscriptions<a class="anchor-link" href="#setting-up-subscriptions" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Subscriptions require WebSocket support. Add the WebSocket starter dependency:</p>
 <pre class="code-block"><code class="language-xml">&lt;dependency&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
@@ -1141,6 +1247,8 @@ public class OrderSubscriptionResolver {
 <p>We'll dive deeper into <code>Flux</code>, <code>Sinks</code>, and reactive streams in Module 08. For now, understand that:
 - <code>Sinks.Many</code> is like a broadcaster — you push events into it and all subscribers receive them
 - <code>Flux</code> is a stream of data — the subscription returns a <code>Flux</code> that the client reads from in real-time</p>
+</div>
+</details>
 <hr />
 <h2 id="13-testing-graphql-with-graphiql">13. Testing GraphQL with GraphiQL<a class="anchor-link" href="#13-testing-graphql-with-graphiql" title="Permanent link">¶</a></h2>
 <p>Spring Boot includes <strong>GraphiQL</strong> — a browser-based IDE for writing and testing GraphQL queries.</p>
@@ -1149,7 +1257,9 @@ public class OrderSubscriptionResolver {
 <li>Open <code>http://localhost:8080/graphiql</code> in your browser</li>
 <li>Write queries and see results immediately</li>
 </ol>
-<h3 id="example-queries-to-try">Example Queries to Try<a class="anchor-link" href="#example-queries-to-try" title="Permanent link">¶</a></h3>
+<details id="example-queries-to-try" class="submodule">
+<summary>Example Queries to Try<a class="anchor-link" href="#example-queries-to-try" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p><strong>Get an order with its customer and items:</strong></p>
 <pre class="code-block"><code class="language-graphql">query {
   order(id: 1) {
@@ -1213,12 +1323,20 @@ public class OrderSubscriptionResolver {
     newStatus
   }
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="14-security-overview-brief">14. Security Overview (Brief)<a class="anchor-link" href="#14-security-overview-brief" title="Permanent link">¶</a></h2>
 <p>GraphQL APIs need the same security measures as REST APIs:</p>
-<h3 id="authentication">Authentication<a class="anchor-link" href="#authentication" title="Permanent link">¶</a></h3>
+<details id="authentication" class="submodule">
+<summary>Authentication<a class="anchor-link" href="#authentication" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Verify who the user is. Typically done with JWT tokens or session cookies — the same approach as REST. In Spring Boot, you can use Spring Security to protect the <code>/graphql</code> endpoint.</p>
-<h3 id="authorization">Authorization<a class="anchor-link" href="#authorization" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="authorization" class="submodule">
+<summary>Authorization<a class="anchor-link" href="#authorization" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Verify what the user is allowed to do. In GraphQL, this means checking permissions at the resolver level:</p>
 <pre class="code-block"><code class="language-java">@MutationMapping
 public OrderResponse createOrder(@Argument CreateOrderInput input, Authentication auth) {
@@ -1228,7 +1346,11 @@ public OrderResponse createOrder(@Argument CreateOrderInput input, Authenticatio
     }
     // ... proceed with creating the order
 }</code></pre>
-<h3 id="query-depth-limiting">Query Depth Limiting<a class="anchor-link" href="#query-depth-limiting" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="query-depth-limiting" class="submodule">
+<summary>Query Depth Limiting<a class="anchor-link" href="#query-depth-limiting" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>A malicious client could send a deeply nested query that exhausts server resources:</p>
 <pre class="code-block"><code class="language-graphql"># This is a denial-of-service attack
 { customer { orders { customer { orders { customer { orders { ... } } } } } } }</code></pre>
@@ -1239,8 +1361,14 @@ public OrderResponse createOrder(@Argument CreateOrderInput input, Authenticatio
       inspection:
         enabled: true</code></pre>
 <p>Add depth limiting through a custom <code>GraphQLInterceptor</code> or use libraries like <code>graphql-java-query-complexity</code>.</p>
-<h3 id="rate-limiting">Rate Limiting<a class="anchor-link" href="#rate-limiting" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="rate-limiting" class="submodule">
+<summary>Rate Limiting<a class="anchor-link" href="#rate-limiting" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>GraphQL operates on a single endpoint, so traditional HTTP rate limiting (X requests per second) applies. However, a single GraphQL request can be much more expensive than a single REST request (querying all orders with all items with all products). Consider <strong>query complexity analysis</strong> — assigning a "cost" to each field and limiting the total cost per query.</p>
+</div>
+</details>
 <hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
@@ -1258,7 +1386,9 @@ public OrderResponse createOrder(@Argument CreateOrderInput input, Authenticatio
 </ul>
 <hr />
 <h2 id="13-graphql-schema-design-best-practices">13. GraphQL Schema Design Best Practices<a class="anchor-link" href="#13-graphql-schema-design-best-practices" title="Permanent link">¶</a></h2>
-<h3 id="connection-relay-pagination">Connection / Relay Pagination<a class="anchor-link" href="#connection-relay-pagination" title="Permanent link">¶</a></h3>
+<details id="connection-relay-pagination" class="submodule">
+<summary>Connection / Relay Pagination<a class="anchor-link" href="#connection-relay-pagination" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Instead of returning a flat list, use the <strong>Connection pattern</strong> for paginated
 results:</p>
 <pre class="code-block"><code class="language-graphql">type Query {
@@ -1297,7 +1427,11 @@ public OrderConnection orders(@Argument Integer first, @Argument String after) {
             edges.isEmpty() ? null : edges.get(edges.size() - 1).cursor());
     return new OrderConnection(edges, pageInfo, orderService.count());
 }</code></pre>
-<h3 id="input-types-vs-arguments">Input Types vs Arguments<a class="anchor-link" href="#input-types-vs-arguments" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="input-types-vs-arguments" class="submodule">
+<summary>Input Types vs Arguments<a class="anchor-link" href="#input-types-vs-arguments" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-graphql"># GOOD — structured input type
 mutation CreateOrder($input: CreateOrderInput!) {
     createOrder(input: $input): Order!
@@ -1318,7 +1452,11 @@ mutation CreateOrder(
     city: String
     zipCode: String
 ): Order</code></pre>
-<h3 id="deprecation">Deprecation<a class="anchor-link" href="#deprecation" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="deprecation" class="submodule">
+<summary>Deprecation<a class="anchor-link" href="#deprecation" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-graphql">type Order {
     id: ID!
     customerName: String! @deprecated(reason: "Use customer { name } instead")
@@ -1326,11 +1464,15 @@ mutation CreateOrder(
     amount: BigDecimal! @deprecated(reason: "Use totalAmount instead")
     totalAmount: BigDecimal!
 }</code></pre>
+</div>
+</details>
 <hr />
 <h2 id="14-graphql-error-handling">14. GraphQL Error Handling<a class="anchor-link" href="#14-graphql-error-handling" title="Permanent link">¶</a></h2>
 <p>GraphQL returns 200 OK even when there are errors. Errors are included in the
 response body, alongside any partial data.</p>
-<h3 id="custom-error-extensions">Custom Error Extensions<a class="anchor-link" href="#custom-error-extensions" title="Permanent link">¶</a></h3>
+<details id="custom-error-extensions" class="submodule">
+<summary>Custom Error Extensions<a class="anchor-link" href="#custom-error-extensions" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <pre class="code-block"><code class="language-java">@ControllerAdvice
 public class GraphQLExceptionHandler {
 
@@ -1359,7 +1501,11 @@ public class GraphQLExceptionHandler {
                 .build();
     }
 }</code></pre>
-<h3 id="error-taxonomy">Error Taxonomy<a class="anchor-link" href="#error-taxonomy" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="error-taxonomy" class="submodule">
+<summary>Error Taxonomy<a class="anchor-link" href="#error-taxonomy" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <table>
 <thead>
 <tr>
@@ -1401,9 +1547,13 @@ public class GraphQLExceptionHandler {
 </tr>
 </tbody>
 </table>
+</div>
+</details>
 <hr />
 <h2 id="15-graphql-security">15. GraphQL Security<a class="anchor-link" href="#15-graphql-security" title="Permanent link">¶</a></h2>
-<h3 id="query-depth-limiting_1">Query Depth Limiting<a class="anchor-link" href="#query-depth-limiting_1" title="Permanent link">¶</a></h3>
+<details id="query-depth-limiting_1" class="submodule">
+<summary>Query Depth Limiting<a class="anchor-link" href="#query-depth-limiting_1" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Malicious clients can send deeply nested queries to overload the server:</p>
 <pre class="code-block"><code class="language-graphql"># Attack: infinitely nested query
 query { orders { items { product { category { parent { products { items { product { ... }}}}}}}}}</code></pre>
@@ -1415,7 +1565,11 @@ query { orders { items { product { category { parent { products { items { produc
         enabled: true
     # Max query depth
     max-query-depth: 7</code></pre>
-<h3 id="query-complexity-analysis">Query Complexity Analysis<a class="anchor-link" href="#query-complexity-analysis" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="query-complexity-analysis" class="submodule">
+<summary>Query Complexity Analysis<a class="anchor-link" href="#query-complexity-analysis" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>Assign a cost to each field and reject queries exceeding a budget:</p>
 <pre class="code-block"><code class="language-java">@Bean
 public GraphQLSchemaFactoryBean schemaFactory(GraphQLSchema schema) {
@@ -1424,7 +1578,11 @@ public GraphQLSchemaFactoryBean schemaFactory(GraphQLSchema schema) {
     // graphql-java-extended-scalars
     return null;  // configure in custom instrumentations
 }</code></pre>
-<h3 id="authentication-in-resolvers">Authentication in Resolvers<a class="anchor-link" href="#authentication-in-resolvers" title="Permanent link">¶</a></h3>
+</div>
+</details>
+<details id="authentication-in-resolvers" class="submodule">
+<summary>Authentication in Resolvers<a class="anchor-link" href="#authentication-in-resolvers" title="Permanent link">¶</a></summary>
+<div class="submodule-body">
 <p>GraphQL doesn't have built-in auth. Implement it at the resolver level:</p>
 <pre class="code-block"><code class="language-java">@QueryMapping
 public OrderResponse order(@Argument Long id, GraphQLServletContext context) {
@@ -1438,6 +1596,8 @@ public OrderResponse order(@Argument Long id, GraphQLServletContext context) {
     }
     return order;
 }</code></pre>
+</div>
+</details>
 <hr />
 <hr />
 <p>← <a href="06-kafka.html">Previous: Module 06 — Apache Kafka</a> | <a href="08-reactor-pattern.html">Next: Module 08 — Reactor Pattern</a> →</p>
