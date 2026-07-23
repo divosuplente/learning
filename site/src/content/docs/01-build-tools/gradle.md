@@ -1,25 +1,6 @@
 ---
-title: "Module 01: Build Tools & Project Setup"
-description: "Build Tools & Project Setup"
----
-
-## What You'll Learn
-
-- What a build tool is and why every Java project needs one
-- How to install Maven and understand the `pom.xml` file
-- How to use Spring Initializr to generate a project
-- The exact project structure Spring Boot expects
-- How to write a complete `pom.xml` with all dependencies for the Order Management System
-- How to configure your application with `application.yml`
-- How to run the application and enable hot-reload during development
-- How to use Spring profiles for different environments
-- How to install the JDK using SDKMAN
-
-## Prerequisites
-
-- [Module 00: Java for Experienced Developers](../00-java-foundations/) — you understand basic Java syntax, classes, records, and packages
-
-
+title: "Module 01: Gradle & Multi-Module"
+description: "Gradle & Multi-Module"
 ---
 
 ## 1. What Is a Build Tool?
@@ -47,23 +28,6 @@ The two most popular build tools for Java are **Maven** and **Gradle**. This cou
 
 ---
 
-## 2. Installing the JDK with SDKMAN
-
-Before we can build anything, we need the JDK (Java Development Kit) installed. In Module 00, you installed it directly. Now let's do it the professional way using **SDKMAN** — a tool for managing Java versions.
-
-### Installing SDKMAN
-
-**macOS / Linux:**
-```bash
-curl -s "https://get.sdkman.io" | bash
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-```
-
-**Windows:** Use [Scoop](https://scoop.sh/) or [Chocolatey](https://chocolatey.org/) instead, or install the JDK manually from [Adoptium](https://adoptium.net/).
-
-### Installing Java 21 with SDKMAN
-
-```bash
 ## List available Java versions
 sdk list java
 
@@ -72,6 +36,7 @@ sdk install java 21.0.4-tem
 
 ## Verify installation
 java -version
+
 ## openjdk version "21.0.4" ...
 
 ## Set it as the default
@@ -82,32 +47,6 @@ SDKMAN lets you install multiple JDK versions and switch between them — useful
 
 ---
 
-## 3. What Is Maven?
-
-**Maven** is a build automation tool for Java projects. It uses an XML file called `pom.xml` (Project Object Model) to describe:
-- Your project's name, group, and version
-- What external libraries (dependencies) your project needs
-- What plugins to use (for compiling, testing, packaging)
-- What Java version to target
-
-### Installing Maven
-
-**macOS (Homebrew):**
-```bash
-brew install maven
-```
-
-**Linux (Ubuntu/Debian):**
-```bash
-sudo apt install maven
-```
-
-**Windows:** Download from [https://maven.apache.org/download.cgi](https://maven.apache.org/download.cgi) and add to PATH.
-
-### Verifying Maven
-
-```bash
-mvn -version
 ## Apache Maven 3.9.x
 ```
 
@@ -129,292 +68,6 @@ Think of it like an address:
 - **version** = which renovation of the house (which release)
 
 Together, these three coordinates uniquely identify any library in the Maven ecosystem. When you declare a dependency, you specify these three coordinates, and Maven downloads the library automatically.
-
----
-
-## 5. Spring Initializr
-
-**Spring Initializr** (pronounced "init-ee-al-izer") is a web tool that generates a Spring Boot project skeleton for you. Instead of creating all the files manually, you fill in a form and download a ready-to-use project.
-
-### Using Spring Initializr
-
-1. Go to [https://start.spring.io](https://start.spring.io)
-2. Fill in the form:
-   - **Project:** Maven
-   - **Language:** Java
-   - **Spring Boot:** 3.x.x (latest stable)
-   - **Group:** `com.example`
-   - **Artifact:** `ordermgmt`
-   - **Name:** `ordermgmt`
-   - **Package name:** `com.example.ordermgmt`
-   - **Java:** 21
-3. Add dependencies (click "Add Dependencies"):
-   - **Spring Web** — for building REST APIs
-   - **Spring Data JPA** — for database access
-   - **PostgreSQL Driver** — for connecting to PostgreSQL
-   - **Spring for GraphQL** — for GraphQL API support
-   - **Spring for Apache Kafka** — for Kafka messaging
-   - **Spring Boot DevTools** — for hot reload during development
-   - **Lombok** — NOT needed, skip it (we use Java records instead)
-4. Click **Generate**
-5. Download and unzip the project
-
-### What Spring Initializr Creates
-
-When you unzip the downloaded file, you get:
-
-```
-ordermgmt/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── example/
-│   │   │           └── ordermgmt/
-│   │   │               └── OrdermgmtApplication.java
-│   │   └── resources/
-│   │       ├── application.properties     (we'll change this to .yml)
-│   │       └── static/                      (for static web files)
-│   └── test/
-│       └── java/
-│           └── com/
-│               └── example/
-│                   └── ordermgmt/
-│                       └── OrdermgmtApplicationTests.java
-├── pom.xml
-├── mvnw                       (Maven wrapper script — lets you run Maven without installing it)
-├── mvnw.cmd                   (Maven wrapper for Windows)
-└── .gitignore
-```
-
-### The Main Application Class
-
-```java
-package com.example.ordermgmt;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class OrdermgmtApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(OrdermgmtApplication.class, args);
-    }
-}
-```
-
-Let's rename it to something clearer:
-
-```java
-package com.example.ordermgmt;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class OrderManagementApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(OrderManagementApplication.class, args);
-    }
-}
-```
-
-### What Does `@SpringBootApplication` Do?
-
-This single annotation does three things (you'll learn about each in later modules):
-
-1. **`@Configuration`** — marks this class as a configuration class (Module 02)
-2. **`@EnableAutoConfiguration`** — tells Spring Boot to automatically configure beans based on the dependencies on the classpath (Module 03)
-3. **`@ComponentScan`** — tells Spring to scan the `com.example.ordermgmt` package and sub-packages for Spring components (Module 02)
-
-For now, just know that this annotation is the starting point of every Spring Boot application.
-
----
-
-## 6. The `pom.xml` — Complete File
-
-The `pom.xml` (Project Object Model) is the heart of a Maven project. Here's the complete, correct `pom.xml` for our Order Management System:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <!-- Parent: Spring Boot provides sensible defaults for everything -->
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.4</version>
-        <relativePath/>
-    </parent>
-
-    <!-- Our project coordinates -->
-    <groupId>com.example</groupId>
-    <artifactId>ordermgmt</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>Order Management System</name>
-
-    <!-- Java version -->
-    <properties>
-        <java.version>21</java.version>
-    </properties>
-
-    <dependencies>
-        <!-- Spring Web: for building REST APIs (controllers, endpoints) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <!-- Spring Data JPA: for database access (entities, repositories) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <!-- PostgreSQL Driver: for connecting to PostgreSQL database -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- Spring for GraphQL: for building GraphQL APIs -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-graphql</artifactId>
-        </dependency>
-
-        <!-- Spring for Apache Kafka: for Kafka messaging (producers, consumers) -->
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
-
-        <!-- Spring WebFlux: for reactive programming (Mono, Flux) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-
-        <!-- Spring Boot DevTools: hot reload during development -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- Spring Boot Starter Test: JUnit 5, AssertJ, Mockito, MockMvc -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Spring Kafka Test: for testing Kafka with embedded broker -->
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Reactor Test: for testing reactive streams (StepVerifier) -->
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Testcontainers: for running real PostgreSQL/Kafka in tests -->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <!-- Spring Boot Maven Plugin: for building fat JARs -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-</project>
-```
-
-### pom.xml Anatomy
-
-Let's break down each section:
-
-#### Parent
-
-```xml
-<parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.4</version>
-</parent>
-```
-
-The **parent POM** provides sensible defaults: Java version, plugin versions, encoding, and dependency management. Instead of specifying a version for every dependency, the parent manages them for you. You just declare the dependency and Maven knows which version to use (compatible with your Spring Boot version).
-
-#### Properties
-
-```xml
-<properties>
-    <java.version>21</java.version>
-</properties>
-```
-
-Properties are reusable values. Setting `java.version` tells Maven to compile with Java 21.
-
-#### Dependencies
-
-Each `<dependency>` declares an external library:
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-web</artifactId>
-</dependency>
-```
-
-- **`groupId:artifactId`** — identifies the library (like Maven coordinates)
-- No `<version>` needed — the parent POM manages it
-- **`<scope>`** — when this dependency is needed:
-  - `compile` (default) — needed at all times
-  - `runtime` — only needed at runtime, not compile time (like database drivers)
-  - `test` — only needed during testing
-  - `provided` — provided by the runtime environment
-
-#### What Is a "Fat JAR"?
-
-A **fat JAR** (also called an uber JAR) is a single JAR file that contains:
-- Your compiled application code
-- All dependency libraries (Spring Boot, PostgreSQL driver, etc.)
-- All configuration files
-
-This means you can distribute your entire application as one file and run it with:
-
-```bash
-java -jar ordermgmt-0.0.1-SNAPSHOT.jar
-```
-
-No need to install Maven, download dependencies, or set up a classpath. The `spring-boot-maven-plugin` creates this fat JAR when you run `mvn package`.
 
 ---
 
@@ -463,21 +116,13 @@ ordermgmt/
 
 ---
 
-## 8. application.yml
-
-Spring Boot reads its configuration from a file in `src/main/resources/`. You can use either `.properties` or `.yml` format. We use **YAML** because it's more readable and supports nested properties.
-
-### Rename `application.properties` to `application.yml`
-
-Delete the auto-generated `application.properties` file and create `application.yml`:
-
-```yaml
 ## Server configuration
 server:
   port: 8080
 
 ## Spring configuration
 spring:
+
 ##  # Application name — shown in logs and actuator
   application:
     name: Order Management System
@@ -491,6 +136,7 @@ spring:
 
 ##  # JPA / Hibernate configuration
   jpa:
+
 ##    # Show SQL in the console (helpful during development)
     show-sql: true
 
@@ -500,7 +146,9 @@ spring:
         format_sql: true
 
 ##    # What Hibernate should do with the database schema on startup
+
 ##    # update: create tables that don't exist and modify existing ones
+
 ##    # none: do nothing (use in production with Flyway or Liquibase)
     hibernate:
       ddl-auto: update
@@ -527,11 +175,6 @@ spring:
       properties:
         spring.json.trusted.packages: "com.example.ordermgmt.kafka.event"
 
-##  # DevTools: enables hot reload
-  devtools:
-    restart:
-      enabled: true
-
 ## Logging configuration
 logging:
   level:
@@ -557,11 +200,6 @@ YAML is more readable and supports nesting, so we use it throughout the course.
 
 ---
 
-## 9. Running the Application
-
-### From the Command Line (Maven)
-
-```bash
 ## In the project root directory:
 mvn spring-boot:run
 ```
@@ -571,10 +209,12 @@ This compiles the code, starts the Spring Boot application, and watches for chan
 ### Building a JAR
 
 ```bash
+
 ## Compile, test, and package into a JAR:
 mvn clean package
 
 ## The JAR is created in the target/ directory:
+
 ## target/ordermgmt-0.0.1-SNAPSHOT.jar
 
 ## Run the JAR:
@@ -610,168 +250,6 @@ If you see a 404, add the Actuator dependency to your `pom.xml`:
     <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
 ```
-
----
-
-## 10. Spring Boot DevTools
-
-**Spring Boot DevTools** is a development-time tool that makes coding faster:
-
-### Hot Reload
-
-When you change a Java file and save it, DevTools automatically restarts the application. This is called a **hot restart** — it's much faster than a full restart because Spring Boot only reloades changed classes.
-
-DevTools is already included in our `pom.xml`:
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-devtools</artifactId>
-    <scope>runtime</scope>
-    <optional>true</optional>
-</dependency>
-```
-
-- `<scope>runtime</scope>` — only needed when running, not when packaging the final JAR
-- `<optional>true</optional>` — not passed to other projects that depend on this one
-- DevTools is automatically disabled in production builds
-
-### Automatic Restart in IntelliJ
-
-For DevTools to detect changes, IntelliJ must "build" the project. To enable automatic building:
-
-1. Settings → Build, Execution, Deployment → Compiler
-2. Check "Build project automatically"
-3. Settings → Advanced Settings
-4. Check "Allow auto-make to start even if developed application is currently running"
-
-Now, every time you save a file (`Cmd+S` / `Ctrl+S`), the application restarts within seconds.
-
----
-
-## 11. Spring Profiles
-
-**Profiles** let you have different configuration for different environments (development, testing, production). For example:
-- **Dev:** use a local PostgreSQL, enable SQL logging, enable DevTools
-- **Test:** use a Testcontainers PostgreSQL, disable SQL logging
-- **Prod:** use a remote PostgreSQL, disable SQL logging, disable DevTools
-
-### Creating Profile Files
-
-Create separate files for each profile:
-
-**`application.yml`** (default — loaded for all profiles):
-```yaml
-server:
-  port: 8080
-
-spring:
-  application:
-    name: Order Management System
-```
-
-**`application-dev.yml`** (development profile):
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/ordermgmt_dev
-    username: postgres
-    password: postgres
-
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-
-logging:
-  level:
-    com.example.ordermgmt: DEBUG
-```
-
-**`application-prod.yml`** (production profile):
-```yaml
-spring:
-  datasource:
-    url: ${DATABASE_URL}           # Read from environment variable
-    username: ${DATABASE_USERNAME}  # Read from environment variable
-    password: ${DATABASE_PASSWORD} # Read from environment variable
-
-  jpa:
-    show-sql: false
-    hibernate:
-      ddl-auto: validate            # Don't modify schema in production
-
-  devtools:
-    restart:
-      enabled: false                # Disable hot restart in production
-
-logging:
-  level:
-    com.example.ordermgmt: INFO
-```
-
-### Activating a Profile
-
-**Command line:**
-```bash
-java -jar ordermgmt.jar --spring.profiles.active=prod
-```
-
-**Environment variable:**
-```bash
-export SPRING_PROFILES_ACTIVE=prod
-java -jar ordermgmt.jar
-```
-
-**In `application.yml` (default for development):**
-```yaml
-spring:
-  profiles:
-    active: dev    # Use the dev profile by default
-```
-
-**In tests:**
-```java
-@SpringBootTest
-@ActiveProfiles("test")
-class OrderManagementApplicationTests {
-    // Tests run with the test profile
-}
-```
-
-### How Profiles Work
-
-1. Spring Boot loads `application.yml` first (always)
-2. Then it loads `application-{profile}.yml`, which overrides any matching properties
-3. The result is a merged configuration
-
-For example, if `application.yml` has `server.port=8080` and `application-prod.yml` has `server.port=9090`, the production environment uses port 9090.
-
-### Environment Variables in YAML
-
-In production, you should never put passwords in files. Use environment variables:
-
-```yaml
-spring:
-  datasource:
-    password: ${DATABASE_PASSWORD}
-```
-
-The `${DATABASE_PASSWORD}` syntax reads the value from the environment variable `DATABASE_PASSWORD`. If it's not set, Spring Boot will fail to start (which is better than falling back to a default password).
-
----
-
-## 12. Maven Commands Cheatsheet
-
-| Command | What It Does |
-|---------|-------------|
-| `mvn clean` | Deletes the `target/` directory (removes old build files) |
-| `mvn compile` | Compiles all Java source files |
-| `mvn test` | Runs all tests |
-| `mvn package` | Compiles, tests, and packages into a JAR |
-| `mvn clean package` | Clean + package (most common before deploying) |
-| `mvn spring-boot:run` | Runs the Spring Boot application |
-| `mvn install` | Package + install into local Maven repository |
-| `mvn verify` | Runs all checks including integration tests |
 
 ---
 
@@ -949,107 +427,12 @@ constructor parameter names without `@Param` annotations.
 
 ---
 
-## 15. Spring Boot Profiles in Practice
-
-Profiles let you have different configuration for different environments
-(development, staging, production).
-
-### Profile-Specific Configuration Files
-
-```
-src/main/resources/
-├── application.yml            # shared config (all profiles)
-├── application-dev.yml        # dev profile overrides
-├── application-staging.yml    # staging profile overrides
-└── application-prod.yml       # production profile overrides
-```
-
-**`application.yml` (shared):**
-```yaml
-spring:
-  application:
-    name: Order Management System
-  jpa:
-    open-in-view: false
-```
-
-**`application-dev.yml`:**
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/ordermgmt_dev
-    username: postgres
-    password: postgres
-  jpa:
-    hibernate:
-      ddl-auto: create-drop  # recreate schema on startup (dev only)
-    show-sql: true
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    com.example.ordermgmt: TRACE
-```
-
-**`application-prod.yml`:**
-```yaml
-spring:
-  datasource:
-    url: ${DATABASE_URL}      # from environment variable
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: validate      # never auto-modify schema in prod
-    show-sql: false
-logging:
-  level:
-    com.example.ordermgmt: INFO
-    org.hibernate.SQL: WARN
-```
-
-### Activating Profiles
-
-```bash
 ## Command line
 java -jar app.jar --spring.profiles.active=dev
 
 ## Environment variable
 export SPRING_PROFILES_ACTIVE=prod
 java -jar app.jar
-
-## In application.yml
-spring:
-  profiles:
-    active: dev
-```
-
-### @Profile on Beans
-
-```java
-@Configuration
-public class DataSourceConfig {
-
-    @Bean
-    @Profile("dev")
-    public DataSource devDataSource() {
-        return new EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .build();
-    }
-
-    @Bean
-    @Profile("prod")
-    public DataSource prodDataSource() {
-        var ds = new HikariDataSource();
-        ds.setJdbcUrl(System.getenv("DATABASE_URL"));
-        ds.setUsername(System.getenv("DB_USERNAME"));
-        ds.setPassword(System.getenv("DB_PASSWORD"));
-        return ds;
-    }
-}
-```
-
----
 
 ## 16. Gradle — An Alternative to Maven
 
@@ -1217,6 +600,7 @@ ordermgmt-parent/
 ### Building Multi-Module Projects
 
 ```bash
+
 ## Build all modules from the parent
 mvn clean package
 
@@ -1235,6 +619,7 @@ The Maven Wrapper lets you run Maven without installing it globally — the
 correct version is downloaded automatically.
 
 ```bash
+
 ## Generate the wrapper in your project
 mvn wrapper:wrapper
 
