@@ -19,7 +19,7 @@
 
 ## Prerequisites
 
-- [Module 00: Java Foundations](./00-java-foundations.md) — you understand Java classes, records, interfaces, constructors
+- [Module 00: Java for Experienced Developers](./00-java-foundations.md) — you understand Java classes, records, interfaces, constructors
 - [Module 01: Build Tools & Project Setup](./01-build-tools-and-project-setup.md) — you have a working Spring Boot project with `application.yml`
 - No prior experience with Spring or dependency injection required
 

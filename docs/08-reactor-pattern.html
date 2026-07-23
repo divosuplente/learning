@@ -150,9 +150,8 @@
 - 17. [When NOT to Use Reactive Programming](#when-not-to-use-reactive-programming)
 - 18. [Combining Multiple Reactive Streams](#combining-multiple-reactive-streams)
 - 19. [Reactive Testing with StepVerifier](#reactive-testing-with-stepverifier)
-- 20. [When NOT to Use Reactive — Expanded](#when-not-to-use-reactive-expanded)
-- 21. [Reactive Design Patterns](#reactive-design-patterns)
-- 22. [Common Reactor Pitfalls](#common-reactor-pitfalls)
+- 20. [Reactive Design Patterns](#reactive-design-patterns)
+- 21. [Common Reactor Pitfalls](#common-reactor-pitfalls)
 
 </details>
 
@@ -1371,48 +1370,7 @@ void map_transforms_each_item() {
             .verifyComplete();
 }</code></pre>
 <hr />
-<h2 id="20-when-not-to-use-reactive-expanded">20. When NOT to Use Reactive — Expanded<a class="anchor-link" href="#20-when-not-to-use-reactive-expanded" title="Permanent link">¶</a></h2>
-<h3 id="latency-comparison">Latency Comparison<a class="anchor-link" href="#latency-comparison" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Operation</th>
-<th>Blocking (Spring MVC)</th>
-<th>Reactive (WebFlux)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1 HTTP call</td>
-<td>200ms (thread blocked)</td>
-<td>200ms (thread free during wait)</td>
-</tr>
-<tr>
-<td>10 concurrent calls</td>
-<td>2000ms (10 threads blocked)</td>
-<td>200ms (1 thread, non-blocking)</td>
-</tr>
-<tr>
-<td>1000 concurrent calls</td>
-<td>Fails (thread pool exhausted)</td>
-<td>200ms (1-2 threads, non-blocking)</td>
-</tr>
-<tr>
-<td>CPU-bound computation (no I/O)</td>
-<td>50ms</td>
-<td>55ms (overhead from scheduling)</td>
-</tr>
-</tbody>
-</table>
-<h3 id="the-rocket-factory-principle">The "Rocket Factory" Principle<a class="anchor-link" href="#the-rocket-factory-principle" title="Permanent link">¶</a></h3>
-<blockquote>
-<p>If your application is a <strong>rocket factory</strong> (thousands of concurrent connections,
-I/O-bound, latency-sensitive) → use reactive.</p>
-<p>If your application is a <strong>bicycle shop</strong> (low concurrency, CPU-bound,
-simplicity over throughput) → use imperative (Spring MVC + virtual threads).</p>
-</blockquote>
-<hr />
-<h2 id="21-reactive-design-patterns">21. Reactive Design Patterns<a class="anchor-link" href="#21-reactive-design-patterns" title="Permanent link">¶</a></h2>
+<h2 id="20-reactive-design-patterns">20. Reactive Design Patterns<a class="anchor-link" href="#20-reactive-design-patterns" title="Permanent link">¶</a></h2>
 <h3 id="the-flatmap-chain-pattern">The "FlatMap Chain" Pattern<a class="anchor-link" href="#the-flatmap-chain-pattern" title="Permanent link">¶</a></h3>
 <p>When working with Mono/Flux, you often chain operations that each return a
 new reactive type. Use <code>flatMap</code> to chain them:</p>
@@ -1507,7 +1465,7 @@ public class StatusController {
     }
 }</code></pre>
 <hr />
-<h2 id="22-common-reactor-pitfalls">22. Common Reactor Pitfalls<a class="anchor-link" href="#22-common-reactor-pitfalls" title="Permanent link">¶</a></h2>
+<h2 id="21-common-reactor-pitfalls">21. Common Reactor Pitfalls<a class="anchor-link" href="#21-common-reactor-pitfalls" title="Permanent link">¶</a></h2>
 <h3 id="pitfall-1-forgetting-to-subscribe">Pitfall 1: Forgetting to Subscribe<a class="anchor-link" href="#pitfall-1-forgetting-to-subscribe" title="Permanent link">¶</a></h3>
 <pre class="code-block"><code class="language-java">// BAD: Nothing happens — no subscription
 mono.doOnNext(x -&gt; log.info("Got: {}", x));

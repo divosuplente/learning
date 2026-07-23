@@ -14,7 +14,7 @@
 
 ## Prerequisites
 
-- [Module 00: Java Foundations](./00-java-foundations.md) — you understand basic Java syntax, classes, records, and packages
+- [Module 00: Java for Experienced Developers](./00-java-foundations.md) — you understand basic Java syntax, classes, records, and packages
 - No prior experience with build tools, Maven, or Spring Boot required
 
 ---

@@ -1068,8 +1068,7 @@ class CoroutineOrderServiceTest {
 
 ---
 
-## 10. exercises
-
+## What You Learned
 ## What You Learned
 
 - **Kotlin** is a JVM language fully interoperable with Java — you can mix both in one project

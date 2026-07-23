@@ -2,8 +2,8 @@
 
 ## What You'll Learn
 
-- What a database is and how relational databases work
-- A crash course in SQL (just enough to understand what JPA does)
+- How the Repository Pattern separates data access from business logic
+- SQL fundamentals as they relate to JPA query generation
 - What the Repository Pattern is and why it separates data access from business logic
 - Object-Relational Mapping (ORM) and the impedance mismatch between objects and tables
 - JPA and Hibernate: what they are and how they relate
@@ -18,7 +18,7 @@
 
 ## Prerequisites
 
-- [Module 00: Java Foundations](./00-java-foundations.md) — you understand Java classes, records, collections
+- [Module 00: Java for Experienced Developers](./00-java-foundations.md) — you understand Java classes, records, collections
 - [Module 01: Build Tools & Project Setup](./01-build-tools-and-project-setup.md) — you have a Spring Boot project
 - [Module 02: Dependency Injection](./02-dependency-injection.md) — you understand beans and constructor injection
 - [Module 03: Spring Boot Fundamentals](./03-spring-boot-fundamentals.md) — you understand `application.yml` and REST controllers
@@ -103,7 +103,7 @@
 
 </details>
 
-## 1. What Is a Database?
+## 1. Databases & Relational Concepts (Quick Refresher)
 
 A **database** is organized storage for your application's data. When your application shuts down, the data in memory (variables, objects) disappears. A database persists data — it saves it to disk so it survives restarts.
 

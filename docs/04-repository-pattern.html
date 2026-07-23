@@ -105,8 +105,8 @@
         <h1 id="module-04-repository-pattern">Module 04: Repository Pattern<a class="anchor-link" href="#module-04-repository-pattern" title="Permanent link">¶</a></h1>
 <h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
 <ul>
-<li>What a database is and how relational databases work</li>
-<li>A crash course in SQL (just enough to understand what JPA does)</li>
+<li>How the Repository Pattern separates data access from business logic</li>
+<li>SQL fundamentals as they relate to JPA query generation</li>
 <li>What the Repository Pattern is and why it separates data access from business logic</li>
 <li>Object-Relational Mapping (ORM) and the impedance mismatch between objects and tables</li>
 <li>JPA and Hibernate: what they are and how they relate</li>
@@ -121,7 +121,7 @@
 </ul>
 <h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
 <ul>
-<li><a href="00-java-foundations.html">Module 00: Java Foundations</a> — you understand Java classes, records, collections</li>
+<li><a href="00-java-foundations.html">Module 00: Java for Experienced Developers</a> — you understand Java classes, records, collections</li>
 <li><a href="01-build-tools-and-project-setup.html">Module 01: Build Tools &amp; Project Setup</a> — you have a Spring Boot project</li>
 <li><a href="02-dependency-injection.html">Module 02: Dependency Injection</a> — you understand beans and constructor injection</li>
 <li><a href="03-spring-boot-fundamentals.html">Module 03: Spring Boot Fundamentals</a> — you understand <code>application.yml</code> and REST controllers</li>
@@ -205,7 +205,7 @@
 
 </details>
 
-<h2 id="1-what-is-a-database">1. What Is a Database?<a class="anchor-link" href="#1-what-is-a-database" title="Permanent link">¶</a></h2>
+<h2 id="1-databases-relational-concepts-quick-refresher">1. Databases &amp; Relational Concepts (Quick Refresher)<a class="anchor-link" href="#1-databases-relational-concepts-quick-refresher" title="Permanent link">¶</a></h2>
 <p>A <strong>database</strong> is organized storage for your application's data. When your application shuts down, the data in memory (variables, objects) disappears. A database persists data — it saves it to disk so it survives restarts.</p>
 <h3 id="relational-databases">Relational Databases<a class="anchor-link" href="#relational-databases" title="Permanent link">¶</a></h3>
 <p>The most common type of database is a <strong>relational database</strong> (RDBMS). It stores data in <strong>tables</strong> — think of a table as a spreadsheet:</p>

@@ -48,9 +48,8 @@
 - 17. [When NOT to Use Reactive Programming](#when-not-to-use-reactive-programming)
 - 18. [Combining Multiple Reactive Streams](#combining-multiple-reactive-streams)
 - 19. [Reactive Testing with StepVerifier](#reactive-testing-with-stepverifier)
-- 20. [When NOT to Use Reactive — Expanded](#when-not-to-use-reactive-expanded)
-- 21. [Reactive Design Patterns](#reactive-design-patterns)
-- 22. [Common Reactor Pitfalls](#common-reactor-pitfalls)
+- 20. [Reactive Design Patterns](#reactive-design-patterns)
+- 21. [Common Reactor Pitfalls](#common-reactor-pitfalls)
 
 </details>
 
@@ -1066,28 +1065,8 @@ void map_transforms_each_item() {
 
 ---
 
-## 20. When NOT to Use Reactive — Expanded
 
-### Latency Comparison
-
-| Operation | Blocking (Spring MVC) | Reactive (WebFlux) |
-|-----------|----------------------|-------------------|
-| 1 HTTP call | 200ms (thread blocked) | 200ms (thread free during wait) |
-| 10 concurrent calls | 2000ms (10 threads blocked) | 200ms (1 thread, non-blocking) |
-| 1000 concurrent calls | Fails (thread pool exhausted) | 200ms (1-2 threads, non-blocking) |
-| CPU-bound computation (no I/O) | 50ms | 55ms (overhead from scheduling) |
-
-### The "Rocket Factory" Principle
-
-> If your application is a **rocket factory** (thousands of concurrent connections,
-> I/O-bound, latency-sensitive) → use reactive.
->
-> If your application is a **bicycle shop** (low concurrency, CPU-bound,
-> simplicity over throughput) → use imperative (Spring MVC + virtual threads).
-
----
-
-## 21. Reactive Design Patterns
+## 20. Reactive Design Patterns
 
 ### The "FlatMap Chain" Pattern
 
@@ -1200,7 +1179,7 @@ public class StatusController {
 
 ---
 
-## 22. Common Reactor Pitfalls
+## 21. Common Reactor Pitfalls
 
 ### Pitfall 1: Forgetting to Subscribe
 

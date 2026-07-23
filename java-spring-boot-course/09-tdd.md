@@ -19,7 +19,7 @@
 
 ## Prerequisites
 
-- [Module 00: Java Foundations](./00-java-foundations.md) — you understand Java classes, records, exceptions, generics
+- [Module 00: Java for Experienced Developers](./00-java-foundations.md) — you understand Java classes, records, exceptions, generics
 - [Module 01: Build Tools & Project Setup](./01-build-tools-and-project-setup.md) — you have a Maven project
 - [Module 02: Dependency Injection](./02-dependency-injection.md) — you understand beans and constructor injection
 - [Module 03: Spring Boot Fundamentals](./03-spring-boot-fundamentals.md) — you understand REST controllers and DTOs
