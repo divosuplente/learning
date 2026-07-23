@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Build Tools & Project Setup — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Build Tools & Project Setup — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item active">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -121,6 +121,77 @@
 <li>No prior experience with build tools, Maven, or Spring Boot required</li>
 </ul>
 <hr />
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is a Build Tool?](#1-what-is-a-build-tool)
+  - [Analogy](#analogy)
+- [2. Installing the JDK with SDKMAN](#2-installing-the-jdk-with-sdkman)
+  - [Installing SDKMAN](#installing-sdkman)
+  - [Installing Java 21 with SDKMAN](#installing-java-21-with-sdkman)
+- [3. What Is Maven?](#3-what-is-maven)
+  - [Installing Maven](#installing-maven)
+  - [Verifying Maven](#verifying-maven)
+- [4. Maven Coordinates](#4-maven-coordinates)
+- [5. Spring Initializr](#5-spring-initializr)
+  - [Using Spring Initializr](#using-spring-initializr)
+  - [What Spring Initializr Creates](#what-spring-initializr-creates)
+  - [The Main Application Class](#the-main-application-class)
+  - [What Does @SpringBootApplication Do?](#what-does-springbootapplication-do)
+- [6. The pom.xml — Complete File](#6-the-pomxml-complete-file)
+  - [pom.xml Anatomy](#pomxml-anatomy)
+    - [Parent](#parent)
+    - [Properties](#properties)
+    - [Dependencies](#dependencies)
+    - [What Is a "Fat JAR"?](#what-is-a-fat-jar)
+- [7. Project Structure](#7-project-structure)
+  - [Key Rules](#key-rules)
+- [8. application.yml](#8-applicationyml)
+  - [Rename application.properties to application.yml](#rename-applicationproperties-to-applicationyml)
+  - [YAML vs Properties](#yaml-vs-properties)
+- [9. Running the Application](#9-running-the-application)
+  - [From the Command Line (Maven)](#from-the-command-line-maven)
+  - [Building a JAR](#building-a-jar)
+  - [From IntelliJ IDEA](#from-intellij-idea)
+  - [Verifying It Works](#verifying-it-works)
+- [10. Spring Boot DevTools](#10-spring-boot-devtools)
+  - [Hot Reload](#hot-reload)
+  - [Automatic Restart in IntelliJ](#automatic-restart-in-intellij)
+- [11. Spring Profiles](#11-spring-profiles)
+  - [Creating Profile Files](#creating-profile-files)
+  - [Activating a Profile](#activating-a-profile)
+  - [How Profiles Work](#how-profiles-work)
+  - [Environment Variables in YAML](#environment-variables-in-yaml)
+- [12. Maven Commands Cheatsheet](#12-maven-commands-cheatsheet)
+- [What You Learned](#what-you-learned)
+- [13. Maven Dependency Scope Deep Dive](#13-maven-dependency-scope-deep-dive)
+  - [The Five Scopes](#the-five-scopes)
+  - [Transitive Dependencies](#transitive-dependencies)
+  - [Excluding Transitive Dependencies](#excluding-transitive-dependencies)
+- [14. Maven Plugin Configuration](#14-maven-plugin-configuration)
+  - [Compiler Plugin](#compiler-plugin)
+  - [Surefire Plugin (Test Execution)](#surefire-plugin-test-execution)
+  - [Spring Boot Maven Plugin](#spring-boot-maven-plugin)
+- [15. Spring Boot Profiles in Practice](#15-spring-boot-profiles-in-practice)
+  - [Profile-Specific Configuration Files](#profile-specific-configuration-files)
+  - [Activating Profiles](#activating-profiles)
+  - [@Profile on Beans](#profile-on-beans)
+- [16. Gradle — An Alternative to Maven](#16-gradle-an-alternative-to-maven)
+  - [Gradle vs Maven](#gradle-vs-maven)
+  - [build.gradle.kts (Kotlin DSL)](#buildgradlekts-kotlin-dsl)
+  - [When to Choose Gradle](#when-to-choose-gradle)
+- [17. Multi-Module Maven Projects](#17-multi-module-maven-projects)
+  - [Project Structure](#project-structure)
+  - [Parent POM](#parent-pom)
+  - [Child Module POM](#child-module-pom)
+  - [Building Multi-Module Projects](#building-multi-module-projects)
+- [18. Maven Wrapper (mvnw)](#18-maven-wrapper-mvnw)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 <h2 id="1-what-is-a-build-tool">1. What Is a Build Tool?<a class="anchor-link" href="#1-what-is-a-build-tool" title="Permanent link">¶</a></h2>
 <p>When you write Java code, you create <code>.java</code> files. But to run them, several things need to happen:</p>
 <ol>
@@ -751,70 +822,6 @@ class OrderManagementApplicationTests {
 </tbody>
 </table>
 <hr />
-<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-generate-a-project-with-spring-initializr">Exercise 1: Generate a Project with Spring Initializr<a class="anchor-link" href="#exercise-1-generate-a-project-with-spring-initializr" title="Permanent link">¶</a></h3>
-<p>Go to <a href="https://start.spring.io">https://start.spring.io</a> and generate a project with:
-- Group: <code>com.example</code>
-- Artifact: <code>ordermgmt</code>
-- Java: 21
-- Dependencies: Spring Web, Spring Data JPA, PostgreSQL Driver, Spring for GraphQL, Spring for Apache Kafka</p>
-<p>Download it, unzip it, and open it in IntelliJ IDEA.</p>
-<details>
-<summary>Hint</summary>
-
-Make sure you don't select Lombok — we use Java records for data classes instead of Lombok annotations.
-</details>
-
-<h3 id="exercise-2-replace-applicationproperties-with-applicationyml">Exercise 2: Replace <code>application.properties</code> with <code>application.yml</code><a class="anchor-link" href="#exercise-2-replace-applicationproperties-with-applicationyml" title="Permanent link">¶</a></h3>
-<p>Delete the <code>application.properties</code> file and create <code>application.yml</code> with basic server and application name configuration. Run the application and verify it starts on port 8080.</p>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-yaml">server:
-  port: 8080
-spring:
-  application:
-    name: Order Management System</code></pre>
-Run with `mvn spring-boot:run` and check the console for "Started OrderManagementApplication".
-</details>
-
-<h3 id="exercise-3-create-profile-files">Exercise 3: Create Profile Files<a class="anchor-link" href="#exercise-3-create-profile-files" title="Permanent link">¶</a></h3>
-<p>Create three profile files:
-- <code>application.yml</code> — shared configuration
-- <code>application-dev.yml</code> — development settings (show SQL, ddl-auto: update)
-- <code>application-prod.yml</code> — production settings (use environment variables for database credentials)</p>
-<p>Run the application with the dev profile and verify the SQL logging works.</p>
-<details>
-<summary>Hint</summary>
-
-Use `spring.profiles.active=dev` in the main `application.yml` or run with `--spring.profiles.active=dev` on the command line. For production, use `${DATABASE_URL}` syntax for environment variables.
-</details>
-
-<h3 id="exercise-4-build-a-jar">Exercise 4: Build a JAR<a class="anchor-link" href="#exercise-4-build-a-jar" title="Permanent link">¶</a></h3>
-<p>Run <code>mvn clean package</code> and verify the JAR is created in <code>target/</code>. Run the JAR with <code>java -jar target/ordermgmt-0.0.1-SNAPSHOT.jar</code>.</p>
-<details>
-<summary>Hint</summary>
-
-If tests fail (because there's no database), you can skip tests with `mvn clean package -DskipTests`. But in real projects, tests should pass before packaging.
-</details>
-
-<h3 id="exercise-5-create-the-package-structure">Exercise 5: Create the Package Structure<a class="anchor-link" href="#exercise-5-create-the-package-structure" title="Permanent link">¶</a></h3>
-<p>Create the following empty packages (directories) in your project:
-- <code>com.example.ordermgmt.config</code>
-- <code>com.example.ordermgmt.controller</code>
-- <code>com.example.ordermgmt.domain</code>
-- <code>com.example.ordermgmt.dto</code>
-- <code>com.example.ordermgmt.repository</code>
-- <code>com.example.ordermgmt.service</code>
-- <code>com.example.ordermgmt.kafka</code>
-- <code>com.example.ordermgmt.graphql</code></p>
-<details>
-<summary>Hint</summary>
-
-In IntelliJ: right-click on `com.example.ordermgmt` → New → Package. Create each one. These will be used in modules 02-10.
-</details>
-
-<hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
 <li>A <strong>build tool</strong> automates compilation, dependency management, packaging, and testing</li>
@@ -1282,10 +1289,10 @@ eliminating "works on my machine" build issues. The <code>mvnw</code> script and
 </li>
 </ul>
 <hr />
-<p>← <a href="00-java-foundations.html">Previous: Module 00</a> | <a href="02-dependency-injection.html">Next: Module 02</a> →</p>
+<p>← <a href="00-java-foundations.html">Previous: Module 00 — Java for Experienced Developers</a> | <a href="02-dependency-injection.html">Next: Module 02 — Dependency Injection</a> →</p>
       </article>
 
-      <div class="footer-nav"><a href="00-java-foundations.html" class="nav-link prev">← Java Foundations</a><a href="02-dependency-injection.html" class="nav-link next">Dependency Injection →</a></div>
+      <div class="footer-nav"><a href="00-java-foundations.html" class="nav-link prev">← Java for Experienced Developers</a><a href="02-dependency-injection.html" class="nav-link next">Dependency Injection →</a></div>
     </main>
   </div>
 

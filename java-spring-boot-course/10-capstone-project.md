@@ -20,6 +20,56 @@
 
 ---
 
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. Project Overview](#1-project-overview)
+  - [Architecture Diagram](#architecture-diagram)
+- [2. Complete Project Structure](#2-complete-project-structure)
+- [3. pom.xml](#3-pomxml)
+- [4. application.yml](#4-applicationyml)
+- [5. docker-compose.yml](#5-docker-composeyml)
+- [6. Domain Layer — JPA Entities](#6-domain-layer-jpa-entities)
+- [7. DTOs — Java Records](#7-dtos-java-records)
+- [8. Repository Layer](#8-repository-layer)
+- [9. Kafka Event Records](#9-kafka-event-records)
+- [10. Kafka Producer](#10-kafka-producer)
+- [11. Kafka Consumer](#11-kafka-consumer)
+- [12. Service Layer](#12-service-layer)
+- [13. REST Controller](#13-rest-controller)
+- [14. Global Exception Handler](#14-global-exception-handler)
+- [15. GraphQL Schema](#15-graphql-schema)
+- [16. GraphQL Resolvers](#16-graphql-resolvers)
+- [17. Reactive Order Status Stream](#17-reactive-order-status-stream)
+- [18. Test Suite Overview](#18-test-suite-overview)
+- [19. Unit Test: OrderService](#19-unit-test-orderservice)
+- [20. Controller Test (MockMvc)](#20-controller-test-mockmvc)
+- [21. Repository Test (Testcontainers)](#21-repository-test-testcontainers)
+- [22. Reactive Stream Test (StepVerifier)](#22-reactive-stream-test-stepverifier)
+- [23. What You Learned](#23-what-you-learned)
+- [24. Extension Ideas (for future modules)](#24-extension-ideas-for-future-modules)
+- [25. Step-by-Step Guide to Run the Application](#25-step-by-step-guide-to-run-the-application)
+- [26. Example Curl Commands (REST)](#26-example-curl-commands-rest)
+- [27. Example GraphQL Queries](#27-example-graphql-queries)
+- [24. API Versioning Strategy](#24-api-versioning-strategy)
+  - [URL-Based Versioning](#url-based-versioning)
+  - [Header-Based Versioning](#header-based-versioning)
+  - [Content Negotiation Versioning](#content-negotiation-versioning)
+  - [Comparison](#comparison)
+- [25. Docker Production Best Practices](#25-docker-production-best-practices)
+  - [Multi-Stage Build](#multi-stage-build)
+  - [Key Production Practices](#key-production-practices)
+- [26. Observability and Monitoring](#26-observability-and-monitoring)
+  - [Structured JSON Logging](#structured-json-logging)
+  - [Micrometer Metrics](#micrometer-metrics)
+  - [Custom Health Indicator](#custom-health-indicator)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+- [What You Learned](#what-you-learned)
+
+</details>
+
 ## 1. Project Overview
 
 The **Order Management System (OMS)** is a backend service for an e-commerce
@@ -1609,56 +1659,6 @@ class OrderStatusPublisherTest {
   and **Kafka event publishing with async callbacks**
 - How to expose a **reactive Flux** for real-time status updates using `Sinks.Many`
 
-### Exercises
-
-<details>
-<summary>Exercise 1: Add a Product REST Controller</summary>
-
-Create a `ProductController` with `GET /api/products`,
-`GET /api/products/{category}`, and `POST /api/products`.
-Add a `ProductService` with stock management (increase/decrease).
-
-**Hint**: Follow the same pattern as `OrderController` — constructor injection,
-`ResponseEntity` return types, `@Valid` on request body. Add a
-`CreateProductRequest` record with validation annotations.
-</details>
-
-<details>
-<summary>Exercise 2: Add a Kafka DLQ (Dead Letter Queue)</summary>
-
-Modify `OrderEventConsumer` to catch deserialization errors and publish
-the failed record to a `order-created-dlq` topic. Add a logging listener
-for the DLQ topic.
-
-**Hint**: Use `DefaultErrorHandler` with a `DeadLetterPublishingRecoverer`.
-Register it in a `ConcurrentKafkaListenerContainerFactory` bean. See Module 06
-for the full pattern.
-</details>
-
-<details>
-<summary>Exercise 3: Add GraphQL Subscriptions</summary>
-
-Add a `subscription OrderStatusChanged { orderStatusChanged: OrderStatusChangedEvent! }`
-to the GraphQL schema and an `@SubscriptionMapping` resolver method that
-returns `Flux<OrderStatusChangedEvent>` from `OrderStatusPublisher.subscribe()`.
-
-**Hint**: Spring for GraphQL supports subscriptions over WebSocket out of the box.
-Use `org.springframework.graphql.data.method.annotation.SubscriptionMapping`.
-</details>
-
-<details>
-<summary>Exercise 4: Add Integration Test for Kafka</summary>
-
-Write a test using `@Testcontainers` with the Kafka container that publishes
-an `OrderCreatedEvent` and verifies the consumer receives it.
-
-**Hint**: Use `@EmbeddedKafka` or `@Container static KafkaContainer` with
-`@ServiceConnection`. Autowire `KafkaTemplate`, send a record, and use
-`Awaitility` or `ConcurrentMessageListenerContainer` to verify receipt.
-</details>
-
----
-
 ## 24. Extension Ideas (for future modules)
 
 - **Security** — Add Spring Security with JWT authentication, role-based access,
@@ -2026,4 +2026,10 @@ Access at: `GET /actuator/health` → includes `kafka` health indicator.
 ---
 
 
-← [Previous: Module 09](./09-tdd.md) | [Next: Module 11](./11-migrating-java-to-kotlin.md) →
+## What You Learned
+
+- See the module content above for key takeaways.
+
+---
+
+← [Previous: Module 09 — Test-Driven Development](./09-tdd.md) | [Next: Module 11 — Migrating Java to Kotlin](./11-migrating-java-to-kotlin.md) →

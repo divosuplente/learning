@@ -23,6 +23,85 @@
 
 ---
 
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is Spring Boot?](#1-what-is-spring-boot)
+  - [The Problem Spring Boot Solves](#the-problem-spring-boot-solves)
+  - [Key Features](#key-features)
+- [2. Auto-Configuration](#2-auto-configuration)
+  - [How It Works](#how-it-works)
+  - [@SpringBootApplication](#springbootapplication)
+- [3. Creating REST Endpoints](#3-creating-rest-endpoints)
+  - [@RestController](#restcontroller)
+  - [HTTP Method Mappings](#http-method-mappings)
+  - [A Complete CRUD Controller](#a-complete-crud-controller)
+- [4. Request Parameters](#4-request-parameters)
+  - [@PathVariable](#pathvariable)
+  - [@RequestParam](#requestparam)
+  - [@RequestBody](#requestbody)
+  - [@RequestHeader](#requestheader)
+- [5. HTTP Responses with ResponseEntity](#5-http-responses-with-responseentity)
+  - [Common HTTP Status Codes](#common-http-status-codes)
+- [6. Input Validation with Jakarta Bean Validation](#6-input-validation-with-jakarta-bean-validation)
+  - [Important: jakarta.validation not javax.validation](#important-jakartavalidation-not-javaxvalidation)
+  - [Validation Annotations](#validation-annotations)
+  - [DTOs with Validation](#dtos-with-validation)
+  - [How Validation Works](#how-validation-works)
+- [7. Exception Handling with @RestControllerAdvice](#7-exception-handling-with-restcontrolleradvice)
+  - [Custom Error Response](#custom-error-response)
+  - [Global Exception Handler](#global-exception-handler)
+  - [What @RestControllerAdvice Does](#what-restcontrolleradvice-does)
+  - [Adding Domain Exception Handling](#adding-domain-exception-handling)
+- [8. DTOs (Data Transfer Objects)](#8-dtos-data-transfer-objects)
+  - [Why Use DTOs Instead of Entities?](#why-use-dtos-instead-of-entities)
+  - [Request DTO](#request-dto)
+  - [Response DTO](#response-dto)
+- [9. Pagination and Sorting](#9-pagination-and-sorting)
+  - [Using Pageable](#using-pageable)
+  - [Request Example](#request-example)
+- [10. Logging with SLF4J](#10-logging-with-slf4j)
+  - [Setting Up Logging](#setting-up-logging)
+  - [Log Levels](#log-levels)
+  - [What Not to Log](#what-not-to-log)
+  - [SLF4J Syntax](#slf4j-syntax)
+- [11. Spring Boot Actuator](#11-spring-boot-actuator)
+  - [Adding Actuator](#adding-actuator)
+  - [Available Endpoints](#available-endpoints)
+  - [Exposing Endpoints](#exposing-endpoints)
+  - [Custom Health Check](#custom-health-check)
+- [What You Learned](#what-you-learned)
+- [11. Content Negotiation and Media Types](#11-content-negotiation-and-media-types)
+  - [Producing JSON and XML](#producing-json-and-xml)
+  - [Adding XML Support](#adding-xml-support)
+- [12. Cross-Origin Resource Sharing (CORS)](#12-cross-origin-resource-sharing-cors)
+  - [Per-Controller CORS](#per-controller-cors)
+  - [Global CORS Configuration](#global-cors-configuration)
+  - [How CORS Works](#how-cors-works)
+- [13. Spring Boot Configuration Properties](#13-spring-boot-configuration-properties)
+  - [@ConfigurationProperties — Type-Safe Configuration](#configurationproperties-type-safe-configuration)
+  - [Using in Services](#using-in-services)
+  - [@Value vs @ConfigurationProperties](#value-vs-configurationproperties)
+- [14. Understanding Spring Boot Auto-Configuration](#14-understanding-spring-boot-auto-configuration)
+  - [How It Works](#how-it-works)
+  - [Discovering Auto-Configuration](#discovering-auto-configuration)
+  - [Excluding Auto-Configuration](#excluding-auto-configuration)
+- [15. Spring Boot Actuator Deep Dive](#15-spring-boot-actuator-deep-dive)
+  - [Enabling Actuator](#enabling-actuator)
+  - [Key Endpoints](#key-endpoints)
+  - [Exposing Endpoints](#exposing-endpoints)
+  - [Changing Log Level at Runtime (No Restart!)](#changing-log-level-at-runtime-no-restart)
+  - [Build Info Endpoint](#build-info-endpoint)
+- [16. Spring Boot DevTools](#16-spring-boot-devtools)
+  - [Automatic Restart](#automatic-restart)
+  - [Live Reload](#live-reload)
+  - [Disabling DevTools in Production](#disabling-devtools-in-production)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 ## 1. What Is Spring Boot?
 
 **Spring Boot** is a framework that makes building Java applications faster and easier. It is built on top of the **Spring Framework**, which has been the most popular Java framework since 2003.
@@ -679,62 +758,6 @@ Now `GET /actuator/health` includes `"database": {"status": "UP", "details": {"d
 
 ---
 
-## Exercises
-
-### Exercise 1: Create a ProductController
-
-Create a `ProductController` with endpoints:
-- `GET /api/products` — list all products
-- `GET /api/products/{id}` — get a product by ID
-- `POST /api/products` — create a product
-- `DELETE /api/products/{id}` — delete a product
-
-Create the DTOs `CreateProductRequest` and `ProductResponse`.
-
-<details>
-<summary>Hint</summary>
-
-Follow the `OrderController` pattern. Create records `CreateProductRequest` (with `@NotBlank name`, `@NotNull price`, `@Positive stock`, `@NotBlank category`) and `ProductResponse` (with a `from()` factory method). Use `@Valid` on the POST method.
-</details>
-
-### Exercise 2: Add Pagination
-
-Modify the product list endpoint to accept pagination parameters: `page`, `size`, `sortBy`, `direction`. Use `PageRequest` and `Sort` to create a `Pageable`.
-
-<details>
-<summary>Hint</summary>
-
-Use `@RequestParam(defaultValue = "0") int page`, `@RequestParam(defaultValue = "20") int size`, etc. Build the `Pageable` with `PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy))`.
-</details>
-
-### Exercise 3: Add Custom Exception Handling
-
-Create a `ProductNotFoundException`. Add an `@ExceptionHandler` in `GlobalExceptionHandler` that returns a 404 with an `ErrorResponse`.
-
-<details>
-<summary>Hint</summary>
-
-Create the exception class extending `RuntimeException` with a constructor taking `Long productId`. In `GlobalExceptionHandler`, add `@ExceptionHandler(ProductNotFoundException.class)` that returns `ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)`.
-</details>
-
-### Exercise 4: Add Validation to CreateProductRequest
-
-Add validation annotations to `CreateProductRequest`:
-- `name` must not be blank (`@NotBlank`)
-- `price` must be positive (`@Positive`)
-- `stock` must be at least 0 (`@Min(0)`)
-- `category` must not be blank (`@NotBlank`)
-
-Test that invalid input returns a 400 error.
-
-<details>
-<summary>Hint</summary>
-
-Use `jakarta.validation.constraints.*` annotations. Use `@Valid` on the `@RequestBody` parameter. Send a POST with a blank name and verify you get a 400 response with the validation message.
-</details>
-
----
-
 ## What You Learned
 
 - **Spring Boot** eliminates boilerplate through auto-configuration, starter dependencies, and an embedded server
@@ -1083,4 +1106,4 @@ It's only active when running from an IDE or with `mvn spring-boot:run`.
 
 ---
 
-← [Previous: Module 02](./02-dependency-injection.md) | [Next: Module 04](./04-repository-pattern.md) →
+← [Previous: Module 02 — Dependency Injection](./02-dependency-injection.md) | [Next: Module 04 — Repository Pattern](./04-repository-pattern.md) →

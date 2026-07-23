@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reactor Pattern — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Reactor Pattern — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -128,6 +128,34 @@
 <li>Understanding of the Order Management System domain model</li>
 </ul>
 <hr />
+<details>
+<summary>Table of Contents</summary>
+
+- 1. [What Is Reactive Programming?](#what-is-reactive-programming)
+- 2. [Why Reactive? The C10K Problem](#why-reactive-the-c10k-problem)
+- 3. [The Reactive Streams Specification](#the-reactive-streams-specification)
+- 4. [Project Reactor — An Implementation](#project-reactor-an-implementation)
+- 5. [Creating Mono and Flux](#creating-mono-and-flux)
+- 6. [Core Operators](#core-operators)
+- 7. [The Reactive Stream Contract](#the-reactive-stream-contract)
+- 8. [Backpressure — Protecting Slow Consumers](#backpressure-protecting-slow-consumers)
+- 9. [Threading and Schedulers](#threading-and-schedulers)
+- 10. [Error Handling](#error-handling)
+- 11. [Hot vs. Cold Publishers](#hot-vs-cold-publishers)
+- 12. [Spring WebFlux — Reactive Controllers](#spring-webflux-reactive-controllers)
+- 13. [Integrating Reactive Kafka](#integrating-reactive-kafka)
+- 14. [Integrating Reactive Database (R2DBC)](#integrating-reactive-database-r2dbc)
+- 15. [Putting It All Together — Reactive Order Service](#putting-it-all-together-reactive-order-service)
+- 16. [Debugging Reactive Pipelines](#debugging-reactive-pipelines)
+- 17. [When NOT to Use Reactive Programming](#when-not-to-use-reactive-programming)
+- 18. [Combining Multiple Reactive Streams](#combining-multiple-reactive-streams)
+- 19. [Reactive Testing with StepVerifier](#reactive-testing-with-stepverifier)
+- 20. [When NOT to Use Reactive — Expanded](#when-not-to-use-reactive-expanded)
+- 21. [Reactive Design Patterns](#reactive-design-patterns)
+- 22. [Common Reactor Pitfalls](#common-reactor-pitfalls)
+
+</details>
+
 <h2 id="1-what-is-reactive-programming">1. What Is Reactive Programming?<a class="anchor-link" href="#1-what-is-reactive-programming" title="Permanent link">¶</a></h2>
 <p><strong>Reactive programming</strong> is a programming paradigm built around <strong>asynchronous data
 streams</strong>. Instead of pulling data from a source and blocking until it arrives,
@@ -221,9 +249,151 @@ threads that can be blocked without wasting OS resources. Virtual threads make
 backpressure, and stream operators that Reactor provides. Virtual threads and
 Reactor are complementary, not exclusive.</p>
 <hr />
-<h2 id="3-project-reactor-the-foundation-of-spring-webflux">3. Project Reactor — The Foundation of Spring WebFlux<a class="anchor-link" href="#3-project-reactor-the-foundation-of-spring-webflux" title="Permanent link">¶</a></h2>
-<p><strong>Project Reactor</strong> is a Reactive Streams implementation used by Spring WebFlux.
-It provides two primary types:</p>
+<h2 id="3-the-reactive-streams-specification">3. The Reactive Streams Specification<a class="anchor-link" href="#3-the-reactive-streams-specification" title="Permanent link">¶</a></h2>
+<p>Before diving into any specific library, it's important to understand the <strong>Reactive Streams specification</strong> — a standard that defines how asynchronous stream processing should work, regardless of the implementation (Reactor, RxJava, akka-streams, etc.).</p>
+<h3 id="the-four-interfaces">The Four Interfaces<a class="anchor-link" href="#the-four-interfaces" title="Permanent link">¶</a></h3>
+<p>The Reactive Streams spec defines four core interfaces:</p>
+<pre class="code-block"><code class="language-java">// A provider of a potentially unbounded number of sequenced elements
+public interface Publisher&lt;T&gt; {
+    void subscribe(Subscriber&lt;? super T&gt; subscriber);
+}
+
+// A consumer of elements from a Publisher
+public interface Subscriber&lt;T&gt; {
+    void onSubscribe(Subscription subscription);
+    void onNext(T item);
+    void onError(Throwable error);
+    void onComplete();
+}
+
+// A link between Publisher and Subscriber that controls demand
+public interface Subscription {
+    void request(long n);    // Request n more items
+    void cancel();           // Cancel the subscription
+}
+
+// A processor that acts as both Subscriber and Publisher
+public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt;R&gt; {
+}</code></pre>
+<h3 id="the-lifecycle-contract">The Lifecycle Contract<a class="anchor-link" href="#the-lifecycle-contract" title="Permanent link">¶</a></h3>
+<p>Here's the sequence of calls when a <code>Subscriber</code> subscribes to a <code>Publisher</code>:</p>
+<pre class="code-block"><code>Publisher          Subscriber
+   |---subscribe()--&gt;|
+   |                  |---onSubscribe(Subscription)--&gt;
+   |                  |---request(n)--&gt;
+   |---onNext(item)--&gt;|  (repeated, up to n items)
+   |                  |---request(n)--&gt;  (request more)
+   |---onNext(item)--&gt;|  (repeated)
+   |---onComplete()--&gt;|  OR  |---onError(throwable)--&gt;</code></pre>
+<p>Key rules from the spec:</p>
+<ol>
+<li><strong><code>onSubscribe</code> is called exactly once</strong> before any other signal.</li>
+<li><strong><code>onNext</code> is never called after <code>onComplete</code> or <code>onError</code>.</strong></li>
+<li><strong>A <code>Subscription</code> must be cancelled</strong> if the <code>Subscriber</code> no longer wants items.</li>
+<li><strong>Calls are non-interfering</strong> — <code>onNext</code> on subscriber A doesn't block subscriber B.</li>
+<li><strong><code>request(n)</code> controls demand</strong> — the Publisher should not send more items than requested.</li>
+</ol>
+<h3 id="backpressure">Backpressure<a class="anchor-link" href="#backpressure" title="Permanent link">¶</a></h3>
+<p><strong>Backpressure</strong> is the mechanism by which a <code>Subscriber</code> tells a <code>Publisher</code>: <em>"I can only handle N items at a time — don't send more than that."</em> This prevents a fast producer from overwhelming a slow consumer.</p>
+<p>Without backpressure:</p>
+<pre class="code-block"><code>Fast Producer: [item1] [item2] [item3] [item4] [item5] → Slow Consumer
+                                                        💥 buffer overflow</code></pre>
+<p>With backpressure:</p>
+<pre class="code-block"><code>Fast Producer: [item1] [item2] → Slow Consumer (request(2))
+               (waits...)
+                              ← request(2)
+              [item3] [item4] → Slow Consumer
+               (waits...)</code></pre>
+<p>This is a <strong>push-pull</strong> model: the Publisher pushes, but the Subscriber pulls by requesting a specific quantity. Different libraries handle backpressure differently:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Behavior</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Buffer</strong></td>
+<td>Store excess items in a queue</td>
+<td>When items can be slightly delayed</td>
+</tr>
+<tr>
+<td><strong>Drop</strong></td>
+<td>Discard items the Subscriber can't process</td>
+<td>Real-time metrics where missing data is OK</td>
+</tr>
+<tr>
+<td><strong>Latest</strong></td>
+<td>Keep only the most recent item</td>
+<td>Live price feeds, sensor data</td>
+</tr>
+<tr>
+<td><strong>Error</strong></td>
+<td>Signal an error when overwhelmed</td>
+<td>When data loss is unacceptable</td>
+</tr>
+<tr>
+<td><strong>Block</strong></td>
+<td>Block the producer thread</td>
+<td>Legacy integration (anti-pattern in reactive)</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary>Deep Dive: Backpressure in the Reactive Streams Spec</summary>
+
+The Reactive Streams specification (formally, the [RS spec](https://www.reactive-streams.org/)) mandates that `Subscription.request(n)` is the ONLY way a Subscriber signals readiness. A Publisher MUST NOT send more items than the total requested amount minus the already delivered amount.
+
+This means the contract enforces backpressure at the specification level — any compliant library (Reactor, RxJava, etc.) inherits this guarantee. The implementation details (buffering, dropping) are library-specific, but the demand-driven contract is universal.
+
+A common mistake: calling `request(Long.MAX_VALUE)` effectively disables backpressure, turning the stream into an unbounded push model. This is fine for testing but dangerous in production — it defeats the purpose of reactive streams.
+
+</details>
+
+<h3 id="implementations-of-the-spec">Implementations of the Spec<a class="anchor-link" href="#implementations-of-the-spec" title="Permanent link">¶</a></h3>
+<p>The Reactive Streams spec is language-agnostic. Popular implementations include:</p>
+<table>
+<thead>
+<tr>
+<th>Implementation</th>
+<th>Language</th>
+<th>Used For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Project Reactor</strong></td>
+<td>Java (JVM)</td>
+<td>Spring WebFlux, Spring Data R2DBC</td>
+</tr>
+<tr>
+<td><strong>RxJava</strong></td>
+<td>Java (JVM)</td>
+<td>Android, general JVM apps</td>
+</tr>
+<tr>
+<td><strong>Mutiny</strong></td>
+<td>Java (JVM)</td>
+<td>Quarkus</td>
+</tr>
+<tr>
+<td><strong>akka-streams</strong></td>
+<td>Scala (JVM)</td>
+<td>Akka ecosystem</td>
+</tr>
+<tr>
+<td><strong>flow</strong></td>
+<td>Kotlin</td>
+<td>Coroutines + Flow (Kotlin's native reactive)</td>
+</tr>
+</tbody>
+</table>
+<p>All implement the same interfaces. The concepts you learn here transfer to any of them.</p>
+<hr />
+<h2 id="4-project-reactor-an-implementation">4. Project Reactor — An Implementation<a class="anchor-link" href="#4-project-reactor-an-implementation" title="Permanent link">¶</a></h2>
+<p><strong>Project Reactor</strong> is the Reactive Streams implementation used by Spring WebFlux. It provides two primary types:</p>
 <ul>
 <li><strong><code>Mono&lt;T&gt;</code></strong> — emits <strong>zero or one</strong> item, then completes (or errors)</li>
 <li><strong><code>Flux&lt;T&gt;</code></strong> — emits <strong>zero to N</strong> items, then completes (or errors)</li>
@@ -252,7 +422,7 @@ It provides two primary types:</p>
 </tbody>
 </table>
 <hr />
-<h2 id="4-creating-mono-and-flux">4. Creating Mono and Flux<a class="anchor-link" href="#4-creating-mono-and-flux" title="Permanent link">¶</a></h2>
+<h2 id="5-creating-mono-and-flux">5. Creating Mono and Flux<a class="anchor-link" href="#5-creating-mono-and-flux" title="Permanent link">¶</a></h2>
 <h3 id="static-factory-methods">Static Factory Methods<a class="anchor-link" href="#static-factory-methods" title="Permanent link">¶</a></h3>
 <table>
 <thead>
@@ -368,7 +538,7 @@ public class PublisherDemo {
     }
 }</code></pre>
 <hr />
-<h2 id="5-core-operators">5. Core Operators<a class="anchor-link" href="#5-core-operators" title="Permanent link">¶</a></h2>
+<h2 id="6-core-operators">6. Core Operators<a class="anchor-link" href="#6-core-operators" title="Permanent link">¶</a></h2>
 <p>Operators transform, filter, or combine reactive streams. Each operator returns
 a new <code>Mono</code> or <code>Flux</code> — they <strong>never mutate</strong> the source.</p>
 <h3 id="reference-table">Reference Table<a class="anchor-link" href="#reference-table" title="Permanent link">¶</a></h3>
@@ -531,7 +701,7 @@ public class OrderStatusPipeline {
     }
 }</code></pre>
 <hr />
-<h2 id="6-the-reactive-stream-contract">6. The Reactive Stream Contract<a class="anchor-link" href="#6-the-reactive-stream-contract" title="Permanent link">¶</a></h2>
+<h2 id="7-the-reactive-stream-contract">7. The Reactive Stream Contract<a class="anchor-link" href="#7-the-reactive-stream-contract" title="Permanent link">¶</a></h2>
 <p>Every <code>Mono</code> and <code>Flux</code> obeys a contract with three lifecycle signals:</p>
 <ol>
 <li><strong><code>onNext(T)</code></strong> — emitted for each element (Flux only; Mono calls it at most once)</li>
@@ -545,7 +715,7 @@ public class OrderStatusPipeline {
 <p>The contract is <strong>guaranteed</strong>: operators cannot swallow <code>onError</code> unless you
 explicitly handle it with <code>onErrorReturn</code>, <code>onErrorResume</code>, or <code>retry</code>.</p>
 <hr />
-<h2 id="7-backpressure-protecting-slow-consumers">7. Backpressure — Protecting Slow Consumers<a class="anchor-link" href="#7-backpressure-protecting-slow-consumers" title="Permanent link">¶</a></h2>
+<h2 id="8-backpressure-protecting-slow-consumers">8. Backpressure — Protecting Slow Consumers<a class="anchor-link" href="#8-backpressure-protecting-slow-consumers" title="Permanent link">¶</a></h2>
 <h3 id="what-is-backpressure">What Is Backpressure?<a class="anchor-link" href="#what-is-backpressure" title="Permanent link">¶</a></h3>
 <p>When a fast producer sends data faster than a slow consumer can process it,
 the unprocessed items pile up in memory. <strong>Backpressure</strong> is the mechanism that
@@ -596,7 +766,7 @@ Flux&lt;Integer&gt; safe = fastProducer
             }
         });</code></pre>
 <hr />
-<h2 id="8-threading-and-schedulers">8. Threading and Schedulers<a class="anchor-link" href="#8-threading-and-schedulers" title="Permanent link">¶</a></h2>
+<h2 id="9-threading-and-schedulers">9. Threading and Schedulers<a class="anchor-link" href="#9-threading-and-schedulers" title="Permanent link">¶</a></h2>
 <p>Reactor separates <strong>where work happens</strong> using schedulers:</p>
 <table>
 <thead>
@@ -638,7 +808,7 @@ Flux&lt;Integer&gt; safe = fastProducer
         .doOnNext(s -&gt; log.info("Processing '{}' on thread {}", s, Thread.currentThread().getName()))
         .filter(s -&gt; s.length() &gt; 0);</code></pre>
 <hr />
-<h2 id="9-error-handling">9. Error Handling<a class="anchor-link" href="#9-error-handling" title="Permanent link">¶</a></h2>
+<h2 id="10-error-handling">10. Error Handling<a class="anchor-link" href="#10-error-handling" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -684,7 +854,7 @@ Mono&lt;String&gt; resilientCall = webClient.get()
             return Mono.just("fallback");
         });</code></pre>
 <hr />
-<h2 id="10-hot-vs-cold-publishers">10. Hot vs. Cold Publishers<a class="anchor-link" href="#10-hot-vs-cold-publishers" title="Permanent link">¶</a></h2>
+<h2 id="11-hot-vs-cold-publishers">11. Hot vs. Cold Publishers<a class="anchor-link" href="#11-hot-vs-cold-publishers" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -734,7 +904,7 @@ public class OrderStatusPublisher {
     }
 }</code></pre>
 <hr />
-<h2 id="11-spring-webflux-reactive-controllers">11. Spring WebFlux — Reactive Controllers<a class="anchor-link" href="#11-spring-webflux-reactive-controllers" title="Permanent link">¶</a></h2>
+<h2 id="12-spring-webflux-reactive-controllers">12. Spring WebFlux — Reactive Controllers<a class="anchor-link" href="#12-spring-webflux-reactive-controllers" title="Permanent link">¶</a></h2>
 <p>Spring WebFlux is the reactive alternative to Spring MVC. It uses Netty (non-blocking
 I/O) instead of Tomcat (thread-per-request).</p>
 <h3 id="annotated-controller-familiar-style">Annotated Controller (familiar style)<a class="anchor-link" href="#annotated-controller-familiar-style" title="Permanent link">¶</a></h3>
@@ -802,7 +972,7 @@ public class ReactiveRouter {
     }
 }</code></pre>
 <hr />
-<h2 id="12-integrating-reactive-kafka">12. Integrating Reactive Kafka<a class="anchor-link" href="#12-integrating-reactive-kafka" title="Permanent link">¶</a></h2>
+<h2 id="13-integrating-reactive-kafka">13. Integrating Reactive Kafka<a class="anchor-link" href="#13-integrating-reactive-kafka" title="Permanent link">¶</a></h2>
 <h3 id="reactive-producer">Reactive Producer<a class="anchor-link" href="#reactive-producer" title="Permanent link">¶</a></h3>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.kafka;
 
@@ -871,7 +1041,7 @@ public class ReactiveOrderConsumer {
     }
 }</code></pre>
 <hr />
-<h2 id="13-integrating-reactive-database-r2dbc">13. Integrating Reactive Database (R2DBC)<a class="anchor-link" href="#13-integrating-reactive-database-r2dbc" title="Permanent link">¶</a></h2>
+<h2 id="14-integrating-reactive-database-r2dbc">14. Integrating Reactive Database (R2DBC)<a class="anchor-link" href="#14-integrating-reactive-database-r2dbc" title="Permanent link">¶</a></h2>
 <p>Spring Data R2DBC provides a reactive alternative to JPA. Instead of
 <code>JpaRepository</code>, you use <code>ReactiveCrudRepository</code>:</p>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.repository;
@@ -887,7 +1057,7 @@ public interface ReactiveOrderRepository extends R2dbcRepository&lt;OrderEntity,
     Flux&lt;OrderEntity&gt; findByStatus(OrderStatus status);
 }</code></pre>
 <hr />
-<h2 id="14-putting-it-all-together-reactive-order-service">14. Putting It All Together — Reactive Order Service<a class="anchor-link" href="#14-putting-it-all-together-reactive-order-service" title="Permanent link">¶</a></h2>
+<h2 id="15-putting-it-all-together-reactive-order-service">15. Putting It All Together — Reactive Order Service<a class="anchor-link" href="#15-putting-it-all-together-reactive-order-service" title="Permanent link">¶</a></h2>
 <pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
 
 import com.example.ordermgmt.domain.*;
@@ -959,7 +1129,7 @@ public class ReactiveOrderService {
     }
 }</code></pre>
 <hr />
-<h2 id="15-debugging-reactive-pipelines">15. Debugging Reactive Pipelines<a class="anchor-link" href="#15-debugging-reactive-pipelines" title="Permanent link">¶</a></h2>
+<h2 id="16-debugging-reactive-pipelines">16. Debugging Reactive Pipelines<a class="anchor-link" href="#16-debugging-reactive-pipelines" title="Permanent link">¶</a></h2>
 <p>Reactive pipelines can be hard to debug because the stack traces don't reflect
 the pipeline structure. Reactor provides debugging tools:</p>
 <table>
@@ -999,7 +1169,7 @@ the pipeline structure. Reactor provides debugging tools:</p>
         .map(n -&gt; n * 10)
         .doOnNext(n -&gt; log.info("Mapped: {}", n));</code></pre>
 <hr />
-<h2 id="16-when-not-to-use-reactive-programming">16. When NOT to Use Reactive Programming<a class="anchor-link" href="#16-when-not-to-use-reactive-programming" title="Permanent link">¶</a></h2>
+<h2 id="17-when-not-to-use-reactive-programming">17. When NOT to Use Reactive Programming<a class="anchor-link" href="#17-when-not-to-use-reactive-programming" title="Permanent link">¶</a></h2>
 <table>
 <thead>
 <tr>
@@ -1034,55 +1204,6 @@ the pipeline structure. Reactor provides debugging tools:</p>
 to handle <strong>many concurrent connections</strong>. Otherwise, traditional Spring MVC
 (or Spring MVC + virtual threads) is simpler and sufficient.</p>
 <hr />
-<h2 id="17-exercises">17. Exercises<a class="anchor-link" href="#17-exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-transform-a-cold-publisher-into-a-hot-one">Exercise 1 — Transform a Cold Publisher into a Hot One<a class="anchor-link" href="#exercise-1-transform-a-cold-publisher-into-a-hot-one" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">Flux&lt;Integer&gt; source = Flux.range(1, 5);
-// Turn this into a hot publisher that emits immediately</code></pre>
-<details>
-<summary>Hint</summary>
-Use the `.share()` operator to convert a cold Flux into a hot one. Late
-subscribers will only see items emitted after they subscribe.
-</details>
-
-<h3 id="exercise-2-backpressure-buffering">Exercise 2 — Backpressure Buffering<a class="anchor-link" href="#exercise-2-backpressure-buffering" title="Permanent link">¶</a></h3>
-<p>Create a Flux that emits 1000 integers rapidly, but the consumer processes each
-item slowly (50ms). Use a backpressure policy that buffers excess items.</p>
-<details>
-<summary>Hint</summary>
-Use `.onBackpressureBuffer(100)` after the source, then `.delayElements(Duration.ofMillis(50))`
-in the consumer. The buffer will hold up to 100 items while the consumer catches up.
-</details>
-
-<h3 id="exercise-3-error-recovery">Exercise 3 — Error Recovery<a class="anchor-link" href="#exercise-3-error-recovery" title="Permanent link">¶</a></h3>
-<p>Write a Mono that calls an external API (simulate with <code>.map()</code> that throws
-on odd numbers). Retry 3 times with 1-second backoff, then return a fallback.</p>
-<details>
-<summary>Hint</summary>
-Use `.retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))` followed by
-`.onErrorReturn("fallback")`.
-</details>
-
-<h3 id="exercise-4-reactive-kafka-stream">Exercise 4 — Reactive Kafka Stream<a class="anchor-link" href="#exercise-4-reactive-kafka-stream" title="Permanent link">¶</a></h3>
-<p>Subscribe to a Flux of OrderCreatedEvent from Kafka and save each to the database
-using a reactive repository. Filter out events where <code>totalAmount</code> is zero.</p>
-<details>
-<summary>Hint</summary>
-Use `.filter(event -> event.totalAmount().compareTo(BigDecimal.ZERO) > 0)`
-followed by `.flatMap(event -> reactiveRepo.save(event.toEntity()))`.
-Subscribe at the end with `.subscribe()`.
-</details>
-
-<h3 id="exercise-5-sinks-for-real-time-updates">Exercise 5 — Sinks for Real-Time Updates<a class="anchor-link" href="#exercise-5-sinks-for-real-time-updates" title="Permanent link">¶</a></h3>
-<p>Create a Sinks.Many that accepts order status changes, and expose a Flux that
-clients can subscribe to. When an order's status changes to SHIPPED, log a
-notification.</p>
-<details>
-<summary>Hint</summary>
-Use `.subscribe()` on the sink's `asFlux()` with `.filter(status -> status == OrderStatus.SHIPPED)`
-and `.doOnNext(status -> log.info("Order shipped!"))`.
-</details>
-
-<hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong>Reactive programming</strong> models computation as asynchronous data streams, not blocking calls</li>
@@ -1098,7 +1219,7 @@ and `.doOnNext(status -> log.info("Order shipped!"))`.
 <li>Use reactive when I/O-bound and high-concurrency; use imperative otherwise</li>
 </ul>
 <hr />
-<h2 id="16-combining-multiple-reactive-streams">16. Combining Multiple Reactive Streams<a class="anchor-link" href="#16-combining-multiple-reactive-streams" title="Permanent link">¶</a></h2>
+<h2 id="18-combining-multiple-reactive-streams">18. Combining Multiple Reactive Streams<a class="anchor-link" href="#18-combining-multiple-reactive-streams" title="Permanent link">¶</a></h2>
 <p>Reactors provides several operators for combining streams. Each has different
 semantics for when and how items are emitted.</p>
 <h3 id="merge-interleave-items-in-real-time">merge — Interleave Items in Real-Time<a class="anchor-link" href="#merge-interleave-items-in-real-time" title="Permanent link">¶</a></h3>
@@ -1179,7 +1300,7 @@ Flux&lt;OrderEvent&gt; latestCustomerStream = Flux.switchOnNext(perCustomerStrea
 </tbody>
 </table>
 <hr />
-<h2 id="17-reactive-testing-with-stepverifier">17. Reactive Testing with StepVerifier<a class="anchor-link" href="#17-reactive-testing-with-stepverifier" title="Permanent link">¶</a></h2>
+<h2 id="19-reactive-testing-with-stepverifier">19. Reactive Testing with StepVerifier<a class="anchor-link" href="#19-reactive-testing-with-stepverifier" title="Permanent link">¶</a></h2>
 <p>StepVerifier is the standard tool for testing reactive pipelines.</p>
 <h3 id="basic-verification">Basic Verification<a class="anchor-link" href="#basic-verification" title="Permanent link">¶</a></h3>
 <pre class="code-block"><code class="language-java">import reactor.test.StepVerifier;
@@ -1250,7 +1371,7 @@ void map_transforms_each_item() {
             .verifyComplete();
 }</code></pre>
 <hr />
-<h2 id="18-when-not-to-use-reactive-expanded">18. When NOT to Use Reactive — Expanded<a class="anchor-link" href="#18-when-not-to-use-reactive-expanded" title="Permanent link">¶</a></h2>
+<h2 id="20-when-not-to-use-reactive-expanded">20. When NOT to Use Reactive — Expanded<a class="anchor-link" href="#20-when-not-to-use-reactive-expanded" title="Permanent link">¶</a></h2>
 <h3 id="latency-comparison">Latency Comparison<a class="anchor-link" href="#latency-comparison" title="Permanent link">¶</a></h3>
 <table>
 <thead>
@@ -1291,7 +1412,7 @@ I/O-bound, latency-sensitive) → use reactive.</p>
 simplicity over throughput) → use imperative (Spring MVC + virtual threads).</p>
 </blockquote>
 <hr />
-<h2 id="19-reactive-design-patterns">19. Reactive Design Patterns<a class="anchor-link" href="#19-reactive-design-patterns" title="Permanent link">¶</a></h2>
+<h2 id="21-reactive-design-patterns">21. Reactive Design Patterns<a class="anchor-link" href="#21-reactive-design-patterns" title="Permanent link">¶</a></h2>
 <h3 id="the-flatmap-chain-pattern">The "FlatMap Chain" Pattern<a class="anchor-link" href="#the-flatmap-chain-pattern" title="Permanent link">¶</a></h3>
 <p>When working with Mono/Flux, you often chain operations that each return a
 new reactive type. Use <code>flatMap</code> to chain them:</p>
@@ -1386,7 +1507,7 @@ public class StatusController {
     }
 }</code></pre>
 <hr />
-<h2 id="20-common-reactor-pitfalls">20. Common Reactor Pitfalls<a class="anchor-link" href="#20-common-reactor-pitfalls" title="Permanent link">¶</a></h2>
+<h2 id="22-common-reactor-pitfalls">22. Common Reactor Pitfalls<a class="anchor-link" href="#22-common-reactor-pitfalls" title="Permanent link">¶</a></h2>
 <h3 id="pitfall-1-forgetting-to-subscribe">Pitfall 1: Forgetting to Subscribe<a class="anchor-link" href="#pitfall-1-forgetting-to-subscribe" title="Permanent link">¶</a></h3>
 <pre class="code-block"><code class="language-java">// BAD: Nothing happens — no subscription
 mono.doOnNext(x -&gt; log.info("Got: {}", x));
@@ -1447,7 +1568,7 @@ Flux&lt;Order&gt; cold = orderRepo.findAll();  // each subscriber gets all items
 </li>
 </ul>
 <hr />
-<p>← <a href="07-graphql.html">Previous: Module 07</a> | <a href="09-tdd.html">Next: Module 09</a> →</p>
+<p>← <a href="07-graphql.html">Previous: Module 07 — GraphQL</a> | <a href="09-tdd.html">Next: Module 09 — Test-Driven Development</a> →</p>
       </article>
 
       <div class="footer-nav"><a href="07-graphql.html" class="nav-link prev">← GraphQL</a><a href="09-tdd.html" class="nav-link next">Test-Driven Development →</a></div>

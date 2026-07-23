@@ -11,13 +11,13 @@ COURSE_DIR = Path(__file__).parent / "java-spring-boot-course"
 OUTPUT_DIR = Path(__file__).parent / "docs"
 
 MODULES = [
-    ("00-java-foundations", "00", "Java Foundations"),
+    ("00-java-foundations", "00", "Java for Experienced Developers"),
     ("01-build-tools-and-project-setup", "01", "Build Tools & Project Setup"),
     ("02-dependency-injection", "02", "Dependency Injection"),
     ("03-spring-boot-fundamentals", "03", "Spring Boot Fundamentals"),
     ("04-repository-pattern", "04", "Repository Pattern"),
     ("05-service-oriented-architecture", "05", "Service-Oriented Architecture"),
-    ("06-kafka", "06", "Kafka"),
+    ("06-kafka", "06", "Apache Kafka"),
     ("07-graphql", "07", "GraphQL"),
     ("08-reactor-pattern", "08", "Reactor Pattern"),
     ("09-tdd", "09", "Test-Driven Development"),
@@ -135,8 +135,8 @@ def render_page(
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{title} — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>{title} — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -148,7 +148,7 @@ def render_page(
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       {search_box}
@@ -199,7 +199,7 @@ def build_index_page(modules: list[tuple[str, str, str]]) -> str:
     content = f"""
     <section class="hero">
       <h1>Java • Spring Boot • Kafka • GraphQL • Reactor • TDD • Kotlin</h1>
-      <p class="hero-subtitle">A complete course for beginners — from zero to production-grade backend.</p>
+      <p class="hero-subtitle">A comprehensive course for active developers — Java and the backend ecosystem, from syntax to production.</p>
       <div class="hero-tags">
         <span class="tag">Java 21+</span>
         <span class="tag">Spring Boot</span>
@@ -211,8 +211,8 @@ def build_index_page(modules: list[tuple[str, str, str]]) -> str:
       </div>
       <div class="hero-meta">
         <span>📚 12 Modules</span>
-        <span>⏱️ 40–60 hours</span>
-        <span>🛠️ Hands-on exercises</span>
+        <span>⏱️ 30–50 hours</span>
+        <span>🔧 Capstone project</span>
       </div>
     </section>
 
@@ -228,7 +228,8 @@ def build_index_page(modules: list[tuple[str, str, str]]) -> str:
       <ol>
         <li><strong>Read each module in order.</strong> Each builds on the previous one.</li>
         <li><strong>Type every code example yourself.</strong> Don't copy-paste. Muscle memory matters.</li>
-        <li><strong>Do every exercise.</strong> They reinforce concepts.</li>
+        <li><strong>Use the table of contents.</strong> Each module has a collapsible TOC at the top for navigation.</li>
+        <li><strong>Expand submodules.</strong> Sections marked with ▶ can be expanded for deeper coverage.</li>
         <li><strong>Refer back.</strong> Later modules reference earlier ones — that's normal.</li>
       </ol>
       <h2>Tools You'll Need</h2>

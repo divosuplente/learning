@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dependency Injection — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Dependency Injection — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -127,6 +127,72 @@
 <li>No prior experience with Spring or dependency injection required</li>
 </ul>
 <hr />
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. The Problem: Tight Coupling with new](#1-the-problem-tight-coupling-with-new)
+  - [Example: The Bad Way](#example-the-bad-way)
+  - [Why Is This Bad?](#why-is-this-bad)
+  - [The Fix: Dependency Injection](#the-fix-dependency-injection)
+- [2. What Is Dependency Injection?](#2-what-is-dependency-injection)
+  - [The Restaurant Analogy](#the-restaurant-analogy)
+- [3. Inversion of Control (IoC)](#3-inversion-of-control-ioc)
+  - [The Hollywood Principle](#the-hollywood-principle)
+- [4. The Spring IoC Container](#4-the-spring-ioc-container)
+  - [Key Terms](#key-terms)
+- [5. Types of Injection](#5-types-of-injection)
+  - [1. Constructor Injection (Preferred)](#1-constructor-injection-preferred)
+  - [2. Setter Injection (Rarely Used)](#2-setter-injection-rarely-used)
+  - [3. Field Injection (Avoid)](#3-field-injection-avoid)
+  - [Why Constructor Injection Is Preferred](#why-constructor-injection-is-preferred)
+- [6. Spring Stereotype Annotations](#6-spring-stereotype-annotations)
+  - [How Component Scanning Works](#how-component-scanning-works)
+  - [Example: Creating Beans](#example-creating-beans)
+- [7. @Autowired: Explicit vs. Implicit Wiring](#7-autowired-explicit-vs-implicit-wiring)
+- [8. Bean Scopes](#8-bean-scopes)
+  - [Setting a Scope](#setting-a-scope)
+- [9. Manual Bean Creation with @Configuration and @Bean](#9-manual-bean-creation-with-configuration-and-bean)
+  - [When to Use @Bean vs @Component](#when-to-use-bean-vs-component)
+- [10. Resolving Ambiguous Dependencies: @Qualifier and @Primary](#10-resolving-ambiguous-dependencies-qualifier-and-primary)
+  - [Using @Qualifier for Specific Selection](#using-qualifier-for-specific-selection)
+- [11. Circular Dependencies](#11-circular-dependencies)
+  - [How to Avoid Circular Dependencies](#how-to-avoid-circular-dependencies)
+- [12. Life-Cycle Hooks: @PostConstruct and @PreDestroy](#12-life-cycle-hooks-postconstruct-and-predestroy)
+  - [When to Use Each](#when-to-use-each)
+- [13. Wiring the Order Management Domain](#13-wiring-the-order-management-domain)
+  - [Domain Records (from Module 00)](#domain-records-from-module-00)
+  - [Repository Interfaces (stubs — real JPA in Module 04)](#repository-interfaces-stubs-real-jpa-in-module-04)
+  - [Service Layer](#service-layer)
+  - [Controller](#controller)
+  - [The Application Entry Point](#the-application-entry-point)
+  - [How Spring Wires Everything](#how-spring-wires-everything)
+- [What You Learned](#what-you-learned)
+- [12. Bean Lifecycle Callbacks in Depth](#12-bean-lifecycle-callbacks-in-depth)
+  - [The Bean Lifecycle (Simplified)](#the-bean-lifecycle-simplified)
+  - [@PostConstruct and @PreDestroy](#postconstruct-and-predestroy)
+  - [When to Use Each](#when-to-use-each)
+- [13. Conditional Bean Registration](#13-conditional-bean-registration)
+  - [@ConditionalOnProperty](#conditionalonproperty)
+  - [@ConditionalOnMissingBean](#conditionalonmissingbean)
+  - [@ConditionalOnClass](#conditionalonclass)
+  - [Combining Conditions](#combining-conditions)
+- [14. Bean Scopes in Practice](#14-bean-scopes-in-practice)
+  - [The Proxy Problem](#the-proxy-problem)
+- [15. Spring Bean Circular Dependencies](#15-spring-bean-circular-dependencies)
+  - [The Problem](#the-problem)
+  - [Solution 1: Redesign (Preferred)](#solution-1-redesign-preferred)
+  - [Solution 2: Use Events](#solution-2-use-events)
+- [16. Spring AOP (Aspect-Oriented Programming)](#16-spring-aop-aspect-oriented-programming)
+  - [How Spring Uses AOP Internally](#how-spring-uses-aop-internally)
+  - [Custom Aspect Example: Method Timing](#custom-aspect-example-method-timing)
+- [17. Spring Profiles and Environment Abstraction](#17-spring-profiles-and-environment-abstraction)
+  - [@Value with SpEL (Spring Expression Language)](#value-with-spel-spring-expression-language)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 <h2 id="1-the-problem-tight-coupling-with-new">1. The Problem: Tight Coupling with <code>new</code><a class="anchor-link" href="#1-the-problem-tight-coupling-with-new" title="Permanent link">¶</a></h2>
 <p>When a class creates its own dependencies using the <code>new</code> keyword, it becomes <strong>tightly coupled</strong> — it can't function without those specific implementations.</p>
 <h3 id="example-the-bad-way">Example: The Bad Way<a class="anchor-link" href="#example-the-bad-way" title="Permanent link">¶</a></h3>
@@ -798,74 +864,6 @@ public class OrderManagementApplication {
 </ol>
 <p><strong>You didn't write a single <code>new</code> statement for any of these objects.</strong> Spring created and connected them all automatically.</p>
 <hr />
-<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-spot-the-new">Exercise 1: Spot the <code>new</code><a class="anchor-link" href="#exercise-1-spot-the-new" title="Permanent link">¶</a></h3>
-<p>Look at the following class and refactor it to use constructor injection instead of <code>new</code>:</p>
-<pre class="code-block"><code class="language-java">public class ProductService {
-    private ProductRepository repo;
-
-    public ProductService() {
-        this.repo = new ProductRepository();
-    }
-}</code></pre>
-<details>
-<summary>Hint</summary>
-
-Add `@Service` to the class. Remove the no-arg constructor and add a constructor that takes `ProductRepository` as a parameter. Make the field `final`.
-</details>
-
-<h3 id="exercise-2-create-a-customerservice">Exercise 2: Create a <code>CustomerService</code><a class="anchor-link" href="#exercise-2-create-a-customerservice" title="Permanent link">¶</a></h3>
-<p>Create a <code>CustomerService</code> with <code>@Service</code> annotation that depends on <code>CustomerRepository</code>. Include methods <code>getCustomer(Long id)</code> and <code>createCustomer(Customer customer)</code>. Use constructor injection.</p>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-java">@Service
-public class CustomerService {
-    private final CustomerRepository customerRepository;
-
-    public CustomerService(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
-    }
-
-    public Customer getCustomer(Long id) {
-        return customerRepository.findById(id)
-                .orElseThrow(() -&gt; new IllegalArgumentException("Not found: " + id));
-    }
-}</code></pre>
-</details>
-
-<h3 id="exercise-3-create-a-configuration-bean">Exercise 3: Create a <code>@Configuration</code> Bean<a class="anchor-link" href="#exercise-3-create-a-configuration-bean" title="Permanent link">¶</a></h3>
-<p>Create a <code>@Configuration</code> class with a <code>@Bean</code> method that creates a <code>Clock</code> bean:</p>
-<pre class="code-block"><code class="language-java">@Bean
-public Clock clock() {
-    return Clock.systemUTC();
-}</code></pre>
-<p>Then inject <code>Clock</code> into <code>OrderService</code> and use it instead of <code>Instant.now()</code>.</p>
-<details>
-<summary>Hint</summary>
-
-Add `Clock clock` as a constructor parameter to `OrderService`. Use `clock.instant()` instead of `Instant.now()`. This makes the service testable — in tests, you can inject a fixed `Clock` for deterministic timestamps.
-</details>
-
-<h3 id="exercise-4-fix-a-circular-dependency">Exercise 4: Fix a Circular Dependency<a class="anchor-link" href="#exercise-4-fix-a-circular-dependency" title="Permanent link">¶</a></h3>
-<p>Two services depend on each other:</p>
-<pre class="code-block"><code class="language-java">@Service
-public class OrderService {
-    public OrderService(CustomerService cs) {}
-}
-
-@Service
-public class CustomerService {
-    public CustomerService(OrderService os) {}
-}</code></pre>
-<p>Refactor to eliminate the cycle.</p>
-<details>
-<summary>Hint</summary>
-
-Extract the shared logic into a third service, e.g., `SharedLookupService`, that both depend on. Neither `OrderService` nor `CustomerService` should directly depend on each other.
-</details>
-
-<hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong>Tight coupling</strong> with <code>new</code> makes code hard to test, modify, and maintain — dependency injection solves this by receiving dependencies from outside</li>
@@ -1229,7 +1227,7 @@ public class OrderService {
 </li>
 </ul>
 <hr />
-<p>← <a href="01-build-tools-and-project-setup.html">Previous: Module 01</a> | <a href="03-spring-boot-fundamentals.html">Next: Module 03</a> →</p>
+<p>← <a href="01-build-tools-and-project-setup.html">Previous: Module 01 — Build Tools &amp; Project Setup</a> | <a href="03-spring-boot-fundamentals.html">Next: Module 03 — Spring Boot Fundamentals</a> →</p>
       </article>
 
       <div class="footer-nav"><a href="01-build-tools-and-project-setup.html" class="nav-link prev">← Build Tools & Project Setup</a><a href="03-spring-boot-fundamentals.html" class="nav-link next">Spring Boot Fundamentals →</a></div>

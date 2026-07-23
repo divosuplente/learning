@@ -25,6 +25,84 @@
 
 ---
 
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is a Database?](#1-what-is-a-database)
+  - [Relational Databases](#relational-databases)
+  - [Key Concepts](#key-concepts)
+  - [Relationships](#relationships)
+- [2. SQL Crash Course](#2-sql-crash-course)
+  - [SELECT — Read Data](#select-read-data)
+  - [INSERT — Create Data](#insert-create-data)
+  - [UPDATE — Modify Data](#update-modify-data)
+  - [DELETE — Remove Data](#delete-remove-data)
+  - [JOIN — Combine Data from Multiple Tables](#join-combine-data-from-multiple-tables)
+  - [What JPA Does](#what-jpa-does)
+- [3. What Is the Repository Pattern?](#3-what-is-the-repository-pattern)
+  - [Without Repository Pattern](#without-repository-pattern)
+  - [With Repository Pattern](#with-repository-pattern)
+- [4. ORM, JPA, and Hibernate](#4-orm-jpa-and-hibernate)
+  - [ORM (Object-Relational Mapping)](#orm-object-relational-mapping)
+  - [JPA (Java Persistence API)](#jpa-java-persistence-api)
+  - [Hibernate](#hibernate)
+  - [Spring Data JPA](#spring-data-jpa)
+- [5. JPA Entities](#5-jpa-entities)
+  - [Entity Anatomy](#entity-anatomy)
+  - [Key Annotations](#key-annotations)
+  - [Why Not Records?](#why-not-records)
+- [6. Creating All Domain Entities](#6-creating-all-domain-entities)
+  - [ProductEntity](#productentity)
+  - [OrderStatus Enum](#orderstatus-enum)
+  - [OrderEntity](#orderentity)
+  - [OrderItemEntity](#orderitementity)
+  - [Understanding Relationships](#understanding-relationships)
+- [7. Spring Data Repositories](#7-spring-data-repositories)
+  - [CustomerRepository](#customerrepository)
+  - [ProductRepository](#productrepository)
+  - [OrderRepository](#orderrepository)
+  - [What Does JpaRepository Give You for Free?](#what-does-jparepository-give-you-for-free)
+  - [Derived Query Methods](#derived-query-methods)
+- [8. Pagination and Sorting in Repositories](#8-pagination-and-sorting-in-repositories)
+- [9. The N+1 Problem](#9-the-n1-problem)
+  - [The Problem](#the-problem)
+  - [Solution 1: JOIN FETCH](#solution-1-join-fetch)
+  - [Solution 2: @EntityGraph](#solution-2-entitygraph)
+- [10. Configuring PostgreSQL](#10-configuring-postgresql)
+  - [application.yml (already set up in Module 01)](#applicationyml-already-set-up-in-module-01)
+  - [What ddl-auto Does](#what-ddl-auto-does)
+  - [Using BigDecimal in PostgreSQL](#using-bigdecimal-in-postgresql)
+- [What You Learned](#what-you-learned)
+- [11. JPA Entity Relationships Deep Dive](#11-jpa-entity-relationships-deep-dive)
+  - [One-to-One](#one-to-one)
+  - [Cascade Types](#cascade-types)
+  - [Fetch Strategies](#fetch-strategies)
+  - [The N+1 Problem (Recap with Solution)](#the-n1-problem-recap-with-solution)
+- [12. JPQL and Native Queries](#12-jpql-and-native-queries)
+  - [JPQL (Java Persistence Query Language)](#jpql-java-persistence-query-language)
+  - [Native SQL Queries](#native-sql-queries)
+  - [Pagination and Sorting](#pagination-and-sorting)
+- [13. Database Indexing and Performance](#13-database-indexing-and-performance)
+  - [Adding Indexes](#adding-indexes)
+  - [When to Index](#when-to-index)
+  - [Common Performance Issues](#common-performance-issues)
+- [14. Flyway Database Migrations](#14-flyway-database-migrations)
+  - [Adding Flyway](#adding-flyway)
+  - [Migration Files](#migration-files)
+  - [How Flyway Works](#how-flyway-works)
+  - [Flyway Configuration](#flyway-configuration)
+  - [Why Flyway Over ddl-auto](#why-flyway-over-ddl-auto)
+- [15. Testing JPA Repositories with Testcontainers](#15-testing-jpa-repositories-with-testcontainers)
+  - [What Is Testcontainers?](#what-is-testcontainers)
+  - [Setup](#setup)
+  - [Full Repository Test](#full-repository-test)
+  - [@ServiceConnection](#serviceconnection)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 ## 1. What Is a Database?
 
 A **database** is organized storage for your application's data. When your application shuts down, the data in memory (variables, objects) disappears. A database persists data — it saves it to disk so it survives restarts.
@@ -730,63 +808,6 @@ private BigDecimal price;
 
 ---
 
-## Exercises
-
-### Exercise 1: Add a Derived Query Method
-
-Add a method to `ProductRepository` that finds products by category and stock greater than a threshold.
-
-<details>
-<summary>Hint</summary>
-
-```java
-List<ProductEntity> findByCategoryAndStockGreaterThan(String category, int minStock);
-```
-Spring generates: `WHERE category = ? AND stock > ?`
-</details>
-
-### Exercise 2: Write a Custom JPQL Query
-
-Add a method to `OrderRepository` that finds orders with total amount greater than a given value, ordered by total descending.
-
-<details>
-<summary>Hint</summary>
-
-```java
-@Query("SELECT o FROM OrderEntity o WHERE o.totalAmount > :amount ORDER BY o.totalAmount DESC")
-List<OrderEntity> findOrdersAboveAmount(@Param("amount") BigDecimal amount);
-```
-</details>
-
-### Exercise 3: Fix an N+1 Problem
-
-Write a `@Query` with `JOIN FETCH` that fetches orders with their items in a single query.
-
-<details>
-<summary>Hint</summary>
-
-```java
-@Query("SELECT DISTINCT o FROM OrderEntity o JOIN FETCH o.items WHERE o.status = :status")
-List<OrderEntity> findOrdersWithItems(@Param("status") OrderStatus status);
-```
-The `DISTINCT` prevents duplicate orders when an order has multiple items (because the JOIN creates one row per item).
-</details>
-
-### Exercise 4: Add Pagination to a Repository
-
-Create a method that finds products by category with pagination.
-
-<details>
-<summary>Hint</summary>
-
-```java
-Page<ProductEntity> findByCategory(String category, Pageable pageable);
-```
-Call it with: `productRepository.findByCategory("Electronics", PageRequest.of(0, 10));`
-</details>
-
----
-
 ## What You Learned
 
 - A **database** stores data persistently in **tables** (rows and columns)
@@ -1203,4 +1224,4 @@ No need for `@DynamicPropertySource` boilerplate.
   https://www.youtube.com/watch?v=l_T0nQNbFiM
 
 ---
-← [Previous: Module 03](./03-spring-boot-fundamentals.md) | [Next: Module 05](./05-service-oriented-architecture.md) →
+← [Previous: Module 03 — Spring Boot Fundamentals](./03-spring-boot-fundamentals.md) | [Next: Module 05 — Service-Oriented Architecture](./05-service-oriented-architecture.md) →

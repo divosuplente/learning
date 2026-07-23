@@ -22,6 +22,67 @@
 
 ---
 
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is an Architecture Pattern?](#1-what-is-an-architecture-pattern)
+- [2. Monolithic vs Microservices vs SOA](#2-monolithic-vs-microservices-vs-soa)
+  - [Monolithic Architecture](#monolithic-architecture)
+  - [Microservices Architecture](#microservices-architecture)
+  - [Service-Oriented Architecture (SOA)](#service-oriented-architecture-soa)
+- [3. Layered Architecture](#3-layered-architecture)
+  - [The Golden Rule](#the-golden-rule)
+  - [Why Not Skip Layers?](#why-not-skip-layers)
+- [4. The Service Layer](#4-the-service-layer)
+  - [What Makes This a Good Service?](#what-makes-this-a-good-service)
+- [5. Transaction Management](#5-transaction-management)
+  - [ACID Properties](#acid-properties)
+  - [The @Transactional Annotation](#the-transactional-annotation)
+  - [Read-Only Transactions](#read-only-transactions)
+  - [Transaction Propagation](#transaction-propagation)
+  - [Transaction Isolation Levels](#transaction-isolation-levels)
+- [6. Data Transfer Objects (DTOs)](#6-data-transfer-objects-dtos)
+  - [Why Use DTOs?](#why-use-dtos)
+  - [Request DTO](#request-dto)
+  - [Response DTO](#response-dto)
+  - [The from() Factory Method](#the-from-factory-method)
+- [7. Domain Exceptions](#7-domain-exceptions)
+  - [Custom Exception Hierarchy](#custom-exception-hierarchy)
+  - [Why a Hierarchy?](#why-a-hierarchy)
+  - [Handling Exceptions in the Controller](#handling-exceptions-in-the-controller)
+- [8. The Controller Layer (Recap)](#8-the-controller-layer-recap)
+- [9. Service-to-Service Communication](#9-service-to-service-communication)
+  - [Option 1: Direct Method Call (Same Application)](#option-1-direct-method-call-same-application)
+  - [Option 2: Application Events (Decoupled Communication)](#option-2-application-events-decoupled-communication)
+  - [Why Events vs Direct Calls?](#why-events-vs-direct-calls)
+- [10. Anti-Patterns to Avoid](#10-anti-patterns-to-avoid)
+  - [Anti-Pattern 1: Fat Controller](#anti-pattern-1-fat-controller)
+  - [Anti-Pattern 2: Anemic Domain Model](#anti-pattern-2-anemic-domain-model)
+  - [Anti-Pattern 3: Business Logic in Repository](#anti-pattern-3-business-logic-in-repository)
+  - [Anti-Pattern 4: Service That Does Everything](#anti-pattern-4-service-that-does-everything)
+- [11. Complete Architecture Summary](#11-complete-architecture-summary)
+  - [Package Structure](#package-structure)
+- [What You Learned](#what-you-learned)
+- [12. Transaction Propagation in Depth](#12-transaction-propagation-in-depth)
+  - [The Seven Propagation Types](#the-seven-propagation-types)
+  - [Code Example: REQUIRES_NEW for Audit Logging](#code-example-requires_new-for-audit-logging)
+  - [Common Pitfall: Self-Invocation](#common-pitfall-self-invocation)
+- [13. Domain Events and Application Events](#13-domain-events-and-application-events)
+  - [Publishing Events](#publishing-events)
+  - [Listening to Events](#listening-to-events)
+  - [Why Use Events?](#why-use-events)
+- [14. Caching Strategy](#14-caching-strategy)
+  - [Enabling Caching](#enabling-caching)
+  - [@Cacheable — Skip Method Execution on Cache Hit](#cacheable-skip-method-execution-on-cache-hit)
+  - [@CacheEvict — Remove from Cache](#cacheevict-remove-from-cache)
+  - [@CachePut — Always Execute, Update Cache](#cacheput-always-execute-update-cache)
+  - [When to Cache vs. When Not To](#when-to-cache-vs-when-not-to)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 ## 1. What Is an Architecture Pattern?
 
 When you build a house, you don't just start placing bricks randomly. You follow a blueprint that says where the foundation goes, where the walls are, where the plumbing runs. The same is true for software.
@@ -1085,72 +1146,6 @@ com.example.ordermgmt
 
 ---
 
-## Exercises
-
-### Exercise 1: Add a CustomerService
-
-Create a `CustomerService` with methods:
-- `createCustomer(CreateCustomerRequest)` — creates a new customer
-- `getCustomerById(Long id)` — returns a `CustomerResponse`
-- `deactivateCustomer(Long id)` — marks a customer as inactive
-
-Ensure it uses `@Transactional` correctly, constructor injection, and returns DTOs.
-
-<details>
-<summary>Hint</summary>
-
-Follow the same pattern as `OrderService`. Create `CreateCustomerRequest` (with `@NotBlank` validation on name and email), `CustomerResponse`, and add an `active` boolean field to your `CustomerEntity`. Use `@Transactional(readOnly = true)` for `getCustomerById`.
-</details>
-
-### Exercise 2: Add Order Status Transition Rules
-
-Currently `confirmOrder` and `cancelOrder` do basic checks. Enhance them to enforce a proper state machine:
-
-- `PENDING → CONFIRMED` (allowed)
-- `PENDING → CANCELLED` (allowed)
-- `CONFIRMED → SHIPPED` (allowed)
-- `SHIPPED → DELIVERED` (allowed)
-- Any other transition should throw an `IllegalStateException`
-
-Add a `shipOrder` and `deliverOrder` method to `OrderService`.
-
-<details>
-<summary>Hint</summary>
-
-Create a method `validateTransition(OrderStatus from, OrderStatus to)` that checks if the transition is allowed. Call it at the start of each status-change method. You can define allowed transitions with a `Map<OrderStatus, Set<OrderStatus>>` or with a `switch` statement using pattern matching.
-</details>
-
-### Exercise 3: Add a ProductService
-
-Create a `ProductService` with methods:
-- `createProduct(CreateProductRequest)` — creates a new product
-- `getProductById(Long id)` — returns a `ProductResponse`
-- `updateStock(Long productId, int quantity)` — adds or removes stock
-- `listProducts(Pageable)` — returns a page of products
-
-Ensure `updateStock` prevents negative stock and publishes a `StockUpdatedEvent`.
-
-<details>
-<summary>Hint</summary>
-
-Inject `ApplicationEventPublisher` into the service. After saving the updated product, call `eventPublisher.publishEvent(new StockUpdatedEvent(productId, newStock))`. Create a `StockUpdatedEvent` record and an `@EventListener` that logs the event.
-</details>
-
-### Exercise 4: Refactor to Rich Domain Model
-
-Refactor `OrderEntity` to encapsulate behavior:
-- Move `addItem(ProductEntity, int quantity)` into the entity (it calculates line total internally)
-- Move `confirm()`, `cancel()`, `ship()`, `deliver()` methods into the entity (they enforce state transitions)
-- Update `OrderService` to call these methods instead of setting fields directly
-
-<details>
-<summary>Hint</summary>
-
-In `OrderEntity`, add a method `addItem(ProductEntity product, int quantity)` that creates an `OrderItemEntity`, sets its relationships, adds it to `items`, and updates `totalAmount`. Add `confirm()` that checks `status == PENDING` and sets `status = CONFIRMED`. This makes the entity self-validating and the service thinner.
-</details>
-
----
-
 ## What You Learned
 
 - An architecture pattern is a blueprint for organizing code — it keeps responsibilities clean and changes safe
@@ -1380,4 +1375,4 @@ public Product updateStock(Long id, int newStock) {
 
 ---
 
-← [Previous: Module 04](./04-repository-pattern.md) | [Next: Module 06](./06-kafka.md) →
+← [Previous: Module 04 — Repository Pattern](./04-repository-pattern.md) | [Next: Module 06 — Apache Kafka](./06-kafka.md) →

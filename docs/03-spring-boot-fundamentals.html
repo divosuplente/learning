@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spring Boot Fundamentals — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Spring Boot Fundamentals — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -125,6 +125,85 @@
 <li><a href="02-dependency-injection.html">Module 02: Dependency Injection</a> — you understand <code>@Service</code>, <code>@Component</code>, constructor injection</li>
 </ul>
 <hr />
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is Spring Boot?](#1-what-is-spring-boot)
+  - [The Problem Spring Boot Solves](#the-problem-spring-boot-solves)
+  - [Key Features](#key-features)
+- [2. Auto-Configuration](#2-auto-configuration)
+  - [How It Works](#how-it-works)
+  - [@SpringBootApplication](#springbootapplication)
+- [3. Creating REST Endpoints](#3-creating-rest-endpoints)
+  - [@RestController](#restcontroller)
+  - [HTTP Method Mappings](#http-method-mappings)
+  - [A Complete CRUD Controller](#a-complete-crud-controller)
+- [4. Request Parameters](#4-request-parameters)
+  - [@PathVariable](#pathvariable)
+  - [@RequestParam](#requestparam)
+  - [@RequestBody](#requestbody)
+  - [@RequestHeader](#requestheader)
+- [5. HTTP Responses with ResponseEntity](#5-http-responses-with-responseentity)
+  - [Common HTTP Status Codes](#common-http-status-codes)
+- [6. Input Validation with Jakarta Bean Validation](#6-input-validation-with-jakarta-bean-validation)
+  - [Important: jakarta.validation not javax.validation](#important-jakartavalidation-not-javaxvalidation)
+  - [Validation Annotations](#validation-annotations)
+  - [DTOs with Validation](#dtos-with-validation)
+  - [How Validation Works](#how-validation-works)
+- [7. Exception Handling with @RestControllerAdvice](#7-exception-handling-with-restcontrolleradvice)
+  - [Custom Error Response](#custom-error-response)
+  - [Global Exception Handler](#global-exception-handler)
+  - [What @RestControllerAdvice Does](#what-restcontrolleradvice-does)
+  - [Adding Domain Exception Handling](#adding-domain-exception-handling)
+- [8. DTOs (Data Transfer Objects)](#8-dtos-data-transfer-objects)
+  - [Why Use DTOs Instead of Entities?](#why-use-dtos-instead-of-entities)
+  - [Request DTO](#request-dto)
+  - [Response DTO](#response-dto)
+- [9. Pagination and Sorting](#9-pagination-and-sorting)
+  - [Using Pageable](#using-pageable)
+  - [Request Example](#request-example)
+- [10. Logging with SLF4J](#10-logging-with-slf4j)
+  - [Setting Up Logging](#setting-up-logging)
+  - [Log Levels](#log-levels)
+  - [What Not to Log](#what-not-to-log)
+  - [SLF4J Syntax](#slf4j-syntax)
+- [11. Spring Boot Actuator](#11-spring-boot-actuator)
+  - [Adding Actuator](#adding-actuator)
+  - [Available Endpoints](#available-endpoints)
+  - [Exposing Endpoints](#exposing-endpoints)
+  - [Custom Health Check](#custom-health-check)
+- [What You Learned](#what-you-learned)
+- [11. Content Negotiation and Media Types](#11-content-negotiation-and-media-types)
+  - [Producing JSON and XML](#producing-json-and-xml)
+  - [Adding XML Support](#adding-xml-support)
+- [12. Cross-Origin Resource Sharing (CORS)](#12-cross-origin-resource-sharing-cors)
+  - [Per-Controller CORS](#per-controller-cors)
+  - [Global CORS Configuration](#global-cors-configuration)
+  - [How CORS Works](#how-cors-works)
+- [13. Spring Boot Configuration Properties](#13-spring-boot-configuration-properties)
+  - [@ConfigurationProperties — Type-Safe Configuration](#configurationproperties-type-safe-configuration)
+  - [Using in Services](#using-in-services)
+  - [@Value vs @ConfigurationProperties](#value-vs-configurationproperties)
+- [14. Understanding Spring Boot Auto-Configuration](#14-understanding-spring-boot-auto-configuration)
+  - [How It Works](#how-it-works)
+  - [Discovering Auto-Configuration](#discovering-auto-configuration)
+  - [Excluding Auto-Configuration](#excluding-auto-configuration)
+- [15. Spring Boot Actuator Deep Dive](#15-spring-boot-actuator-deep-dive)
+  - [Enabling Actuator](#enabling-actuator)
+  - [Key Endpoints](#key-endpoints)
+  - [Exposing Endpoints](#exposing-endpoints)
+  - [Changing Log Level at Runtime (No Restart!)](#changing-log-level-at-runtime-no-restart)
+  - [Build Info Endpoint](#build-info-endpoint)
+- [16. Spring Boot DevTools](#16-spring-boot-devtools)
+  - [Automatic Restart](#automatic-restart)
+  - [Live Reload](#live-reload)
+  - [Disabling DevTools in Production](#disabling-devtools-in-production)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 <h2 id="1-what-is-spring-boot">1. What Is Spring Boot?<a class="anchor-link" href="#1-what-is-spring-boot" title="Permanent link">¶</a></h2>
 <p><strong>Spring Boot</strong> is a framework that makes building Java applications faster and easier. It is built on top of the <strong>Spring Framework</strong>, which has been the most popular Java framework since 2003.</p>
 <h3 id="the-problem-spring-boot-solves">The Problem Spring Boot Solves<a class="anchor-link" href="#the-problem-spring-boot-solves" title="Permanent link">¶</a></h3>
@@ -838,50 +917,6 @@ public class DatabaseHealthIndicator implements HealthIndicator {
 }</code></pre>
 <p>Now <code>GET /actuator/health</code> includes <code>"database": {"status": "UP", "details": {"database": "reachable"}}</code>.</p>
 <hr />
-<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-create-a-productcontroller">Exercise 1: Create a ProductController<a class="anchor-link" href="#exercise-1-create-a-productcontroller" title="Permanent link">¶</a></h3>
-<p>Create a <code>ProductController</code> with endpoints:
-- <code>GET /api/products</code> — list all products
-- <code>GET /api/products/{id}</code> — get a product by ID
-- <code>POST /api/products</code> — create a product
-- <code>DELETE /api/products/{id}</code> — delete a product</p>
-<p>Create the DTOs <code>CreateProductRequest</code> and <code>ProductResponse</code>.</p>
-<details>
-<summary>Hint</summary>
-
-Follow the `OrderController` pattern. Create records `CreateProductRequest` (with `@NotBlank name`, `@NotNull price`, `@Positive stock`, `@NotBlank category`) and `ProductResponse` (with a `from()` factory method). Use `@Valid` on the POST method.
-</details>
-
-<h3 id="exercise-2-add-pagination">Exercise 2: Add Pagination<a class="anchor-link" href="#exercise-2-add-pagination" title="Permanent link">¶</a></h3>
-<p>Modify the product list endpoint to accept pagination parameters: <code>page</code>, <code>size</code>, <code>sortBy</code>, <code>direction</code>. Use <code>PageRequest</code> and <code>Sort</code> to create a <code>Pageable</code>.</p>
-<details>
-<summary>Hint</summary>
-
-Use `@RequestParam(defaultValue = "0") int page`, `@RequestParam(defaultValue = "20") int size`, etc. Build the `Pageable` with `PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy))`.
-</details>
-
-<h3 id="exercise-3-add-custom-exception-handling">Exercise 3: Add Custom Exception Handling<a class="anchor-link" href="#exercise-3-add-custom-exception-handling" title="Permanent link">¶</a></h3>
-<p>Create a <code>ProductNotFoundException</code>. Add an <code>@ExceptionHandler</code> in <code>GlobalExceptionHandler</code> that returns a 404 with an <code>ErrorResponse</code>.</p>
-<details>
-<summary>Hint</summary>
-
-Create the exception class extending `RuntimeException` with a constructor taking `Long productId`. In `GlobalExceptionHandler`, add `@ExceptionHandler(ProductNotFoundException.class)` that returns `ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)`.
-</details>
-
-<h3 id="exercise-4-add-validation-to-createproductrequest">Exercise 4: Add Validation to CreateProductRequest<a class="anchor-link" href="#exercise-4-add-validation-to-createproductrequest" title="Permanent link">¶</a></h3>
-<p>Add validation annotations to <code>CreateProductRequest</code>:
-- <code>name</code> must not be blank (<code>@NotBlank</code>)
-- <code>price</code> must be positive (<code>@Positive</code>)
-- <code>stock</code> must be at least 0 (<code>@Min(0)</code>)
-- <code>category</code> must not be blank (<code>@NotBlank</code>)</p>
-<p>Test that invalid input returns a 400 error.</p>
-<details>
-<summary>Hint</summary>
-
-Use `jakarta.validation.constraints.*` annotations. Use `@Valid` on the `@RequestBody` parameter. Send a POST with a blank name and verify you get a 400 response with the validation message.
-</details>
-
-<hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong>Spring Boot</strong> eliminates boilerplate through auto-configuration, starter dependencies, and an embedded server</li>
@@ -1200,7 +1235,7 @@ It's only active when running from an IDE or with <code>mvn spring-boot:run</cod
 </li>
 </ul>
 <hr />
-<p>← <a href="02-dependency-injection.html">Previous: Module 02</a> | <a href="04-repository-pattern.html">Next: Module 04</a> →</p>
+<p>← <a href="02-dependency-injection.html">Previous: Module 02 — Dependency Injection</a> | <a href="04-repository-pattern.html">Next: Module 04 — Repository Pattern</a> →</p>
       </article>
 
       <div class="footer-nav"><a href="02-dependency-injection.html" class="nav-link prev">← Dependency Injection</a><a href="04-repository-pattern.html" class="nav-link next">Repository Pattern →</a></div>

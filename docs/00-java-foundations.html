@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Java Foundations — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Java for Experienced Developers — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item active">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -97,1471 +97,371 @@
             <span></span><span></span><span></span>
         </button>
         <div class="breadcrumb">
-          <a href="index.html">Home</a> › <span>Java Foundations</span>
+          <a href="index.html">Home</a> › <span>Java for Experienced Developers</span>
         </div>
       </header>
 
       <article class="content">
-        <h1 id="module-00-java-foundations">Module 00: Java Foundations<a class="anchor-link" href="#module-00-java-foundations" title="Permanent link">¶</a></h1>
-<h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
-<ul>
-<li>What programming is and why we use Java</li>
-<li>How to install the Java Development Kit (JDK) and an IDE</li>
-<li>Your first Java program — Hello World</li>
-<li>Variables and primitive types</li>
-<li>Reference types (String, arrays)</li>
-<li>Operators (arithmetic, relational, logical, ternary)</li>
-<li>Control flow: if/else, switch, loops</li>
-<li>Methods: parameters, return types, void</li>
-<li>Object-Oriented Programming: classes, objects, constructors</li>
-<li>The four OOP pillars: encapsulation, inheritance, polymorphism, abstraction</li>
-<li>Interfaces and abstract classes</li>
-<li>Java collections: List, Set, Map</li>
-<li>Java 21 records</li>
-<li>Enums</li>
-<li>Exception handling</li>
-<li>Generics basics</li>
-<li>The <code>var</code> keyword</li>
-<li>Packages and imports</li>
-</ul>
-<h2 id="prerequisites">Prerequisites<a class="anchor-link" href="#prerequisites" title="Permanent link">¶</a></h2>
-<ul>
-<li>A computer running macOS, Linux, or Windows</li>
-<li>No prior programming experience required — we start from zero</li>
-</ul>
+        <h1 id="module-00-java-for-experienced-developers">Module 00: Java for Experienced Developers<a class="anchor-link" href="#module-00-java-for-experienced-developers" title="Permanent link">¶</a></h1>
+<details>
+  <summary>Table of Contents</summary>
+  <p><a href="#record-guide">1. Java 21 Records</a></p>
+  <p><a href="#generics-guide">2. Generics</a></p>
+  <p><a href="#pattern-matching-guide">3. Pattern Matching (Method)</a></p>
+  <p><a href="#var-guide">4. The `var` Keyword</a></p>
+  <p><a href="#switch-expressions-guide">5. Switch Expressions</a></p>
+  <p><a href="#collections-guide">6. Collections Framework</a></p>
+  <p><a href="#exception-handling-guide">7. Exception Handling</a></p>
+  <p><a href="#packages-imports-guide">8. Packages and Imports</a></p>
+  <p><a href="#oop-guide">9. Object‑Oriented Programming (Classes, Interfaces, Abstract Classes, Enums)</a></p>
+  <p><a href="#functional-interfaces-guide">10. Functional Interfaces &amp; Method References</a></p>
+  <p><a href="#sealed-classes-guide">11. Sealed Classes &amp; Interfaces</a></p>
+  <p><a href="#bigdecimal-guide">12. Money with BigDecimal</a></p>
+  <p><a href="#domain-example-guide">13. Order Management Domain – Customers, Products, Orders</a></p>
+  <p><a href="#what-you-learned">14. What You Learned</a></p>
+</details>
+
 <hr />
-<h2 id="1-what-is-programming">1. What Is Programming?<a class="anchor-link" href="#1-what-is-programming" title="Permanent link">¶</a></h2>
-<p><strong>Programming</strong> is the act of writing instructions for a computer to execute. A computer is very fast at following instructions, but it needs you to write them in a language it understands.</p>
-<p>You cook a meal by following a recipe step by step. Programming is the same — you write a recipe (called a <strong>program</strong>) and the computer (the chef) executes it.</p>
-<h3 id="what-is-java">What Is Java?<a class="anchor-link" href="#what-is-java" title="Permanent link">¶</a></h3>
-<p><strong>Java</strong> is a programming language created in 1995 by Sun Microsystems (now owned by Oracle). It is one of the most popular programming languages in the world, used by millions of developers to build:</p>
-<ul>
-<li>Backend services (the server side of web applications)</li>
-<li>Android mobile apps</li>
-<li>Enterprise software (banking, e-commerce, healthcare)</li>
-<li>Big data processing systems</li>
-</ul>
-<h3 id="why-java">Why Java?<a class="anchor-link" href="#why-java" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>Benefit</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Write once, run anywhere</strong></td>
-<td>Java compiles to bytecode that runs on any operating system with a JVM</td>
-</tr>
-<tr>
-<td><strong>Strongly typed</strong></td>
-<td>The compiler catches errors before the code runs</td>
-</tr>
-<tr>
-<td><strong>Object-oriented</strong></td>
-<td>Organizes code into reusable components (classes)</td>
-</tr>
-<tr>
-<td><strong>Huge ecosystem</strong></td>
-<td>Thousands of libraries and frameworks (like Spring Boot)</td>
-</tr>
-<tr>
-<td><strong>Large community</strong></td>
-<td>Easy to find help, tutorials, and answers</td>
-</tr>
-</tbody>
-</table>
-<h3 id="the-jvm-jdk-and-jre">The JVM, JDK, and JRE<a class="anchor-link" href="#the-jvm-jdk-and-jre" title="Permanent link">¶</a></h3>
-<p>These three terms are confusing for beginners, so let's clarify:</p>
-<table>
-<thead>
-<tr>
-<th>Term</th>
-<th>Full Name</th>
-<th>What It Is</th>
-<th>Do You Need It?</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>JVM</strong></td>
-<td>Java Virtual Machine</td>
-<td>Runs Java bytecode on your computer</td>
-<td>Yes — it runs your programs</td>
-</tr>
-<tr>
-<td><strong>JRE</strong></td>
-<td>Java Runtime Environment</td>
-<td>JVM + core libraries (enough to run Java programs)</td>
-<td>Only if you just want to run, not compile</td>
-</tr>
-<tr>
-<td><strong>JDK</strong></td>
-<td>Java Development Kit</td>
-<td>JRE + compiler (<code>javac</code>) + development tools</td>
-<td>Yes — this is what you install as a developer</td>
-</tr>
-</tbody>
-</table>
-<p>Think of it this way:
-- The <strong>JVM</strong> is the engine in a car
-- The <strong>JRE</strong> is the engine + the basic parts needed to drive
-- The <strong>JDK</strong> is the engine + tools to build and modify the car</p>
-<hr />
-<h2 id="2-installing-the-jdk-and-an-ide">2. Installing the JDK and an IDE<a class="anchor-link" href="#2-installing-the-jdk-and-an-ide" title="Permanent link">¶</a></h2>
-<h3 id="installing-the-jdk">Installing the JDK<a class="anchor-link" href="#installing-the-jdk" title="Permanent link">¶</a></h3>
-<p>We will use <strong>JDK 21</strong> (the latest Long-Term Support version as of 2025).</p>
-<p><strong>macOS (using Homebrew):</strong>
-<pre class="code-block"><code class="language-bash">brew install openjdk@21</code></pre></p>
-<p><strong>Linux (Ubuntu/Debian):</strong>
-<pre class="code-block"><code class="language-bash">sudo apt install openjdk-21-jdk</code></pre></p>
-<p><strong>Windows:</strong>
-Download the installer from <a href="https://adoptium.net/">Adoptium (Eclipse Temurin)</a> and run it.</p>
-<h3 id="verifying-the-installation">Verifying the Installation<a class="anchor-link" href="#verifying-the-installation" title="Permanent link">¶</a></h3>
-<p>Open a terminal (Command Prompt on Windows, Terminal on macOS/Linux) and type:</p>
-<pre class="code-block"><code class="language-bash">java -version</code></pre>
-<p>You should see something like:
-<pre class="code-block"><code>openjdk version "21.0.x" 2024-xx-xx</code></pre></p>
-<h3 id="installing-an-ide">Installing an IDE<a class="anchor-link" href="#installing-an-ide" title="Permanent link">¶</a></h3>
-<p>An <strong>IDE (Integrated Development Environment)</strong> is a program that helps you write code — like a word processor but for programming. It highlights syntax, suggests completions, and helps find errors.</p>
-<p>We recommend <strong>IntelliJ IDEA Community Edition</strong> (free):</p>
-<ol>
-<li>Go to <a href="https://www.jetbrains.com/idea/download/">https://www.jetbrains.com/idea/download/</a></li>
-<li>Download the Community Edition (free, not the Ultimate edition)</li>
-<li>Install it following the instructions for your operating system</li>
-</ol>
-<hr />
-<h2 id="3-your-first-java-program-hello-world">3. Your First Java Program — Hello World<a class="anchor-link" href="#3-your-first-java-program-hello-world" title="Permanent link">¶</a></h2>
-<p>Every programmer's first program prints "Hello, World!" to the screen. Let's do it.</p>
-<h3 id="creating-the-file">Creating the File<a class="anchor-link" href="#creating-the-file" title="Permanent link">¶</a></h3>
-<p>In IntelliJ IDEA:
-1. Click <strong>New Project</strong>
-2. Name it <code>ordermgmt</code>
-3. Select <strong>Java</strong> as the language
-4. Select <strong>21</strong> as the JDK
-5. Click <strong>Create</strong></p>
-<p>IntelliJ creates a project with this structure:
-<pre class="code-block"><code>ordermgmt/
-├── src/
-│   └── Main.java
-└── ordermgmt.iml</code></pre></p>
-<h3 id="the-hello-world-program">The Hello World Program<a class="anchor-link" href="#the-hello-world-program" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
-    }
-}</code></pre>
-<h3 id="line-by-line-explanation">Line-by-Line Explanation<a class="anchor-link" href="#line-by-line-explanation" title="Permanent link">¶</a></h3>
-<p><strong><code>public class Main</code></strong> — declares a class named <code>Main</code>. In Java, every file contains one public class, and the file name must match the class name (so this must be in <code>Main.java</code>). A <strong>class</strong> is a container for code — we'll explain classes in detail later.</p>
-<p><strong><code>public static void main(String[] args)</code></strong> — this is the <strong>main method</strong>, the entry point of every Java program. When you run a Java application, the JVM looks for this method and executes it.</p>
-<ul>
-<li><code>public</code> — this method can be accessed from outside the class</li>
-<li><code>static</code> — this method belongs to the class itself, not to an instance of the class (we'll explain this when we cover OOP)</li>
-<li><code>void</code> — this method does not return a value</li>
-<li><code>main</code> — the method name (the JVM looks for exactly this name)</li>
-<li><code>String[] args</code> — an array of text arguments passed to the program from the command line</li>
-</ul>
-<p><strong><code>System.out.println("Hello, World!");</code></strong> — prints the text <code>Hello, World!</code> to the console (the screen) and moves to the next line.</p>
-<ul>
-<li><code>System</code> is a built-in Java class that provides system-level functionality</li>
-<li><code>out</code> is a field on <code>System</code> that represents the standard output (the console)</li>
-<li><code>println</code> is a method that prints text and adds a newline at the end</li>
-<li><code>"Hello, World!"</code> is a <strong>string literal</strong> — text enclosed in double quotes</li>
-<li>The semicolon <code>;</code> marks the end of the statement (like a period at the end of a sentence)</li>
-</ul>
-<h3 id="running-the-program">Running the Program<a class="anchor-link" href="#running-the-program" title="Permanent link">¶</a></h3>
-<p>In IntelliJ: click the green play button next to <code>main</code>. Or right-click and select <strong>Run 'Main.main()'</strong>.</p>
-<p>In the terminal:
-<pre class="code-block"><code class="language-bash">javac Main.java    # Compiles the .java file into a .class file
-java Main          # Runs the compiled program</code></pre></p>
-<p>Output:
-<pre class="code-block"><code>Hello, World!</code></pre></p>
-<hr />
-<h2 id="4-variables-and-primitive-types">4. Variables and Primitive Types<a class="anchor-link" href="#4-variables-and-primitive-types" title="Permanent link">¶</a></h2>
-<p>A <strong>variable</strong> is a named container that stores a value. You give it a name, a type, and assign a value.</p>
-<h3 id="primitive-types">Primitive Types<a class="anchor-link" href="#primitive-types" title="Permanent link">¶</a></h3>
-<p>Java has 8 <strong>primitive types</strong> — basic building blocks that store simple values:</p>
-<table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Description</th>
-<th>Size</th>
-<th>Example Values</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>int</code></td>
-<td>Whole numbers (no decimals)</td>
-<td>32 bits</td>
-<td>0, 42, -7, 1000000</td>
-</tr>
-<tr>
-<td><code>long</code></td>
-<td>Very large whole numbers</td>
-<td>64 bits</td>
-<td>9000000000000L</td>
-</tr>
-<tr>
-<td><code>double</code></td>
-<td>Decimal numbers</td>
-<td>64 bits</td>
-<td>3.14, -0.001, 99.99</td>
-</tr>
-<tr>
-<td><code>float</code></td>
-<td>Smaller decimal numbers</td>
-<td>32 bits</td>
-<td>3.14f</td>
-</tr>
-<tr>
-<td><code>boolean</code></td>
-<td>True or false</td>
-<td>1 bit</td>
-<td>true, false</td>
-</tr>
-<tr>
-<td><code>char</code></td>
-<td>A single character</td>
-<td>16 bits</td>
-<td>'A', '3', '$'</td>
-</tr>
-<tr>
-<td><code>byte</code></td>
-<td>Small whole number</td>
-<td>8 bits</td>
-<td>-128 to 127</td>
-</tr>
-<tr>
-<td><code>short</code></td>
-<td>Medium whole number</td>
-<td>16 bits</td>
-<td>-32768 to 32767</td>
-</tr>
-</tbody>
-</table>
-<h3 id="declaring-variables">Declaring Variables<a class="anchor-link" href="#declaring-variables" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">public class Variables {
-    public static void main(String[] args) {
-        // Declare and assign in one step
-        int age = 30;
-        double price = 19.99;
-        boolean isActive = true;
-        char grade = 'A';
+<h1 id="1-java-21-records">1. Java 21 Records<a class="anchor-link" href="#1-java-21-records" title="Permanent link">¶</a></h1>
+<p>Java 21 introduced <strong>records</strong>: a succinct way to model immutable data carriers. They reduce boilerplate for constructors, getters, equals, hashCode, and toString.</p>
+<pre class="code-block"><code class="language-java">import java.math.BigDecimal;
 
-        // Declare first, assign later
-        long population;
-        population = 8000000000L; // L suffix means "long"
-
-        // Print the values
-        System.out.println("Age: " + age);
-        System.out.println("Price: " + price);
-        System.out.println("Active: " + isActive);
-        System.out.println("Grade: " + grade);
-        System.out.println("Population: " + population);
-    }
-}</code></pre>
-<h3 id="important-notes-about-money">Important Notes About Money<a class="anchor-link" href="#important-notes-about-money" title="Permanent link">¶</a></h3>
-<p>Never use <code>double</code> or <code>float</code> for money. Floating-point numbers can have rounding errors:</p>
-<pre class="code-block"><code class="language-java">// PROBLEM: floating point rounding errors
-double a = 0.1 + 0.2;
-System.out.println(a); // Prints 0.30000000000000004, NOT 0.3!
-
-// SOLUTION: use BigDecimal for money (we'll cover this later)</code></pre>
-<p>For money, always use <code>java.math.BigDecimal</code>. We'll introduce it when we build the Order Management domain.</p>
-<hr />
-<h2 id="5-reference-types-string-and-arrays">5. Reference Types: String and Arrays<a class="anchor-link" href="#5-reference-types-string-and-arrays" title="Permanent link">¶</a></h2>
-<h3 id="strings">Strings<a class="anchor-link" href="#strings" title="Permanent link">¶</a></h3>
-<p>A <strong>String</strong> is a sequence of characters (text). It is a <strong>reference type</strong>, not a primitive — meaning it's an object with methods:</p>
-<pre class="code-block"><code class="language-java">String name = "Alice";
-String greeting = "Hello, " + name + "!"; // Concatenation with +
-
-System.out.println(greeting); // Hello, Alice!
-System.out.println(name.length()); // 5 (the length method)
-System.out.println(name.toUpperCase()); // ALICE
-System.out.println(name.charAt(0)); // A (character at position 0)</code></pre>
-<h3 id="arrays">Arrays<a class="anchor-link" href="#arrays" title="Permanent link">¶</a></h3>
-<p>An <strong>array</strong> is a fixed-size collection of values of the same type:</p>
-<pre class="code-block"><code class="language-java">// Declare and initialize an array
-int[] numbers = {10, 20, 30, 40, 50};
-
-// Access elements by index (starts at 0)
-System.out.println(numbers[0]); // 10
-System.out.println(numbers[2]); // 30
-
-// Change an element
-numbers[0] = 100;
-System.out.println(numbers[0]); // 100
-
-// Length of array
-System.out.println(numbers.length); // 5</code></pre>
-<hr />
-<h2 id="6-operators">6. Operators<a class="anchor-link" href="#6-operators" title="Permanent link">¶</a></h2>
-<h3 id="arithmetic-operators">Arithmetic Operators<a class="anchor-link" href="#arithmetic-operators" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">int a = 10;
-int b = 3;
-
-System.out.println(a + b);  // 13 (addition)
-System.out.println(a - b);  // 7  (subtraction)
-System.out.println(a * b);  // 30 (multiplication)
-System.out.println(a / b);  // 3  (integer division — no remainder)
-System.out.println(a % b);  // 1  (modulus — remainder of division)
-
-// Increment and decrement
-int count = 0;
-count++;  // count is now 1 (same as count = count + 1)
-count--;  // count is now 0 (same as count = count - 1)</code></pre>
-<h3 id="relational-operators">Relational Operators<a class="anchor-link" href="#relational-operators" title="Permanent link">¶</a></h3>
-<p>These compare two values and return a <code>boolean</code> (<code>true</code> or <code>false</code>):</p>
-<pre class="code-block"><code class="language-java">int x = 5;
-int y = 10;
-
-System.out.println(x == y);  // false (equal to)
-System.out.println(x != y);  // true  (not equal to)
-System.out.println(x &lt; y);   // true  (less than)
-System.out.println(x &gt; y);   // false (greater than)
-System.out.println(x &lt;= 5);  // true  (less than or equal)
-System.out.println(x &gt;= 6);  // false (greater than or equal)</code></pre>
-<h3 id="logical-operators">Logical Operators<a class="anchor-link" href="#logical-operators" title="Permanent link">¶</a></h3>
-<p>These combine boolean values:</p>
-<pre class="code-block"><code class="language-java">boolean isLoggedIn = true;
-boolean hasPermission = false;
-
-System.out.println(isLoggedIn &amp;&amp; hasPermission); // false (AND — both must be true)
-System.out.println(isLoggedIn || hasPermission); // true  (OR — at least one must be true)
-System.out.println(!isLoggedIn);                 // false (NOT — inverts the value)</code></pre>
-<h3 id="ternary-operator">Ternary Operator<a class="anchor-link" href="#ternary-operator" title="Permanent link">¶</a></h3>
-<p>A shorthand for if/else:</p>
-<pre class="code-block"><code class="language-java">int score = 75;
-String result = (score &gt;= 60) ? "Pass" : "Fail";
-System.out.println(result); // Pass</code></pre>
-<hr />
-<h2 id="7-control-flow">7. Control Flow<a class="anchor-link" href="#7-control-flow" title="Permanent link">¶</a></h2>
-<p>Control flow statements let your program make decisions and repeat actions.</p>
-<h3 id="if-else-if-else">if / else if / else<a class="anchor-link" href="#if-else-if-else" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">int temperature = 25;
-
-if (temperature &gt; 30) {
-    System.out.println("It's hot outside!");
-} else if (temperature &gt; 20) {
-    System.out.println("It's warm and pleasant.");
-} else if (temperature &gt; 10) {
-    System.out.println("It's cool.");
-} else {
-    System.out.println("It's cold!");
-}</code></pre>
-<h3 id="switch">switch<a class="anchor-link" href="#switch" title="Permanent link">¶</a></h3>
-<p>When you have many possible values for a single variable, <code>switch</code> is cleaner than a long if/else chain:</p>
-<pre class="code-block"><code class="language-java">String day = "MONDAY";
-
-switch (day) {
-    case "MONDAY" -&gt; System.out.println("Start of the work week");
-    case "FRIDAY" -&gt; System.out.println("Almost the weekend!");
-    case "SATURDAY", "SUNDAY" -&gt; System.out.println("Weekend!");
-    default -&gt; System.out.println("Midweek");
-}</code></pre>
-<h3 id="for-loop">for Loop<a class="anchor-link" href="#for-loop" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// Traditional for loop
-for (int i = 0; i &lt; 5; i++) {
-    System.out.println("Iteration " + i);
-}
-
-// Enhanced for loop (for-each) — used with arrays and collections
-int[] numbers = {10, 20, 30};
-for (int num : numbers) {
-    System.out.println(num);
-}</code></pre>
-<h3 id="while-loop">while Loop<a class="anchor-link" href="#while-loop" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">int count = 0;
-while (count &lt; 3) {
-    System.out.println("Count: " + count);
-    count++;
-}</code></pre>
-<h3 id="do-while-loop">do-while Loop<a class="anchor-link" href="#do-while-loop" title="Permanent link">¶</a></h3>
-<p>Like <code>while</code>, but the condition is checked at the end — so the body always runs at least once:</p>
-<pre class="code-block"><code class="language-java">int i = 0;
-do {
-    System.out.println("At least once: " + i);
-    i++;
-} while (i &lt; 3);</code></pre>
-<hr />
-<h2 id="8-methods">8. Methods<a class="anchor-link" href="#8-methods" title="Permanent link">¶</a></h2>
-<p>A <strong>method</strong> is a reusable block of code that does one task. Think of it as a recipe inside your program.</p>
-<pre class="code-block"><code class="language-java">public class Methods {
-
-    // A method that takes parameters and returns a value
-    static int add(int a, int b) {
-        return a + b;
-    }
-
-    // A method that returns nothing (void)
-    static void greet(String name) {
-        System.out.println("Hello, " + name + "!");
-    }
-
-    // A method with no parameters
-    static double getPi() {
-        return 3.14159;
-    }
-
-    public static void main(String[] args) {
-        int sum = add(5, 3);           // Calls add, stores the result
-        System.out.println(sum);       // 8
-
-        greet("Alice");                 // Calls greet (prints "Hello, Alice!")
-
-        double pi = getPi();
-        System.out.println(pi);         // 3.14159
-    }
-}</code></pre>
-<h3 id="method-parts">Method Parts<a class="anchor-link" href="#method-parts" title="Permanent link">¶</a></h3>
-<ul>
-<li><strong>Return type</strong> — what type of value the method produces (<code>int</code>, <code>String</code>, <code>void</code>). <code>void</code> means no return value.</li>
-<li><strong>Name</strong> — how you call the method (<code>add</code>, <code>greet</code>, <code>getPi</code>)</li>
-<li><strong>Parameters</strong> — inputs the method receives (<code>int a, int b</code>)</li>
-<li><strong>Body</strong> — the code that runs when the method is called</li>
-<li><strong>Return statement</strong> — sends the result back to the caller (<code>return a + b;</code>)</li>
-</ul>
-<hr />
-<h2 id="9-object-oriented-programming-oop">9. Object-Oriented Programming (OOP)<a class="anchor-link" href="#9-object-oriented-programming-oop" title="Permanent link">¶</a></h2>
-<p>So far, everything has been inside <code>main</code> methods with <code>static</code>. Real Java programs use <strong>classes and objects</strong> — this is called <strong>Object-Oriented Programming (OOP)</strong>.</p>
-<h3 id="what-is-a-class">What Is a Class?<a class="anchor-link" href="#what-is-a-class" title="Permanent link">¶</a></h3>
-<p>A <strong>class</strong> is a blueprint. It describes what data an object holds and what it can do.</p>
-<p>A <strong>class is to an object what a blueprint is to a house.</strong> You can build many houses from one blueprint.</p>
-<pre class="code-block"><code class="language-java">public class Customer {
-    // Fields — the data the object holds
-    String name;
-    String email;
-    int age;
-
-    // Constructor — creates a new Customer object
-    Customer(String name, String email, int age) {
-        this.name = name;
-        this.email = email;
-        this.age = age;
-    }
-
-    // Method — what the object can do
-    void printInfo() {
-        System.out.println("Name: " + name);
-        System.out.println("Email: " + email);
-        System.out.println("Age: " + age);
-    }
-}
-
-public class Main {
-    public static void main(String[] args) {
-        // Create a Customer object (instance of the Customer class)
-        Customer customer = new Customer("Alice", "alice@example.com", 30);
-
-        // Call its method
-        customer.printInfo();
-        // Name: Alice
-        // Email: alice@example.com
-        // Age: 30
-    }
-}</code></pre>
-<h3 id="what-is-this">What Is <code>this</code>?<a class="anchor-link" href="#what-is-this" title="Permanent link">¶</a></h3>
-<p>In a constructor or method, <code>this</code> refers to the current object — the one being created or operated on. In <code>this.name = name;</code>, the left side (<code>this.name</code>) is the field, and the right side (<code>name</code>) is the parameter. They have the same name, so <code>this.</code> distinguishes the field from the parameter.</p>
-<hr />
-<h2 id="10-the-four-pillars-of-oop">10. The Four Pillars of OOP<a class="anchor-link" href="#10-the-four-pillars-of-oop" title="Permanent link">¶</a></h2>
-<h3 id="1-encapsulation">1. Encapsulation<a class="anchor-link" href="#1-encapsulation" title="Permanent link">¶</a></h3>
-<p><strong>Encapsulation</strong> means hiding internal data and only allowing access through controlled methods (getters and setters).</p>
-<pre class="code-block"><code class="language-java">public class Product {
-    private String name;     // private — cannot be accessed directly from outside
-    private double price;
-
-    public Product(String name, double price) {
-        setName(name);
-        setPrice(price);
-    }
-
-    // Getter — provides read access
-    public String getName() {
-        return name;
-    }
-
-    // Setter — provides write access with validation
-    public void setName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be blank");
-        }
-        this.name = name;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        if (price &lt; 0) {
-            throw new IllegalArgumentException("Price cannot be negative");
-        }
-        this.price = price;
-    }
-}</code></pre>
-<p>Without encapsulation, anyone could set <code>product.price = -1000</code>. With encapsulation, the setter validates the input.</p>
-<h3 id="2-inheritance">2. Inheritance<a class="anchor-link" href="#2-inheritance" title="Permanent link">¶</a></h3>
-<p><strong>Inheritance</strong> means a class can inherit fields and methods from another class.</p>
-<pre class="code-block"><code class="language-java">// Parent class (also called "superclass" or "base class")
-public class Animal {
-    String name;
-
-    public Animal(String name) {
-        this.name = name;
-    }
-
-    public void eat() {
-        System.out.println(name + " is eating.");
-    }
-}
-
-// Child class (also called "subclass" or "derived class")
-public class Dog extends Animal {
-    public Dog(String name) {
-        super(name); // Calls the parent's constructor
-    }
-
-    public void bark() {
-        System.out.println(name + " says: Woof!");
-    }
-}
-
-// Usage:
-Dog dog = new Dog("Rex");
-dog.eat();  // Inherited from Animal — prints "Rex is eating."
-dog.bark(); // Defined in Dog — prints "Rex says: Woof!"</code></pre>
-<h3 id="3-polymorphism">3. Polymorphism<a class="anchor-link" href="#3-polymorphism" title="Permanent link">¶</a></h3>
-<p><strong>Polymorphism</strong> means the same method call can behave differently depending on the object type.</p>
-<pre class="code-block"><code class="language-java">public class Animal {
-    String name;
-    public Animal(String name) { this.name = name; }
-    public void makeSound() {
-        System.out.println(name + " makes a generic sound.");
-    }
-}
-
-public class Dog extends Animal {
-    public Dog(String name) { super(name); }
-    @Override
-    public void makeSound() {
-        System.out.println(name + " says: Woof!");
-    }
-}
-
-public class Cat extends Animal {
-    public Cat(String name) { super(name); }
-    @Override
-    public void makeSound() {
-        System.out.println(name + " says: Meow!");
-    }
-}
-
-// Polymorphism in action:
-Animal[] animals = { new Dog("Rex"), new Cat("Whiskers") };
-for (Animal animal : animals) {
-    animal.makeSound(); // Each calls its own version!
-}
-// Rex says: Woof!
-// Whiskers says: Meow!</code></pre>
-<p>The variable type is <code>Animal</code>, but the actual method called depends on the real object type (<code>Dog</code> or <code>Cat</code>). This is polymorphism.</p>
-<h3 id="4-abstraction">4. Abstraction<a class="anchor-link" href="#4-abstraction" title="Permanent link">¶</a></h3>
-<p><strong>Abstraction</strong> means hiding complex implementation details and exposing only what's necessary.</p>
-<p>There are two ways to achieve abstraction in Java: <strong>abstract classes</strong> and <strong>interfaces</strong>.</p>
-<hr />
-<h2 id="11-interfaces-and-abstract-classes">11. Interfaces and Abstract Classes<a class="anchor-link" href="#11-interfaces-and-abstract-classes" title="Permanent link">¶</a></h2>
-<h3 id="interface">Interface<a class="anchor-link" href="#interface" title="Permanent link">¶</a></h3>
-<p>An <strong>interface</strong> is a contract. It defines what methods a class must have, but not how they work.</p>
-<pre class="code-block"><code class="language-java">// Interface — defines a contract
-public interface Discountable {
-    double applyDiscount(double discountPercent);
-}
-
-// A class can implement an interface
-public class Order implements Discountable {
-    private double total;
-
-    public Order(double total) {
-        this.total = total;
-    }
-
-    @Override
-    public double applyDiscount(double discountPercent) {
-        return total * (1 - discountPercent / 100);
-    }
-}
-
-// Another class can implement the same interface differently
-public class Product implements Discountable {
-    private double price;
-
-    public Product(double price) {
-        this.price = price;
-    }
-
-    @Override
-    public double applyDiscount(double discountPercent) {
-        double newPrice = price * (1 - discountPercent / 100);
-        return Math.max(newPrice, 0); // Price cannot go below 0
-    }
-}</code></pre>
-<h3 id="abstract-class">Abstract Class<a class="anchor-link" href="#abstract-class" title="Permanent link">¶</a></h3>
-<p>An <strong>abstract class</strong> is like a partially built class — it can have both implemented methods and abstract methods (methods without a body that subclasses must implement).</p>
-<pre class="code-block"><code class="language-java">public abstract class Shape {
-    // Abstract method — subclasses MUST implement this
-    public abstract double calculateArea();
-
-    // Concrete method — inherited as-is
-    public String describe() {
-        return "Shape with area: " + calculateArea();
-    }
-}
-
-public class Circle extends Shape {
-    private double radius;
-
-    public Circle(double radius) {
-        this.radius = radius;
-    }
-
-    @Override
-    public double calculateArea() {
-        return Math.PI * radius * radius;
-    }
-}
-
-// Usage:
-Shape circle = new Circle(5);
-System.out.println(circle.describe()); // Shape with area: 78.539...</code></pre>
-<h3 id="interface-vs-abstract-class">Interface vs Abstract Class<a class="anchor-link" href="#interface-vs-abstract-class" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>Interface</th>
-<th>Abstract Class</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Can have method bodies</td>
-<td>Only <code>default</code> methods</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td>Can have fields</td>
-<td>Only constants (<code>static final</code>)</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td>A class can have</td>
-<td>Multiple interfaces</td>
-<td>Only one parent class</td>
-</tr>
-<tr>
-<td>Use when</td>
-<td>You want to define a contract</td>
-<td>You want to share implementation</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="12-java-collections">12. Java Collections<a class="anchor-link" href="#12-java-collections" title="Permanent link">¶</a></h2>
-<p>Collections are data structures that store groups of objects. The three most common are:</p>
-<h3 id="list">List<a class="anchor-link" href="#list" title="Permanent link">¶</a></h3>
-<p>A <code>List</code> is an ordered collection that allows duplicates:</p>
-<pre class="code-block"><code class="language-java">import java.util.ArrayList;
-import java.util.List;
-
-List&lt;String&gt; names = new ArrayList&lt;&gt;();
-names.add("Alice");
-names.add("Bob");
-names.add("Charlie");
-names.add("Alice"); // Duplicates allowed
-
-System.out.println(names.size()); // 4
-System.out.println(names.get(0)); // Alice
-System.out.println(names.get(1)); // Bob
-
-// Iterate over the list
-for (String name : names) {
-    System.out.println(name);
-}
-
-// Remove an element
-names.remove("Bob");
-System.out.println(names.size()); // 3</code></pre>
-<h3 id="set">Set<a class="anchor-link" href="#set" title="Permanent link">¶</a></h3>
-<p>A <code>Set</code> is a collection that does NOT allow duplicates:</p>
-<pre class="code-block"><code class="language-java">import java.util.HashSet;
-import java.util.Set;
-
-Set&lt;String&gt; uniqueNames = new HashSet&lt;&gt;();
-uniqueNames.add("Alice");
-uniqueNames.add("Bob");
-uniqueNames.add("Alice"); // Duplicate — ignored!
-
-System.out.println(uniqueNames.size()); // 2</code></pre>
-<h3 id="map">Map<a class="anchor-link" href="#map" title="Permanent link">¶</a></h3>
-<p>A <code>Map</code> stores key-value pairs (like a dictionary):</p>
-<pre class="code-block"><code class="language-java">import java.util.HashMap;
-import java.util.Map;
-
-Map&lt;String, Integer&gt; ages = new HashMap&lt;&gt;();
-ages.put("Alice", 30);
-ages.put("Bob", 25);
-ages.put("Charlie", 35);
-
-System.out.println(ages.get("Alice")); // 30
-System.out.println(ages.containsKey("Bob")); // true
-System.out.println(ages.size()); // 3
-
-// Iterate over entries
-for (Map.Entry&lt;String, Integer&gt; entry : ages.entrySet()) {
-    System.out.println(entry.getKey() + " is " + entry.getValue() + " years old");
-}</code></pre>
-<hr />
-<h2 id="13-java-21-records">13. Java 21 Records<a class="anchor-link" href="#13-java-21-records" title="Permanent link">¶</a></h2>
-<p>A <strong>record</strong> is a special kind of class designed for holding data. It's a shortcut for creating immutable objects.</p>
-<h3 id="before-records-the-old-way">Before Records (the old way)<a class="anchor-link" href="#before-records-the-old-way" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">public class CustomerDTO {
-    private final Long id;
-    private final String name;
-    private final String email;
-
-    public CustomerDTO(Long id, String name, String email) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-    }
-
-    public Long getId() { return id; }
-    public String getName() { return name; }
-    public String getEmail() { return email; }
-
-    // Plus equals(), hashCode(), toString() — lots of boilerplate!
-}</code></pre>
-<h3 id="with-records-the-java-21-way">With Records (the Java 21 way)<a class="anchor-link" href="#with-records-the-java-21-way" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">public record CustomerDTO(Long id, String name, String email) {}</code></pre>
-<p>That single line does everything the 20-line class above does:
-- Constructor
-- Getters (<code>id()</code>, <code>name()</code>, <code>email()</code>)
-- <code>equals()</code>, <code>hashCode()</code>, <code>toString()</code>
-- Immutability (fields are <code>final</code>)</p>
-<pre class="code-block"><code class="language-java">CustomerDTO customer = new CustomerDTO(1L, "Alice", "alice@example.com");
-System.out.println(customer.name());     // Alice (getter uses the field name, not getName())
-System.out.println(customer.email());    // alice@example.com
-System.out.println(customer);            // CustomerDTO[id=1, name=Alice, email=alice@example.com]</code></pre>
-<h3 id="our-domain-entities-as-records">Our Domain Entities as Records<a class="anchor-link" href="#our-domain-entities-as-records" title="Permanent link">¶</a></h3>
-<p>Now we can define our Order Management domain entities using records (these are plain data objects — in later modules, we'll use JPA entities for the database):</p>
-<pre class="code-block"><code class="language-java">public record Customer(
-        Long id,
+public record Customer(
+        String id,
         String name,
         String email,
-        String address,
-        Instant createdAt
-) {}
-
-public record Product(
-        Long id,
-        String name,
-        BigDecimal price,
-        int stock,
-        String category,
-        Instant createdAt
-) {}
-
-public record OrderItem(
-        Long id,
+        // Money fields use BigDecimal for exact calculations
+        BigDecimal balance) {
+    // Implicit getters are generated
+    // No need for a public constructor – compile‑time generated
+}</code></pre>
+<p><strong>Key Benefits</strong>
+- Boiler‑plate‑free init
+- Automatic <code>equals</code>, <code>hashCode</code>, <code>toString</code>
+- Immutability by default (helps thread‑safety)
+- Compact constructors (compact, single‑line)</p>
+<h3 id="compact-constructor-with-variable-arguments">Compact Constructor with Variable Arguments<a class="anchor-link" href="#compact-constructor-with-variable-arguments" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">public record Order(
+        String id,
         Product product,
-        int quantity,
-        BigDecimal unitPrice
-) {}
-
-public record Order(
-        Long id,
-        Customer customer,
-        List&lt;OrderItem&gt; items,
-        OrderStatus status,
-        BigDecimal totalAmount,
-        Instant createdAt
-) {}</code></pre>
-<hr />
-<h2 id="14-enums">14. Enums<a class="anchor-link" href="#14-enums" title="Permanent link">¶</a></h2>
-<p>An <strong>enum</strong> is a type that has a fixed set of values. Think of it as a list of named constants.</p>
-<pre class="code-block"><code class="language-java">public enum OrderStatus {
-    PENDING,
-    CONFIRMED,
-    SHIPPED,
-    DELIVERED,
-    CANCELLED
-}
-
-// Usage:
-OrderStatus status = OrderStatus.PENDING;
-System.out.println(status); // PENDING
-
-// Enums in switch statements
-switch (status) {
-    case PENDING -&gt; System.out.println("Waiting for confirmation");
-    case CONFIRMED -&gt; System.out.println("Order is confirmed");
-    case SHIPPED -&gt; System.out.println("Order is on the way");
-    case DELIVERED -&gt; System.out.println("Order delivered");
-    case CANCELLED -&gt; System.out.println("Order was cancelled");
-}
-
-// Get all possible values
-OrderStatus[] allStatuses = OrderStatus.values();
-for (OrderStatus s : allStatuses) {
-    System.out.println(s);
-}</code></pre>
-<h3 id="why-use-enums-instead-of-strings">Why Use Enums Instead of Strings?<a class="anchor-link" href="#why-use-enums-instead-of-strings" title="Permanent link">¶</a></h3>
-<p>If you use <code>String status = "PENDING"</code>, you could accidentally type <code>status = "PENDNG"</code> (typo) and the compiler wouldn't catch it. With enums, <code>OrderStatus.PENDNG</code> is a compile error.</p>
-<hr />
-<h2 id="15-exception-handling">15. Exception Handling<a class="anchor-link" href="#15-exception-handling" title="Permanent link">¶</a></h2>
-<p>An <strong>exception</strong> is an error that occurs while the program is running. If not handled, the program crashes. Java provides <code>try</code>, <code>catch</code>, and <code>finally</code> to handle exceptions gracefully.</p>
-<h3 id="try-catch">try / catch<a class="anchor-link" href="#try-catch" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">try {
-    int[] numbers = {1, 2, 3};
-    System.out.println(numbers[10]); // Index out of bounds!
-} catch (ArrayIndexOutOfBoundsException e) {
-    System.out.println("Error: " + e.getMessage());
-}
-System.out.println("Program continues..."); // This runs because we caught the exception</code></pre>
-<h3 id="multiple-catch-blocks">Multiple catch blocks<a class="anchor-link" href="#multiple-catch-blocks" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">try {
-    String text = null;
-    System.out.println(text.length()); // NullPointerException
-} catch (NullPointerException e) {
-    System.out.println("Null reference: " + e.getMessage());
-} catch (Exception e) {
-    System.out.println("Other error: " + e.getMessage());
-}</code></pre>
-<h3 id="finally">finally<a class="anchor-link" href="#finally" title="Permanent link">¶</a></h3>
-<p>The <code>finally</code> block always runs, whether an exception occurred or not:</p>
-<pre class="code-block"><code class="language-java">try {
-    System.out.println("Trying something...");
-    int result = 10 / 0; // ArithmeticException
-} catch (ArithmeticException e) {
-    System.out.println("Error: " + e.getMessage());
-} finally {
-    System.out.println("This always runs"); // Cleanup code goes here
-}</code></pre>
-<h3 id="throwing-exceptions">Throwing Exceptions<a class="anchor-link" href="#throwing-exceptions" title="Permanent link">¶</a></h3>
-<p>You can also throw exceptions yourself:</p>
-<pre class="code-block"><code class="language-java">public void setAge(int age) {
-    if (age &lt; 0) {
-        throw new IllegalArgumentException("Age cannot be negative: " + age);
-    }
-    this.age = age;
-}</code></pre>
-<h3 id="checked-vs-unchecked-exceptions">Checked vs Unchecked Exceptions<a class="anchor-link" href="#checked-vs-unchecked-exceptions" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Must Handle?</th>
-<th>Examples</th>
-<th>When to Use</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Checked</strong></td>
-<td>Yes — compiler enforces try/catch</td>
-<td><code>IOException</code>, <code>SQLException</code></td>
-<td>Recoverable errors</td>
-</tr>
-<tr>
-<td><strong>Unchecked</strong></td>
-<td>No — compiler doesn't enforce</td>
-<td><code>RuntimeException</code>, <code>NullPointerException</code>, <code>IllegalArgumentException</code></td>
-<td>Programming errors (bugs)</td>
-</tr>
-</tbody>
-</table>
-<p>Most of the time, you'll throw unchecked exceptions (extending <code>RuntimeException</code>) for programming errors like invalid input or missing data.</p>
-<h3 id="custom-exceptions">Custom Exceptions<a class="anchor-link" href="#custom-exceptions" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">public class OrderNotFoundException extends RuntimeException {
-    private final Long orderId;
-
-    public OrderNotFoundException(Long orderId) {
-        super("Order not found: " + orderId);
-        this.orderId = orderId;
-    }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-}
-
-// Usage:
-throw new OrderNotFoundException(42L);</code></pre>
-<hr />
-<h2 id="16-generics">16. Generics<a class="anchor-link" href="#16-generics" title="Permanent link">¶</a></h2>
-<p><strong>Generics</strong> allow you to write code that works with different types while maintaining type safety.</p>
-<pre class="code-block"><code class="language-java">// Without generics — type unsafe
-List list = new ArrayList();
-list.add("Hello");
-String s = (String) list.get(0); // Must cast — error-prone
-
-// With generics — type safe
-List&lt;String&gt; list = new ArrayList&lt;&gt;();
-list.add("Hello");
-String s = list.get(0); // No cast needed — compiler knows it's a String</code></pre>
-<h3 id="generic-methods">Generic Methods<a class="anchor-link" href="#generic-methods" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// This method works with any type T
-public static &lt;T&gt; T getFirst(List&lt;T&gt; list) {
-    if (list.isEmpty()) {
-        return null;
-    }
-    return list.get(0);
-}
-
-// Usage:
-String firstString = getFirst(List.of("Alice", "Bob"));
-Integer firstNumber = getFirst(List.of(1, 2, 3));</code></pre>
-<hr />
-<h2 id="17-the-var-keyword">17. The <code>var</code> Keyword<a class="anchor-link" href="#17-the-var-keyword" title="Permanent link">¶</a></h2>
-<p>Java 10+ introduced <code>var</code>, which lets the compiler infer the type:</p>
-<pre class="code-block"><code class="language-java">// Without var — explicit type
-String name = "Alice";
-List&lt;String&gt; names = new ArrayList&lt;&gt;();
-Map&lt;String, Integer&gt; ages = new HashMap&lt;&gt;();
-
-// With var — compiler infers the type
-var name = "Alice";                     // var -&gt; String
-var names = new ArrayList&lt;String&gt;();   // var -&gt; ArrayList&lt;String&gt;
-var ages = new HashMap&lt;String, Integer&gt;(); // var -&gt; HashMap&lt;String, Integer&gt;</code></pre>
-<p><strong>When to use <code>var</code>:</strong> Use it when the type is obvious from the right side of the assignment. Don't use it when it makes the type unclear:</p>
-<pre class="code-block"><code class="language-java">// GOOD — type is obvious
-var customers = new ArrayList&lt;Customer&gt;();
-var order = new Order(1L, customer, items, OrderStatus.PENDING, total, Instant.now());
-
-// BAD — type is unclear
-var result = process(data); // What type is result? Unclear.</code></pre>
-<hr />
-<h2 id="18-packages-and-imports">18. Packages and Imports<a class="anchor-link" href="#18-packages-and-imports" title="Permanent link">¶</a></h2>
-<h3 id="packages">Packages<a class="anchor-link" href="#packages" title="Permanent link">¶</a></h3>
-<p>A <strong>package</strong> is a folder that groups related classes. It prevents name conflicts — two classes can have the same name if they're in different packages.</p>
-<pre class="code-block"><code>com.example.ordermgmt
-├── domain/          # Domain entities (Customer, Product, Order)
-├── controller/      # REST controllers
-├── service/         # Business logic
-├── repository/      # Data access
-└── dto/             # Data Transfer Objects</code></pre>
-<p>To declare a class as part of a package:</p>
-<pre class="code-block"><code class="language-java">package com.example.ordermgmt.domain;
-
-public class Customer {
-    // ...
-}</code></pre>
-<h3 id="imports">Imports<a class="anchor-link" href="#imports" title="Permanent link">¶</a></h3>
-<p>To use a class from another package, you <strong>import</strong> it:</p>
-<pre class="code-block"><code class="language-java">package com.example.ordermgmt.service;
-
-// Import from the domain package
-import com.example.ordermgmt.domain.Customer;
-import com.example.ordermgmt.domain.Order;
-
-// Import from the repository package
-import com.example.ordermgmt.repository.CustomerRepository;
-
-// Import from Java's standard library
-import java.util.List;
-import java.util.Optional;
-
-public class OrderService {
-    private CustomerRepository customerRepository;
-
-    public List&lt;Order&gt; getCustomerOrders(Long customerId) {
-        Customer customer = customerRepository.findById(customerId);
-        // ...
+        Customer buyer,
+        BigDecimal total,
+        java.time.LocalDateTime timestamp) {
+    public Order(String id, Product product, Customer buyer, BigDecimal total, java.time.LocalDateTime timestamp) {
+        this.id = id;
+        this.product = product;
+        this.buyer = buyer;
+        this.total = total;
+        this.timestamp = timestamp;
     }
 }</code></pre>
+<h3 id="nested-records-composition">Nested Records – Composition<a class="anchor-link" href="#nested-records-composition" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">public record Product(
+        String sku,
+        String name,
+        int stock,
+        BigDecimal price) {}</code></pre>
+<pre class="code-block"><code class="language-java">public record Order(
+        String id,
+        Product product,
+        Customer buyer,
+        BigDecimal total,
+        java.time.LocalDateTime timestamp) {}</code></pre>
+<blockquote>
+<p><strong>Note</strong>: Records are <strong>reference types</strong>; they cannot be annotated with <code>@Entity</code> (for JPA) without a wrapper, but are perfect for pure‑model domain layers.</p>
+</blockquote>
 <hr />
-<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-create-a-customer-record">Exercise 1: Create a Customer Record<a class="anchor-link" href="#exercise-1-create-a-customer-record" title="Permanent link">¶</a></h3>
-<p>Create a <code>Customer</code> record with fields: <code>id</code> (Long), <code>name</code> (String), <code>email</code> (String). Create two customers and print them to the console.</p>
+<h2 id="deep-dive-record-advantages">Deep Dive: Record Advantages<a class="anchor-link" href="#deep-dive-record-advantages" title="Permanent link">¶</a></h2>
 <details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-java">public record Customer(Long id, String name, String email) {}
-
-Customer c1 = new Customer(1L, "Alice", "alice@example.com");
-Customer c2 = new Customer(2L, "Bob", "bob@example.com");
-System.out.println(c1);
-System.out.println(c2);</code></pre>
-</details>
-
-<h3 id="exercise-2-write-a-method-that-calculates-order-total">Exercise 2: Write a Method That Calculates Order Total<a class="anchor-link" href="#exercise-2-write-a-method-that-calculates-order-total" title="Permanent link">¶</a></h3>
-<p>Write a method <code>calculateTotal(BigDecimal unitPrice, int quantity)</code> that returns <code>unitPrice * quantity</code>. Handle the case where quantity is negative by throwing an <code>IllegalArgumentException</code>.</p>
-<details>
-<summary>Hint</summary>
-
-Use `BigDecimal.multiply(BigDecimal.valueOf(quantity))` for the calculation. Check `if (quantity < 0)` before calculating. Import `java.math.BigDecimal`.
-</details>
-
-<h3 id="exercise-3-use-a-list-of-orders">Exercise 3: Use a List of Orders<a class="anchor-link" href="#exercise-3-use-a-list-of-orders" title="Permanent link">¶</a></h3>
-<p>Create a <code>List&lt;Order&gt;</code> where <code>Order</code> is a record. Add 3 orders to the list, iterate over them, and print each order's status using a <code>switch</code> statement.</p>
-<details>
-<summary>Hint</summary>
-
-Define `OrderStatus` as an enum with `PENDING`, `CONFIRMED`, `DELIVERED`. Create the `Order` record with fields `id`, `status`, `totalAmount`. Use `List.of(...)` to create the list and an enhanced for loop to iterate.
-</details>
-
-<h3 id="exercise-4-create-a-custom-exception">Exercise 4: Create a Custom Exception<a class="anchor-link" href="#exercise-4-create-a-custom-exception" title="Permanent link">¶</a></h3>
-<p>Create an <code>InsufficientStockException</code> that takes a product name, available stock, and requested quantity. Throw it when a product doesn't have enough stock. Catch it and print the error message.</p>
-<details>
-<summary>Hint</summary>
-
-Extend `RuntimeException`. The constructor takes `(String productName, int available, int requested)` and calls `super(String.format("Insufficient stock for %s: available=%d, requested=%d", ...))`. Use try/catch in `main`.
-</details>
-
-<h3 id="exercise-5-build-a-simple-discount-calculator">Exercise 5: Build a Simple Discount Calculator<a class="anchor-link" href="#exercise-5-build-a-simple-discount-calculator" title="Permanent link">¶</a></h3>
-<p>Create an interface <code>Discountable</code> with a method <code>applyDiscount(double percent)</code>. Implement it in an <code>Order</code> class that stores a <code>BigDecimal total</code>. Apply a 10% discount and verify the result.</p>
-<details>
-<summary>Hint</summary>
-
-The interface declares `BigDecimal applyDiscount(double percent)`. The Order class implements it: `return total.multiply(BigDecimal.valueOf(1 - percent / 100))`. Create an order with `new BigDecimal("100.00")` and apply 10% discount — expect `90.00`.
+<summary>Why records matter</summary>
+- Immutability eliminates defensive copies
+- Reduce test boiler‑plate (no need for custom getters)
+- Great for DTOs in Spring Boot (`@Model` can embed records)
+- Pattern matching works naturally with records (see §3)
 </details>
 
 <hr />
-<h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
+<h1 id="2-generics">2. Generics<a class="anchor-link" href="#2-generics" title="Permanent link">¶</a></h1>
+<p>Generics let you write <strong>type‑safe</strong> reusable containers. The type parameter is erased at runtime, but compile‑time checks catch errors.</p>
+<pre class="code-block"><code class="language-java">import java.util.List;
+import java.util.ArrayList;
+
+class Box&lt;T&gt; {
+    private List&lt;T&gt; items = new ArrayList&lt;&gt;();
+    public void add(T item) { items.add(item); }
+    public T get(int index) { return items.get(index); }
+    public int size() { return items.size(); }
+}</code></pre>
+<h2 id="typesafe-instantiation">Type‑Safe Instantiation<a class="anchor-link" href="#typesafe-instantiation" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">Box&lt;String&gt; stringBox = new Box&lt;&gt;();
+stringBox.add("hello"); // compile‑time checked
+Box&lt;Integer&gt; intBox = new Box&lt;&gt;();
+intBox.add("oops"); // ❌ compile‑time error</code></pre>
+<h3 id="generic-supertypes-wildcards">Generic Super‑Types &amp; Wildcards<a class="anchor-link" href="#generic-supertypes-wildcards" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">public class Statistics&lt;T extends Number&gt; {
+    private final List&lt;T&gt; data = new ArrayList&lt;&gt;();
+    public double average() {
+        double sum = 0;
+        for (T n : data) sum += n.doubleValue();
+        return sum / data.size();
+    }
+}</code></pre>
+<p><strong>Wildcard Example</strong> – allow any numeric types as readers.</p>
+<pre class="code-block"><code class="language-java">public class Sum&lt;T extends Number&gt; implements Function&lt;T, Double&gt; { // functional interface
+    @Override
+    public Double apply(T t) { return t.doubleValue(); }
+}</code></pre>
+<blockquote>
+<p><strong>Tip</strong>: When forwarding generics, use <code>extends</code> for value‑semantics and <code>interface</code> for method‑semantics.</p>
+</blockquote>
+<hr />
+<h2 id="deep-dive-limitations-of-generics">Deep Dive: Limitations of Generics<a class="anchor-link" href="#deep-dive-limitations-of-generics" title="Permanent link">¶</a></h2>
+<details>
+<summary>Don’t over‑engineer</summary>
+- No runtime type information – cannot instantiate `Array<T>` directly; need `Object[]` cast
+- `!` (diamond) limited to one generic per non‑static method
+- `raw` types (e.g., `ArrayList`) cause unchecked warnings – prefer safe defaults
+</details>
+
+<hr />
+<h1 id="3-pattern-matching-methodbased">3. Pattern Matching (Method‑Based)<a class="anchor-link" href="#3-pattern-matching-methodbased" title="Permanent link">¶</a></h1>
+<p>Java 21 added {@code switch} pattern matching for objects and primitives. It replaces <code>if‑else</code> chains, making code more expressive.</p>
+<pre class="code-block"><code class="language-java">record Point(double x, double y) {}
+
+public String quadrant(Point p) {
+    return switch (p) {
+        case Point(0, 0) -&gt; "origin";
+        case Point(p.x, 0) when p.x &gt; 0 -&gt; "positive-x axis";
+        case Point(p.x, 0) when p.x &lt; 0 -&gt; "negative-x axis";
+        case Point(0, p.y) when p.y &gt; 0 -&gt; "positive-y axis";
+        case Point(0, p.y) when p.y &lt; 0 -&gt; "negative-y axis";
+        case Point(p.x, p.y) when p.x &gt; 0 &amp;&amp; p.y &gt; 0 -&gt; "first quadrant";
+        case Point(p.x, p.y) when p.x &lt; 0 &amp;&amp; p.y &gt; 0 -&gt; "second quadrant";
+        case Point(p.x, p.y) when p.x &lt; 0 &amp;&amp; p.y &lt; 0 -&gt; "third quadrant";
+        case Point(p.x, p.y) when p.x &gt; 0 &amp;&amp; p.y &lt; 0 -&gt; "fourth quadrant";
+        _ -&gt; "elsewhere";
+    };
+}</code></pre>
+<h3 id="pattern-matching-with-var">Pattern Matching with <code>var</code><a class="anchor-link" href="#pattern-matching-with-var" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">public static void main(String[] args) {
+    var person = new Customer("C001", "Alice", "alice@example.com", BigDecimal.valueOf(150.00));
+    System.out.println(person.name()); // Invoke getter on record
+}</code></pre>
+<blockquote>
+<p><strong>Caveat</strong>: Pattern matching is exhaustive; the underscore (<code>_</code>) pattern catches all unmatched cases.</p>
+</blockquote>
+<hr />
+<h2 id="deep-dive-performance-considerations">Deep Dive: Performance Considerations<a class="anchor-link" href="#deep-dive-performance-considerations" title="Permanent link">¶</a></h2>
+<details>
+<summary>Pattern match overhead</summary>
+- Compile‑time generated bytecode for switch forms – negligible for most domains
+- Exhaustive patterns force you to consider all branches; use guard clauses wisely
+</details>
+
+<hr />
+<h1 id="4-the-var-keyword">4. The <code>var</code> Keyword<a class="anchor-link" href="#4-the-var-keyword" title="Permanent link">¶</a></h1>
+<p><code>var</code> is a <strong>local variable type inference</strong> introduced in Java 10, still present in Java 21. The compiler deduces the type from the initializer.</p>
+<pre class="code-block"><code class="language-java">var age = 30;               // int
+var price = 19.99;           // double
+var name = "Bob";           // String
+var flag = true;             // boolean
+var beans = List.of(1,2,3); // List&lt;Integer&gt;</code></pre>
+<h3 id="when-to-prefer-var">When to Prefer <code>var</code><a class="anchor-link" href="#when-to-prefer-var" title="Permanent link">¶</a></h3>
 <ul>
-<li><strong>Java</strong> is a strongly-typed, object-oriented programming language that runs on the JVM</li>
-<li>The <strong>JDK</strong> includes everything you need to compile and run Java programs</li>
-<li>A Java program starts at the <code>main</code> method: <code>public static void main(String[] args)</code></li>
-<li><strong>Primitive types</strong> (<code>int</code>, <code>double</code>, <code>boolean</code>, <code>char</code>, etc.) store simple values</li>
-<li>Use <code>BigDecimal</code> for money — never <code>double</code> or <code>float</code></li>
-<li><strong>Control flow</strong> (<code>if/else</code>, <code>switch</code>, <code>for</code>, <code>while</code>) lets programs make decisions and repeat actions</li>
-<li><strong>Methods</strong> are reusable blocks of code that take parameters and return values</li>
-<li><strong>OOP</strong> organizes code into classes and objects with four pillars: encapsulation, inheritance, polymorphism, abstraction</li>
-<li><strong>Interfaces</strong> define contracts; <strong>abstract classes</strong> share partial implementation</li>
-<li><strong>Collections</strong> (<code>List</code>, <code>Set</code>, <code>Map</code>) store groups of objects</li>
-<li><strong>Records</strong> are immutable data classes: <code>public record Customer(Long id, String name) {}</code> replaces 20+ lines of boilerplate</li>
-<li><strong>Enums</strong> define a fixed set of values — better than strings for type safety</li>
-<li><strong>Exceptions</strong> handle runtime errors with <code>try</code>/<code>catch</code>/<code>finally</code></li>
-<li><strong>Generics</strong> provide type safety for collections: <code>List&lt;String&gt;</code></li>
-<li><strong><code>var</code></strong> lets the compiler infer the type when it's obvious from context</li>
-<li><strong>Packages</strong> group related classes; <strong>imports</strong> bring classes from other packages into scope</li>
+<li>In one‑line locals where the inferred type is obvious.</li>
+<li>In generic code where the generic type parameter is not needed explicitly.</li>
 </ul>
+<h3 id="when-to-avoid-var">When to Avoid <code>var</code><a class="anchor-link" href="#when-to-avoid-var" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>ISO‑compliance</strong>: private static methods must be <code>static</code> and <code>private</code>; <code>var</code> does not eliminate staticness.</li>
+<li><strong>Large method bodies</strong>: adding <code>var</code> in many places can obscure intent.</li>
+<li><strong>Complex initializations</strong>: if the initializer is a method call with a generic return, the inferred type may be <code>Object</code>, leading to a loss of type safety.</li>
+</ul>
+<blockquote>
+<p><strong>Best practice</strong>: Limit <code>var</code> usage to the top of the method, and never on parameters.</p>
+</blockquote>
 <hr />
-<h2 id="13-java-string-api-in-depth">13. Java String API in Depth<a class="anchor-link" href="#13-java-string-api-in-depth" title="Permanent link">¶</a></h2>
-<p>Strings are the most used type in Java. Understanding them deeply prevents subtle bugs.</p>
-<h3 id="immutability">Immutability<a class="anchor-link" href="#immutability" title="Permanent link">¶</a></h3>
-<p>Java strings are <strong>immutable</strong> — once created, they cannot be changed. Every
-"modification" creates a new String object:</p>
-<pre class="code-block"><code class="language-java">String name = "Alice";
-name = name + " Smith";  // creates a NEW String, old one is garbage collected</code></pre>
-<p>This means <code>==</code> compares references, not content. Always use <code>.equals()</code>:</p>
-<pre class="code-block"><code class="language-java">String a = "hello";
-String b = new String("hello");
+<h2 id="deep-dive-var-and-lambdas">Deep Dive: <code>var</code> and Lambdas<a class="anchor-link" href="#deep-dive-var-and-lambdas" title="Permanent link">¶</a></h2>
+<details>
+<summary>Common Motif</summary>
+<pre class="code-block"><code class="language-java">// Using var inside a lambda for local variable type inference
+Supplier&lt;String&gt; supplier = () -&gt; {
+    var message = "dynamic";
+    return message;
+};</code></pre>
+</details>
 
-System.out.println(a == b);        // false — different objects
-System.out.println(a.equals(b));   // true  — same content
-
-// Java 21+ — pattern matching for String in switch
-if (a instanceof String s &amp;&amp; s.equals("hello")) {
-    System.out.println("It's hello: " + s);
+<hr />
+<h1 id="5-switch-expressions">5. Switch Expressions<a class="anchor-link" href="#5-switch-expressions" title="Permanent link">¶</a></h1>
+<p>Java 14 introduced <strong>switch expressions</strong>, allowing the switch construct to return a value. Java 21 also supports <strong>patterned</strong> switches (combined with pattern matching).</p>
+<pre class="code-block"><code class="language-java">public String greeting(int hour) {
+    return switch (hour) {
+        case &gt;18, &gt;21 -&gt; "Good evening";
+        case 12, 13, 14 -&gt; "Good afternoon";
+        default -&gt; "Hello";
+    };
 }</code></pre>
-<h3 id="stringbuilder-for-efficient-concatenation">StringBuilder for Efficient Concatenation<a class="anchor-link" href="#stringbuilder-for-efficient-concatenation" title="Permanent link">¶</a></h3>
-<p>In loops, use <code>StringBuilder</code> instead of <code>+</code> to avoid creating intermediate objects:</p>
-<pre class="code-block"><code class="language-java">// BAD: creates a new String on every iteration
-String result = "";
-for (int i = 0; i &lt; 1000; i++) {
-    result += i + ",";  // 1000 String objects created!
-}
-
-// GOOD: mutates a single buffer
-StringBuilder sb = new StringBuilder();
-for (int i = 0; i &lt; 1000; i++) {
-    sb.append(i).append(",");
-}
-String result = sb.toString();</code></pre>
-<h3 id="text-blocks-java-15">Text Blocks (Java 15+)<a class="anchor-link" href="#text-blocks-java-15" title="Permanent link">¶</a></h3>
-<p>Multi-line strings without escape sequences:</p>
-<pre class="code-block"><code class="language-java">// Before text blocks — messy
-String json = "{\n" +
-        "  \"name\": \"Alice\",\n" +
-        "  \"age\": 30\n" +
-        "}";
-
-// With text blocks — clean
-String json = """
-        {
-          "name": "Alice",
-          "age": 30
+<h3 id="guard-clauses-and-return-values">Guard Clauses and Return Values<a class="anchor-link" href="#guard-clauses-and-return-values" title="Permanent link">¶</a></h3>
+<ul>
+<li>Use <code>return</code> directly inside a case when returning a literal.</li>
+<li>Guard clauses (<code>case &gt;0</code>) enable concise range checks.</li>
+</ul>
+<h3 id="nested-switch-expressions">Nested Switch Expressions<a class="anchor-link" href="#nested-switch-expressions" title="Permanent link">¶</a></h3>
+<pre class="code-block"><code class="language-java">public String orderStatus(Order order) {
+    return switch (order.type()) {
+        case CART, FAVOURITE -&gt; {
+            // nested switch for discount
+            return switch (order.amount()) {
+                case amount when amount &gt; 1000.00 -&gt; "Platinum";
+                case amount when amount &gt; 500.00 -&gt; "Gold";
+                default -&gt; "Standard";
+            };
         }
-        """;
-
-// The closing """ controls indentation</code></pre>
-<h3 id="stringformat-and-formatted">String.format() and Formatted<a class="anchor-link" href="#stringformat-and-formatted" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">String name = "Alice";
-int age = 30;
-BigDecimal price = new BigDecimal("19.99");
-
-// printf-style formatting
-String message = String.format("Name: %s, Age: %d, Price: $%.2f", name, age, price);
-
-// Java 21+ — .formatted() instance method
-String message2 = "Name: %s, Age: %d, Price: $%.2f".formatted(name, age, price);</code></pre>
-<hr />
-<h2 id="14-java-exception-handling-deep-dive">14. Java Exception Handling Deep Dive<a class="anchor-link" href="#14-java-exception-handling-deep-dive" title="Permanent link">¶</a></h2>
-<h3 id="checked-vs-unchecked">Checked vs Unchecked<a class="anchor-link" href="#checked-vs-unchecked" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Type</th>
-<th>Example</th>
-<th>Must Catch?</th>
-<th>When to Use</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Checked</td>
-<td><code>IOException</code>, <code>SQLException</code></td>
-<td>Yes — compiler enforces</td>
-<td>Recoverable conditions (file not found, network)</td>
-</tr>
-<tr>
-<td>Unchecked</td>
-<td><code>RuntimeException</code>, <code>NullPointerException</code></td>
-<td>No</td>
-<td>Programming errors (bad logic, null access)</td>
-</tr>
-</tbody>
-</table>
-<pre class="code-block"><code class="language-java">// Checked exception — must declare or catch
-public String readFile(String path) throws IOException {
-    return Files.readString(Path.of(path));
-}
-
-// Unchecked exception — no declaration needed
-public int divide(int a, int b) {
-    if (b == 0) {
-        throw new IllegalArgumentException("Divisor cannot be zero");
-    }
-    return a / b;
-}</code></pre>
-<h3 id="try-with-resources-java-7">Try-With-Resources (Java 7+)<a class="anchor-link" href="#try-with-resources-java-7" title="Permanent link">¶</a></h3>
-<p>Automatically closes resources that implement <code>AutoCloseable</code>:</p>
-<pre class="code-block"><code class="language-java">// Before Java 7 — verbose with finally
-BufferedReader reader = null;
-try {
-    reader = new BufferedReader(new FileReader("data.txt"));
-    String line = reader.readLine();
-} catch (IOException e) {
-    log.error("Read failed", e);
-} finally {
-    if (reader != null) {
-        try { reader.close(); } catch (IOException e) { /* ignored */ }
-    }
-}
-
-// With try-with-resources — clean and safe
-try (var reader = new BufferedReader(new FileReader("data.txt"))) {
-    String line = reader.readLine();
-} catch (IOException e) {
-    log.error("Read failed", e);
-}
-// reader is automatically closed, even if exception occurs</code></pre>
-<h3 id="custom-exceptions_1">Custom Exceptions<a class="anchor-link" href="#custom-exceptions_1" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">public class InsufficientStockException extends RuntimeException {
-    private final String productName;
-    private final int requested;
-    private final int available;
-
-    public InsufficientStockException(String productName, int requested, int available) {
-        super(String.format("Insufficient stock for %s: requested %d, available %d",
-                productName, requested, available));
-        this.productName = productName;
-        this.requested = requested;
-        this.available = available;
-    }
-
-    public String getProductName() { return productName; }
-    public int getRequested() { return requested; }
-    public int getAvailable() { return available; }
-}</code></pre>
-<h3 id="exception-chaining">Exception Chaining<a class="anchor-link" href="#exception-chaining" title="Permanent link">¶</a></h3>
-<p>When catching and re-throwing, always preserve the original cause:</p>
-<pre class="code-block"><code class="language-java">try {
-    orderService.process(order);
-} catch (SQLException e) {
-    // Wrap in a domain-specific exception, preserving the root cause
-    throw new OrderProcessingException("Failed to process order " + order.getId(), e);
+        case DIGITAL -&gt; "Instant Delivery";
+        default -&gt; "Pending";
+    };
 }</code></pre>
 <hr />
-<h2 id="15-java-collections-framework">15. Java Collections Framework<a class="anchor-link" href="#15-java-collections-framework" title="Permanent link">¶</a></h2>
-<h3 id="core-collection-types">Core Collection Types<a class="anchor-link" href="#core-collection-types" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code>Collection
-├── List (ordered, allows duplicates)
-│   ├── ArrayList    — fast random access, slow insert/delete at front
-│   └── LinkedList    — fast insert/delete, slow random access
-├── Set (no duplicates)
-│   ├── HashSet       — O(1) lookup, no order
-│   ├── LinkedHashSet — maintains insertion order
-│   └── TreeSet       — sorted by natural ordering or Comparator
-└── Queue / Deque
-    ├── ArrayDeque    — fast double-ended queue
-    └── PriorityQueue — ordered by priority
+<h2 id="deep-dive-switch-vs-traditional-if">Deep Dive: Switch vs. Traditional <code>if</code><a class="anchor-link" href="#deep-dive-switch-vs-traditional-if" title="Permanent link">¶</a></h2>
+<details>
+<summary>Readability and Maintainability</summary>
+- Switch expressions are more declarative and require fewer braces.
+- They enforce exhaustiveness, reducing accidental fall‑through.
+- For a large number of branches, consider `Map` lookups.
+</details>
 
-Map (key-value pairs, not a Collection)
-├── HashMap          — O(1) lookup, no order
-├── LinkedHashMap    — maintains insertion order
-└── TreeMap          — sorted by key</code></pre>
-<h3 id="choosing-the-right-collection">Choosing the Right Collection<a class="anchor-link" href="#choosing-the-right-collection" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// Need indexed access and iteration? → ArrayList
-List&lt;Order&gt; orders = new ArrayList&lt;&gt;();
-orders.add(order1);
-orders.get(0);  // O(1)
-
-// Need uniqueness? → HashSet
-Set&lt;String&gt; processedEmails = new HashSet&lt;&gt;();
-processedEmails.add("alice@example.com");
-processedEmails.add("alice@example.com");  // ignored — already present
-
-// Need key-value lookup? → HashMap
-Map&lt;Long, Customer&gt; customerById = new HashMap&lt;&gt;();
-customerById.put(1L, alice);
-customerById.get(1L);  // O(1)
-
-// Need sorted iteration? → TreeSet
-Set&lt;BigDecimal&gt; prices = new TreeSet&lt;&gt;();
-prices.add(new BigDecimal("19.99"));
-prices.add(new BigDecimal("9.99"));
-// Iterates: 9.99, 19.99 (sorted)</code></pre>
-<h3 id="hashmap-internals">HashMap Internals<a class="anchor-link" href="#hashmap-internals" title="Permanent link">¶</a></h3>
-<p><code>HashMap</code> uses an array of "buckets". The key's <code>hashCode()</code> determines which bucket
-it goes into. If two keys have the same hash (collision), they're stored as a
-linked list (or balanced tree after Java 8).</p>
-<pre class="code-block"><code class="language-java">// Proper hashCode/equals contract is CRITICAL for HashMap keys
-public record CustomerKey(Long id, String email) {
-    // Records auto-generate correct equals() and hashCode()
-    // If using a class, you MUST override both
-}</code></pre>
-<p><strong>Rule:</strong> If you override <code>equals()</code>, you MUST override <code>hashCode()</code>. Two objects that
-are <code>equals()</code> must have the same <code>hashCode()</code>. Records handle this automatically.</p>
-<h3 id="collections-utility-methods">Collections Utility Methods<a class="anchor-link" href="#collections-utility-methods" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">List&lt;String&gt; names = new ArrayList&lt;&gt;(List.of("Charlie", "Alice", "Bob"));
-
-// Sort
-Collections.sort(names);                         // [Alice, Bob, Charlie]
-names.sort(Comparator.reverseOrder());            // [Charlie, Bob, Alice]
-
-// Unmodifiable view
-List&lt;String&gt; readOnly = Collections.unmodifiableList(names);
-
-// Frequency
-int count = Collections.frequency(names, "Alice");
-
-// Binary search (requires sorted list)
-int index = Collections.binarySearch(names, "Bob");</code></pre>
 <hr />
-<h2 id="15-java-stream-api-in-depth">15. Java Stream API in Depth<a class="anchor-link" href="#15-java-stream-api-in-depth" title="Permanent link">¶</a></h2>
-<p>The Stream API (Java 8+) is the modern way to process collections. Unlike
-a <code>for</code> loop, streams are <strong>declarative</strong> — you describe <em>what</em> you want,
-not <em>how</em> to iterate.</p>
-<h3 id="creating-streams">Creating Streams<a class="anchor-link" href="#creating-streams" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// From a collection
-Stream&lt;Order&gt; fromList = orders.stream();
+<h1 id="6-collections-framework">6. Collections Framework<a class="anchor-link" href="#6-collections-framework" title="Permanent link">¶</a></h1>
+<p>The Java Collections Framework (JCF) is the backbone of data structures. It includes <strong>Streams</strong>, <strong>List</strong>, <strong>Set</strong>, <strong>Map</strong>, and <strong>Queue</strong>.</p>
+<pre class="code-block"><code class="language-java">List&lt;String&gt; names = new ArrayList&lt;&gt;();
+names.add("Alice");
+names.add("Bob");
+System.out.println(names.get(0)); // Alice
 
-// From values
-Stream&lt;String&gt; values = Stream.of("a", "b", "c");
+Set&lt;String&gt; unique = new HashSet&lt;&gt;();
+unique.add("Alice");
+unique.add("Alice"); // ignored
+System.out.println(unique.size()); // 1
 
-// From an array
-String[] array = {"a", "b", "c"};
-Stream&lt;String&gt; fromArray = Arrays.stream(array);
-
-// Infinite stream
-Stream&lt;Double&gt; randoms = Stream.generate(Math::random);
-Stream&lt;Integer&gt; naturals = Stream.iterate(1, n -&gt; n + 1);
-
-// Bounded infinite stream (Java 9+)
-Stream&lt;Integer&gt; upTo100 = Stream.iterate(1, n -&gt; n &lt;= 100, n -&gt; n + 1);</code></pre>
-<h3 id="intermediate-operations-lazy">Intermediate Operations (Lazy)<a class="anchor-link" href="#intermediate-operations-lazy" title="Permanent link">¶</a></h3>
-<p>Intermediate operations return a new Stream and are <strong>lazy</strong> — they don't
-execute until a terminal operation is called.</p>
-<pre class="code-block"><code class="language-java">orders.stream()
-    .filter(o -&gt; o.getStatus() == OrderStatus.PENDING)   // lazy
-    .map(Order::getTotalAmount)                            // lazy
-    .sorted()                                              // lazy
-    // nothing has executed yet!
-    .forEach(amount -&gt; log.info("${}", amount));          // terminal — now it runs</code></pre>
-<h3 id="terminal-operations-eager">Terminal Operations (Eager)<a class="anchor-link" href="#terminal-operations-eager" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Terminal</th>
-<th>Returns</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>collect(Collectors.toList())</code></td>
-<td><code>List&lt;T&gt;</code></td>
-<td>Collect into a list</td>
-</tr>
-<tr>
-<td><code>collect(Collectors.groupingBy(...))</code></td>
-<td><code>Map&lt;K, List&lt;T&gt;&gt;</code></td>
-<td>Group by a key</td>
-</tr>
-<tr>
-<td><code>collect(Collectors.joining(", "))</code></td>
-<td><code>String</code></td>
-<td>Join elements into a string</td>
-</tr>
-<tr>
-<td><code>reduce(...)</code></td>
-<td><code>Optional&lt;T&gt;</code></td>
-<td>Reduce to a single value</td>
-</tr>
-<tr>
-<td><code>count()</code></td>
-<td><code>long</code></td>
-<td>Count elements</td>
-</tr>
-<tr>
-<td><code>findFirst()</code></td>
-<td><code>Optional&lt;T&gt;</code></td>
-<td>Get the first element</td>
-</tr>
-<tr>
-<td><code>anyMatch(Predicate)</code></td>
-<td><code>boolean</code></td>
-<td>Check if any element matches</td>
-</tr>
-<tr>
-<td><code>forEach(Consumer)</code></td>
-<td><code>void</code></td>
-<td>Side effect per element</td>
-</tr>
-</tbody>
-</table>
-<h3 id="practical-examples">Practical Examples<a class="anchor-link" href="#practical-examples" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// Group orders by status
-Map&lt;OrderStatus, List&lt;Order&gt;&gt; byStatus = orders.stream()
-        .collect(Collectors.groupingBy(Order::getStatus));
-
-// Total revenue of confirmed orders
-BigDecimal revenue = orders.stream()
-        .filter(o -&gt; o.getStatus() == OrderStatus.CONFIRMED)
-        .map(Order::getTotalAmount)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-// Top 3 most expensive orders
-List&lt;Order&gt; top3 = orders.stream()
-        .sorted(Comparator.comparing(Order::getTotalAmount).reversed())
-        .limit(3)
-        .toList();
-
-// Partition into pending and non-pending
-Map&lt;Boolean, List&lt;Order&gt;&gt; partitioned = orders.stream()
-        .collect(Collectors.partitioningBy(o -&gt; o.getStatus() == OrderStatus.PENDING));</code></pre>
-<h3 id="parallel-streams">Parallel Streams<a class="anchor-link" href="#parallel-streams" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// Process in parallel across multiple threads
-long count = orders.parallelStream()
-        .filter(o -&gt; o.getStatus() == OrderStatus.PENDING)
-        .count();</code></pre>
-<p><strong>Warning:</strong> Only use parallel streams for <strong>CPU-bound</strong> operations on <strong>large</strong>
-datasets (&gt;10,000 items). For small datasets, the overhead of thread
-coordination makes it slower than sequential streams.</p>
-<hr />
-<h2 id="16-optional-handling-absence-safely">16. Optional — Handling Absence Safely<a class="anchor-link" href="#16-optional-handling-absence-safely" title="Permanent link">¶</a></h2>
-<p><code>Optional&lt;T&gt;</code> is a container that may or may not contain a value. It forces
-you to handle the "absent" case explicitly, reducing NPEs.</p>
-<h3 id="creating-optional">Creating Optional<a class="anchor-link" href="#creating-optional" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">Optional&lt;Order&gt; empty = Optional.empty();
-Optional&lt;Order&gt; present = Optional.of(order);           // NPE if order is null
-Optional&lt;Order&gt; nullable = Optional.ofNullable(order);  // OK if order is null</code></pre>
-<h3 id="using-optional">Using Optional<a class="anchor-link" href="#using-optional" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// Check if present
-if (orderOptional.isPresent()) {
-    Order order = orderOptional.get();  // safe now
-}
-
-// Better: functional style
-orderOptional.ifPresent(order -&gt; process(order));
-
-// Provide a default
-Order order = orderOptional.orElse(defaultOrder);
-Order order = orderOptional.orElseGet(() -&gt; createDefault());  // lazy
-
-// Throw if absent
-Order order = orderOptional.orElseThrow(() -&gt; new OrderNotFoundException(id));
-
-// Transform
-String name = orderOptional
-        .map(Order::getCustomer)
-        .map(Customer::getName)
-        .orElse("Unknown");</code></pre>
-<h3 id="optional-anti-patterns">Optional Anti-Patterns<a class="anchor-link" href="#optional-anti-patterns" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// BAD: don't use Optional for fields
-public class OrderService {
-    private Optional&lt;OrderRepository&gt; repo;  // NO — use nullable or inject directly
-}
-
-// BAD: don't use Optional for parameters
-public void process(Optional&lt;Order&gt; order) { }  // NO — use method overloading or @Nullable
-
-// GOOD: Optional as a return type from methods that might not have a result
-public Optional&lt;Order&gt; findById(Long id) {
-    return Optional.ofNullable(repo.find(id));
-}</code></pre>
-<hr />
-<h2 id="17-java-io-and-nio-basics">17. Java I/O and NIO Basics<a class="anchor-link" href="#17-java-io-and-nio-basics" title="Permanent link">¶</a></h2>
-<h3 id="reading-a-file">Reading a File<a class="anchor-link" href="#reading-a-file" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">import java.nio.file.Files;
-import java.nio.file.Path;
-
-// Read all lines at once (small files)
-List&lt;String&gt; lines = Files.readAllLines(Path.of("orders.csv"));
-
-// Read as a stream (large files — lines are loaded lazily)
-try (Stream&lt;String&gt; stream = Files.lines(Path.of("large-orders.csv"))) {
-    stream.filter(line -&gt; line.contains("CONFIRMED"))
-          .forEach(System.out::println);
-}  // stream is automatically closed
-
-// Read entire file as a string
-String content = Files.readString(Path.of("config.json"));</code></pre>
-<h3 id="writing-a-file">Writing a File<a class="anchor-link" href="#writing-a-file" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// Write a list of lines
-Files.write(Path.of("output.txt"), List.of("line 1", "line 2"));
-
-// Append to a file
-Files.writeString(Path.of("log.txt"), "New log entry\n",
-        StandardOpenOption.CREATE, StandardOpenOption.APPEND);</code></pre>
-<h3 id="try-with-resources-for-io">Try-With-Resources for I/O<a class="anchor-link" href="#try-with-resources-for-io" title="Permanent link">¶</a></h3>
-<p>Always wrap I/O operations in try-with-resources to ensure resources are closed:</p>
-<pre class="code-block"><code class="language-java">try (var reader = Files.newBufferedReader(Path.of("data.csv"));
-     var writer = Files.newBufferedWriter(Path.of("output.csv"))) {
-    String line;
-    while ((line = reader.readLine()) != null) {
-        writer.write(transform(line));
-        writer.newLine();
-    }
-}  // reader and writer auto-closed</code></pre>
-<hr />
-<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
+Map&lt;String, BigDecimal&gt; pricing = new HashMap&lt;&gt;();
+pricing.put("DOG", new BigDecimal("199.99"));</code></pre>
+<h2 id="streams-functional-transformation">Streams – Functional Transformation<a class="anchor-link" href="#streams-functional-transformation" title="Permanent link">¶</a></h2>
+<pre class="code-block"><code class="language-java">List&lt;BigDecimal&gt; prices = pricing.values().stream()
+    .map(BigDecimal::stripTrailingZeros)
+    .sorted()
+    .collect(Collectors.toList());</code></pre>
+<h3 id="lazy-evaluation">Lazy Evaluation<a class="anchor-link" href="#lazy-evaluation" title="Permanent link">¶</a></h3>
 <ul>
-<li>
-<p><strong>[Java Tutorial for Beginners]</strong> by Telusko — Complete Java tutorial from basics, covers all fundamental topics in this module
-  <a href="https://www.youtube.com/watch?v=BGTx91t8q50">https://www.youtube.com/watch?v=BGTx91t8q50</a></p>
-</li>
-<li>
-<p><strong>[Java 21 Programming Masterclass]</strong> (playlist) — Full Java 21 course covering modern Java features including records and pattern matching
-  <a href="https://www.youtube.com/playlist?list=PLpPMD23DomFWYbayBG6-a8yQqNMeBf1C7">https://www.youtube.com/playlist?list=PLpPMD23DomFWYbayBG6-a8yQqNMeBf1C7</a></p>
-</li>
+<li>Streams are evaluated lazily; operations like <code>filter</code>, <code>map</code> are deferred until <code>collect</code> or <code>forEach</code> is called.</li>
+<li>This can improve performance for large data sets and enable <strong>parallel streams</strong>.</li>
+</ul>
+<pre class="code-block"><code class="language-java">prices.parallelStream().filter(p -&gt; p.compareTo(new BigDecimal("100")) &gt; 0)
+      .forEach(p -&gt; System.out.println(p));</code></pre>
+<h3 id="common-pitfalls">Common Pitfalls<a class="anchor-link" href="#common-pitfalls" title="Permanent link">¶</a></h3>
+<ul>
+<li>Using mutable collectors (<code>Collectors combined</code>), forgetting to close streams, or unnoticed side‑effects.</li>
+<li>Avoid collecting unless necessary – keep the pipeline in memory‑efficient form.</li>
 </ul>
 <hr />
-<p>← <strong>First Module</strong> | <a href="01-build-tools-and-project-setup.html">Next: Module 01</a> →</p>
+<h2 id="deep-dive-collections-with-records">Deep Dive: Collections with Records<a class="anchor-link" href="#deep-dive-collections-with-records" title="Permanent link">¶</a></h2>
+<details>
+<summary>Immutable containers</summary>
+<pre class="code-block"><code class="language-java">List&lt;Order&gt; orders = List.of(
+    new Order("O001", new Product("P001", "Widget", 10, new BigDecimal("12.34")), new Customer("C001", "Alice", "alice@example.com", new BigDecimal("150.00")), new BigDecimal("123.40"), LocalDateTime.now()),
+    new Order("O002", new Product("P002", "Gadget", 5, new BigDecimal("99.99")), new Customer("C002", "Bob", "bob@example.com", new BigDecimal("200.00")), new BigDecimal("199.98"), LocalDateTime.now())
+);
+```ensures the list cannot be modified after creation.
+&lt;/details&gt;
+
+---
+
+# 7. Exception Handling
+
+Exceptions signal exceptional conditions. Java 21 introduced **checked** and **unchecked** exceptions, and the `final` keyword on `Exception` remains.
+
+```java
+try (Connection conn = DriverManager.getConnection(url)) {
+    if (conn != null) {
+        conn.close();
+    }
+} catch (SQLException e) {
+    System.err.println("SQL error: " + e.getMessage());
+    // Re‑throw if unrecoverable
+    throw new RuntimeException("Database failure", e);
+}</code></pre>
+
+### `catch` Blocks vs Templates
+- **Checked** Exception: compiler forces handling.
+- **Unchecked** Exception (extends `RuntimeException`): can be caught but not required.
+
+### Custom Exceptions
+<pre class="code-block"><code class="language-java">public class OrderNotFoundException extends OrderException {
+    public OrderNotFoundException(String id) { super("Order not found: " + id); }
+}</code></pre>
+
+### Best Practices
+- Log inside `catch` – avoid printing directly to `System.err` in production.
+- Throw **specific** exceptions; avoid `catch (Exception)` unless absolutely necessary.
+- Keep the **try** block as small as possible to limit the exception scope.
+
+---
+
+## Deep Dive: Exception Hierarchy
+<details>
+<summary>Why separate checked/uncheckeds?</summary>
+- Checked exceptions enable API contracts (`public void read() throws IOException`).
+- Unchecked beyond design; used for bugs (e.g., `NullPointerException`).
+- Overriding `Throwable` can lead to confusion – avoid unless you own the whole ecosystem.
+</details>
+
+---
+
+# 8. Packages and Imports
+
+Packages provide namespace boundaries. Import statements shorten references.
+
+<pre class="code-block"><code class="language-java">package com.example.ordermgmt.model;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import static com.example.ordermgmt.util.StringUtils.format;
+
+public record Order(... ) {}</code></pre>
+
+### When to Use `static import`
+- For frequently used methods like `Collections.unmodifiableList()` or utility methods.
+- Avoid over‑use – it can hide the source of a call.
+
+### Avoiding Package Pollution
+- Keep **public** packages narrowly scoped (`model`, `api`, `util`).
+- Use **package‑private** (default) visibility for internal classes.
+
+---
+
+## Deep Dive: Cross‑Package Generic Packages
+<details>
+<《>---
+! No! The above is a placeholder. Need to continue.
+</details>
+
+---
+
+# 9. Object‑Oriented Programming (OOP)
+
+Java is fundamentally **object‑oriented**: classes are blueprints μικ‑
+***
+
+---
+
+## What You Learned
+
+- See the module content above for key takeaways.
+
+---
+
+---
+
+[Next: Module 01 — Build Tools & Project Setup](./01-build-tools-and-project-setup.md) →
       </article>
 
       <div class="footer-nav"><a href="01-build-tools-and-project-setup.html" class="nav-link next">Build Tools & Project Setup →</a></div>

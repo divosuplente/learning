@@ -21,6 +21,60 @@
 
 ---
 
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. Why Kotlin?](#1-why-kotlin)
+  - [Java vs Kotlin: Quick Comparison](#java-vs-kotlin-quick-comparison)
+  - [Should You Migrate?](#should-you-migrate)
+- [2. Setting Up Kotlin in a Spring Boot Project](#2-setting-up-kotlin-in-a-spring-boot-project)
+  - [Option A: Start a New Project with Spring Initializr](#option-a-start-a-new-project-with-spring-initializr)
+  - [Option B: Add Kotlin to an Existing Java Project](#option-b-add-kotlin-to-an-existing-java-project)
+  - [The Three Kotlin Compiler Plugins](#the-three-kotlin-compiler-plugins)
+- [3. Kotlin Syntax Crash Course for Java Developers](#3-kotlin-syntax-crash-course-for-java-developers)
+  - [3.1 Hello World](#31-hello-world)
+  - [3.2 Variables](#32-variables)
+  - [3.3 Null Safety](#33-null-safety)
+  - [3.4 String Interpolation](#34-string-interpolation)
+  - [3.5 Data Classes](#35-data-classes)
+  - [3.6 When Expression (Kotlin's switch)](#36-when-expression-kotlins-switch)
+  - [3.7 Functions](#37-functions)
+  - [3.8 Extension Functions](#38-extension-functions)
+  - [3.9 Collections](#39-collections)
+- [4. Migrating the Domain Layer](#4-migrating-the-domain-layer)
+  - [4.1 Java Entities → Kotlin Entities](#41-java-entities-kotlin-entities)
+  - [4.2 Java Records → Kotlin Data Classes](#42-java-records-kotlin-data-classes)
+  - [4.3 Java Enums → Kotlin Enums](#43-java-enums-kotlin-enums)
+- [5. Migrating Services and Controllers](#5-migrating-services-and-controllers)
+  - [5.1 Service Layer](#51-service-layer)
+  - [5.2 REST Controller](#52-rest-controller)
+- [6. Kotlin Coroutines — Alternative to Reactor](#6-kotlin-coroutines-alternative-to-reactor)
+  - [Mono/Flux vs Coroutines](#monoflux-vs-coroutines)
+  - [Adding Coroutine Support](#adding-coroutine-support)
+  - [Coroutine Controller Example](#coroutine-controller-example)
+  - [Coroutine Service Example](#coroutine-service-example)
+- [7. Kotlin-Specific Spring Features](#7-kotlin-specific-spring-features)
+  - [7.1 Routing DSL](#71-routing-dsl)
+  - [7.2 Bean DSL](#72-bean-dsl)
+  - [7.3 Kotlin JPA Repositories](#73-kotlin-jpa-repositories)
+- [8. IntelliJ IDEA's Java-to-Kotlin Converter (J2K)](#8-intellij-ideas-java-to-kotlin-converter-j2k)
+  - [How to Use It](#how-to-use-it)
+  - [What J2K Handles Well](#what-j2k-handles-well)
+  - [What J2K Does NOT Handle](#what-j2k-does-not-handle)
+  - [Migration Strategy](#migration-strategy)
+  - [Mixed Java/Kotlin](#mixed-javakotlin)
+- [9. Testing Kotlin Code](#9-testing-kotlin-code)
+  - [9.1 JUnit 5 with Kotlin](#91-junit-5-with-kotlin)
+  - [9.2 Key Testing Differences](#92-key-testing-differences)
+  - [9.3 Testing Coroutines with runTest](#93-testing-coroutines-with-runtest)
+- [10. exercises](#10-exercises)
+- [What You Learned](#what-you-learned)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 ## 1. Why Kotlin?
 
 **Kotlin** is a modern, statically-typed programming language that runs on the JVM.
@@ -1016,145 +1070,6 @@ class CoroutineOrderServiceTest {
 
 ## 10. exercises
 
-### exercise 1 — Convert a Java Record to Kotlin data class
-
-Convert this Java record to a Kotlin data class with all the same properties:
-
-```java
-public record ProductResponse(
-        Long id,
-        String name,
-        BigDecimal price,
-        String category,
-        boolean inStock
-) {}
-```
-
-<details>
-<summary>Hint</summary>
-
-```kotlin
-data class ProductResponse(
-    val id: Long?,
-    val name: String,
-    val price: BigDecimal,
-    val category: String,
-    val inStock: Boolean
-)
-```
-The `id` is `Long?` because it may not be assigned yet. All others are non-nullable.
-</details>
-
-### exercise 2 — Convert a Java Service to Kotlin
-
-Convert this Java service method to Kotlin, using constructor injection via the
-primary constructor:
-
-```java
-@Service
-public class ProductService {
-    private final ProductRepository repo;
-    private final Logger log = LoggerFactory.getLogger(ProductService.class);
-
-    public ProductService(ProductRepository repo) {
-        this.repo = repo;
-    }
-
-    public Product findById(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not found: " + id));
-    }
-}
-```
-
-<details>
-<summary>Hint</summary>
-
-```kotlin
-@Service
-class ProductService(
-    private val repo: ProductRepository
-) {
-    private val log = LoggerFactory.getLogger(javaClass)
-
-    fun findById(id: Long): Product =
-        repo.findById(id)
-            .orElseThrow { IllegalArgumentException("Not found: $id") }
-}
-```
-</details>
-
-### exercise 3 — Write a Suspend Function
-
-Write a Kotlin suspend function that fetches an order by ID, checks if its total
-exceeds $100, and returns a discount-eligible label. Use coroutines.
-
-<details>
-<summary>Hint</summary>
-
-```kotlin
-suspend fun checkDiscountEligibility(id: Long): String {
-    val order = orderRepository.findById(id)
-        ?: throw IllegalArgumentException("Order not found: $id")
-    return if (order.totalAmount > BigDecimal("100")) {
-        "Eligible for 10% discount"
-    } else {
-        "Not eligible"
-    }
-}
-```
-</details>
-
-### exercise 4 — Convert a REST Controller to Kotlin with Coroutines
-
-Convert this Java reactive controller to a Kotlin coroutine controller:
-
-```java
-@RestController
-@RequestMapping("/api/orders")
-public class ReactiveOrderController {
-    private final ReactiveOrderService service;
-
-    @GetMapping("/{id}")
-    public Mono<OrderResponse> findById(@PathVariable Long id) {
-        return service.findById(id);
-    }
-}
-```
-
-<details>
-<summary>Hint</summary>
-
-```kotlin
-@RestController
-@RequestMapping("/api/orders")
-class CoroutineOrderController(
-    private val service: CoroutineOrderService
-) {
-    @GetMapping("/{id}")
-    suspend fun findById(@PathVariable id: Long): OrderResponse =
-        service.findById(id)
-}
-```
-The `suspend` keyword replaces `Mono<>` wrapping.
-</details>
-
-### exercise 5 — Extension Function
-
-Write a Kotlin extension function on `BigDecimal` that formats it as a currency
-string with a dollar sign and two decimal places.
-
-<details>
-<summary>Hint</summary>
-
-```kotlin
-fun BigDecimal.toCurrency(): String = "$${String.format("%.2f", this)}"
-```
-Usage: `BigDecimal("19.999").toCurrency()` → `"$20.00"`
-</details>
-
----
-
 ## What You Learned
 
 - **Kotlin** is a JVM language fully interoperable with Java — you can mix both in one project
@@ -1183,3 +1098,7 @@ Usage: `BigDecimal("19.999").toCurrency()` → `"$20.00"`
 ---
 
 ← [Previous: Module 10](./10-capstone-project.md) | **Next:** None (final module)
+
+---
+
+← [Previous: Module 10 — Capstone Project](./10-capstone-project.md)

@@ -30,6 +30,91 @@
 
 ---
 
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is Testing? Why Do We Test?](#1-what-is-testing-why-do-we-test)
+  - [Why Test?](#why-test)
+  - [What Happens Without Tests?](#what-happens-without-tests)
+- [2. Types of Tests](#2-types-of-tests)
+  - [Unit Tests](#unit-tests)
+  - [Integration Tests](#integration-tests)
+  - [End-to-End (E2E) Tests](#end-to-end-e2e-tests)
+- [3. The Test Pyramid](#3-the-test-pyramid)
+- [4. What Is TDD?](#4-what-is-tdd)
+  - [The Red-Green-Refactor Cycle](#the-red-green-refactor-cycle)
+  - [Why TDD?](#why-tdd)
+- [5. JUnit 5](#5-junit-5)
+  - [Core Annotations](#core-annotations)
+  - [A Simple Test Class](#a-simple-test-class)
+  - [The Arrange-Act-Assert Pattern](#the-arrange-act-assert-pattern)
+  - [Parameterized Tests](#parameterized-tests)
+  - [Nested Tests](#nested-tests)
+- [6. AssertJ](#6-assertj)
+  - [Comparison](#comparison)
+  - [Useful AssertJ Assertions](#useful-assertj-assertions)
+  - [Why AssertJ Over JUnit Assertions?](#why-assertj-over-junit-assertions)
+- [7. Mockito](#7-mockito)
+  - [Core Mockito Concepts](#core-mockito-concepts)
+  - [A Mocked Unit Test](#a-mocked-unit-test)
+  - [What's Happening Here?](#whats-happening-here)
+  - [When-ThenReturn: Stubs](#when-thenreturn-stubs)
+  - [Verifying Interactions](#verifying-interactions)
+  - [Argument Matchers](#argument-matchers)
+- [8. TDD Walkthrough: Building OrderCalculator](#8-tdd-walkthrough-building-ordercalculator)
+  - [Step 1: Red — Write a Failing Test](#step-1-red-write-a-failing-test)
+  - [Step 2: Green — Write the Minimum Code](#step-2-green-write-the-minimum-code)
+  - [Step 3: Red — Add Another Test](#step-3-red-add-another-test)
+  - [Step 4: Red — Test for Negative Quantity](#step-4-red-test-for-negative-quantity)
+  - [Step 5: Green — Add Validation](#step-5-green-add-validation)
+  - [Step 6: Red — Test for Null Price](#step-6-red-test-for-null-price)
+  - [Step 7: Green — Add Null Check](#step-7-green-add-null-check)
+  - [Step 8: Refactor](#step-8-refactor)
+- [9. TDD Walkthrough: Building OrderService](#9-tdd-walkthrough-building-orderservice)
+  - [Step 1: Red — Write a Test for "Should Create Order"](#step-1-red-write-a-test-for-should-create-order)
+  - [Step 2: Green — Implement createOrder](#step-2-green-implement-createorder)
+  - [Step 3: Red — Test for "Should Throw When Customer Not Found"](#step-3-red-test-for-should-throw-when-customer-not-found)
+  - [Step 4: Red — Test for "Should Throw When Stock Is Insufficient"](#step-4-red-test-for-should-throw-when-stock-is-insufficient)
+- [10. Spring Boot Test Slices](#10-spring-boot-test-slices)
+  - [Web Layer Tests with MockMvc](#web-layer-tests-with-mockmvc)
+  - [What's Happening Here?](#whats-happening-here)
+  - [Repository Tests with @DataJpaTest](#repository-tests-with-datajpatest)
+  - [What's Happening Here?](#whats-happening-here)
+- [11. JaCoCo: Measuring Test Coverage](#11-jacoco-measuring-test-coverage)
+  - [Adding JaCoCo to Maven](#adding-jacoco-to-maven)
+  - [Running Coverage](#running-coverage)
+- [12. Testing Kafka Consumers](#12-testing-kafka-consumers)
+  - [Adding Test Dependencies](#adding-test-dependencies)
+  - [Kafka Consumer Test](#kafka-consumer-test)
+- [13. Testing Reactive Streams with StepVerifier](#13-testing-reactive-streams-with-stepverifier)
+  - [Adding the Dependency](#adding-the-dependency)
+  - [StepVerifier Example](#stepverifier-example)
+  - [What StepVerifier Does](#what-stepverifier-does)
+- [14. Anti-Patterns to Avoid](#14-anti-patterns-to-avoid)
+  - [Testing Implementation Details](#testing-implementation-details)
+  - [Over-Mocking](#over-mocking)
+  - [Brittle Tests](#brittle-tests)
+  - [Testing Getters and Setters](#testing-getters-and-setters)
+- [15. Best Practices Summary](#15-best-practices-summary)
+- [What You Learned](#what-you-learned)
+- [15. Test Smells and Anti-Patterns](#15-test-smells-and-anti-patterns)
+  - [Testing Implementation Details (White-Box Testing)](#testing-implementation-details-white-box-testing)
+  - [Excessive Mocking (Mock Everything Anti-Pattern)](#excessive-mocking-mock-everything-anti-pattern)
+  - [Brittle Assertions](#brittle-assertions)
+  - [Test Pyramid vs Ice Cream Cone](#test-pyramid-vs-ice-cream-cone)
+- [16. Integration Testing Strategy](#16-integration-testing-strategy)
+  - [Test Slices](#test-slices)
+  - [When to Use Each](#when-to-use-each)
+- [17. Test Coverage and Code Quality](#17-test-coverage-and-code-quality)
+  - [JaCoCo Configuration](#jacoco-configuration)
+  - [What to Cover vs What Not To](#what-to-cover-vs-what-not-to)
+  - [Mutation Testing with PIT](#mutation-testing-with-pit)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 ## 1. What Is Testing? Why Do We Test?
 
 **Testing** is the deliberate execution of your code to verify it does what you intend it to do. You write a piece of code, then you write another piece of code that calls the first piece and checks whether the result is correct.
@@ -1335,59 +1420,6 @@ Getters and setters are generated by the compiler or Lombok. Testing them tests 
 
 ---
 
-## Exercises
-
-### Exercise 1: Write Tests for OrderCalculator
-
-Using TDD, build an `OrderCalculator` with these methods and write tests first for each:
-- `calculateTotal(BigDecimal unitPrice, int quantity)` — returns `unitPrice * quantity`
-- `calculateGrandTotal(List<BigDecimal> itemTotals)` — sums all item totals
-- `applyDiscount(BigDecimal total, BigDecimal discountPercent)` — returns `total * (1 - discount/100)`
-
-<details>
-<summary>Hint</summary>
-
-For each method: write a test for the happy path (valid input), a test for zero/empty, and a test for invalid input (negative discount, null price). Use `assertThatThrownBy` for exception tests. Write the test, see it fail, implement, see it pass, refactor.
-</details>
-
-### Exercise 2: Write a Controller Test
-
-Write a `@WebMvcTest` for a `ProductController` that has:
-- `GET /api/products/{id}` — returns a product
-- `POST /api/products` — creates a product
-- Tests for: product found (200), product not found (404), invalid input (400)
-
-<details>
-<summary>Hint</summary>
-
-Follow the `OrderControllerTest` pattern. Use `@MockBean ProductService`, `when(productService.getProductById(...)).thenReturn(...)`, and `when(productService.getProductById(999L)).thenThrow(new ProductNotFoundException(999L))`. Use `jsonPath` to check response fields.
-</details>
-
-### Exercise 3: Write a Repository Test
-
-Write a `@DataJpaTest` for `ProductRepository` that tests:
-- Saving a product and finding it by ID
-- Finding products by category
-- Finding products with low stock (custom query)
-
-<details>
-<summary>Hint</summary>
-
-Follow the `OrderRepositoryTest` pattern. Use `@Testcontainers` with a real PostgreSQL container. For the low stock test, save two products with different stock levels and query for `stock < threshold`.
-</details>
-
-### Exercise 4: Write a Reactive Test with StepVerifier
-
-Create a `Flux<OrderEvent>` that emits 3 order events and write a StepVerifier test that verifies each emission and completion.
-
-<details>
-<summary>Hint</summary>
-
-Use `Flux.just(event1, event2, event3)` to create the flux. Use `StepVerifier.create(flux).expectNext(event1).expectNext(event2).expectNext(event3).verifyComplete()`. Create the events as simple records with `orderId`, `status`, and `timestamp` fields.
-</details>
-
----
-
 ## What You Learned
 
 - **Testing** verifies your code does what it should — it catches bugs early, prevents regressions, documents behavior, and gives confidence to refactor
@@ -1459,157 +1491,4 @@ assertThat(order.getCreatedAt())
 
 ```
        /\
-      /E2E\          ← few (5%): Slow, high-level, real browser + DB
-     /------\
-    /  Integ \       ← some (25%): Real database, real Spring context
-   /----------\
-  /    Unit     \    ← many (70%): Fast, isolated, mocked dependencies
- /----------------\
-```
-
-**Ice cream cone (bad):** many E2E tests, few unit tests. Slow, flaky, hard to
-maintain.
-
-**Test pyramid (good):** many unit tests, some integration tests, few E2E tests.
-Fast, targeted, reliable.
-
----
-
-## 16. Integration Testing Strategy
-
-### Test Slices
-
-| Slice | Loads | Doesn't Load | When to Use |
-|-------|-------|-------------|-------------|
-| `@WebMvcTest` | Spring MVC + one controller | Services, repositories | Controller logic, validation, serialization |
-| `@DataJpaTest` | JPA + entity manager + test DB | Controllers, services | Repository queries, entity mappings |
-| `@JsonTest` | Jackson serialization | Everything else | DTO serialization round-trip |
-| `@SpringBootTest` | Entire application | Nothing | End-to-end integration |
-| `@RestClientTest` | One REST client + mock server | Everything else | RestTemplate / WebClient behavior |
-
-### When to Use Each
-
-```java
-// @WebMvcTest: test controller without starting the full app
-@WebMvcTest(OrderController.class)
-class OrderControllerTest {
-    @Autowired MockMvc mockMvc;
-    @MockBean OrderService orderService;
-
-    @Test
-    void GET_orders_returns_200() throws Exception {
-        when(orderService.findAll()).thenReturn(List.of(orderResponse));
-        mockMvc.perform(get("/api/orders"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0].customerName").value("Alice"));
-    }
-}
-
-// @DataJpaTest: test repository against real PostgreSQL via Testcontainers
-@DataJpaTest
-@Testcontainers
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class OrderRepositoryTest {
-    @Container @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-
-    @Autowired OrderRepository repo;
-
-    @Test
-    void findByStatus_returns_matching_orders() {
-        repo.save(new OrderEntity(customer, OrderStatus.PENDING));
-        var results = repo.findByStatus(OrderStatus.PENDING);
-        assertThat(results).hasSize(1);
-    }
-}
-```
-
----
-
-## 17. Test Coverage and Code Quality
-
-### JaCoCo Configuration
-
-```xml
-<plugin>
-    <groupId>org.jacoco</groupId>
-    <artifactId>jacoco-maven-plugin</artifactId>
-    <version>0.8.12</version>
-    <executions>
-        <execution>
-            <goals><goal>prepare-agent</goal></goals>
-        </execution>
-        <execution>
-            <id>report</id>
-            <phase>test</phase>
-            <goals><goal>report</goal></goals>
-        </execution>
-        <execution>
-            <id>check</id>
-            <goals><goal>check</goal></goals>
-            <configuration>
-                <rules>
-                    <rule>
-                        <element>BUNDLE</element>
-                        <limits>
-                            <limit>
-                                <counter>INSTRUCTION</counter>
-                                <value>COVEREDRATIO</value>
-                                <minimum>0.80</minimum>
-                            </limit>
-                        </limits>
-                    </rule>
-                </rules>
-            </configuration>
-        </execution>
-    </executions>
-</plugin>
-```
-
-### What to Cover vs What Not To
-
-| Cover | Don't Cover |
-|-------|-------------|
-| Business logic (services, domain rules) | Getters and setters |
-| Edge cases (null, empty, max values) | Spring Boot framework internals |
-| Error handling paths | Infrastructure code (tested in integration) |
-| State transitions | DTOs with no behavior |
-| Boundary conditions | Configuration classes |
-
-### Mutation Testing with PIT
-
-Mutation testing verifies test **quality** — not just coverage. PIT modifies
-(mates) the production code and checks if tests fail (kill the mutant):
-
-```xml
-<plugin>
-    <groupId>org.pitest</groupId>
-    <artifactId>pitest-maven</artifactId>
-    <version>1.15.0</version>
-    <configuration>
-        <mutationThreshold>70</mutationThreshold>
-        <targetClasses>
-            <param>com.example.ordermgmt.*</param>
-        </targetClasses>
-    </configuration>
-</plugin>
-```
-
-Run with: `mvn org.pitest:pitest-maven:mutationCoverage`
-
-If PIT changes `>` to `>=` and your test still passes, your test doesn't adequately
-verifying that boundary.
-
----
-
-## Recommended YouTube Videos
-
-- **[Test Driven Development (TDD) in Spring]** by Dan Vega — TDD approach to testing REST controllers in Spring Boot (51:09, 39K views)
-  https://www.youtube.com/watch?v=-H5sud1-K5A
-
-- **[Spring Boot Testing - Batteries Included]** by Dan Vega — Comprehensive overview of Spring Boot testing capabilities
-  https://www.youtube.com/watch?v=rUbjV3VY1DI
-
----
-
-← [Previous: Module 08](./08-reactor-pattern.md) | [Next: Module 10](./10-capstone-project.md) →
+      /E2E\          ← [Previous: Module 08 — Reactor Pattern](./08-reactor-pattern.md) | [Next: Module 10 — Capstone Project](./10-capstone-project.md) →

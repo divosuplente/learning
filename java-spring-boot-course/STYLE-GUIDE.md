@@ -4,7 +4,11 @@
 
 ## Audience
 
-The learner **knows nothing about programming**. Assume no prior experience with Java, any framework, or any concept. Every term must be introduced before use or explained inline on first appearance.
+The learner is an **active developer** who already knows how to program in at least one language. They understand variables, functions, loops, conditionals, classes, and basic CS concepts. They need to learn Java and the surrounding backend ecosystem (Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin).
+
+Do NOT explain: what programming is, what a variable is, what a loop is, what a function is, what OOP is, what a compiler is. Assume all of these.
+
+DO explain: Java-specific syntax and idioms, framework concepts (beans, IoC, entities, resolvers), architectural patterns, and ecosystem tooling.
 
 ## Pedagogical Rules
 
@@ -12,10 +16,12 @@ The learner **knows nothing about programming**. Assume no prior experience with
 2. **One concept at a time.** Each subsection introduces exactly one idea. If you need two concepts to explain something, introduce them separately first.
 3. **Code-first, then explanation.** Show complete, runnable code. Then explain what each part does line-by-line. Then explain *why*.
 4. **Every code block must compile.** No pseudocode, no `// TODO`, no `...`. If the example is long, show the full file. Use `// ... other code from above` ONLY when repeating identical code from the same module.
-5. **Exercises at the end.** Every module ends with 3–5 exercises ranging from "modify this example" to "build this from scratch." Include solution hints (not full solutions) in a collapsed `<details>` block.
-6. **Recap section.** Every module ends with a "What you learned" bullet list summarizing key takeaways.
-7. **Depth rule:** Aim for 800–1500 lines per module. Better to be thorough than terse. These are standalone study materials.
-8. **No jargon without introduction.** First use of "bean," "IoC," "serializer," "backpressure," etc. gets a one-sentence definition in parentheses or a footnote.
+5. **No exercises.** Modules do not contain exercises. The capstone project (Module 10) serves as the practical application of all concepts.
+6. **Table of contents.** Every module starts with a collapsible table of contents listing all sections for quick navigation.
+7. **Collapsible submodules.** Deep dives or advanced topics use `<details>` blocks. The core content stands alone without expanding them.
+8. **Recap section.** Every module ends with a "What you learned" bullet list summarizing key takeaways.
+9. **Depth rule:** Aim for 800–1500 lines per module. Better to be thorough than terse. These are standalone study materials.
+10. **Introduce framework/ecosystem jargon.** First use of "bean," "IoC," "serializer," "backpressure," etc. gets a one-sentence definition in parentheses or a footnote. General programming jargon does not need explanation.
 
 ## Code Conventions
 
@@ -83,6 +89,7 @@ com.example.ordermgmt
 | 08 - Reactor | Reactive `OrderFlux` streaming order updates |
 | 09 - TDD | Tests for service, controller, repository, Kafka consumer |
 | 10 - Capstone | Full integrated application with all layers |
+| 11 - Kotlin | Migrate entities, services, and controllers to Kotlin |
 
 ## Module Format Template
 
@@ -101,24 +108,31 @@ com.example.ordermgmt
 
 ---
 
+## Table of Contents
+
+<details>
+<summary>Click to expand</summary>
+
+- [Section 1](#section-1)
+- [Section 2](#section-2)
+  - [Subsection 2.1](#subsection-21)
+  - [Subsection 2.2](#subsection-22)
+- [Section 3](#section-3)
+
+</details>
+
+---
+
 ## [Section titles in logical order]
 
 [Content with code examples]
 
----
-
-## Exercises
-
-### Exercise 1
-[Task]
-
 <details>
-<summary>Hint</summary>
-[Hint text]
-</details>
+<summary>Deep Dive: [Advanced Topic]</summary>
 
-### Exercise 2
-...
+[Optional deeper coverage that can be expanded]
+
+</details>
 
 ---
 
@@ -141,9 +155,10 @@ Before submitting a module, verify:
 - [ ] Package structure follows the convention
 - [ ] Code uses constructor injection, never field `@Autowired`
 - [ ] Java 21+ syntax (records, var, pattern matching)
-- [ ] Every concept is introduced before use (assume no prior knowledge)
+- [ ] Every framework/ecosystem concept is introduced before use
 - [ ] Code blocks are complete and would compile
-- [ ] Exercises are at the end in `<details>` hint blocks
+- [ ] Table of contents is present at the top
+- [ ] Collapsible submodules use `<details>` blocks for optional deep dives
 - [ ] "What You Learned" recap is present
 - [ ] Nav links at the bottom point to correct module files
-- [ ] No jargon used without a first-use definition
+- [ ] No basic programming concepts are explained (assume the reader can code)

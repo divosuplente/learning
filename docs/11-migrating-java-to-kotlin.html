@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Migrating Java to Kotlin — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Migrating Java to Kotlin — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -123,6 +123,60 @@
 <li>Understanding of: Java OOP, Spring Boot DI/REST/JPA, records, Reactor Mono/Flux</li>
 </ul>
 <hr />
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. Why Kotlin?](#1-why-kotlin)
+  - [Java vs Kotlin: Quick Comparison](#java-vs-kotlin-quick-comparison)
+  - [Should You Migrate?](#should-you-migrate)
+- [2. Setting Up Kotlin in a Spring Boot Project](#2-setting-up-kotlin-in-a-spring-boot-project)
+  - [Option A: Start a New Project with Spring Initializr](#option-a-start-a-new-project-with-spring-initializr)
+  - [Option B: Add Kotlin to an Existing Java Project](#option-b-add-kotlin-to-an-existing-java-project)
+  - [The Three Kotlin Compiler Plugins](#the-three-kotlin-compiler-plugins)
+- [3. Kotlin Syntax Crash Course for Java Developers](#3-kotlin-syntax-crash-course-for-java-developers)
+  - [3.1 Hello World](#31-hello-world)
+  - [3.2 Variables](#32-variables)
+  - [3.3 Null Safety](#33-null-safety)
+  - [3.4 String Interpolation](#34-string-interpolation)
+  - [3.5 Data Classes](#35-data-classes)
+  - [3.6 When Expression (Kotlin's switch)](#36-when-expression-kotlins-switch)
+  - [3.7 Functions](#37-functions)
+  - [3.8 Extension Functions](#38-extension-functions)
+  - [3.9 Collections](#39-collections)
+- [4. Migrating the Domain Layer](#4-migrating-the-domain-layer)
+  - [4.1 Java Entities → Kotlin Entities](#41-java-entities-kotlin-entities)
+  - [4.2 Java Records → Kotlin Data Classes](#42-java-records-kotlin-data-classes)
+  - [4.3 Java Enums → Kotlin Enums](#43-java-enums-kotlin-enums)
+- [5. Migrating Services and Controllers](#5-migrating-services-and-controllers)
+  - [5.1 Service Layer](#51-service-layer)
+  - [5.2 REST Controller](#52-rest-controller)
+- [6. Kotlin Coroutines — Alternative to Reactor](#6-kotlin-coroutines-alternative-to-reactor)
+  - [Mono/Flux vs Coroutines](#monoflux-vs-coroutines)
+  - [Adding Coroutine Support](#adding-coroutine-support)
+  - [Coroutine Controller Example](#coroutine-controller-example)
+  - [Coroutine Service Example](#coroutine-service-example)
+- [7. Kotlin-Specific Spring Features](#7-kotlin-specific-spring-features)
+  - [7.1 Routing DSL](#71-routing-dsl)
+  - [7.2 Bean DSL](#72-bean-dsl)
+  - [7.3 Kotlin JPA Repositories](#73-kotlin-jpa-repositories)
+- [8. IntelliJ IDEA's Java-to-Kotlin Converter (J2K)](#8-intellij-ideas-java-to-kotlin-converter-j2k)
+  - [How to Use It](#how-to-use-it)
+  - [What J2K Handles Well](#what-j2k-handles-well)
+  - [What J2K Does NOT Handle](#what-j2k-does-not-handle)
+  - [Migration Strategy](#migration-strategy)
+  - [Mixed Java/Kotlin](#mixed-javakotlin)
+- [9. Testing Kotlin Code](#9-testing-kotlin-code)
+  - [9.1 JUnit 5 with Kotlin](#91-junit-5-with-kotlin)
+  - [9.2 Key Testing Differences](#92-key-testing-differences)
+  - [9.3 Testing Coroutines with runTest](#93-testing-coroutines-with-runtest)
+- [10. exercises](#10-exercises)
+- [What You Learned](#what-you-learned)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 <h2 id="1-why-kotlin">1. Why Kotlin?<a class="anchor-link" href="#1-why-kotlin" title="Permanent link">¶</a></h2>
 <p><strong>Kotlin</strong> is a modern, statically-typed programming language that runs on the JVM.
 It was created by JetBrains (the company behind IntelliJ IDEA) and is fully
@@ -1031,115 +1085,6 @@ class CoroutineOrderServiceTest {
 }</code></pre>
 <hr />
 <h2 id="10-exercises">10. exercises<a class="anchor-link" href="#10-exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-convert-a-java-record-to-kotlin-data-class">exercise 1 — Convert a Java Record to Kotlin data class<a class="anchor-link" href="#exercise-1-convert-a-java-record-to-kotlin-data-class" title="Permanent link">¶</a></h3>
-<p>Convert this Java record to a Kotlin data class with all the same properties:</p>
-<pre class="code-block"><code class="language-java">public record ProductResponse(
-        Long id,
-        String name,
-        BigDecimal price,
-        String category,
-        boolean inStock
-) {}</code></pre>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-kotlin">data class ProductResponse(
-    val id: Long?,
-    val name: String,
-    val price: BigDecimal,
-    val category: String,
-    val inStock: Boolean
-)</code></pre>
-The `id` is `Long?` because it may not be assigned yet. All others are non-nullable.
-</details>
-
-<h3 id="exercise-2-convert-a-java-service-to-kotlin">exercise 2 — Convert a Java Service to Kotlin<a class="anchor-link" href="#exercise-2-convert-a-java-service-to-kotlin" title="Permanent link">¶</a></h3>
-<p>Convert this Java service method to Kotlin, using constructor injection via the
-primary constructor:</p>
-<pre class="code-block"><code class="language-java">@Service
-public class ProductService {
-    private final ProductRepository repo;
-    private final Logger log = LoggerFactory.getLogger(ProductService.class);
-
-    public ProductService(ProductRepository repo) {
-        this.repo = repo;
-    }
-
-    public Product findById(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -&gt; new IllegalArgumentException("Not found: " + id));
-    }
-}</code></pre>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-kotlin">@Service
-class ProductService(
-    private val repo: ProductRepository
-) {
-    private val log = LoggerFactory.getLogger(javaClass)
-
-    fun findById(id: Long): Product =
-        repo.findById(id)
-            .orElseThrow { IllegalArgumentException("Not found: $id") }
-}</code></pre>
-</details>
-
-<h3 id="exercise-3-write-a-suspend-function">exercise 3 — Write a Suspend Function<a class="anchor-link" href="#exercise-3-write-a-suspend-function" title="Permanent link">¶</a></h3>
-<p>Write a Kotlin suspend function that fetches an order by ID, checks if its total
-exceeds $100, and returns a discount-eligible label. Use coroutines.</p>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-kotlin">suspend fun checkDiscountEligibility(id: Long): String {
-    val order = orderRepository.findById(id)
-        ?: throw IllegalArgumentException("Order not found: $id")
-    return if (order.totalAmount &gt; BigDecimal("100")) {
-        "Eligible for 10% discount"
-    } else {
-        "Not eligible"
-    }
-}</code></pre>
-</details>
-
-<h3 id="exercise-4-convert-a-rest-controller-to-kotlin-with-coroutines">exercise 4 — Convert a REST Controller to Kotlin with Coroutines<a class="anchor-link" href="#exercise-4-convert-a-rest-controller-to-kotlin-with-coroutines" title="Permanent link">¶</a></h3>
-<p>Convert this Java reactive controller to a Kotlin coroutine controller:</p>
-<pre class="code-block"><code class="language-java">@RestController
-@RequestMapping("/api/orders")
-public class ReactiveOrderController {
-    private final ReactiveOrderService service;
-
-    @GetMapping("/{id}")
-    public Mono&lt;OrderResponse&gt; findById(@PathVariable Long id) {
-        return service.findById(id);
-    }
-}</code></pre>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-kotlin">@RestController
-@RequestMapping("/api/orders")
-class CoroutineOrderController(
-    private val service: CoroutineOrderService
-) {
-    @GetMapping("/{id}")
-    suspend fun findById(@PathVariable id: Long): OrderResponse =
-        service.findById(id)
-}</code></pre>
-The `suspend` keyword replaces `Mono<>` wrapping.
-</details>
-
-<h3 id="exercise-5-extension-function">exercise 5 — Extension Function<a class="anchor-link" href="#exercise-5-extension-function" title="Permanent link">¶</a></h3>
-<p>Write a Kotlin extension function on <code>BigDecimal</code> that formats it as a currency
-string with a dollar sign and two decimal places.</p>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-kotlin">fun BigDecimal.toCurrency(): String = "$${String.format("%.2f", this)}"</code></pre>
-Usage: `BigDecimal("19.999").toCurrency()` → `"$20.00"`
-</details>
-
-<hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong>Kotlin</strong> is a JVM language fully interoperable with Java — you can mix both in one project</li>
@@ -1169,6 +1114,8 @@ Usage: `BigDecimal("19.999").toCurrency()` → `"$20.00"`
 </ul>
 <hr />
 <p>← <a href="10-capstone-project.html">Previous: Module 10</a> | <strong>Next:</strong> None (final module)</p>
+<hr />
+<p>← <a href="10-capstone-project.html">Previous: Module 10 — Capstone Project</a></p>
       </article>
 
       <div class="footer-nav"><a href="10-capstone-project.html" class="nav-link prev">← Capstone Project</a></div>

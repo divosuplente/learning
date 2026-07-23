@@ -19,6 +19,77 @@
 
 ---
 
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is a Build Tool?](#1-what-is-a-build-tool)
+  - [Analogy](#analogy)
+- [2. Installing the JDK with SDKMAN](#2-installing-the-jdk-with-sdkman)
+  - [Installing SDKMAN](#installing-sdkman)
+  - [Installing Java 21 with SDKMAN](#installing-java-21-with-sdkman)
+- [3. What Is Maven?](#3-what-is-maven)
+  - [Installing Maven](#installing-maven)
+  - [Verifying Maven](#verifying-maven)
+- [4. Maven Coordinates](#4-maven-coordinates)
+- [5. Spring Initializr](#5-spring-initializr)
+  - [Using Spring Initializr](#using-spring-initializr)
+  - [What Spring Initializr Creates](#what-spring-initializr-creates)
+  - [The Main Application Class](#the-main-application-class)
+  - [What Does @SpringBootApplication Do?](#what-does-springbootapplication-do)
+- [6. The pom.xml — Complete File](#6-the-pomxml-complete-file)
+  - [pom.xml Anatomy](#pomxml-anatomy)
+    - [Parent](#parent)
+    - [Properties](#properties)
+    - [Dependencies](#dependencies)
+    - [What Is a "Fat JAR"?](#what-is-a-fat-jar)
+- [7. Project Structure](#7-project-structure)
+  - [Key Rules](#key-rules)
+- [8. application.yml](#8-applicationyml)
+  - [Rename application.properties to application.yml](#rename-applicationproperties-to-applicationyml)
+  - [YAML vs Properties](#yaml-vs-properties)
+- [9. Running the Application](#9-running-the-application)
+  - [From the Command Line (Maven)](#from-the-command-line-maven)
+  - [Building a JAR](#building-a-jar)
+  - [From IntelliJ IDEA](#from-intellij-idea)
+  - [Verifying It Works](#verifying-it-works)
+- [10. Spring Boot DevTools](#10-spring-boot-devtools)
+  - [Hot Reload](#hot-reload)
+  - [Automatic Restart in IntelliJ](#automatic-restart-in-intellij)
+- [11. Spring Profiles](#11-spring-profiles)
+  - [Creating Profile Files](#creating-profile-files)
+  - [Activating a Profile](#activating-a-profile)
+  - [How Profiles Work](#how-profiles-work)
+  - [Environment Variables in YAML](#environment-variables-in-yaml)
+- [12. Maven Commands Cheatsheet](#12-maven-commands-cheatsheet)
+- [What You Learned](#what-you-learned)
+- [13. Maven Dependency Scope Deep Dive](#13-maven-dependency-scope-deep-dive)
+  - [The Five Scopes](#the-five-scopes)
+  - [Transitive Dependencies](#transitive-dependencies)
+  - [Excluding Transitive Dependencies](#excluding-transitive-dependencies)
+- [14. Maven Plugin Configuration](#14-maven-plugin-configuration)
+  - [Compiler Plugin](#compiler-plugin)
+  - [Surefire Plugin (Test Execution)](#surefire-plugin-test-execution)
+  - [Spring Boot Maven Plugin](#spring-boot-maven-plugin)
+- [15. Spring Boot Profiles in Practice](#15-spring-boot-profiles-in-practice)
+  - [Profile-Specific Configuration Files](#profile-specific-configuration-files)
+  - [Activating Profiles](#activating-profiles)
+  - [@Profile on Beans](#profile-on-beans)
+- [16. Gradle — An Alternative to Maven](#16-gradle-an-alternative-to-maven)
+  - [Gradle vs Maven](#gradle-vs-maven)
+  - [build.gradle.kts (Kotlin DSL)](#buildgradlekts-kotlin-dsl)
+  - [When to Choose Gradle](#when-to-choose-gradle)
+- [17. Multi-Module Maven Projects](#17-multi-module-maven-projects)
+  - [Project Structure](#project-structure)
+  - [Parent POM](#parent-pom)
+  - [Child Module POM](#child-module-pom)
+  - [Building Multi-Module Projects](#building-multi-module-projects)
+- [18. Maven Wrapper (mvnw)](#18-maven-wrapper-mvnw)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 ## 1. What Is a Build Tool?
 
 When you write Java code, you create `.java` files. But to run them, several things need to happen:
@@ -772,86 +843,6 @@ The `${DATABASE_PASSWORD}` syntax reads the value from the environment variable 
 
 ---
 
-## Exercises
-
-### Exercise 1: Generate a Project with Spring Initializr
-
-Go to [https://start.spring.io](https://start.spring.io) and generate a project with:
-- Group: `com.example`
-- Artifact: `ordermgmt`
-- Java: 21
-- Dependencies: Spring Web, Spring Data JPA, PostgreSQL Driver, Spring for GraphQL, Spring for Apache Kafka
-
-Download it, unzip it, and open it in IntelliJ IDEA.
-
-<details>
-<summary>Hint</summary>
-
-Make sure you don't select Lombok — we use Java records for data classes instead of Lombok annotations.
-</details>
-
-### Exercise 2: Replace `application.properties` with `application.yml`
-
-Delete the `application.properties` file and create `application.yml` with basic server and application name configuration. Run the application and verify it starts on port 8080.
-
-<details>
-<summary>Hint</summary>
-
-```yaml
-server:
-  port: 8080
-spring:
-  application:
-    name: Order Management System
-```
-Run with `mvn spring-boot:run` and check the console for "Started OrderManagementApplication".
-</details>
-
-### Exercise 3: Create Profile Files
-
-Create three profile files:
-- `application.yml` — shared configuration
-- `application-dev.yml` — development settings (show SQL, ddl-auto: update)
-- `application-prod.yml` — production settings (use environment variables for database credentials)
-
-Run the application with the dev profile and verify the SQL logging works.
-
-<details>
-<summary>Hint</summary>
-
-Use `spring.profiles.active=dev` in the main `application.yml` or run with `--spring.profiles.active=dev` on the command line. For production, use `${DATABASE_URL}` syntax for environment variables.
-</details>
-
-### Exercise 4: Build a JAR
-
-Run `mvn clean package` and verify the JAR is created in `target/`. Run the JAR with `java -jar target/ordermgmt-0.0.1-SNAPSHOT.jar`.
-
-<details>
-<summary>Hint</summary>
-
-If tests fail (because there's no database), you can skip tests with `mvn clean package -DskipTests`. But in real projects, tests should pass before packaging.
-</details>
-
-### Exercise 5: Create the Package Structure
-
-Create the following empty packages (directories) in your project:
-- `com.example.ordermgmt.config`
-- `com.example.ordermgmt.controller`
-- `com.example.ordermgmt.domain`
-- `com.example.ordermgmt.dto`
-- `com.example.ordermgmt.repository`
-- `com.example.ordermgmt.service`
-- `com.example.ordermgmt.kafka`
-- `com.example.ordermgmt.graphql`
-
-<details>
-<summary>Hint</summary>
-
-In IntelliJ: right-click on `com.example.ordermgmt` → New → Package. Create each one. These will be used in modules 02-10.
-</details>
-
----
-
 ## What You Learned
 
 - A **build tool** automates compilation, dependency management, packaging, and testing
@@ -1338,4 +1329,4 @@ eliminating "works on my machine" build issues. The `mvnw` script and
 
 ---
 
-← [Previous: Module 00](./00-java-foundations.md) | [Next: Module 02](./02-dependency-injection.md) →
+← [Previous: Module 00 — Java for Experienced Developers](./00-java-foundations.md) | [Next: Module 02 — Dependency Injection](./02-dependency-injection.md) →

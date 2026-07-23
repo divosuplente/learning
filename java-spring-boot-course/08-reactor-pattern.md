@@ -26,6 +26,34 @@
 
 ---
 
+<details>
+<summary>Table of Contents</summary>
+
+- 1. [What Is Reactive Programming?](#what-is-reactive-programming)
+- 2. [Why Reactive? The C10K Problem](#why-reactive-the-c10k-problem)
+- 3. [The Reactive Streams Specification](#the-reactive-streams-specification)
+- 4. [Project Reactor — An Implementation](#project-reactor-an-implementation)
+- 5. [Creating Mono and Flux](#creating-mono-and-flux)
+- 6. [Core Operators](#core-operators)
+- 7. [The Reactive Stream Contract](#the-reactive-stream-contract)
+- 8. [Backpressure — Protecting Slow Consumers](#backpressure-protecting-slow-consumers)
+- 9. [Threading and Schedulers](#threading-and-schedulers)
+- 10. [Error Handling](#error-handling)
+- 11. [Hot vs. Cold Publishers](#hot-vs-cold-publishers)
+- 12. [Spring WebFlux — Reactive Controllers](#spring-webflux-reactive-controllers)
+- 13. [Integrating Reactive Kafka](#integrating-reactive-kafka)
+- 14. [Integrating Reactive Database (R2DBC)](#integrating-reactive-database-r2dbc)
+- 15. [Putting It All Together — Reactive Order Service](#putting-it-all-together-reactive-order-service)
+- 16. [Debugging Reactive Pipelines](#debugging-reactive-pipelines)
+- 17. [When NOT to Use Reactive Programming](#when-not-to-use-reactive-programming)
+- 18. [Combining Multiple Reactive Streams](#combining-multiple-reactive-streams)
+- 19. [Reactive Testing with StepVerifier](#reactive-testing-with-stepverifier)
+- 20. [When NOT to Use Reactive — Expanded](#when-not-to-use-reactive-expanded)
+- 21. [Reactive Design Patterns](#reactive-design-patterns)
+- 22. [Common Reactor Pitfalls](#common-reactor-pitfalls)
+
+</details>
+
 ## 1. What Is Reactive Programming?
 
 **Reactive programming** is a programming paradigm built around **asynchronous data
@@ -102,10 +130,123 @@ Reactor are complementary, not exclusive.
 
 ---
 
-## 3. Project Reactor — The Foundation of Spring WebFlux
+## 3. The Reactive Streams Specification
 
-**Project Reactor** is a Reactive Streams implementation used by Spring WebFlux.
-It provides two primary types:
+Before diving into any specific library, it's important to understand the **Reactive Streams specification** — a standard that defines how asynchronous stream processing should work, regardless of the implementation (Reactor, RxJava, akka-streams, etc.).
+
+### The Four Interfaces
+
+The Reactive Streams spec defines four core interfaces:
+
+```java
+// A provider of a potentially unbounded number of sequenced elements
+public interface Publisher<T> {
+    void subscribe(Subscriber<? super T> subscriber);
+}
+
+// A consumer of elements from a Publisher
+public interface Subscriber<T> {
+    void onSubscribe(Subscription subscription);
+    void onNext(T item);
+    void onError(Throwable error);
+    void onComplete();
+}
+
+// A link between Publisher and Subscriber that controls demand
+public interface Subscription {
+    void request(long n);    // Request n more items
+    void cancel();           // Cancel the subscription
+}
+
+// A processor that acts as both Subscriber and Publisher
+public interface Processor<T, R> extends Subscriber<T>, Publisher<R> {
+}
+```
+
+### The Lifecycle Contract
+
+Here's the sequence of calls when a `Subscriber` subscribes to a `Publisher`:
+
+```
+Publisher          Subscriber
+   |---subscribe()-->|
+   |                  |---onSubscribe(Subscription)-->
+   |                  |---request(n)-->
+   |---onNext(item)-->|  (repeated, up to n items)
+   |                  |---request(n)-->  (request more)
+   |---onNext(item)-->|  (repeated)
+   |---onComplete()-->|  OR  |---onError(throwable)-->
+```
+
+Key rules from the spec:
+
+1. **`onSubscribe` is called exactly once** before any other signal.
+2. **`onNext` is never called after `onComplete` or `onError`.**
+3. **A `Subscription` must be cancelled** if the `Subscriber` no longer wants items.
+4. **Calls are non-interfering** — `onNext` on subscriber A doesn't block subscriber B.
+5. **`request(n)` controls demand** — the Publisher should not send more items than requested.
+
+### Backpressure
+
+**Backpressure** is the mechanism by which a `Subscriber` tells a `Publisher`: *"I can only handle N items at a time — don't send more than that."* This prevents a fast producer from overwhelming a slow consumer.
+
+Without backpressure:
+
+```
+Fast Producer: [item1] [item2] [item3] [item4] [item5] → Slow Consumer
+                                                        💥 buffer overflow
+```
+
+With backpressure:
+
+```
+Fast Producer: [item1] [item2] → Slow Consumer (request(2))
+               (waits...)
+                              ← request(2)
+              [item3] [item4] → Slow Consumer
+               (waits...)
+```
+
+This is a **push-pull** model: the Publisher pushes, but the Subscriber pulls by requesting a specific quantity. Different libraries handle backpressure differently:
+
+| Strategy | Behavior | Use Case |
+|----------|----------|----------|
+| **Buffer** | Store excess items in a queue | When items can be slightly delayed |
+| **Drop** | Discard items the Subscriber can't process | Real-time metrics where missing data is OK |
+| **Latest** | Keep only the most recent item | Live price feeds, sensor data |
+| **Error** | Signal an error when overwhelmed | When data loss is unacceptable |
+| **Block** | Block the producer thread | Legacy integration (anti-pattern in reactive) |
+
+<details>
+<summary>Deep Dive: Backpressure in the Reactive Streams Spec</summary>
+
+The Reactive Streams specification (formally, the [RS spec](https://www.reactive-streams.org/)) mandates that `Subscription.request(n)` is the ONLY way a Subscriber signals readiness. A Publisher MUST NOT send more items than the total requested amount minus the already delivered amount.
+
+This means the contract enforces backpressure at the specification level — any compliant library (Reactor, RxJava, etc.) inherits this guarantee. The implementation details (buffering, dropping) are library-specific, but the demand-driven contract is universal.
+
+A common mistake: calling `request(Long.MAX_VALUE)` effectively disables backpressure, turning the stream into an unbounded push model. This is fine for testing but dangerous in production — it defeats the purpose of reactive streams.
+
+</details>
+
+### Implementations of the Spec
+
+The Reactive Streams spec is language-agnostic. Popular implementations include:
+
+| Implementation | Language | Used For |
+|---------------|----------|----------|
+| **Project Reactor** | Java (JVM) | Spring WebFlux, Spring Data R2DBC |
+| **RxJava** | Java (JVM) | Android, general JVM apps |
+| **Mutiny** | Java (JVM) | Quarkus |
+| **akka-streams** | Scala (JVM) | Akka ecosystem |
+| **flow** | Kotlin | Coroutines + Flow (Kotlin's native reactive) |
+
+All implement the same interfaces. The concepts you learn here transfer to any of them.
+
+---
+
+## 4. Project Reactor — An Implementation
+
+**Project Reactor** is the Reactive Streams implementation used by Spring WebFlux. It provides two primary types:
 
 - **`Mono<T>`** — emits **zero or one** item, then completes (or errors)
 - **`Flux<T>`** — emits **zero to N** items, then completes (or errors)
@@ -121,7 +262,7 @@ Both implement the **`Publisher`** interface from the Reactive Streams spec.
 
 ---
 
-## 4. Creating Mono and Flux
+## 5. Creating Mono and Flux
 
 ### Static Factory Methods
 
@@ -192,7 +333,7 @@ public class PublisherDemo {
 
 ---
 
-## 5. Core Operators
+## 6. Core Operators
 
 Operators transform, filter, or combine reactive streams. Each operator returns
 a new `Mono` or `Flux` — they **never mutate** the source.
@@ -289,7 +430,7 @@ public class OrderStatusPipeline {
 
 ---
 
-## 6. The Reactive Stream Contract
+## 7. The Reactive Stream Contract
 
 Every `Mono` and `Flux` obeys a contract with three lifecycle signals:
 
@@ -309,7 +450,7 @@ explicitly handle it with `onErrorReturn`, `onErrorResume`, or `retry`.
 
 ---
 
-## 7. Backpressure — Protecting Slow Consumers
+## 8. Backpressure — Protecting Slow Consumers
 
 ### What Is Backpressure?
 
@@ -344,7 +485,7 @@ Flux<Integer> safe = fastProducer
 
 ---
 
-## 8. Threading and Schedulers
+## 9. Threading and Schedulers
 
 Reactor separates **where work happens** using schedulers:
 
@@ -373,7 +514,7 @@ Flux<String> pipeline = Flux.fromIterable(List.of("a", "b", "c"))
 
 ---
 
-## 9. Error Handling
+## 10. Error Handling
 
 | Method | Effect |
 |--------|--------|
@@ -399,7 +540,7 @@ Mono<String> resilientCall = webClient.get()
 
 ---
 
-## 10. Hot vs. Cold Publishers
+## 11. Hot vs. Cold Publishers
 
 | Type | Behavior | Analogy |
 |------|----------|---------|
@@ -444,7 +585,7 @@ public class OrderStatusPublisher {
 
 ---
 
-## 11. Spring WebFlux — Reactive Controllers
+## 12. Spring WebFlux — Reactive Controllers
 
 Spring WebFlux is the reactive alternative to Spring MVC. It uses Netty (non-blocking
 I/O) instead of Tomcat (thread-per-request).
@@ -523,7 +664,7 @@ public class ReactiveRouter {
 
 ---
 
-## 12. Integrating Reactive Kafka
+## 13. Integrating Reactive Kafka
 
 ### Reactive Producer
 
@@ -602,7 +743,7 @@ public class ReactiveOrderConsumer {
 
 ---
 
-## 13. Integrating Reactive Database (R2DBC)
+## 14. Integrating Reactive Database (R2DBC)
 
 Spring Data R2DBC provides a reactive alternative to JPA. Instead of
 `JpaRepository`, you use `ReactiveCrudRepository`:
@@ -624,7 +765,7 @@ public interface ReactiveOrderRepository extends R2dbcRepository<OrderEntity, Lo
 
 ---
 
-## 14. Putting It All Together — Reactive Order Service
+## 15. Putting It All Together — Reactive Order Service
 
 ```java
 package com.example.ordermgmt.service;
@@ -701,7 +842,7 @@ public class ReactiveOrderService {
 
 ---
 
-## 15. Debugging Reactive Pipelines
+## 16. Debugging Reactive Pipelines
 
 Reactive pipelines can be hard to debug because the stack traces don't reflect
 the pipeline structure. Reactor provides debugging tools:
@@ -725,7 +866,7 @@ Flux<Integer> debugged = Flux.range(1, 10)
 
 ---
 
-## 16. When NOT to Use Reactive Programming
+## 17. When NOT to Use Reactive Programming
 
 | Situation | Why Reactive Is Inappropriate |
 |-----------|------------------------------|
@@ -738,69 +879,6 @@ Flux<Integer> debugged = Flux.range(1, 10)
 **Rule of thumb:** Use reactive when your application is **I/O-bound** and needs
 to handle **many concurrent connections**. Otherwise, traditional Spring MVC
 (or Spring MVC + virtual threads) is simpler and sufficient.
-
----
-
-## 17. Exercises
-
-### Exercise 1 — Transform a Cold Publisher into a Hot One
-
-```java
-Flux<Integer> source = Flux.range(1, 5);
-// Turn this into a hot publisher that emits immediately
-```
-
-<details>
-<summary>Hint</summary>
-Use the `.share()` operator to convert a cold Flux into a hot one. Late
-subscribers will only see items emitted after they subscribe.
-</details>
-
-### Exercise 2 — Backpressure Buffering
-
-Create a Flux that emits 1000 integers rapidly, but the consumer processes each
-item slowly (50ms). Use a backpressure policy that buffers excess items.
-
-<details>
-<summary>Hint</summary>
-Use `.onBackpressureBuffer(100)` after the source, then `.delayElements(Duration.ofMillis(50))`
-in the consumer. The buffer will hold up to 100 items while the consumer catches up.
-</details>
-
-### Exercise 3 — Error Recovery
-
-Write a Mono that calls an external API (simulate with `.map()` that throws
-on odd numbers). Retry 3 times with 1-second backoff, then return a fallback.
-
-<details>
-<summary>Hint</summary>
-Use `.retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))` followed by
-`.onErrorReturn("fallback")`.
-</details>
-
-### Exercise 4 — Reactive Kafka Stream
-
-Subscribe to a Flux of OrderCreatedEvent from Kafka and save each to the database
-using a reactive repository. Filter out events where `totalAmount` is zero.
-
-<details>
-<summary>Hint</summary>
-Use `.filter(event -> event.totalAmount().compareTo(BigDecimal.ZERO) > 0)`
-followed by `.flatMap(event -> reactiveRepo.save(event.toEntity()))`.
-Subscribe at the end with `.subscribe()`.
-</details>
-
-### Exercise 5 — Sinks for Real-Time Updates
-
-Create a Sinks.Many that accepts order status changes, and expose a Flux that
-clients can subscribe to. When an order's status changes to SHIPPED, log a
-notification.
-
-<details>
-<summary>Hint</summary>
-Use `.subscribe()` on the sink's `asFlux()` with `.filter(status -> status == OrderStatus.SHIPPED)`
-and `.doOnNext(status -> log.info("Order shipped!"))`.
-</details>
 
 ---
 
@@ -820,7 +898,7 @@ and `.doOnNext(status -> log.info("Order shipped!"))`.
 
 ---
 
-## 16. Combining Multiple Reactive Streams
+## 18. Combining Multiple Reactive Streams
 
 Reactors provides several operators for combining streams. Each has different
 semantics for when and how items are emitted.
@@ -897,7 +975,7 @@ Flux<OrderEvent> latestCustomerStream = Flux.switchOnNext(perCustomerStreams);
 
 ---
 
-## 17. Reactive Testing with StepVerifier
+## 19. Reactive Testing with StepVerifier
 
 StepVerifier is the standard tool for testing reactive pipelines.
 
@@ -988,7 +1066,7 @@ void map_transforms_each_item() {
 
 ---
 
-## 18. When NOT to Use Reactive — Expanded
+## 20. When NOT to Use Reactive — Expanded
 
 ### Latency Comparison
 
@@ -1009,7 +1087,7 @@ void map_transforms_each_item() {
 
 ---
 
-## 19. Reactive Design Patterns
+## 21. Reactive Design Patterns
 
 ### The "FlatMap Chain" Pattern
 
@@ -1122,7 +1200,7 @@ public class StatusController {
 
 ---
 
-## 20. Common Reactor Pitfalls
+## 22. Common Reactor Pitfalls
 
 ### Pitfall 1: Forgetting to Subscribe
 
@@ -1204,4 +1282,4 @@ Flux<Order> cold = orderRepo.findAll();  // each subscriber gets all items
 
 ---
 
-← [Previous: Module 07](./07-graphql.md) | [Next: Module 09](./09-tdd.md) →
+← [Previous: Module 07 — GraphQL](./07-graphql.md) | [Next: Module 09 — Test-Driven Development](./09-tdd.md) →

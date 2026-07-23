@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Repository Pattern — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Repository Pattern — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -127,6 +127,84 @@
 <li><a href="03-spring-boot-fundamentals.html">Module 03: Spring Boot Fundamentals</a> — you understand <code>application.yml</code> and REST controllers</li>
 </ul>
 <hr />
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is a Database?](#1-what-is-a-database)
+  - [Relational Databases](#relational-databases)
+  - [Key Concepts](#key-concepts)
+  - [Relationships](#relationships)
+- [2. SQL Crash Course](#2-sql-crash-course)
+  - [SELECT — Read Data](#select-read-data)
+  - [INSERT — Create Data](#insert-create-data)
+  - [UPDATE — Modify Data](#update-modify-data)
+  - [DELETE — Remove Data](#delete-remove-data)
+  - [JOIN — Combine Data from Multiple Tables](#join-combine-data-from-multiple-tables)
+  - [What JPA Does](#what-jpa-does)
+- [3. What Is the Repository Pattern?](#3-what-is-the-repository-pattern)
+  - [Without Repository Pattern](#without-repository-pattern)
+  - [With Repository Pattern](#with-repository-pattern)
+- [4. ORM, JPA, and Hibernate](#4-orm-jpa-and-hibernate)
+  - [ORM (Object-Relational Mapping)](#orm-object-relational-mapping)
+  - [JPA (Java Persistence API)](#jpa-java-persistence-api)
+  - [Hibernate](#hibernate)
+  - [Spring Data JPA](#spring-data-jpa)
+- [5. JPA Entities](#5-jpa-entities)
+  - [Entity Anatomy](#entity-anatomy)
+  - [Key Annotations](#key-annotations)
+  - [Why Not Records?](#why-not-records)
+- [6. Creating All Domain Entities](#6-creating-all-domain-entities)
+  - [ProductEntity](#productentity)
+  - [OrderStatus Enum](#orderstatus-enum)
+  - [OrderEntity](#orderentity)
+  - [OrderItemEntity](#orderitementity)
+  - [Understanding Relationships](#understanding-relationships)
+- [7. Spring Data Repositories](#7-spring-data-repositories)
+  - [CustomerRepository](#customerrepository)
+  - [ProductRepository](#productrepository)
+  - [OrderRepository](#orderrepository)
+  - [What Does JpaRepository Give You for Free?](#what-does-jparepository-give-you-for-free)
+  - [Derived Query Methods](#derived-query-methods)
+- [8. Pagination and Sorting in Repositories](#8-pagination-and-sorting-in-repositories)
+- [9. The N+1 Problem](#9-the-n1-problem)
+  - [The Problem](#the-problem)
+  - [Solution 1: JOIN FETCH](#solution-1-join-fetch)
+  - [Solution 2: @EntityGraph](#solution-2-entitygraph)
+- [10. Configuring PostgreSQL](#10-configuring-postgresql)
+  - [application.yml (already set up in Module 01)](#applicationyml-already-set-up-in-module-01)
+  - [What ddl-auto Does](#what-ddl-auto-does)
+  - [Using BigDecimal in PostgreSQL](#using-bigdecimal-in-postgresql)
+- [What You Learned](#what-you-learned)
+- [11. JPA Entity Relationships Deep Dive](#11-jpa-entity-relationships-deep-dive)
+  - [One-to-One](#one-to-one)
+  - [Cascade Types](#cascade-types)
+  - [Fetch Strategies](#fetch-strategies)
+  - [The N+1 Problem (Recap with Solution)](#the-n1-problem-recap-with-solution)
+- [12. JPQL and Native Queries](#12-jpql-and-native-queries)
+  - [JPQL (Java Persistence Query Language)](#jpql-java-persistence-query-language)
+  - [Native SQL Queries](#native-sql-queries)
+  - [Pagination and Sorting](#pagination-and-sorting)
+- [13. Database Indexing and Performance](#13-database-indexing-and-performance)
+  - [Adding Indexes](#adding-indexes)
+  - [When to Index](#when-to-index)
+  - [Common Performance Issues](#common-performance-issues)
+- [14. Flyway Database Migrations](#14-flyway-database-migrations)
+  - [Adding Flyway](#adding-flyway)
+  - [Migration Files](#migration-files)
+  - [How Flyway Works](#how-flyway-works)
+  - [Flyway Configuration](#flyway-configuration)
+  - [Why Flyway Over ddl-auto](#why-flyway-over-ddl-auto)
+- [15. Testing JPA Repositories with Testcontainers](#15-testing-jpa-repositories-with-testcontainers)
+  - [What Is Testcontainers?](#what-is-testcontainers)
+  - [Setup](#setup)
+  - [Full Repository Test](#full-repository-test)
+  - [@ServiceConnection](#serviceconnection)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 <h2 id="1-what-is-a-database">1. What Is a Database?<a class="anchor-link" href="#1-what-is-a-database" title="Permanent link">¶</a></h2>
 <p>A <strong>database</strong> is organized storage for your application's data. When your application shuts down, the data in memory (variables, objects) disappears. A database persists data — it saves it to disk so it survives restarts.</p>
 <h3 id="relational-databases">Relational Databases<a class="anchor-link" href="#relational-databases" title="Permanent link">¶</a></h3>
@@ -813,45 +891,6 @@ private BigDecimal price;</code></pre>
 <li>Maps to <code>NUMERIC(10, 2)</code> in PostgreSQL — always use BigDecimal for money</li>
 </ul>
 <hr />
-<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-add-a-derived-query-method">Exercise 1: Add a Derived Query Method<a class="anchor-link" href="#exercise-1-add-a-derived-query-method" title="Permanent link">¶</a></h3>
-<p>Add a method to <code>ProductRepository</code> that finds products by category and stock greater than a threshold.</p>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-java">List&lt;ProductEntity&gt; findByCategoryAndStockGreaterThan(String category, int minStock);</code></pre>
-Spring generates: `WHERE category = ? AND stock > ?`
-</details>
-
-<h3 id="exercise-2-write-a-custom-jpql-query">Exercise 2: Write a Custom JPQL Query<a class="anchor-link" href="#exercise-2-write-a-custom-jpql-query" title="Permanent link">¶</a></h3>
-<p>Add a method to <code>OrderRepository</code> that finds orders with total amount greater than a given value, ordered by total descending.</p>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-java">@Query("SELECT o FROM OrderEntity o WHERE o.totalAmount &gt; :amount ORDER BY o.totalAmount DESC")
-List&lt;OrderEntity&gt; findOrdersAboveAmount(@Param("amount") BigDecimal amount);</code></pre>
-</details>
-
-<h3 id="exercise-3-fix-an-n1-problem">Exercise 3: Fix an N+1 Problem<a class="anchor-link" href="#exercise-3-fix-an-n1-problem" title="Permanent link">¶</a></h3>
-<p>Write a <code>@Query</code> with <code>JOIN FETCH</code> that fetches orders with their items in a single query.</p>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-java">@Query("SELECT DISTINCT o FROM OrderEntity o JOIN FETCH o.items WHERE o.status = :status")
-List&lt;OrderEntity&gt; findOrdersWithItems(@Param("status") OrderStatus status);</code></pre>
-The `DISTINCT` prevents duplicate orders when an order has multiple items (because the JOIN creates one row per item).
-</details>
-
-<h3 id="exercise-4-add-pagination-to-a-repository">Exercise 4: Add Pagination to a Repository<a class="anchor-link" href="#exercise-4-add-pagination-to-a-repository" title="Permanent link">¶</a></h3>
-<p>Create a method that finds products by category with pagination.</p>
-<details>
-<summary>Hint</summary>
-
-<pre class="code-block"><code class="language-java">Page&lt;ProductEntity&gt; findByCategory(String category, Pageable pageable);</code></pre>
-Call it with: `productRepository.findByCategory("Electronics", PageRequest.of(0, 10));`
-</details>
-
-<hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
 <li>A <strong>database</strong> stores data persistently in <strong>tables</strong> (rows and columns)</li>
@@ -1286,7 +1325,7 @@ No need for <code>@DynamicPropertySource</code> boilerplate.</p>
 </li>
 </ul>
 <hr />
-<p>← <a href="03-spring-boot-fundamentals.html">Previous: Module 03</a> | <a href="05-service-oriented-architecture.html">Next: Module 05</a> →</p>
+<p>← <a href="03-spring-boot-fundamentals.html">Previous: Module 03 — Spring Boot Fundamentals</a> | <a href="05-service-oriented-architecture.html">Next: Module 05 — Service-Oriented Architecture</a> →</p>
       </article>
 
       <div class="footer-nav"><a href="03-spring-boot-fundamentals.html" class="nav-link prev">← Spring Boot Fundamentals</a><a href="05-service-oriented-architecture.html" class="nav-link next">Service-Oriented Architecture →</a></div>

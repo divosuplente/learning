@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kafka — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Apache Kafka — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item active">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -97,12 +97,12 @@
             <span></span><span></span><span></span>
         </button>
         <div class="breadcrumb">
-          <a href="index.html">Home</a> › <span>Kafka</span>
+          <a href="index.html">Home</a> › <span>Apache Kafka</span>
         </div>
       </header>
 
       <article class="content">
-        <h1 id="module-06-kafka">Module 06: Kafka<a class="anchor-link" href="#module-06-kafka" title="Permanent link">¶</a></h1>
+        <h1 id="module-06-apache-kafka">Module 06: Apache Kafka<a class="anchor-link" href="#module-06-apache-kafka" title="Permanent link">¶</a></h1>
 <h2 id="what-youll-learn">What You'll Learn<a class="anchor-link" href="#what-youll-learn" title="Permanent link">¶</a></h2>
 <ul>
 <li>Synchronous vs asynchronous communication between system components</li>
@@ -127,6 +127,81 @@
 <li><a href="05-service-oriented-architecture.html">Module 05: Service-Oriented Architecture</a> — you understand the service layer and application events</li>
 </ul>
 <hr />
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. Synchronous vs Asynchronous Communication](#1-synchronous-vs-asynchronous-communication)
+  - [Synchronous Communication](#synchronous-communication)
+  - [Asynchronous Communication](#asynchronous-communication)
+  - [When to Use Which?](#when-to-use-which)
+- [2. What Is Apache Kafka?](#2-what-is-apache-kafka)
+  - [Kafka Analogy: A Newsstand](#kafka-analogy-a-newsstand)
+- [3. Core Kafka Concepts](#3-core-kafka-concepts)
+  - [Topic](#topic)
+  - [Partition](#partition)
+  - [Offset](#offset)
+  - [Consumer Group](#consumer-group)
+  - [Broker](#broker)
+  - [Producer](#producer)
+  - [Consumer](#consumer)
+  - [Architecture Diagram](#architecture-diagram)
+- [4. Setting Up Kafka Locally with Docker](#4-setting-up-kafka-locally-with-docker)
+- [5. Spring Boot Kafka Configuration](#5-spring-boot-kafka-configuration)
+  - [Adding the Kafka Dependency](#adding-the-kafka-dependency)
+  - [application.yml Configuration](#applicationyml-configuration)
+  - [What Are Serializers and Deserializers?](#what-are-serializers-and-deserializers)
+- [6. Defining Kafka Events](#6-defining-kafka-events)
+- [7. Kafka Producers in Spring Boot](#7-kafka-producers-in-spring-boot)
+  - [What's Happening Here?](#whats-happening-here)
+  - [Why Use a Key?](#why-use-a-key)
+- [8. Integrating the Producer with the Service](#8-integrating-the-producer-with-the-service)
+- [9. Kafka Consumers in Spring Boot](#9-kafka-consumers-in-spring-boot)
+  - [What's Happening Here?](#whats-happening-here)
+  - [Multiple Consumers (Different Consumer Groups)](#multiple-consumers-different-consumer-groups)
+- [10. Serialization and Deserialization in Detail](#10-serialization-and-deserialization-in-detail)
+- [11. Error Handling](#11-error-handling)
+  - [Dead Letter Queue (DLQ)](#dead-letter-queue-dlq)
+  - [How It Works](#how-it-works)
+- [12. Delivery Semantics](#12-delivery-semantics)
+  - [At-Most-Once](#at-most-once)
+  - [At-Least-Once (Default)](#at-least-once-default)
+  - [Exactly-Once](#exactly-once)
+- [13. Idempotent Consumers](#13-idempotent-consumers)
+  - [What Is Idempotency?](#what-is-idempotency)
+  - [Making Consumers Idempotent](#making-consumers-idempotent)
+- [14. Kafka Streams Overview](#14-kafka-streams-overview)
+- [What You Learned](#what-you-learned)
+- [10. Kafka Consumer Groups and Partition Rebalancing](#10-kafka-consumer-groups-and-partition-rebalancing)
+  - [Consumer Groups](#consumer-groups)
+  - [Rebalancing](#rebalancing)
+  - [ConsumerRebalanceListener](#consumerrebalancelistener)
+  - [Partition Assignment Strategies](#partition-assignment-strategies)
+- [11. Exactly-Once Semantics (EOS)](#11-exactly-once-semantics-eos)
+  - [Idempotent Producer](#idempotent-producer)
+  - [Transactional Producer](#transactional-producer)
+  - [Transactional Consumer](#transactional-consumer)
+- [12. Kafka Stream Processing Basics](#12-kafka-stream-processing-basics)
+  - [Java KStream Example: Order Count by Status](#java-kstream-example-order-count-by-status)
+  - [Windowed Aggregation](#windowed-aggregation)
+  - [KStream vs KTable](#kstream-vs-ktable)
+- [13. Kafka Schema Registry and Avro Serialization](#13-kafka-schema-registry-and-avro-serialization)
+  - [The Problem with JSON Serialization](#the-problem-with-json-serialization)
+  - [Avro + Schema Registry](#avro-schema-registry)
+  - [Adding Avro Support](#adding-avro-support)
+  - [Avro Schema](#avro-schema)
+  - [Configuration](#configuration)
+  - [Compatibility Rules](#compatibility-rules)
+- [14. Kafka Monitoring and Metrics](#14-kafka-monitoring-and-metrics)
+  - [Key Metrics to Monitor](#key-metrics-to-monitor)
+  - [Spring Boot Kafka Metrics](#spring-boot-kafka-metrics)
+  - [Kafka CLI Tools](#kafka-cli-tools)
+- [15. Kafka in Production: Best Practices](#15-kafka-in-production-best-practices)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 <h2 id="1-synchronous-vs-asynchronous-communication">1. Synchronous vs Asynchronous Communication<a class="anchor-link" href="#1-synchronous-vs-asynchronous-communication" title="Permanent link">¶</a></h2>
 <p>When two parts of a system need to communicate, there are two fundamental approaches:</p>
 <h3 id="synchronous-communication">Synchronous Communication<a class="anchor-link" href="#synchronous-communication" title="Permanent link">¶</a></h3>
@@ -820,40 +895,6 @@ KTable&lt;String, Long&gt; orderCounts = orders
 // You can query them in real-time</code></pre>
 <p>Kafka Streams is powerful for real-time analytics, but it's an advanced topic. For now, know that it exists and that it builds on the same Kafka topics you already understand.</p>
 <hr />
-<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-add-a-payment-event-consumer">Exercise 1: Add a Payment Event Consumer<a class="anchor-link" href="#exercise-1-add-a-payment-event-consumer" title="Permanent link">¶</a></h3>
-<p>Create a new event <code>PaymentProcessedEvent</code> (with <code>orderId</code>, <code>paymentMethod</code>, <code>amount</code>, <code>processedAt</code>). Add a producer method in <code>OrderEventProducer</code> that sends it. Create a <code>PaymentEventConsumer</code> that listens for it and logs the payment.</p>
-<details>
-<summary>Hint</summary>
-
-Create the record `PaymentProcessedEvent` in the `kafka.event` package. Add a `publishPaymentProcessed(...)` method to `OrderEventProducer` using `kafkaTemplate.send(ORDER_EVENTS_TOPIC, key, event)`. Create a `PaymentEventConsumer` class with `@KafkaListener(topics = "order-events", groupId = "payment-group")` and a method that accepts `PaymentProcessedEvent`.
-</details>
-
-<h3 id="exercise-2-add-error-handling-with-dlq">Exercise 2: Add Error Handling with DLQ<a class="anchor-link" href="#exercise-2-add-error-handling-with-dlq" title="Permanent link">¶</a></h3>
-<p>Modify the <code>OrderEventConsumer</code> to use <code>@RetryableTopic</code> with 5 attempts and exponential backoff (1s, 2s, 4s, 8s). Add a DLT handler that logs the failed event with full details.</p>
-<details>
-<summary>Hint</summary>
-
-Use `@RetryableTopic(attempts = "5", backoff = @Backoff(delay = 1000, multiplier = 2.0), dltTopic = "order-events-dlt")` above the `@KafkaListener` annotation. Add a separate `@KafkaListener(topics = "order-events-dlt")` method for the DLT handler.
-</details>
-
-<h3 id="exercise-3-make-the-consumer-idempotent">Exercise 3: Make the Consumer Idempotent<a class="anchor-link" href="#exercise-3-make-the-consumer-idempotent" title="Permanent link">¶</a></h3>
-<p>Modify the <code>OrderEventConsumer</code> to check if an order was already processed before processing it. Use the <code>OrderRepository</code> to check by order ID.</p>
-<details>
-<summary>Hint</summary>
-
-Add a `@Transactional` annotation to the consumer method. At the start of the method, call `orderRepository.findById(event.orderId())`. If it returns a non-empty result, log "already processed" and return early. If it's empty, proceed with processing.
-</details>
-
-<h3 id="exercise-4-create-a-combined-consumer">Exercise 4: Create a Combined Consumer<a class="anchor-link" href="#exercise-4-create-a-combined-consumer" title="Permanent link">¶</a></h3>
-<p>Create a consumer that listens to both <code>order-events</code> and a new topic <code>product-events</code>. For <code>order-events</code>, it counts how many orders were created (maintaining an in-memory counter). For <code>product-events</code>, it logs each product event.</p>
-<details>
-<summary>Hint</summary>
-
-Use two methods, each with its own `@KafkaListener` annotation pointing to a different topic. Use `AtomicInteger` (a thread-safe integer) as an in-memory counter and increment it each time an order event is received. Remember this counter resets when the application restarts — in production, you'd store it in a database.
-</details>
-
-<hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong>Synchronous</strong> communication waits for a response; <strong>asynchronous</strong> communication fires and forgets. Kafka enables asynchronous event-driven communication</li>
@@ -874,398 +915,10 @@ Use two methods, each with its own `@KafkaListener` annotation pointing to a dif
 <h3 id="consumer-groups">Consumer Groups<a class="anchor-link" href="#consumer-groups" title="Permanent link">¶</a></h3>
 <p>A <strong>consumer group</strong> is a set of consumers that jointly process messages from one
 or more topics. Kafka distributes partitions among the group's consumers:</p>
-<pre class="code-block"><code>Topic: order-created (3 partitions)
-
-Consumer Group: ordermgmt-group
-  Consumer A  ←  partition 0
-  Consumer B  ←  partition 1
-  Consumer C  ←  partition 2
-
-If Consumer C dies:
-  Consumer A  ←  partition 0, partition 2 (rebalanced)
-  Consumer B  ←  partition 1</code></pre>
-<p><strong>Rule:</strong> A partition is assigned to exactly one consumer within a group. Adding
-more consumers than partitions means some consumers are idle.</p>
-<h3 id="rebalancing">Rebalancing<a class="anchor-link" href="#rebalancing" title="Permanent link">¶</a></h3>
-<p><strong>Rebalancing</strong> is the process of redistributing partitions when:
-- A consumer joins or leaves the group
-- A consumer crashes
-- New partitions are added to a topic</p>
-<p>During rebalancing, <strong>consumers stop processing</strong> until rebalancing completes.</p>
-<h3 id="consumerrebalancelistener">ConsumerRebalanceListener<a class="anchor-link" href="#consumerrebalancelistener" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">@Component
-public class OrderConsumer {
-
-    @KafkaListener(topics = "order-created", groupId = "ordermgmt-group")
-    public void consume(ConsumerRecord&lt;String, OrderCreatedEvent&gt; record,
-                        Acknowledgment ack) {
-        try {
-            log.info("Processing order {}", record.value().orderId());
-            processOrder(record.value());
-            ack.acknowledge();  // manual commit
-        } catch (Exception e) {
-            log.error("Failed to process order", e);
-            // don't ack — message will be re-delivered after rebalance
-        }
-    }
-
-    @Bean
-    public ConsumerFactory&lt;String, OrderCreatedEvent&gt; consumerFactory() {
-        Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);  // manual commit
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        return new DefaultKafkaConsumerFactory&lt;&gt;(props);
-    }
-}</code></pre>
-<h3 id="partition-assignment-strategies">Partition Assignment Strategies<a class="anchor-link" href="#partition-assignment-strategies" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Strategy</th>
-<th>Behavior</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>RangeAssignor</code> (default)</td>
-<td>Assigns partitions in ranges</td>
-</tr>
-<tr>
-<td><code>RoundRobinAssignor</code></td>
-<td>Distributes partitions round-robin</td>
-</tr>
-<tr>
-<td><code>StickyAssignor</code></td>
-<td>Minimizes partition movement on rebalance</td>
-</tr>
-<tr>
-<td><code>CooperativeStickyAssignor</code></td>
-<td>Incremental rebalance — only affected partitions stop</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="11-exactly-once-semantics-eos">11. Exactly-Once Semantics (EOS)<a class="anchor-link" href="#11-exactly-once-semantics-eos" title="Permanent link">¶</a></h2>
-<p>Kafka's default delivery is <strong>at-least-once</strong> — messages may be redelivered
-after a consumer crash. <strong>Exactly-once</strong> prevents duplicate processing.</p>
-<h3 id="idempotent-producer">Idempotent Producer<a class="anchor-link" href="#idempotent-producer" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">@Bean
-public ProducerFactory&lt;String, OrderCreatedEvent&gt; producerFactory() {
-    Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-    props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);  // enables EOS
-    props.put(ProducerConfig.ACKS_CONFIG, "all");
-    props.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
-    return new DefaultKafkaProducerFactory&lt;&gt;(props);
-}</code></pre>
-<h3 id="transactional-producer">Transactional Producer<a class="anchor-link" href="#transactional-producer" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">@Bean
-public KafkaTemplate&lt;String, Object&gt; kafkaTemplate(ProducerFactory&lt;String, Object&gt; pf) {
-    var template = new KafkaTemplate&lt;&gt;(pf);
-    template.setTransactionIdPrefix("ordermgmt-tx-");  // enables transactions
-    return template;
-}
-
-// Usage
-@Transactional
-public void publishOrderCreated(OrderEntity order) {
-    kafkaTemplate.executeInTransaction(template -&gt; {
-        template.send("order-created", OrderCreatedEvent.from(order));
-        template.send("order-audit", AuditEvent.from(order));
-        return null;  // both messages sent atomically
-    });
-}</code></pre>
-<h3 id="transactional-consumer">Transactional Consumer<a class="anchor-link" href="#transactional-consumer" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-yaml">spring:
-  kafka:
-    consumer:
-      isolation-level: read_committed  # only read committed transactional messages</code></pre>
-<p>With <code>read_committed</code>, the consumer only sees messages from transactions that
-were committed — not aborted transactions.</p>
-<hr />
-<h2 id="12-kafka-stream-processing-basics">12. Kafka Stream Processing Basics<a class="anchor-link" href="#12-kafka-stream-processing-basics" title="Permanent link">¶</a></h2>
-<p><strong>Kafka Streams</strong> is a library for processing Kafka data in real-time. Unlike
-a consumer/producer, it handles state management, joins, and windowing for you.</p>
-<h3 id="java-kstream-example-order-count-by-status">Java KStream Example: Order Count by Status<a class="anchor-link" href="#java-kstream-example-order-count-by-status" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.*;
-
-@Configuration
-public class OrderStreamConfig {
-
-    @Bean
-    public KStream&lt;String, OrderCreatedEvent&gt; orderStream(StreamsBuilder builder) {
-        KStream&lt;String, OrderCreatedEvent&gt; stream = builder
-                .stream("order-created",
-                        Consumed.with(Serdes.String(), jsonSerde()));
-
-        // Group by order status and count
-        KTable&lt;String, Long&gt; countsByStatus = stream
-                .groupBy((key, order) -&gt; order.status().name(),
-                        Grouped.with(Serdes.String(), jsonSerde()))
-                .count();
-
-        // Write counts to an output topic
-        countsByStatus.toStream()
-                .to("order-status-counts",
-                        Produced.with(Serdes.String(), Serdes.Long()));
-
-        return stream;
-    }
-}</code></pre>
-<h3 id="windowed-aggregation">Windowed Aggregation<a class="anchor-link" href="#windowed-aggregation" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// Count orders per customer in 5-minute tumbling windows
-KTable&lt;Windowed&lt;String&gt;, Long&gt; windowedCounts = stream
-        .groupByKey()
-        .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(5)))
-        .count();</code></pre>
-<h3 id="kstream-vs-ktable">KStream vs KTable<a class="anchor-link" href="#kstream-vs-ktable" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Concept</th>
-<th>KStream</th>
-<th>KTable</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Analogy</td>
-<td>A stream of events (append-only log)</td>
-<td>A table's current state (upsertable)</td>
-</tr>
-<tr>
-<td>Duplicates</td>
-<td>Allowed (same key appears multiple times)</td>
-<td>Replaced (latest value for a key wins)</td>
-</tr>
-<tr>
-<td>Use case</td>
-<td>Processing individual events</td>
-<td>Maintaining current state</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="13-kafka-schema-registry-and-avro-serialization">13. Kafka Schema Registry and Avro Serialization<a class="anchor-link" href="#13-kafka-schema-registry-and-avro-serialization" title="Permanent link">¶</a></h2>
-<h3 id="the-problem-with-json-serialization">The Problem with JSON Serialization<a class="anchor-link" href="#the-problem-with-json-serialization" title="Permanent link">¶</a></h3>
-<p>When using JSON for Kafka messages, the <strong>producer and consumer must agree on
-the message structure</strong>. If the producer adds a field, old consumers may break.
-<strong>Schema Registry</strong> solves this by storing and versioning schemas centrally.</p>
-<h3 id="avro-schema-registry">Avro + Schema Registry<a class="anchor-link" href="#avro-schema-registry" title="Permanent link">¶</a></h3>
-<p><strong>Avro</strong> is a compact binary serialization format (like Protocol Buffers).
-<strong>Schema Registry</strong> stores Avro schemas and enforces compatibility rules.</p>
-<h3 id="adding-avro-support">Adding Avro Support<a class="anchor-link" href="#adding-avro-support" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.apache.avro&lt;/groupId&gt;
-    &lt;artifactId&gt;avro&lt;/artifactId&gt;
-    &lt;version&gt;1.11.3&lt;/version&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;io.confluent&lt;/groupId&gt;
-    &lt;artifactId&gt;kafka-avro-serializer&lt;/artifactId&gt;
-    &lt;version&gt;7.6.0&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
-<h3 id="avro-schema">Avro Schema<a class="anchor-link" href="#avro-schema" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-json">// src/main/avro/order-created-event.avsc
-{
-  "type": "record",
-  "name": "OrderCreatedEvent",
-  "namespace": "com.example.ordermgmt.kafka.event",
-  "fields": [
-    {"name": "orderId", "type": "long"},
-    {"name": "customerId", "type": "long"},
-    {"name": "status", "type": "string"},
-    {"name": "totalAmount", "type": {"type": "bytes", "logicalType": "decimal", "precision": 10, "scale": 2}},
-    {"name": "createdAt", "type": {"type": "long", "logicalType": "timestamp-millis"}}
-  ]
-}</code></pre>
-<h3 id="configuration">Configuration<a class="anchor-link" href="#configuration" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-yaml">spring:
-  kafka:
-    properties:
-      schema.registry.url: http://localhost:8081
-    producer:
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-    consumer:
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-      properties:
-        specific.avro.reader: true  # generate Java classes instead of GenericRecord</code></pre>
-<h3 id="compatibility-rules">Compatibility Rules<a class="anchor-link" href="#compatibility-rules" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Rule</th>
-<th>Allows</th>
-<th>Prevents</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>BACKWARD</td>
-<td>Adding optional fields, removing fields</td>
-<td>Adding required fields</td>
-</tr>
-<tr>
-<td>FORWARD</td>
-<td>Removing optional fields</td>
-<td>Adding required fields</td>
-</tr>
-<tr>
-<td>FULL</td>
-<td>Both backward and forward</td>
-<td>Breaking changes</td>
-</tr>
-</tbody>
-</table>
-<p>When a producer tries to send a message with an incompatible schema, the Schema
-Registry <strong>rejects it</strong> — preventing broken consumers.</p>
-<hr />
-<h2 id="14-kafka-monitoring-and-metrics">14. Kafka Monitoring and Metrics<a class="anchor-link" href="#14-kafka-monitoring-and-metrics" title="Permanent link">¶</a></h2>
-<h3 id="key-metrics-to-monitor">Key Metrics to Monitor<a class="anchor-link" href="#key-metrics-to-monitor" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Metric</th>
-<th>What It Tells You</th>
-<th>Healthy Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>consumer-lag</code></td>
-<td>How far behind the consumer is</td>
-<td>&lt; 1000 messages</td>
-</tr>
-<tr>
-<td><code>producer-record-error-rate</code></td>
-<td>Failed sends per second</td>
-<td>0</td>
-</tr>
-<tr>
-<td><code>producer-record-send-rate</code></td>
-<td>Messages sent per second</td>
-<td>Matches expected</td>
-</tr>
-<tr>
-<td><code>consumer-records-consumed-rate</code></td>
-<td>Messages consumed per second</td>
-<td>Matches producer rate</td>
-</tr>
-<tr>
-<td><code>consumer-fetch-latency-avg</code></td>
-<td>Average time to fetch from broker</td>
-<td>&lt; 100ms</td>
-</tr>
-<tr>
-<td><code>request-latency-avg</code></td>
-<td>Average broker response time</td>
-<td>&lt; 50ms</td>
-</tr>
-</tbody>
-</table>
-<h3 id="spring-boot-kafka-metrics">Spring Boot Kafka Metrics<a class="anchor-link" href="#spring-boot-kafka-metrics" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">@Service
-public class KafkaMetricsService {
-
-    private final MeterRegistry meterRegistry;
-
-    public KafkaMetricsService(MeterRegistry meterRegistry) {
-        this.meterRegistry = meterRegistry;
-    }
-
-    public double getConsumerLag(String topic, String groupId) {
-        return meterRegistry.find("kafka.consumer.lag")
-                .tag("topic", topic)
-                .tag("group", groupId)
-                .gauge()
-                .map(g -&gt; g.value())
-                .orElse(0.0);
-    }
-}</code></pre>
-<p>Access via: <code>GET /actuator/metrics/kafka.consumer.lag</code></p>
-<h3 id="kafka-cli-tools">Kafka CLI Tools<a class="anchor-link" href="#kafka-cli-tools" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-bash"># List topics
-docker exec oms-kafka /opt/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:9092
-
-# Describe a topic (partitions, replicas)
-docker exec oms-kafka /opt/kafka/bin/kafka-topics.sh --describe --topic order-created --bootstrap-server localhost:9092
-
-# Consume messages from the CLI (for debugging)
-docker exec oms-kafka /opt/kafka/bin/kafka-console-consumer.sh --topic order-created --from-beginning --bootstrap-server localhost:9092
-
-# Check consumer group lag
-docker exec oms-kafka /opt/kafka/bin/kafka-consumer-groups.sh --describe --group ordermgmt-group --bootstrap-server localhost:9092</code></pre>
-<hr />
-<h2 id="15-kafka-in-production-best-practices">15. Kafka in Production: Best Practices<a class="anchor-link" href="#15-kafka-in-production-best-practices" title="Permanent link">¶</a></h2>
-<table>
-<thead>
-<tr>
-<th>Practice</th>
-<th>Why</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Use <code>acks=all</code> for critical data</td>
-<td>Ensures the message is replicated before acknowledged</td>
-</tr>
-<tr>
-<td>Set <code>retries</code> to a high number (or <code>Integer.MAX_VALUE</code>)</td>
-<td>Transient failures should retry, not lose data</td>
-</tr>
-<tr>
-<td>Enable <code>enable.idempotence=true</code></td>
-<td>Prevents duplicates during retries</td>
-</tr>
-<tr>
-<td>Use meaningful topic names (<code>order-created</code>, not <code>topic1</code>)</td>
-<td>Discoverability</td>
-</tr>
-<tr>
-<td>Partition by a meaningful key (e.g., <code>customerId</code>)</td>
-<td>Related messages go to the same partition (ordering)</td>
-</tr>
-<tr>
-<td>Set <code>min.insync.replicas=2</code></td>
-<td>Requires at least 2 replicas to acknowledge writes</td>
-</tr>
-<tr>
-<td>Use a DLQ (dead letter queue) for poison messages</td>
-<td>Prevents one bad message from blocking the consumer</td>
-</tr>
-<tr>
-<td>Monitor consumer lag continuously</td>
-<td>Lag growing = consumer can't keep up</td>
-</tr>
-<tr>
-<td>Don't block in the consumer loop</td>
-<td>Use async processing or increase partitions/consumers</td>
-</tr>
-<tr>
-<td>Use <code>spring.kafka.listener.ack-mode=manual</code> for at-least-once</td>
-<td>Only commit after successful processing</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
-<ul>
-<li>
-<p><strong>[Kafka Crash Course - Hands-On Project]</strong> by TechWorld with Nana — Excellent conceptual intro to Kafka with a hands‑on demo project (1:07:58, 247K views)
-  <a href="https://www.youtube.com/watch?v=B7CwU_tNYIE">https://www.youtube.com/watch?v=B7CwU_tNYIE</a></p>
-</li>
-<li>
-<p><strong>[Apache Kafka in 5 minutes]</strong> by Stephane Maarek — Quick conceptual overview of how Kafka works with diagrams (5:20, 990K views)
-  <a href="https://www.youtube.com/watch?v=PzPXRmVHMxI">https://www.youtube.com/watch?v=PzPXRmVHMxI</a></p>
-</li>
-<li>
-<p><strong>[Spring Boot + Kafka in Minutes (Your First Message)]</strong> by Dan Vega — Getting started with Kafka in a Spring Boot application
-  <a href="https://www.youtube.com/watch?v=5XW3f_39ipY">https://www.youtube.com/watch?v=5XW3f_39ipY</a></p>
-</li>
-</ul>
-<hr />
-<p>← <a href="05-service-oriented-architecture.html">Previous: Module 05</a> | <a href="07-graphql.html">Next: Module 07</a> →</p>
+<p>```
+Topic: order-created (3 partitions)</p>
+<p>Consumer Group: ordermgmt-group
+  Consumer A  ← <a href="05-service-oriented-architecture.html">Previous: Module 05 — Service-Oriented Architecture</a> | <a href="07-graphql.html">Next: Module 07 — GraphQL</a> →</p>
       </article>
 
       <div class="footer-nav"><a href="05-service-oriented-architecture.html" class="nav-link prev">← Service-Oriented Architecture</a><a href="07-graphql.html" class="nav-link next">GraphQL →</a></div>

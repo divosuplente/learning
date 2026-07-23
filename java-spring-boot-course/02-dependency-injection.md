@@ -25,6 +25,72 @@
 
 ---
 
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. The Problem: Tight Coupling with new](#1-the-problem-tight-coupling-with-new)
+  - [Example: The Bad Way](#example-the-bad-way)
+  - [Why Is This Bad?](#why-is-this-bad)
+  - [The Fix: Dependency Injection](#the-fix-dependency-injection)
+- [2. What Is Dependency Injection?](#2-what-is-dependency-injection)
+  - [The Restaurant Analogy](#the-restaurant-analogy)
+- [3. Inversion of Control (IoC)](#3-inversion-of-control-ioc)
+  - [The Hollywood Principle](#the-hollywood-principle)
+- [4. The Spring IoC Container](#4-the-spring-ioc-container)
+  - [Key Terms](#key-terms)
+- [5. Types of Injection](#5-types-of-injection)
+  - [1. Constructor Injection (Preferred)](#1-constructor-injection-preferred)
+  - [2. Setter Injection (Rarely Used)](#2-setter-injection-rarely-used)
+  - [3. Field Injection (Avoid)](#3-field-injection-avoid)
+  - [Why Constructor Injection Is Preferred](#why-constructor-injection-is-preferred)
+- [6. Spring Stereotype Annotations](#6-spring-stereotype-annotations)
+  - [How Component Scanning Works](#how-component-scanning-works)
+  - [Example: Creating Beans](#example-creating-beans)
+- [7. @Autowired: Explicit vs. Implicit Wiring](#7-autowired-explicit-vs-implicit-wiring)
+- [8. Bean Scopes](#8-bean-scopes)
+  - [Setting a Scope](#setting-a-scope)
+- [9. Manual Bean Creation with @Configuration and @Bean](#9-manual-bean-creation-with-configuration-and-bean)
+  - [When to Use @Bean vs @Component](#when-to-use-bean-vs-component)
+- [10. Resolving Ambiguous Dependencies: @Qualifier and @Primary](#10-resolving-ambiguous-dependencies-qualifier-and-primary)
+  - [Using @Qualifier for Specific Selection](#using-qualifier-for-specific-selection)
+- [11. Circular Dependencies](#11-circular-dependencies)
+  - [How to Avoid Circular Dependencies](#how-to-avoid-circular-dependencies)
+- [12. Life-Cycle Hooks: @PostConstruct and @PreDestroy](#12-life-cycle-hooks-postconstruct-and-predestroy)
+  - [When to Use Each](#when-to-use-each)
+- [13. Wiring the Order Management Domain](#13-wiring-the-order-management-domain)
+  - [Domain Records (from Module 00)](#domain-records-from-module-00)
+  - [Repository Interfaces (stubs — real JPA in Module 04)](#repository-interfaces-stubs-real-jpa-in-module-04)
+  - [Service Layer](#service-layer)
+  - [Controller](#controller)
+  - [The Application Entry Point](#the-application-entry-point)
+  - [How Spring Wires Everything](#how-spring-wires-everything)
+- [What You Learned](#what-you-learned)
+- [12. Bean Lifecycle Callbacks in Depth](#12-bean-lifecycle-callbacks-in-depth)
+  - [The Bean Lifecycle (Simplified)](#the-bean-lifecycle-simplified)
+  - [@PostConstruct and @PreDestroy](#postconstruct-and-predestroy)
+  - [When to Use Each](#when-to-use-each)
+- [13. Conditional Bean Registration](#13-conditional-bean-registration)
+  - [@ConditionalOnProperty](#conditionalonproperty)
+  - [@ConditionalOnMissingBean](#conditionalonmissingbean)
+  - [@ConditionalOnClass](#conditionalonclass)
+  - [Combining Conditions](#combining-conditions)
+- [14. Bean Scopes in Practice](#14-bean-scopes-in-practice)
+  - [The Proxy Problem](#the-proxy-problem)
+- [15. Spring Bean Circular Dependencies](#15-spring-bean-circular-dependencies)
+  - [The Problem](#the-problem)
+  - [Solution 1: Redesign (Preferred)](#solution-1-redesign-preferred)
+  - [Solution 2: Use Events](#solution-2-use-events)
+- [16. Spring AOP (Aspect-Oriented Programming)](#16-spring-aop-aspect-oriented-programming)
+  - [How Spring Uses AOP Internally](#how-spring-uses-aop-internally)
+  - [Custom Aspect Example: Method Timing](#custom-aspect-example-method-timing)
+- [17. Spring Profiles and Environment Abstraction](#17-spring-profiles-and-environment-abstraction)
+  - [@Value with SpEL (Spring Expression Language)](#value-with-spel-spring-expression-language)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 ## 1. The Problem: Tight Coupling with `new`
 
 When a class creates its own dependencies using the `new` keyword, it becomes **tightly coupled** — it can't function without those specific implementations.
@@ -699,97 +765,6 @@ When you start the application:
 
 ---
 
-## Exercises
-
-### Exercise 1: Spot the `new`
-
-Look at the following class and refactor it to use constructor injection instead of `new`:
-
-```java
-public class ProductService {
-    private ProductRepository repo;
-
-    public ProductService() {
-        this.repo = new ProductRepository();
-    }
-}
-```
-
-<details>
-<summary>Hint</summary>
-
-Add `@Service` to the class. Remove the no-arg constructor and add a constructor that takes `ProductRepository` as a parameter. Make the field `final`.
-</details>
-
-### Exercise 2: Create a `CustomerService`
-
-Create a `CustomerService` with `@Service` annotation that depends on `CustomerRepository`. Include methods `getCustomer(Long id)` and `createCustomer(Customer customer)`. Use constructor injection.
-
-<details>
-<summary>Hint</summary>
-
-```java
-@Service
-public class CustomerService {
-    private final CustomerRepository customerRepository;
-
-    public CustomerService(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
-    }
-
-    public Customer getCustomer(Long id) {
-        return customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not found: " + id));
-    }
-}
-```
-</details>
-
-### Exercise 3: Create a `@Configuration` Bean
-
-Create a `@Configuration` class with a `@Bean` method that creates a `Clock` bean:
-
-```java
-@Bean
-public Clock clock() {
-    return Clock.systemUTC();
-}
-```
-
-Then inject `Clock` into `OrderService` and use it instead of `Instant.now()`.
-
-<details>
-<summary>Hint</summary>
-
-Add `Clock clock` as a constructor parameter to `OrderService`. Use `clock.instant()` instead of `Instant.now()`. This makes the service testable — in tests, you can inject a fixed `Clock` for deterministic timestamps.
-</details>
-
-### Exercise 4: Fix a Circular Dependency
-
-Two services depend on each other:
-
-```java
-@Service
-public class OrderService {
-    public OrderService(CustomerService cs) {}
-}
-
-@Service
-public class CustomerService {
-    public CustomerService(OrderService os) {}
-}
-```
-
-Refactor to eliminate the cycle.
-
-<details>
-<summary>Hint</summary>
-
-Extract the shared logic into a third service, e.g., `SharedLookupService`, that both depend on. Neither `OrderService` nor `CustomerService` should directly depend on each other.
-</details>
-
----
-
 ## What You Learned
 
 - **Tight coupling** with `new` makes code hard to test, modify, and maintain — dependency injection solves this by receiving dependencies from outside
@@ -1183,4 +1158,4 @@ public class OrderService {
   https://www.youtube.com/playlist?list=PLC97BDEFDCDD169D7
 
 ---
-← [Previous: Module 01](./01-build-tools-and-project-setup.md) | [Next: Module 03](./03-spring-boot-fundamentals.md) →
+← [Previous: Module 01 — Build Tools & Project Setup](./01-build-tools-and-project-setup.md) | [Next: Module 03 — Spring Boot Fundamentals](./03-spring-boot-fundamentals.md) →

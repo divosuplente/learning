@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Service-Oriented Architecture — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Service-Oriented Architecture — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -124,6 +124,67 @@
 <li><a href="04-repository-pattern.html">Module 04: Repository Pattern</a> — you understand JPA entities and Spring Data repositories</li>
 </ul>
 <hr />
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is an Architecture Pattern?](#1-what-is-an-architecture-pattern)
+- [2. Monolithic vs Microservices vs SOA](#2-monolithic-vs-microservices-vs-soa)
+  - [Monolithic Architecture](#monolithic-architecture)
+  - [Microservices Architecture](#microservices-architecture)
+  - [Service-Oriented Architecture (SOA)](#service-oriented-architecture-soa)
+- [3. Layered Architecture](#3-layered-architecture)
+  - [The Golden Rule](#the-golden-rule)
+  - [Why Not Skip Layers?](#why-not-skip-layers)
+- [4. The Service Layer](#4-the-service-layer)
+  - [What Makes This a Good Service?](#what-makes-this-a-good-service)
+- [5. Transaction Management](#5-transaction-management)
+  - [ACID Properties](#acid-properties)
+  - [The @Transactional Annotation](#the-transactional-annotation)
+  - [Read-Only Transactions](#read-only-transactions)
+  - [Transaction Propagation](#transaction-propagation)
+  - [Transaction Isolation Levels](#transaction-isolation-levels)
+- [6. Data Transfer Objects (DTOs)](#6-data-transfer-objects-dtos)
+  - [Why Use DTOs?](#why-use-dtos)
+  - [Request DTO](#request-dto)
+  - [Response DTO](#response-dto)
+  - [The from() Factory Method](#the-from-factory-method)
+- [7. Domain Exceptions](#7-domain-exceptions)
+  - [Custom Exception Hierarchy](#custom-exception-hierarchy)
+  - [Why a Hierarchy?](#why-a-hierarchy)
+  - [Handling Exceptions in the Controller](#handling-exceptions-in-the-controller)
+- [8. The Controller Layer (Recap)](#8-the-controller-layer-recap)
+- [9. Service-to-Service Communication](#9-service-to-service-communication)
+  - [Option 1: Direct Method Call (Same Application)](#option-1-direct-method-call-same-application)
+  - [Option 2: Application Events (Decoupled Communication)](#option-2-application-events-decoupled-communication)
+  - [Why Events vs Direct Calls?](#why-events-vs-direct-calls)
+- [10. Anti-Patterns to Avoid](#10-anti-patterns-to-avoid)
+  - [Anti-Pattern 1: Fat Controller](#anti-pattern-1-fat-controller)
+  - [Anti-Pattern 2: Anemic Domain Model](#anti-pattern-2-anemic-domain-model)
+  - [Anti-Pattern 3: Business Logic in Repository](#anti-pattern-3-business-logic-in-repository)
+  - [Anti-Pattern 4: Service That Does Everything](#anti-pattern-4-service-that-does-everything)
+- [11. Complete Architecture Summary](#11-complete-architecture-summary)
+  - [Package Structure](#package-structure)
+- [What You Learned](#what-you-learned)
+- [12. Transaction Propagation in Depth](#12-transaction-propagation-in-depth)
+  - [The Seven Propagation Types](#the-seven-propagation-types)
+  - [Code Example: REQUIRES_NEW for Audit Logging](#code-example-requires_new-for-audit-logging)
+  - [Common Pitfall: Self-Invocation](#common-pitfall-self-invocation)
+- [13. Domain Events and Application Events](#13-domain-events-and-application-events)
+  - [Publishing Events](#publishing-events)
+  - [Listening to Events](#listening-to-events)
+  - [Why Use Events?](#why-use-events)
+- [14. Caching Strategy](#14-caching-strategy)
+  - [Enabling Caching](#enabling-caching)
+  - [@Cacheable — Skip Method Execution on Cache Hit](#cacheable-skip-method-execution-on-cache-hit)
+  - [@CacheEvict — Remove from Cache](#cacheevict-remove-from-cache)
+  - [@CachePut — Always Execute, Update Cache](#cacheput-always-execute-update-cache)
+  - [When to Cache vs. When Not To](#when-to-cache-vs-when-not-to)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 <h2 id="1-what-is-an-architecture-pattern">1. What Is an Architecture Pattern?<a class="anchor-link" href="#1-what-is-an-architecture-pattern" title="Permanent link">¶</a></h2>
 <p>When you build a house, you don't just start placing bricks randomly. You follow a blueprint that says where the foundation goes, where the walls are, where the plumbing runs. The same is true for software.</p>
 <p>An <strong>architecture pattern</strong> is a blueprint for how to organize the code in your application. It defines:</p>
@@ -1086,60 +1147,6 @@ List&lt;OrderEntity&gt; highValue = pendingOrders.stream()
 │       └── InsufficientStockException.java
 └── OrderManagementApplication.java</code></pre>
 <hr />
-<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-add-a-customerservice">Exercise 1: Add a CustomerService<a class="anchor-link" href="#exercise-1-add-a-customerservice" title="Permanent link">¶</a></h3>
-<p>Create a <code>CustomerService</code> with methods:
-- <code>createCustomer(CreateCustomerRequest)</code> — creates a new customer
-- <code>getCustomerById(Long id)</code> — returns a <code>CustomerResponse</code>
-- <code>deactivateCustomer(Long id)</code> — marks a customer as inactive</p>
-<p>Ensure it uses <code>@Transactional</code> correctly, constructor injection, and returns DTOs.</p>
-<details>
-<summary>Hint</summary>
-
-Follow the same pattern as `OrderService`. Create `CreateCustomerRequest` (with `@NotBlank` validation on name and email), `CustomerResponse`, and add an `active` boolean field to your `CustomerEntity`. Use `@Transactional(readOnly = true)` for `getCustomerById`.
-</details>
-
-<h3 id="exercise-2-add-order-status-transition-rules">Exercise 2: Add Order Status Transition Rules<a class="anchor-link" href="#exercise-2-add-order-status-transition-rules" title="Permanent link">¶</a></h3>
-<p>Currently <code>confirmOrder</code> and <code>cancelOrder</code> do basic checks. Enhance them to enforce a proper state machine:</p>
-<ul>
-<li><code>PENDING → CONFIRMED</code> (allowed)</li>
-<li><code>PENDING → CANCELLED</code> (allowed)</li>
-<li><code>CONFIRMED → SHIPPED</code> (allowed)</li>
-<li><code>SHIPPED → DELIVERED</code> (allowed)</li>
-<li>Any other transition should throw an <code>IllegalStateException</code></li>
-</ul>
-<p>Add a <code>shipOrder</code> and <code>deliverOrder</code> method to <code>OrderService</code>.</p>
-<details>
-<summary>Hint</summary>
-
-Create a method `validateTransition(OrderStatus from, OrderStatus to)` that checks if the transition is allowed. Call it at the start of each status-change method. You can define allowed transitions with a `Map<OrderStatus, Set<OrderStatus>>` or with a `switch` statement using pattern matching.
-</details>
-
-<h3 id="exercise-3-add-a-productservice">Exercise 3: Add a ProductService<a class="anchor-link" href="#exercise-3-add-a-productservice" title="Permanent link">¶</a></h3>
-<p>Create a <code>ProductService</code> with methods:
-- <code>createProduct(CreateProductRequest)</code> — creates a new product
-- <code>getProductById(Long id)</code> — returns a <code>ProductResponse</code>
-- <code>updateStock(Long productId, int quantity)</code> — adds or removes stock
-- <code>listProducts(Pageable)</code> — returns a page of products</p>
-<p>Ensure <code>updateStock</code> prevents negative stock and publishes a <code>StockUpdatedEvent</code>.</p>
-<details>
-<summary>Hint</summary>
-
-Inject `ApplicationEventPublisher` into the service. After saving the updated product, call `eventPublisher.publishEvent(new StockUpdatedEvent(productId, newStock))`. Create a `StockUpdatedEvent` record and an `@EventListener` that logs the event.
-</details>
-
-<h3 id="exercise-4-refactor-to-rich-domain-model">Exercise 4: Refactor to Rich Domain Model<a class="anchor-link" href="#exercise-4-refactor-to-rich-domain-model" title="Permanent link">¶</a></h3>
-<p>Refactor <code>OrderEntity</code> to encapsulate behavior:
-- Move <code>addItem(ProductEntity, int quantity)</code> into the entity (it calculates line total internally)
-- Move <code>confirm()</code>, <code>cancel()</code>, <code>ship()</code>, <code>deliver()</code> methods into the entity (they enforce state transitions)
-- Update <code>OrderService</code> to call these methods instead of setting fields directly</p>
-<details>
-<summary>Hint</summary>
-
-In `OrderEntity`, add a method `addItem(ProductEntity product, int quantity)` that creates an `OrderItemEntity`, sets its relationships, adds it to `items`, and updates `totalAmount`. Add `confirm()` that checks `status == PENDING` and sets `status = CONFIRMED`. This makes the entity self-validating and the service thinner.
-</details>
-
-<hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
 <li>An architecture pattern is a blueprint for organizing code — it keeps responsibilities clean and changes safe</li>
@@ -1387,10 +1394,10 @@ public Product updateStock(Long id, int newStock) {
 </li>
 </ul>
 <hr />
-<p>← <a href="04-repository-pattern.html">Previous: Module 04</a> | <a href="06-kafka.html">Next: Module 06</a> →</p>
+<p>← <a href="04-repository-pattern.html">Previous: Module 04 — Repository Pattern</a> | <a href="06-kafka.html">Next: Module 06 — Apache Kafka</a> →</p>
       </article>
 
-      <div class="footer-nav"><a href="04-repository-pattern.html" class="nav-link prev">← Repository Pattern</a><a href="06-kafka.html" class="nav-link next">Kafka →</a></div>
+      <div class="footer-nav"><a href="04-repository-pattern.html" class="nav-link prev">← Repository Pattern</a><a href="06-kafka.html" class="nav-link next">Apache Kafka →</a></div>
     </main>
   </div>
 

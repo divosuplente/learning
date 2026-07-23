@@ -1,4 +1,4 @@
-# Module 06: Kafka
+# Module 06: Apache Kafka
 
 ## What You'll Learn
 
@@ -24,6 +24,81 @@
 - [Module 05: Service-Oriented Architecture](./05-service-oriented-architecture.md) — you understand the service layer and application events
 
 ---
+
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. Synchronous vs Asynchronous Communication](#1-synchronous-vs-asynchronous-communication)
+  - [Synchronous Communication](#synchronous-communication)
+  - [Asynchronous Communication](#asynchronous-communication)
+  - [When to Use Which?](#when-to-use-which)
+- [2. What Is Apache Kafka?](#2-what-is-apache-kafka)
+  - [Kafka Analogy: A Newsstand](#kafka-analogy-a-newsstand)
+- [3. Core Kafka Concepts](#3-core-kafka-concepts)
+  - [Topic](#topic)
+  - [Partition](#partition)
+  - [Offset](#offset)
+  - [Consumer Group](#consumer-group)
+  - [Broker](#broker)
+  - [Producer](#producer)
+  - [Consumer](#consumer)
+  - [Architecture Diagram](#architecture-diagram)
+- [4. Setting Up Kafka Locally with Docker](#4-setting-up-kafka-locally-with-docker)
+- [5. Spring Boot Kafka Configuration](#5-spring-boot-kafka-configuration)
+  - [Adding the Kafka Dependency](#adding-the-kafka-dependency)
+  - [application.yml Configuration](#applicationyml-configuration)
+  - [What Are Serializers and Deserializers?](#what-are-serializers-and-deserializers)
+- [6. Defining Kafka Events](#6-defining-kafka-events)
+- [7. Kafka Producers in Spring Boot](#7-kafka-producers-in-spring-boot)
+  - [What's Happening Here?](#whats-happening-here)
+  - [Why Use a Key?](#why-use-a-key)
+- [8. Integrating the Producer with the Service](#8-integrating-the-producer-with-the-service)
+- [9. Kafka Consumers in Spring Boot](#9-kafka-consumers-in-spring-boot)
+  - [What's Happening Here?](#whats-happening-here)
+  - [Multiple Consumers (Different Consumer Groups)](#multiple-consumers-different-consumer-groups)
+- [10. Serialization and Deserialization in Detail](#10-serialization-and-deserialization-in-detail)
+- [11. Error Handling](#11-error-handling)
+  - [Dead Letter Queue (DLQ)](#dead-letter-queue-dlq)
+  - [How It Works](#how-it-works)
+- [12. Delivery Semantics](#12-delivery-semantics)
+  - [At-Most-Once](#at-most-once)
+  - [At-Least-Once (Default)](#at-least-once-default)
+  - [Exactly-Once](#exactly-once)
+- [13. Idempotent Consumers](#13-idempotent-consumers)
+  - [What Is Idempotency?](#what-is-idempotency)
+  - [Making Consumers Idempotent](#making-consumers-idempotent)
+- [14. Kafka Streams Overview](#14-kafka-streams-overview)
+- [What You Learned](#what-you-learned)
+- [10. Kafka Consumer Groups and Partition Rebalancing](#10-kafka-consumer-groups-and-partition-rebalancing)
+  - [Consumer Groups](#consumer-groups)
+  - [Rebalancing](#rebalancing)
+  - [ConsumerRebalanceListener](#consumerrebalancelistener)
+  - [Partition Assignment Strategies](#partition-assignment-strategies)
+- [11. Exactly-Once Semantics (EOS)](#11-exactly-once-semantics-eos)
+  - [Idempotent Producer](#idempotent-producer)
+  - [Transactional Producer](#transactional-producer)
+  - [Transactional Consumer](#transactional-consumer)
+- [12. Kafka Stream Processing Basics](#12-kafka-stream-processing-basics)
+  - [Java KStream Example: Order Count by Status](#java-kstream-example-order-count-by-status)
+  - [Windowed Aggregation](#windowed-aggregation)
+  - [KStream vs KTable](#kstream-vs-ktable)
+- [13. Kafka Schema Registry and Avro Serialization](#13-kafka-schema-registry-and-avro-serialization)
+  - [The Problem with JSON Serialization](#the-problem-with-json-serialization)
+  - [Avro + Schema Registry](#avro-schema-registry)
+  - [Adding Avro Support](#adding-avro-support)
+  - [Avro Schema](#avro-schema)
+  - [Configuration](#configuration)
+  - [Compatibility Rules](#compatibility-rules)
+- [14. Kafka Monitoring and Metrics](#14-kafka-monitoring-and-metrics)
+  - [Key Metrics to Monitor](#key-metrics-to-monitor)
+  - [Spring Boot Kafka Metrics](#spring-boot-kafka-metrics)
+  - [Kafka CLI Tools](#kafka-cli-tools)
+- [15. Kafka in Production: Best Practices](#15-kafka-in-production-best-practices)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
 
 ## 1. Synchronous vs Asynchronous Communication
 
@@ -845,50 +920,6 @@ Kafka Streams is powerful for real-time analytics, but it's an advanced topic. F
 
 ---
 
-## Exercises
-
-### Exercise 1: Add a Payment Event Consumer
-
-Create a new event `PaymentProcessedEvent` (with `orderId`, `paymentMethod`, `amount`, `processedAt`). Add a producer method in `OrderEventProducer` that sends it. Create a `PaymentEventConsumer` that listens for it and logs the payment.
-
-<details>
-<summary>Hint</summary>
-
-Create the record `PaymentProcessedEvent` in the `kafka.event` package. Add a `publishPaymentProcessed(...)` method to `OrderEventProducer` using `kafkaTemplate.send(ORDER_EVENTS_TOPIC, key, event)`. Create a `PaymentEventConsumer` class with `@KafkaListener(topics = "order-events", groupId = "payment-group")` and a method that accepts `PaymentProcessedEvent`.
-</details>
-
-### Exercise 2: Add Error Handling with DLQ
-
-Modify the `OrderEventConsumer` to use `@RetryableTopic` with 5 attempts and exponential backoff (1s, 2s, 4s, 8s). Add a DLT handler that logs the failed event with full details.
-
-<details>
-<summary>Hint</summary>
-
-Use `@RetryableTopic(attempts = "5", backoff = @Backoff(delay = 1000, multiplier = 2.0), dltTopic = "order-events-dlt")` above the `@KafkaListener` annotation. Add a separate `@KafkaListener(topics = "order-events-dlt")` method for the DLT handler.
-</details>
-
-### Exercise 3: Make the Consumer Idempotent
-
-Modify the `OrderEventConsumer` to check if an order was already processed before processing it. Use the `OrderRepository` to check by order ID.
-
-<details>
-<summary>Hint</summary>
-
-Add a `@Transactional` annotation to the consumer method. At the start of the method, call `orderRepository.findById(event.orderId())`. If it returns a non-empty result, log "already processed" and return early. If it's empty, proceed with processing.
-</details>
-
-### Exercise 4: Create a Combined Consumer
-
-Create a consumer that listens to both `order-events` and a new topic `product-events`. For `order-events`, it counts how many orders were created (maintaining an in-memory counter). For `product-events`, it logs each product event.
-
-<details>
-<summary>Hint</summary>
-
-Use two methods, each with its own `@KafkaListener` annotation pointing to a different topic. Use `AtomicInteger` (a thread-safe integer) as an in-memory counter and increment it each time an order event is received. Remember this counter resets when the application restarts — in production, you'd store it in a database.
-</details>
-
----
-
 ## What You Learned
 
 - **Synchronous** communication waits for a response; **asynchronous** communication fires and forgets. Kafka enables asynchronous event-driven communication
@@ -917,335 +948,4 @@ or more topics. Kafka distributes partitions among the group's consumers:
 Topic: order-created (3 partitions)
 
 Consumer Group: ordermgmt-group
-  Consumer A  ←  partition 0
-  Consumer B  ←  partition 1
-  Consumer C  ←  partition 2
-
-If Consumer C dies:
-  Consumer A  ←  partition 0, partition 2 (rebalanced)
-  Consumer B  ←  partition 1
-```
-
-**Rule:** A partition is assigned to exactly one consumer within a group. Adding
-more consumers than partitions means some consumers are idle.
-
-### Rebalancing
-
-**Rebalancing** is the process of redistributing partitions when:
-- A consumer joins or leaves the group
-- A consumer crashes
-- New partitions are added to a topic
-
-During rebalancing, **consumers stop processing** until rebalancing completes.
-
-### ConsumerRebalanceListener
-
-```java
-@Component
-public class OrderConsumer {
-
-    @KafkaListener(topics = "order-created", groupId = "ordermgmt-group")
-    public void consume(ConsumerRecord<String, OrderCreatedEvent> record,
-                        Acknowledgment ack) {
-        try {
-            log.info("Processing order {}", record.value().orderId());
-            processOrder(record.value());
-            ack.acknowledge();  // manual commit
-        } catch (Exception e) {
-            log.error("Failed to process order", e);
-            // don't ack — message will be re-delivered after rebalance
-        }
-    }
-
-    @Bean
-    public ConsumerFactory<String, OrderCreatedEvent> consumerFactory() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);  // manual commit
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        return new DefaultKafkaConsumerFactory<>(props);
-    }
-}
-```
-
-### Partition Assignment Strategies
-
-| Strategy | Behavior |
-|----------|----------|
-| `RangeAssignor` (default) | Assigns partitions in ranges |
-| `RoundRobinAssignor` | Distributes partitions round-robin |
-| `StickyAssignor` | Minimizes partition movement on rebalance |
-| `CooperativeStickyAssignor` | Incremental rebalance — only affected partitions stop |
-
----
-
-## 11. Exactly-Once Semantics (EOS)
-
-Kafka's default delivery is **at-least-once** — messages may be redelivered
-after a consumer crash. **Exactly-once** prevents duplicate processing.
-
-### Idempotent Producer
-
-```java
-@Bean
-public ProducerFactory<String, OrderCreatedEvent> producerFactory() {
-    Map<String, Object> props = new HashMap<>();
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-    props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);  // enables EOS
-    props.put(ProducerConfig.ACKS_CONFIG, "all");
-    props.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
-    return new DefaultKafkaProducerFactory<>(props);
-}
-```
-
-### Transactional Producer
-
-```java
-@Bean
-public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> pf) {
-    var template = new KafkaTemplate<>(pf);
-    template.setTransactionIdPrefix("ordermgmt-tx-");  // enables transactions
-    return template;
-}
-
-// Usage
-@Transactional
-public void publishOrderCreated(OrderEntity order) {
-    kafkaTemplate.executeInTransaction(template -> {
-        template.send("order-created", OrderCreatedEvent.from(order));
-        template.send("order-audit", AuditEvent.from(order));
-        return null;  // both messages sent atomically
-    });
-}
-```
-
-### Transactional Consumer
-
-```yaml
-spring:
-  kafka:
-    consumer:
-      isolation-level: read_committed  # only read committed transactional messages
-```
-
-With `read_committed`, the consumer only sees messages from transactions that
-were committed — not aborted transactions.
-
----
-
-## 12. Kafka Stream Processing Basics
-
-**Kafka Streams** is a library for processing Kafka data in real-time. Unlike
-a consumer/producer, it handles state management, joins, and windowing for you.
-
-### Java KStream Example: Order Count by Status
-
-```java
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.*;
-
-@Configuration
-public class OrderStreamConfig {
-
-    @Bean
-    public KStream<String, OrderCreatedEvent> orderStream(StreamsBuilder builder) {
-        KStream<String, OrderCreatedEvent> stream = builder
-                .stream("order-created",
-                        Consumed.with(Serdes.String(), jsonSerde()));
-
-        // Group by order status and count
-        KTable<String, Long> countsByStatus = stream
-                .groupBy((key, order) -> order.status().name(),
-                        Grouped.with(Serdes.String(), jsonSerde()))
-                .count();
-
-        // Write counts to an output topic
-        countsByStatus.toStream()
-                .to("order-status-counts",
-                        Produced.with(Serdes.String(), Serdes.Long()));
-
-        return stream;
-    }
-}
-```
-
-### Windowed Aggregation
-
-```java
-// Count orders per customer in 5-minute tumbling windows
-KTable<Windowed<String>, Long> windowedCounts = stream
-        .groupByKey()
-        .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(5)))
-        .count();
-```
-
-### KStream vs KTable
-
-| Concept | KStream | KTable |
-|---------|---------|--------|
-| Analogy | A stream of events (append-only log) | A table's current state (upsertable) |
-| Duplicates | Allowed (same key appears multiple times) | Replaced (latest value for a key wins) |
-| Use case | Processing individual events | Maintaining current state |
-
----
-
-## 13. Kafka Schema Registry and Avro Serialization
-
-### The Problem with JSON Serialization
-
-When using JSON for Kafka messages, the **producer and consumer must agree on
-the message structure**. If the producer adds a field, old consumers may break.
-**Schema Registry** solves this by storing and versioning schemas centrally.
-
-### Avro + Schema Registry
-
-**Avro** is a compact binary serialization format (like Protocol Buffers).
-**Schema Registry** stores Avro schemas and enforces compatibility rules.
-
-### Adding Avro Support
-
-```xml
-<dependency>
-    <groupId>org.apache.avro</groupId>
-    <artifactId>avro</artifactId>
-    <version>1.11.3</version>
-</dependency>
-<dependency>
-    <groupId>io.confluent</groupId>
-    <artifactId>kafka-avro-serializer</artifactId>
-    <version>7.6.0</version>
-</dependency>
-```
-
-### Avro Schema
-
-```json
-// src/main/avro/order-created-event.avsc
-{
-  "type": "record",
-  "name": "OrderCreatedEvent",
-  "namespace": "com.example.ordermgmt.kafka.event",
-  "fields": [
-    {"name": "orderId", "type": "long"},
-    {"name": "customerId", "type": "long"},
-    {"name": "status", "type": "string"},
-    {"name": "totalAmount", "type": {"type": "bytes", "logicalType": "decimal", "precision": 10, "scale": 2}},
-    {"name": "createdAt", "type": {"type": "long", "logicalType": "timestamp-millis"}}
-  ]
-}
-```
-
-### Configuration
-
-```yaml
-spring:
-  kafka:
-    properties:
-      schema.registry.url: http://localhost:8081
-    producer:
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-    consumer:
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-      properties:
-        specific.avro.reader: true  # generate Java classes instead of GenericRecord
-```
-
-### Compatibility Rules
-
-| Rule | Allows | Prevents |
-|------|--------|---------|
-| BACKWARD | Adding optional fields, removing fields | Adding required fields |
-| FORWARD | Removing optional fields | Adding required fields |
-| FULL | Both backward and forward | Breaking changes |
-
-When a producer tries to send a message with an incompatible schema, the Schema
-Registry **rejects it** — preventing broken consumers.
-
----
-
-## 14. Kafka Monitoring and Metrics
-
-### Key Metrics to Monitor
-
-| Metric | What It Tells You | Healthy Value |
-|--------|-------------------|---------------|
-| `consumer-lag` | How far behind the consumer is | < 1000 messages |
-| `producer-record-error-rate` | Failed sends per second | 0 |
-| `producer-record-send-rate` | Messages sent per second | Matches expected |
-| `consumer-records-consumed-rate` | Messages consumed per second | Matches producer rate |
-| `consumer-fetch-latency-avg` | Average time to fetch from broker | < 100ms |
-| `request-latency-avg` | Average broker response time | < 50ms |
-
-### Spring Boot Kafka Metrics
-
-```java
-@Service
-public class KafkaMetricsService {
-
-    private final MeterRegistry meterRegistry;
-
-    public KafkaMetricsService(MeterRegistry meterRegistry) {
-        this.meterRegistry = meterRegistry;
-    }
-
-    public double getConsumerLag(String topic, String groupId) {
-        return meterRegistry.find("kafka.consumer.lag")
-                .tag("topic", topic)
-                .tag("group", groupId)
-                .gauge()
-                .map(g -> g.value())
-                .orElse(0.0);
-    }
-}
-```
-
-Access via: `GET /actuator/metrics/kafka.consumer.lag`
-
-### Kafka CLI Tools
-
-```bash
-# List topics
-docker exec oms-kafka /opt/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:9092
-
-# Describe a topic (partitions, replicas)
-docker exec oms-kafka /opt/kafka/bin/kafka-topics.sh --describe --topic order-created --bootstrap-server localhost:9092
-
-# Consume messages from the CLI (for debugging)
-docker exec oms-kafka /opt/kafka/bin/kafka-console-consumer.sh --topic order-created --from-beginning --bootstrap-server localhost:9092
-
-# Check consumer group lag
-docker exec oms-kafka /opt/kafka/bin/kafka-consumer-groups.sh --describe --group ordermgmt-group --bootstrap-server localhost:9092
-```
-
----
-
-## 15. Kafka in Production: Best Practices
-
-| Practice | Why |
-|----------|-----|
-| Use `acks=all` for critical data | Ensures the message is replicated before acknowledged |
-| Set `retries` to a high number (or `Integer.MAX_VALUE`) | Transient failures should retry, not lose data |
-| Enable `enable.idempotence=true` | Prevents duplicates during retries |
-| Use meaningful topic names (`order-created`, not `topic1`) | Discoverability |
-| Partition by a meaningful key (e.g., `customerId`) | Related messages go to the same partition (ordering) |
-| Set `min.insync.replicas=2` | Requires at least 2 replicas to acknowledge writes |
-| Use a DLQ (dead letter queue) for poison messages | Prevents one bad message from blocking the consumer |
-| Monitor consumer lag continuously | Lag growing = consumer can't keep up |
-| Don't block in the consumer loop | Use async processing or increase partitions/consumers |
-| Use `spring.kafka.listener.ack-mode=manual` for at-least-once | Only commit after successful processing |
-
----
-
-
-## Recommended YouTube Videos
-
-- **[Kafka Crash Course - Hands-On Project]** by TechWorld with Nana — Excellent conceptual intro to Kafka with a hands‑on demo project (1:07:58, 247K views)
-  https://www.youtube.com/watch?v=B7CwU_tNYIE
-
-- **[Apache Kafka in 5 minutes]** by Stephane Maarek — Quick conceptual overview of how Kafka works with diagrams (5:20, 990K views)
-  https://www.youtube.com/watch?v=PzPXRmVHMxI
-
-- **[Spring Boot + Kafka in Minutes (Your First Message)]** by Dan Vega — Getting started with Kafka in a Spring Boot application
-  https://www.youtube.com/watch?v=5XW3f_39ipY
-
----
-← [Previous: Module 05](./05-service-oriented-architecture.md) | [Next: Module 07](./07-graphql.md) →
+  Consumer A  ← [Previous: Module 05 — Service-Oriented Architecture](./05-service-oriented-architecture.md) | [Next: Module 07 — GraphQL](./07-graphql.md) →

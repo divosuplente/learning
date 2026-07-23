@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Test-Driven Development — Java Spring Boot Course</title>
-  <meta name="description" content="A complete course: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin" />
+  <title>Test-Driven Development — Backend Engineering Course</title>
+  <meta name="description" content="Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <a href="index.html" class="logo">
           <span class="logo-icon">☕</span>
-          <span class="logo-text">Spring Boot<br><small>Course</small></span>
+          <span class="logo-text">Backend<br><small>Engineering</small></span>
         </a>
       </div>
       
@@ -28,7 +28,7 @@
         
         <a href="00-java-foundations.html" class="nav-item">
           <span class="nav-num">00</span>
-          <span class="nav-title">Java Foundations</span>
+          <span class="nav-title">Java for Experienced Developers</span>
         </a>
 
         <a href="01-build-tools-and-project-setup.html" class="nav-item">
@@ -58,7 +58,7 @@
 
         <a href="06-kafka.html" class="nav-item">
           <span class="nav-num">06</span>
-          <span class="nav-title">Kafka</span>
+          <span class="nav-title">Apache Kafka</span>
         </a>
 
         <a href="07-graphql.html" class="nav-item">
@@ -132,6 +132,91 @@
 <li><a href="08-reactor-pattern.html">Module 08: Reactor Pattern</a> — you understand Mono and Flux (for testing reactive code)</li>
 </ul>
 <hr />
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is Testing? Why Do We Test?](#1-what-is-testing-why-do-we-test)
+  - [Why Test?](#why-test)
+  - [What Happens Without Tests?](#what-happens-without-tests)
+- [2. Types of Tests](#2-types-of-tests)
+  - [Unit Tests](#unit-tests)
+  - [Integration Tests](#integration-tests)
+  - [End-to-End (E2E) Tests](#end-to-end-e2e-tests)
+- [3. The Test Pyramid](#3-the-test-pyramid)
+- [4. What Is TDD?](#4-what-is-tdd)
+  - [The Red-Green-Refactor Cycle](#the-red-green-refactor-cycle)
+  - [Why TDD?](#why-tdd)
+- [5. JUnit 5](#5-junit-5)
+  - [Core Annotations](#core-annotations)
+  - [A Simple Test Class](#a-simple-test-class)
+  - [The Arrange-Act-Assert Pattern](#the-arrange-act-assert-pattern)
+  - [Parameterized Tests](#parameterized-tests)
+  - [Nested Tests](#nested-tests)
+- [6. AssertJ](#6-assertj)
+  - [Comparison](#comparison)
+  - [Useful AssertJ Assertions](#useful-assertj-assertions)
+  - [Why AssertJ Over JUnit Assertions?](#why-assertj-over-junit-assertions)
+- [7. Mockito](#7-mockito)
+  - [Core Mockito Concepts](#core-mockito-concepts)
+  - [A Mocked Unit Test](#a-mocked-unit-test)
+  - [What's Happening Here?](#whats-happening-here)
+  - [When-ThenReturn: Stubs](#when-thenreturn-stubs)
+  - [Verifying Interactions](#verifying-interactions)
+  - [Argument Matchers](#argument-matchers)
+- [8. TDD Walkthrough: Building OrderCalculator](#8-tdd-walkthrough-building-ordercalculator)
+  - [Step 1: Red — Write a Failing Test](#step-1-red-write-a-failing-test)
+  - [Step 2: Green — Write the Minimum Code](#step-2-green-write-the-minimum-code)
+  - [Step 3: Red — Add Another Test](#step-3-red-add-another-test)
+  - [Step 4: Red — Test for Negative Quantity](#step-4-red-test-for-negative-quantity)
+  - [Step 5: Green — Add Validation](#step-5-green-add-validation)
+  - [Step 6: Red — Test for Null Price](#step-6-red-test-for-null-price)
+  - [Step 7: Green — Add Null Check](#step-7-green-add-null-check)
+  - [Step 8: Refactor](#step-8-refactor)
+- [9. TDD Walkthrough: Building OrderService](#9-tdd-walkthrough-building-orderservice)
+  - [Step 1: Red — Write a Test for "Should Create Order"](#step-1-red-write-a-test-for-should-create-order)
+  - [Step 2: Green — Implement createOrder](#step-2-green-implement-createorder)
+  - [Step 3: Red — Test for "Should Throw When Customer Not Found"](#step-3-red-test-for-should-throw-when-customer-not-found)
+  - [Step 4: Red — Test for "Should Throw When Stock Is Insufficient"](#step-4-red-test-for-should-throw-when-stock-is-insufficient)
+- [10. Spring Boot Test Slices](#10-spring-boot-test-slices)
+  - [Web Layer Tests with MockMvc](#web-layer-tests-with-mockmvc)
+  - [What's Happening Here?](#whats-happening-here)
+  - [Repository Tests with @DataJpaTest](#repository-tests-with-datajpatest)
+  - [What's Happening Here?](#whats-happening-here)
+- [11. JaCoCo: Measuring Test Coverage](#11-jacoco-measuring-test-coverage)
+  - [Adding JaCoCo to Maven](#adding-jacoco-to-maven)
+  - [Running Coverage](#running-coverage)
+- [12. Testing Kafka Consumers](#12-testing-kafka-consumers)
+  - [Adding Test Dependencies](#adding-test-dependencies)
+  - [Kafka Consumer Test](#kafka-consumer-test)
+- [13. Testing Reactive Streams with StepVerifier](#13-testing-reactive-streams-with-stepverifier)
+  - [Adding the Dependency](#adding-the-dependency)
+  - [StepVerifier Example](#stepverifier-example)
+  - [What StepVerifier Does](#what-stepverifier-does)
+- [14. Anti-Patterns to Avoid](#14-anti-patterns-to-avoid)
+  - [Testing Implementation Details](#testing-implementation-details)
+  - [Over-Mocking](#over-mocking)
+  - [Brittle Tests](#brittle-tests)
+  - [Testing Getters and Setters](#testing-getters-and-setters)
+- [15. Best Practices Summary](#15-best-practices-summary)
+- [What You Learned](#what-you-learned)
+- [15. Test Smells and Anti-Patterns](#15-test-smells-and-anti-patterns)
+  - [Testing Implementation Details (White-Box Testing)](#testing-implementation-details-white-box-testing)
+  - [Excessive Mocking (Mock Everything Anti-Pattern)](#excessive-mocking-mock-everything-anti-pattern)
+  - [Brittle Assertions](#brittle-assertions)
+  - [Test Pyramid vs Ice Cream Cone](#test-pyramid-vs-ice-cream-cone)
+- [16. Integration Testing Strategy](#16-integration-testing-strategy)
+  - [Test Slices](#test-slices)
+  - [When to Use Each](#when-to-use-each)
+- [17. Test Coverage and Code Quality](#17-test-coverage-and-code-quality)
+  - [JaCoCo Configuration](#jacoco-configuration)
+  - [What to Cover vs What Not To](#what-to-cover-vs-what-not-to)
+  - [Mutation Testing with PIT](#mutation-testing-with-pit)
+- [Recommended YouTube Videos](#recommended-youtube-videos)
+
+</details>
+
 <h2 id="1-what-is-testing-why-do-we-test">1. What Is Testing? Why Do We Test?<a class="anchor-link" href="#1-what-is-testing-why-do-we-test" title="Permanent link">¶</a></h2>
 <p><strong>Testing</strong> is the deliberate execution of your code to verify it does what you intend it to do. You write a piece of code, then you write another piece of code that calls the first piece and checks whether the result is correct.</p>
 <h3 id="why-test">Why Test?<a class="anchor-link" href="#why-test" title="Permanent link">¶</a></h3>
@@ -1368,49 +1453,6 @@ void shouldReturnName() {
 </tbody>
 </table>
 <hr />
-<h2 id="exercises">Exercises<a class="anchor-link" href="#exercises" title="Permanent link">¶</a></h2>
-<h3 id="exercise-1-write-tests-for-ordercalculator">Exercise 1: Write Tests for OrderCalculator<a class="anchor-link" href="#exercise-1-write-tests-for-ordercalculator" title="Permanent link">¶</a></h3>
-<p>Using TDD, build an <code>OrderCalculator</code> with these methods and write tests first for each:
-- <code>calculateTotal(BigDecimal unitPrice, int quantity)</code> — returns <code>unitPrice * quantity</code>
-- <code>calculateGrandTotal(List&lt;BigDecimal&gt; itemTotals)</code> — sums all item totals
-- <code>applyDiscount(BigDecimal total, BigDecimal discountPercent)</code> — returns <code>total * (1 - discount/100)</code></p>
-<details>
-<summary>Hint</summary>
-
-For each method: write a test for the happy path (valid input), a test for zero/empty, and a test for invalid input (negative discount, null price). Use `assertThatThrownBy` for exception tests. Write the test, see it fail, implement, see it pass, refactor.
-</details>
-
-<h3 id="exercise-2-write-a-controller-test">Exercise 2: Write a Controller Test<a class="anchor-link" href="#exercise-2-write-a-controller-test" title="Permanent link">¶</a></h3>
-<p>Write a <code>@WebMvcTest</code> for a <code>ProductController</code> that has:
-- <code>GET /api/products/{id}</code> — returns a product
-- <code>POST /api/products</code> — creates a product
-- Tests for: product found (200), product not found (404), invalid input (400)</p>
-<details>
-<summary>Hint</summary>
-
-Follow the `OrderControllerTest` pattern. Use `@MockBean ProductService`, `when(productService.getProductById(...)).thenReturn(...)`, and `when(productService.getProductById(999L)).thenThrow(new ProductNotFoundException(999L))`. Use `jsonPath` to check response fields.
-</details>
-
-<h3 id="exercise-3-write-a-repository-test">Exercise 3: Write a Repository Test<a class="anchor-link" href="#exercise-3-write-a-repository-test" title="Permanent link">¶</a></h3>
-<p>Write a <code>@DataJpaTest</code> for <code>ProductRepository</code> that tests:
-- Saving a product and finding it by ID
-- Finding products by category
-- Finding products with low stock (custom query)</p>
-<details>
-<summary>Hint</summary>
-
-Follow the `OrderRepositoryTest` pattern. Use `@Testcontainers` with a real PostgreSQL container. For the low stock test, save two products with different stock levels and query for `stock < threshold`.
-</details>
-
-<h3 id="exercise-4-write-a-reactive-test-with-stepverifier">Exercise 4: Write a Reactive Test with StepVerifier<a class="anchor-link" href="#exercise-4-write-a-reactive-test-with-stepverifier" title="Permanent link">¶</a></h3>
-<p>Create a <code>Flux&lt;OrderEvent&gt;</code> that emits 3 order events and write a StepVerifier test that verifies each emission and completion.</p>
-<details>
-<summary>Hint</summary>
-
-Use `Flux.just(event1, event2, event3)` to create the flux. Use `StepVerifier.create(flux).expectNext(event1).expectNext(event2).expectNext(event3).verifyComplete()`. Create the events as simple records with `orderId`, `status`, and `timestamp` fields.
-</details>
-
-<hr />
 <h2 id="what-you-learned">What You Learned<a class="anchor-link" href="#what-you-learned" title="Permanent link">¶</a></h2>
 <ul>
 <li><strong>Testing</strong> verifies your code does what it should — it catches bugs early, prevents regressions, documents behavior, and gives confidence to refactor</li>
@@ -1464,193 +1506,9 @@ assertEquals(Instant.parse("2025-01-15T10:00:00Z"), order.getCreatedAt());
 assertThat(order.getCreatedAt())
         .isCloseTo(Instant.now(), within(1, ChronoUnit.SECONDS));</code></pre>
 <h3 id="test-pyramid-vs-ice-cream-cone">Test Pyramid vs Ice Cream Cone<a class="anchor-link" href="#test-pyramid-vs-ice-cream-cone" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code>       /\
-      /E2E\          ← few (5%): Slow, high-level, real browser + DB
-     /------\
-    /  Integ \       ← some (25%): Real database, real Spring context
-   /----------\
-  /    Unit     \    ← many (70%): Fast, isolated, mocked dependencies
- /----------------\</code></pre>
-<p><strong>Ice cream cone (bad):</strong> many E2E tests, few unit tests. Slow, flaky, hard to
-maintain.</p>
-<p><strong>Test pyramid (good):</strong> many unit tests, some integration tests, few E2E tests.
-Fast, targeted, reliable.</p>
-<hr />
-<h2 id="16-integration-testing-strategy">16. Integration Testing Strategy<a class="anchor-link" href="#16-integration-testing-strategy" title="Permanent link">¶</a></h2>
-<h3 id="test-slices">Test Slices<a class="anchor-link" href="#test-slices" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Slice</th>
-<th>Loads</th>
-<th>Doesn't Load</th>
-<th>When to Use</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>@WebMvcTest</code></td>
-<td>Spring MVC + one controller</td>
-<td>Services, repositories</td>
-<td>Controller logic, validation, serialization</td>
-</tr>
-<tr>
-<td><code>@DataJpaTest</code></td>
-<td>JPA + entity manager + test DB</td>
-<td>Controllers, services</td>
-<td>Repository queries, entity mappings</td>
-</tr>
-<tr>
-<td><code>@JsonTest</code></td>
-<td>Jackson serialization</td>
-<td>Everything else</td>
-<td>DTO serialization round-trip</td>
-</tr>
-<tr>
-<td><code>@SpringBootTest</code></td>
-<td>Entire application</td>
-<td>Nothing</td>
-<td>End-to-end integration</td>
-</tr>
-<tr>
-<td><code>@RestClientTest</code></td>
-<td>One REST client + mock server</td>
-<td>Everything else</td>
-<td>RestTemplate / WebClient behavior</td>
-</tr>
-</tbody>
-</table>
-<h3 id="when-to-use-each">When to Use Each<a class="anchor-link" href="#when-to-use-each" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-java">// @WebMvcTest: test controller without starting the full app
-@WebMvcTest(OrderController.class)
-class OrderControllerTest {
-    @Autowired MockMvc mockMvc;
-    @MockBean OrderService orderService;
-
-    @Test
-    void GET_orders_returns_200() throws Exception {
-        when(orderService.findAll()).thenReturn(List.of(orderResponse));
-        mockMvc.perform(get("/api/orders"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0].customerName").value("Alice"));
-    }
-}
-
-// @DataJpaTest: test repository against real PostgreSQL via Testcontainers
-@DataJpaTest
-@Testcontainers
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class OrderRepositoryTest {
-    @Container @ServiceConnection
-    static PostgreSQLContainer&lt;?&gt; postgres = new PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
-
-    @Autowired OrderRepository repo;
-
-    @Test
-    void findByStatus_returns_matching_orders() {
-        repo.save(new OrderEntity(customer, OrderStatus.PENDING));
-        var results = repo.findByStatus(OrderStatus.PENDING);
-        assertThat(results).hasSize(1);
-    }
-}</code></pre>
-<hr />
-<h2 id="17-test-coverage-and-code-quality">17. Test Coverage and Code Quality<a class="anchor-link" href="#17-test-coverage-and-code-quality" title="Permanent link">¶</a></h2>
-<h3 id="jacoco-configuration">JaCoCo Configuration<a class="anchor-link" href="#jacoco-configuration" title="Permanent link">¶</a></h3>
-<pre class="code-block"><code class="language-xml">&lt;plugin&gt;
-    &lt;groupId&gt;org.jacoco&lt;/groupId&gt;
-    &lt;artifactId&gt;jacoco-maven-plugin&lt;/artifactId&gt;
-    &lt;version&gt;0.8.12&lt;/version&gt;
-    &lt;executions&gt;
-        &lt;execution&gt;
-            &lt;goals&gt;&lt;goal&gt;prepare-agent&lt;/goal&gt;&lt;/goals&gt;
-        &lt;/execution&gt;
-        &lt;execution&gt;
-            &lt;id&gt;report&lt;/id&gt;
-            &lt;phase&gt;test&lt;/phase&gt;
-            &lt;goals&gt;&lt;goal&gt;report&lt;/goal&gt;&lt;/goals&gt;
-        &lt;/execution&gt;
-        &lt;execution&gt;
-            &lt;id&gt;check&lt;/id&gt;
-            &lt;goals&gt;&lt;goal&gt;check&lt;/goal&gt;&lt;/goals&gt;
-            &lt;configuration&gt;
-                &lt;rules&gt;
-                    &lt;rule&gt;
-                        &lt;element&gt;BUNDLE&lt;/element&gt;
-                        &lt;limits&gt;
-                            &lt;limit&gt;
-                                &lt;counter&gt;INSTRUCTION&lt;/counter&gt;
-                                &lt;value&gt;COVEREDRATIO&lt;/value&gt;
-                                &lt;minimum&gt;0.80&lt;/minimum&gt;
-                            &lt;/limit&gt;
-                        &lt;/limits&gt;
-                    &lt;/rule&gt;
-                &lt;/rules&gt;
-            &lt;/configuration&gt;
-        &lt;/execution&gt;
-    &lt;/executions&gt;
-&lt;/plugin&gt;</code></pre>
-<h3 id="what-to-cover-vs-what-not-to">What to Cover vs What Not To<a class="anchor-link" href="#what-to-cover-vs-what-not-to" title="Permanent link">¶</a></h3>
-<table>
-<thead>
-<tr>
-<th>Cover</th>
-<th>Don't Cover</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Business logic (services, domain rules)</td>
-<td>Getters and setters</td>
-</tr>
-<tr>
-<td>Edge cases (null, empty, max values)</td>
-<td>Spring Boot framework internals</td>
-</tr>
-<tr>
-<td>Error handling paths</td>
-<td>Infrastructure code (tested in integration)</td>
-</tr>
-<tr>
-<td>State transitions</td>
-<td>DTOs with no behavior</td>
-</tr>
-<tr>
-<td>Boundary conditions</td>
-<td>Configuration classes</td>
-</tr>
-</tbody>
-</table>
-<h3 id="mutation-testing-with-pit">Mutation Testing with PIT<a class="anchor-link" href="#mutation-testing-with-pit" title="Permanent link">¶</a></h3>
-<p>Mutation testing verifies test <strong>quality</strong> — not just coverage. PIT modifies
-(mates) the production code and checks if tests fail (kill the mutant):</p>
-<pre class="code-block"><code class="language-xml">&lt;plugin&gt;
-    &lt;groupId&gt;org.pitest&lt;/groupId&gt;
-    &lt;artifactId&gt;pitest-maven&lt;/artifactId&gt;
-    &lt;version&gt;1.15.0&lt;/version&gt;
-    &lt;configuration&gt;
-        &lt;mutationThreshold&gt;70&lt;/mutationThreshold&gt;
-        &lt;targetClasses&gt;
-            &lt;param&gt;com.example.ordermgmt.*&lt;/param&gt;
-        &lt;/targetClasses&gt;
-    &lt;/configuration&gt;
-&lt;/plugin&gt;</code></pre>
-<p>Run with: <code>mvn org.pitest:pitest-maven:mutationCoverage</code></p>
-<p>If PIT changes <code>&gt;</code> to <code>&gt;=</code> and your test still passes, your test doesn't adequately
-verifying that boundary.</p>
-<hr />
-<h2 id="recommended-youtube-videos">Recommended YouTube Videos<a class="anchor-link" href="#recommended-youtube-videos" title="Permanent link">¶</a></h2>
-<ul>
-<li>
-<p><strong>[Test Driven Development (TDD) in Spring]</strong> by Dan Vega — TDD approach to testing REST controllers in Spring Boot (51:09, 39K views)
-  <a href="https://www.youtube.com/watch?v=-H5sud1-K5A">https://www.youtube.com/watch?v=-H5sud1-K5A</a></p>
-</li>
-<li>
-<p><strong>[Spring Boot Testing - Batteries Included]</strong> by Dan Vega — Comprehensive overview of Spring Boot testing capabilities
-  <a href="https://www.youtube.com/watch?v=rUbjV3VY1DI">https://www.youtube.com/watch?v=rUbjV3VY1DI</a></p>
-</li>
-</ul>
-<hr />
-<p>← <a href="08-reactor-pattern.html">Previous: Module 08</a> | <a href="10-capstone-project.html">Next: Module 10</a> →</p>
+<p>```
+       /\
+      /E2E          ← <a href="08-reactor-pattern.html">Previous: Module 08 — Reactor Pattern</a> | <a href="10-capstone-project.html">Next: Module 10 — Capstone Project</a> →</p>
       </article>
 
       <div class="footer-nav"><a href="08-reactor-pattern.html" class="nav-link prev">← Reactor Pattern</a><a href="10-capstone-project.html" class="nav-link next">Capstone Project →</a></div>
