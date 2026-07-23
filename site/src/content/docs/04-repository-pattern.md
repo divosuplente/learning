@@ -1138,5 +1138,3 @@ container's database URL, username, and password into your Spring configuration.
 No need for `@DynamicPropertySource` boilerplate.
 
 ---
-← 
-(../05-service-oriented-architecture/) →

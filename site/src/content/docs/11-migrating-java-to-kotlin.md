@@ -1034,8 +1034,4 @@ class CoroutineOrderServiceTest {
 - **Migration strategy**: DTOs first, then entities, controllers, services, repositories, tests last
 
 ---
-← [Previous: Module 10](../10-capstone-project/) | **Next:** None (final module)
-
 ---
-
-← [Previous: Module 10 — Capstone Project](../10-capstone-project/)

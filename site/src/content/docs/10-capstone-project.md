@@ -1762,7 +1762,7 @@ mutation UpdateStatus {
 
 ---
 
-## 24. API Versioning Strategy
+## 28. API Versioning Strategy
 
 API versioning lets you evolve your API without breaking existing clients.
 
@@ -1834,7 +1834,7 @@ curl -H "Accept: application/vnd.ordermgmt.v2+json" http://localhost:8080/api/or
 
 ---
 
-## 25. Docker Production Best Practices
+## 29. Docker Production Best Practices
 
 ### Multi-Stage Build
 
@@ -1880,7 +1880,7 @@ ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 
 ---
 
-## 26. Observability and Monitoring
+## 30. Observability and Monitoring
 
 ### Structured JSON Logging
 
@@ -1968,7 +1968,7 @@ Access at: `GET /actuator/health` → includes `kafka` health indicator.
 
 ---
 
-## 27. Sealed Classes for Domain Modeling
+## 31. Sealed Classes for Domain Modeling
 
 Java 21 sealed classes let us model the domain exhaustively — the compiler guarantees we handle every case. We'll refactor `OrderStatus` and event types to use sealed interfaces.
 
@@ -2045,7 +2045,7 @@ Use enums when all variants share the same shape. Use sealed when variants have 
 
 ---
 
-## 28. Virtual Threads for Blocking Endpoints
+## 32. Virtual Threads for Blocking Endpoints
 
 Java 21's **virtual threads** (Project Loom) give us a third concurrency model alongside Spring MVC (thread-per-request) and Spring WebFlux (reactive). Virtual threads allow blocking code to scale without the cognitive overhead of reactive pipelines.
 
@@ -2161,7 +2161,7 @@ try {
 
 ---
 
-## 29. Preparing for Kotlin Migration (Module 11 Preview)
+## 33. Preparing for Kotlin Migration (Module 11 Preview)
 
 The capstone is written in Java, but the codebase is structured to make a future Kotlin migration (covered in Module 11) straightforward. Here's what makes the code Kotlin-ready:
 
@@ -2264,6 +2264,3 @@ The capstone codebase is structured so each of these steps is independent.
 - When to choose virtual threads vs reactive streams (use both, each where it fits)
 
 ---
-
-← 
-(../11-migrating-java-to-kotlin/) →

@@ -18,7 +18,7 @@ description: "Build Tools & Project Setup"
 ## Prerequisites
 
 - [Module 00: Java for Experienced Developers](../00-java-foundations/) — you understand basic Java syntax, classes, records, and packages
-- No prior experience with Maven or Spring Boot (build tool concepts from any ecosystem transfer)
+
 
 ---
 
@@ -1249,5 +1249,3 @@ eliminating "works on my machine" build issues. The `mvnw` script and
 `.mvn/` directory should be committed to version control.
 
 ---
-← 
-(../02-dependency-injection/) →

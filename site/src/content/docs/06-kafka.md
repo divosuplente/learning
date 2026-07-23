@@ -865,16 +865,3 @@ Kafka Streams is powerful for real-time analytics, but it's an advanced topic. F
 
 ---
 
-## 10. Kafka Consumer Groups and Partition Rebalancing
-
-### Consumer Groups
-
-A **consumer group** is a set of consumers that jointly process messages from one
-or more topics. Kafka distributes partitions among the group's consumers:
-
-```
-Topic: order-created (3 partitions)
-
-Consumer Group: ordermgmt-group
-  Consumer A  ← 
-(../07-graphql/) →

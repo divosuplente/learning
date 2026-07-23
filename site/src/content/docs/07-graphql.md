@@ -1241,7 +1241,7 @@ GraphQL operates on a single endpoint, so traditional HTTP rate limiting (X requ
 
 ---
 
-## 13. GraphQL Schema Design Best Practices
+## 15. GraphQL Schema Design Best Practices
 
 ### Connection / Relay Pagination
 
@@ -1329,7 +1329,7 @@ type Order {
 
 ---
 
-## 14. GraphQL Error Handling
+## 16. GraphQL Error Handling
 
 GraphQL returns 200 OK even when there are errors. Errors are included in the
 response body, alongside any partial data.
@@ -1380,7 +1380,7 @@ public class GraphQLExceptionHandler {
 
 ---
 
-## 15. GraphQL Security
+## 17. GraphQL Security
 
 ### Query Depth Limiting
 
@@ -1437,5 +1437,3 @@ public OrderResponse order(@Argument Long id, GraphQLServletContext context) {
 ```
 
 ---
-← 
-(../08-reactor-pattern/) →

@@ -1306,5 +1306,3 @@ public Product updateStock(Long id, int newStock) {
 | No | Data that must always be fresh (pricing, availability) |
 
 ---
-← 
-(../06-kafka/) →

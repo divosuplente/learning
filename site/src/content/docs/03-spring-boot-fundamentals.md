@@ -620,296 +620,6 @@ The `{}` placeholder approach is preferred because:
 
 ## 11. Spring Boot Actuator
 
-**Actuator** is a Spring Boot module that provides production-ready features: health checks, metrics, and monitoring.
-
-### Adding Actuator
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
-```
-
-### Available Endpoints
-
-| Endpoint | URL | What It Shows |
-|----------|-----|---------------|
-| Health | `/actuator/health` | Is the application running? `{"status":"UP"}` |
-| Info | `/actuator/info` | Application info (name, version) |
-| Metrics | `/actuator/metrics` | List of available metrics |
-| Env | `/actuator/env` | Environment variables and config |
-| Loggers | `/actuator/loggers` | View and change log levels at runtime |
-
-### Exposing Endpoints
-
-By default, only `/actuator/health` is exposed. To expose more endpoints:
-
-```yaml
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,env
-```
-
-### Custom Health Check
-
-```java
-package com.example.ordermgmt.config;
-
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.stereotype.Component;
-
-@Component
-public class DatabaseHealthIndicator implements HealthIndicator {
-
-    @Override
-    public Health health() {
-        // Check if the database is reachable
-        try {
-            // In a real app, you'd check the database connection
-            return Health.up().withDetail("database", "reachable").build();
-        } catch (Exception e) {
-            return Health.down().withDetail("error", e.getMessage()).build();
-        }
-    }
-}
-```
-
-Now `GET /actuator/health` includes `"database": {"status": "UP", "details": {"database": "reachable"}}`.
-
----
-
-## What You Learned
-
-- **Spring Boot** eliminates boilerplate through auto-configuration, starter dependencies, and an embedded server
-- **`@SpringBootApplication`** combines `@Configuration`, `@EnableAutoConfiguration`, and `@ComponentScan`
-- **REST endpoints** are created with `@RestController`, `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`
-- **Request parameters** are extracted with `@PathVariable` (from URL), `@RequestParam` (from query string), `@RequestBody` (from JSON body), `@RequestHeader` (from headers)
-- **`ResponseEntity`** controls both the response body and HTTP status code
-- **Jakarta Bean Validation** (using `jakarta.validation.*`, not `javax.validation.*`) validates input with `@Valid`, `@NotBlank`, `@NotNull`, `@Min`, `@Max`, etc.
-- **`@RestControllerAdvice`** with `@ExceptionHandler` handles exceptions globally across all controllers
-- **DTOs** (records) decouple the API shape from the database schema
-- **Pagination** uses `Pageable` and `PageRequest` to split results into pages
-- **SLF4J** with `LoggerFactory` provides structured logging with `{}` placeholders — never use `System.out.println()` or Lombok's `@Slf4j`
-- **Actuator** provides health checks, metrics, and monitoring endpoints
-
----
-## 11. Content Negotiation and Media Types
-
-Spring Boot can serve the same endpoint in multiple formats (JSON, XML, etc.)
-based on the `Accept` header sent by the client.
-
-### Producing JSON and XML
-
-```java
-@RestController
-@RequestMapping("/api/orders")
-public class OrderController {
-
-    @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<OrderResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.findById(id));
-    }
-}
-```
-
-```bash
-## Client requests JSON
-curl -H "Accept: application/json" http://localhost:8080/api/orders/1
-## → {"id":1,"customerName":"Alice",...}
-
-## Same endpoint, client requests XML
-curl -H "Accept: application/xml" http://localhost:8080/api/orders/1
-## → <OrderResponse><id>1</id><customerName>Alice</customerName>...</OrderResponse>
-```
-
-### Adding XML Support
-
-Add the Jackson XML dependency:
-
-```xml
-<dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
-    <artifactId>jackson-dataformat-xml</artifactId>
-</dependency>
-```
-
----
-
-## 12. Cross-Origin Resource Sharing (CORS)
-
-Browsers block JavaScript from making requests to a different origin than the page
-that served it. **CORS** is the mechanism that lets your API explicitly allow
-cross-origin requests.
-
-### Per-Controller CORS
-
-```java
-@RestController
-@RequestMapping("/api/orders")
-@CrossOrigin(origins = "http://localhost:3000")  // React dev server
-public class OrderController { ... }
-```
-
-### Global CORS Configuration
-
-```java
-@Configuration
-public class CorsConfig implements WebMvcConfigurer {
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000", "https://myapp.example.com")
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);  // cache preflight for 1 hour
-    }
-}
-```
-
-### How CORS Works
-
-1. Browser sends a **preflight** `OPTIONS` request before the actual request
-2. Server responds with allowed origins, methods, and headers
-3. If the actual request's origin is allowed, browser sends it
-
----
-
-## 13. Spring Boot Configuration Properties
-
-### @ConfigurationProperties — Type-Safe Configuration
-
-```yaml
-## application.yml
-ordermgmt:
-  pagination:
-    default-page-size: 20
-    max-page-size: 100
-  features:
-    audit-log: true
-    cache-ttl-seconds: 300
-```
-
-```java
-@ConfigurationProperties(prefix = "ordermgmt")
-public record OrderMgmtProperties(
-    Pagination pagination,
-    Features features
-) {
-    public record Pagination(int defaultPageSize, int maxPageSize) {}
-    public record Features(boolean auditLog, int cacheTtlSeconds) {}
-}
-```
-
-```java
-@Configuration
-@EnableConfigurationProperties(OrderMgmtProperties.class)
-public class AppConfig { }
-```
-
-### Using in Services
-
-```java
-@Service
-public class OrderService {
-    private final OrderMgmtProperties properties;
-
-    public OrderService(OrderRepository repo, OrderMgmtProperties properties) {
-        this.repo = repo;
-        this.properties = properties;
-    }
-
-    public List<Order> findAll(int page) {
-        int pageSize = properties.pagination().defaultPageSize();
-        return repo.findAll(PageRequest.of(page, pageSize)).getContent();
-    }
-}
-```
-
-### @Value vs @ConfigurationProperties
-
-| `@Value` | `@ConfigurationProperties` |
-|-----------|---------------------------|
-| One property at a time | Bulk binding to a record/class |
-| No type safety | Fully typed |
-| SpEL expressions supported | No SpEL |
-| Simple values | Nested structures, lists, maps |
-
-```java
-// @Value — simple but error-prone
-@Value("${ordermgmt.pagination.default-page-size:20}")
-private int defaultPageSize;
-
-// @ConfigurationProperties — type-safe and clean
-// (as shown above)
-```
-
----
-
-## 14. Understanding Spring Boot Auto-Configuration
-
-Spring Boot's "magic" is **auto-configuration** — it automatically configures
-beans based on what's on your classpath.
-
-### How It Works
-
-1. Spring Boot scans the classpath for specific classes
-2. If a class is present, the corresponding auto-configuration kicks in
-3. If a class is absent, the configuration is skipped
-
-```java
-// This is what happens internally (simplified):
-@Configuration
-@ConditionalOnClass(name = "org.postgresql.ds.PGSimpleDataSource")
-@ConditionalOnMissingBean(DataSource.class)
-public class DataSourceAutoConfiguration {
-
-    @Bean
-    @ConditionalOnProperty(name = "spring.datasource.url")
-    public DataSource dataSource(
-            @Value("${spring.datasource.url}") String url,
-            @Value("${spring.datasource.username}") String username,
-            @Value("${spring.datasource.password}") String password) {
-        var ds = new HikariDataSource();
-        ds.setJdbcUrl(url);
-        ds.setUsername(username);
-        ds.setPassword(password);
-        return ds;
-    }
-}
-```
-
-### Discovering Auto-Configuration
-
-```bash
-## See all auto-configuration decisions at startup
-java -jar app.jar --debug
-
-## Or in application.yml
-debug: true
-```
-
-This prints a "CONDITIONS EVALUATION REPORT" showing which auto-configurations
-matched and which didn't, with reasons.
-
-### Excluding Auto-Configuration
-
-```java
-@SpringBootApplication(exclude = {
-    DataSourceAutoConfiguration.class,       // don't auto-configure a datasource
-    HibernateJpaAutoConfiguration.class      // don't auto-configure JPA
-})
-public class OrderManagementApplication { ... }
-```
-
----
-
-## 15. Spring Boot Actuator Deep Dive
-
 Actuator provides **production-ready** endpoints for monitoring and managing
 your application.
 
@@ -986,7 +696,218 @@ curl http://localhost:8080/actuator/info
 ## → {"build":{"version":"1.0.0","artifact":"ordermgmt","name":"Order Management System","time":"2025-01-15T10:00:00Z"}}
 ```
 
+
+## 12. Content Negotiation and Media Types
+
+Spring Boot can serve the same endpoint in multiple formats (JSON, XML, etc.)
+based on the `Accept` header sent by the client.
+
+### Producing JSON and XML
+
+```java
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<OrderResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.findById(id));
+    }
+}
+```
+
+```bash
+## Client requests JSON
+curl -H "Accept: application/json" http://localhost:8080/api/orders/1
+## → {"id":1,"customerName":"Alice",...}
+
+## Same endpoint, client requests XML
+curl -H "Accept: application/xml" http://localhost:8080/api/orders/1
+## → <OrderResponse><id>1</id><customerName>Alice</customerName>...</OrderResponse>
+```
+
+### Adding XML Support
+
+Add the Jackson XML dependency:
+
+```xml
+<dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-xml</artifactId>
+</dependency>
+```
+
 ---
+
+## 13. Cross-Origin Resource Sharing (CORS)
+
+Browsers block JavaScript from making requests to a different origin than the page
+that served it. **CORS** is the mechanism that lets your API explicitly allow
+cross-origin requests.
+
+### Per-Controller CORS
+
+```java
+@RestController
+@RequestMapping("/api/orders")
+@CrossOrigin(origins = "http://localhost:3000")  // React dev server
+public class OrderController { ... }
+```
+
+### Global CORS Configuration
+
+```java
+@Configuration
+public class CorsConfig implements WebMvcConfigurer {
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOrigins("http://localhost:3000", "https://myapp.example.com")
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);  // cache preflight for 1 hour
+    }
+}
+```
+
+### How CORS Works
+
+1. Browser sends a **preflight** `OPTIONS` request before the actual request
+2. Server responds with allowed origins, methods, and headers
+3. If the actual request's origin is allowed, browser sends it
+
+---
+
+## 14. Spring Boot Configuration Properties
+
+### @ConfigurationProperties — Type-Safe Configuration
+
+```yaml
+## application.yml
+ordermgmt:
+  pagination:
+    default-page-size: 20
+    max-page-size: 100
+  features:
+    audit-log: true
+    cache-ttl-seconds: 300
+```
+
+```java
+@ConfigurationProperties(prefix = "ordermgmt")
+public record OrderMgmtProperties(
+    Pagination pagination,
+    Features features
+) {
+    public record Pagination(int defaultPageSize, int maxPageSize) {}
+    public record Features(boolean auditLog, int cacheTtlSeconds) {}
+}
+```
+
+```java
+@Configuration
+@EnableConfigurationProperties(OrderMgmtProperties.class)
+public class AppConfig { }
+```
+
+### Using in Services
+
+```java
+@Service
+public class OrderService {
+    private final OrderMgmtProperties properties;
+
+    public OrderService(OrderRepository repo, OrderMgmtProperties properties) {
+        this.repo = repo;
+        this.properties = properties;
+    }
+
+    public List<Order> findAll(int page) {
+        int pageSize = properties.pagination().defaultPageSize();
+        return repo.findAll(PageRequest.of(page, pageSize)).getContent();
+    }
+}
+```
+
+### @Value vs @ConfigurationProperties
+
+| `@Value` | `@ConfigurationProperties` |
+|-----------|---------------------------|
+| One property at a time | Bulk binding to a record/class |
+| No type safety | Fully typed |
+| SpEL expressions supported | No SpEL |
+| Simple values | Nested structures, lists, maps |
+
+```java
+// @Value — simple but error-prone
+@Value("${ordermgmt.pagination.default-page-size:20}")
+private int defaultPageSize;
+
+// @ConfigurationProperties — type-safe and clean
+// (as shown above)
+```
+
+---
+
+## 15. Understanding Spring Boot Auto-Configuration
+
+Spring Boot's "magic" is **auto-configuration** — it automatically configures
+beans based on what's on your classpath.
+
+### How It Works
+
+1. Spring Boot scans the classpath for specific classes
+2. If a class is present, the corresponding auto-configuration kicks in
+3. If a class is absent, the configuration is skipped
+
+```java
+// This is what happens internally (simplified):
+@Configuration
+@ConditionalOnClass(name = "org.postgresql.ds.PGSimpleDataSource")
+@ConditionalOnMissingBean(DataSource.class)
+public class DataSourceAutoConfiguration {
+
+    @Bean
+    @ConditionalOnProperty(name = "spring.datasource.url")
+    public DataSource dataSource(
+            @Value("${spring.datasource.url}") String url,
+            @Value("${spring.datasource.username}") String username,
+            @Value("${spring.datasource.password}") String password) {
+        var ds = new HikariDataSource();
+        ds.setJdbcUrl(url);
+        ds.setUsername(username);
+        ds.setPassword(password);
+        return ds;
+    }
+}
+```
+
+### Discovering Auto-Configuration
+
+```bash
+## See all auto-configuration decisions at startup
+java -jar app.jar --debug
+
+## Or in application.yml
+debug: true
+```
+
+This prints a "CONDITIONS EVALUATION REPORT" showing which auto-configurations
+matched and which didn't, with reasons.
+
+### Excluding Auto-Configuration
+
+```java
+@SpringBootApplication(exclude = {
+    DataSourceAutoConfiguration.class,       // don't auto-configure a datasource
+    HibernateJpaAutoConfiguration.class      // don't auto-configure JPA
+})
+public class OrderManagementApplication { ... }
+```
+
+---
+
 
 ## 16. Spring Boot DevTools
 
@@ -1017,6 +938,19 @@ Install the [LiveReload browser extension](http://livereload.com/) to use this.
 DevTools is automatically disabled when running as a packaged JAR (`java -jar app.jar`).
 It's only active when running from an IDE or with `mvn spring-boot:run`.
 
----
-← 
-(../04-repository-pattern/) →
+------
+
+## What You Learned
+
+- **Spring Boot** eliminates boilerplate through auto-configuration, starter dependencies, and an embedded server
+- **`@SpringBootApplication`** combines `@Configuration`, `@EnableAutoConfiguration`, and `@ComponentScan`
+- **REST endpoints** are created with `@RestController`, `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`
+- **Request parameters** are extracted with `@PathVariable` (from URL), `@RequestParam` (from query string), `@RequestBody` (from JSON body), `@RequestHeader` (from headers)
+- **`ResponseEntity`** controls both the response body and HTTP status code
+- **Jakarta Bean Validation** (using `jakarta.validation.*`, not `javax.validation.*`) validates input with `@Valid`, `@NotBlank`, `@NotNull`, `@Min`, `@Max`, etc.
+- **`@RestControllerAdvice`** with `@ExceptionHandler` handles exceptions globally across all controllers
+- **DTOs** (records) decouple the API shape from the database schema
+- **Pagination** uses `Pageable` and `PageRequest` to split results into pages
+- **SLF4J** with `LoggerFactory` provides structured logging with `{}` placeholders — never use `System.out.println()` or Lombok's `@Slf4j`
+- **Actuator** provides health checks, metrics, and monitoring endpoints
+

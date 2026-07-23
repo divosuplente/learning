@@ -1219,5 +1219,3 @@ Flux<Order> cold = orderRepo.findAll();  // each subscriber gets all items
 ```
 
 ---
-← 
-(../09-tdd/) →
