@@ -19,3 +19,77 @@
   --sl-color-gray-6: #1e293b;
   --sl-color-gray-7: #0f172a;
 }
+
+/* ---- Module card grid (landing page) ---- */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.module-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.25rem;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 12px;
+  background: var(--sl-color-gray-6);
+  text-decoration: none;
+  color: var(--sl-color-text);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.module-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--sl-color-accent), var(--sl-color-accent-high));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.module-card:hover {
+  border-color: var(--sl-color-accent);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.module-card:hover::before {
+  opacity: 1;
+}
+
+.module-card.capstone {
+  border-color: var(--sl-color-accent-low);
+}
+
+.module-card.capstone::before {
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  opacity: 1;
+}
+
+.module-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--sl-color-accent-high);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.module-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--sl-color-white);
+}
+
+.module-desc {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--sl-color-text-muted);
+}
