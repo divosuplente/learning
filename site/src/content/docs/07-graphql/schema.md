@@ -268,7 +268,7 @@ public class GraphQLConfig {
 
                     @Override
                     public BigDecimal parseLiteral(Object input) {
-                        if (input instanceof org.springframework.graphql.java21runtime.value.Value.StringValue sv) {
+                        if (input instanceof graphql.language.StringValue sv) {
                             return new BigDecimal(sv.getValue());
                         }
                         return null;
@@ -302,7 +302,7 @@ public class GraphQLConfig {
 
                     @Override
                     public Instant parseLiteral(Object input) {
-                        if (input instanceof org.springframework.graphql.java21runtime.value.Value.StringValue sv) {
+                        if (input instanceof graphql.language.StringValue sv) {
                             try {
                                 return Instant.parse(sv.getValue());
                             } catch (DateTimeParseException e) {

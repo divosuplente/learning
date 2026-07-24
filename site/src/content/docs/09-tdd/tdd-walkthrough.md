@@ -305,10 +305,9 @@ void shouldThrowWhenStockInsufficient() {
     when(productRepository.findById(10L)).thenReturn(Optional.of(product));
 
     assertThatThrownBy(() -> orderService.createOrder(request))
-            .isInstanceOf(InsufficientStockException.class)
-            .hasMessageContaining("10")
-            .hasMessageContaining("available=2")
-            .hasMessageContaining("requested=5");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Insufficient stock")
+            .hasMessageContaining("requested 5");
 }
 ```
 

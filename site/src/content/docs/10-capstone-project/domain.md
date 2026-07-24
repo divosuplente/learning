@@ -10,6 +10,7 @@ be Java records because JPA requires a no-arg constructor and mutable fields.
 
 ```java
 package com.example.ordermgmt.domain;
+// Each type below goes in its own file: OrderStatus.java, CustomerEntity.java, ProductEntity.java, OrderEntity.java, OrderItemEntity.java
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -116,8 +117,6 @@ public class OrderEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items = new ArrayList<>();
 
-    protected OrderEntity() {}
-
     public OrderEntity() {
         this.status = OrderStatus.PENDING;
         this.totalAmount = BigDecimal.ZERO;
@@ -186,6 +185,7 @@ DTOs are Java **records** — immutable, concise, and perfect for API payloads.
 ```java
 package com.example.ordermgmt.dto;
 
+// Each record below goes in its own file: CreateOrderRequest.java, CreateOrderItemRequest.java, OrderResponse.java, OrderItemResponse.java, UpdateOrderStatusRequest.java
 import com.example.ordermgmt.domain.OrderEntity;
 import com.example.ordermgmt.domain.OrderItemEntity;
 import com.example.ordermgmt.domain.OrderStatus;

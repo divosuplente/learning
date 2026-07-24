@@ -9,6 +9,7 @@ Events are Java records — immutable message payloads.
 
 ```java
 package com.example.ordermgmt.kafka.event;
+// Each record below goes in its own file: OrderCreatedEvent.java, OrderStatusChangedEvent.java
 
 import com.example.ordermgmt.domain.OrderEntity;
 import com.example.ordermgmt.domain.OrderStatus;

@@ -200,7 +200,7 @@ class OrderControllerTest {
                 {"productId": 1, "quantity": 2}
               ]
             }
-            "";
+            """;
 
         mockMvc.perform(post("/api/orders")
                         .contentType(MediaType.APPLICATION_JSON)
