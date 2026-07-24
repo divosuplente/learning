@@ -696,7 +696,6 @@ curl http://localhost:8080/actuator/info
 ## → {"build":{"version":"1.0.0","artifact":"ordermgmt","name":"Order Management System","time":"2025-01-15T10:00:00Z"}}
 ```
 
-
 ## 12. Content Negotiation and Media Types
 
 Spring Boot can serve the same endpoint in multiple formats (JSON, XML, etc.)
@@ -908,7 +907,6 @@ public class OrderManagementApplication { ... }
 
 ---
 
-
 ## 16. Spring Boot DevTools
 
 DevTools provides development-time features that speed up your workflow.
@@ -953,4 +951,3 @@ It's only active when running from an IDE or with `mvn spring-boot:run`.
 - **Pagination** uses `Pageable` and `PageRequest` to split results into pages
 - **SLF4J** with `LoggerFactory` provides structured logging with `{}` placeholders — never use `System.out.println()` or Lombok's `@Slf4j`
 - **Actuator** provides health checks, metrics, and monitoring endpoints
-

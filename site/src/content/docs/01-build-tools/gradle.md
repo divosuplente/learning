@@ -219,8 +219,4 @@ eliminating "works on my machine" build issues. The `mvnw` script and
 
 ---
 
-
-
 ---
-
-← [Previous: Module 00 — Java for Experienced Developers](./00-java-foundations.md) | [Next: Module 02 — Dependency Injection](./02-dependency-injection.md) →

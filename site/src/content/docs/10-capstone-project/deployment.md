@@ -268,7 +268,6 @@ Access at: `GET /actuator/health` → includes `kafka` health indicator.
 
 ---
 
-
 ## 6. Sealed Classes for Domain Modeling
 
 Java 21 sealed classes let us model the domain exhaustively — the compiler guarantees we handle every case. We'll refactor `OrderStatus` and event types to use sealed interfaces.
@@ -333,18 +332,5 @@ public void handleEvent(OrderEvent event) {
 ```
 
 If someone later adds `OrderRefundedEvent implements OrderEvent`, the switch fails to compile until the new case is handled. This is **exhaustive domain modeling** — the compiler catches missing cases.
-
-<details>
-<summary>Deep Dive: Sealed Classes vs Enums</summary>
-
-Sealed interfaces are more powerful than enums:
-
-- **Enums** are singletons — one instance per value. You can't attach per-instance data.
-- **Sealed classes/interfaces** allow per-instance fields. `OrderCreatedEvent` carries `totalAmount`, `OrderCancelledEvent` carries `reason` — different data per variant.
-- **Records + sealed = algebraic data types** — the functional programming concept where types are composed of "or" (sealed) and "and" (records) relationships.
-
-Use enums when all variants share the same shape. Use sealed when variants have different fields.
-
-</details>
 
 ---

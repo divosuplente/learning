@@ -361,7 +361,4 @@ public OrderResponse order(@Argument Long id, GraphQLServletContext context) {
 
 ---
 
-
 ---
-
-← [Previous: Module 06 — Apache Kafka](./06-kafka.md) | [Next: Module 08 — Reactor Pattern](./08-reactor-pattern.md) →

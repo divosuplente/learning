@@ -175,7 +175,6 @@ With backpressure:
 ```
 Fast Producer: [item1] [item2] → Slow Consumer (request(2))
                (waits...)
-                              ← request(2)
               [item3] [item4] → Slow Consumer
                (waits...)
 ```

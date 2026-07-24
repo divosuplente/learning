@@ -194,33 +194,6 @@ public class VirtualThreadConfig {
 
 Now every HTTP request to `/api/orders/*` runs on a virtual thread. You can block freely (JPA calls, REST client calls) without worrying about thread exhaustion.
 
-<details>
-<summary>Deep Dive: Virtual Thread Pitfalls</summary>
-
-Virtual threads are cheap, but they're not free. Watch out for:
-
-- **Synchronized blocks**: Virtual threads pinned to their carrier thread inside `synchronized`. Use `ReentrantLock` instead if a virtual thread might block inside a lock.
-- **Thread-local overuse**: Virtual threads support `ThreadLocal`, but millions of virtual threads with thread-locals consume real memory. Prefer passing context explicitly.
-- **`Object.wait()`**: Also pins the virtual thread. Use `java.util.concurrent` locks instead.
-
-```java
-// BAD: pins the virtual thread
-synchronized (lock) {
-    condition.await(); // pins!
-}
-
-// GOOD: does not pin
-ReentrantLock lock = new ReentrantLock();
-lock.lock();
-try {
-    condition.await(); // does NOT pin
-} finally {
-    lock.unlock();
-}
-```
-
-</details>
-
 ---
 
 ## 5. Preparing for Kotlin Migration (Module 11 Preview)
@@ -317,7 +290,6 @@ The capstone codebase is structured so each of these steps is independent.
 
 ---
 
-
 ## What You Learned
 
 - How to assemble a complete Order Management System using **all concepts from all modules**
@@ -330,5 +302,3 @@ The capstone codebase is structured so each of these steps is independent.
 - When to choose virtual threads vs reactive streams (use both, each where it fits)
 
 ---
-
-← [Previous: Module 09 — Test-Driven Development](./09-tdd.md) | [Next: Module 11 — Migrating Java to Kotlin](./11-migrating-java-to-kotlin.md) →

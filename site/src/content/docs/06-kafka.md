@@ -864,4 +864,3 @@ Kafka Streams is powerful for real-time analytics, but it's an advanced topic. F
 - **Kafka Streams** enables real-time stream processing (filtering, aggregating, joining streams)
 
 ---
-
