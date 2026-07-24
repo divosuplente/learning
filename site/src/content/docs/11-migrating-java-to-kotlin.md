@@ -199,7 +199,7 @@ These plugins are essential for Spring Boot + Kotlin:
    classes annotated with `@Entity`. JPA requires this, but Kotlin classes
    don't have implicit no-arg constructors.
 
-3. **`all-open`** — A general plugin that opens classes annoted with any
+3. **`all-open`** — A general plugin that opens classes annotated with any
    annotation you specify. Used alongside `spring` for custom annotations.
 
 Without these plugins, Spring Boot will **fail to start** with Kotlin.
@@ -993,7 +993,18 @@ wrappers. Add it to your pom.xml:
 
 ### 9.3 Testing Coroutines with `runTest`
 
-For coroutine tests, use `kotlinx-coroutines-test`:
+For coroutine tests, use `kotlinx-coroutines-test`. Add it to your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.jetbrains.kotlinx</groupId>
+    <artifactId>kotlinx-coroutines-test</artifactId>
+    <version>1.8.1</version>
+    <scope>test</scope>
+</dependency>
+```
+
+Then use `runTest` to test `suspend` functions:
 
 ```kotlin
 import kotlinx.coroutines.test.runTest
@@ -1017,7 +1028,6 @@ class CoroutineOrderServiceTest {
 
 ---
 
-## What You Learned
 ## What You Learned
 
 - **Kotlin** is a JVM language fully interoperable with Java — you can mix both in one project
