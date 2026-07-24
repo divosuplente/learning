@@ -3,7 +3,7 @@ title: "Module 07: Schema & Types"
 description: "Schema & Types"
 ---
 
-## 5. Core GraphQL Concepts
+## 1. Core GraphQL Concepts
 
 ### Schema
 
@@ -69,17 +69,157 @@ We'll cover subscriptions briefly at the end of this module.
 
 ---
 
-## 6. Schema Definition Language (SDL)
+## 2. Schema Definition Language (SDL)
 
 Let's write the complete GraphQL schema for our Order Management System. Create a file at `src/main/resources/graphql/schema.graphqls`:
 
 ```graphql
-
-## Custom scalars for types Java has but GraphQL doesn't
+# Custom scalars for types Java has but GraphQL doesn't
 scalar BigDecimal
 scalar Instant
 
-## 8. Custom Scalars
+# --- Enums ---
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    SHIPPED
+    DELIVERED
+    CANCELLED
+}
+
+# --- Types ---
+
+type Customer {
+    id: ID!
+    name: String!
+    email: String!
+    address: String
+    createdAt: Instant!
+    orders: [Order!]!
+}
+
+type Product {
+    id: ID!
+    name: String!
+    price: BigDecimal!
+    stock: Int!
+    category: String!
+    createdAt: Instant!
+}
+
+type Order {
+    id: ID!
+    customer: Customer!
+    status: OrderStatus!
+    totalAmount: BigDecimal!
+    createdAt: Instant!
+    items: [OrderItem!]!
+}
+
+type OrderItem {
+    id: ID!
+    product: Product!
+    quantity: Int!
+    unitPrice: BigDecimal!
+}
+
+# --- Input Types (for mutations) ---
+
+input CreateOrderInput {
+    customerId: ID!
+    items: [CreateOrderItemInput!]!
+}
+
+input CreateOrderItemInput {
+    productId: ID!
+    quantity: Int!
+}
+
+input CreateCustomerInput {
+    name: String!
+    email: String!
+    address: String
+}
+
+input CreateProductInput {
+    name: String!
+    price: BigDecimal!
+    stock: Int!
+    category: String!
+}
+
+# --- Response type for status change ---
+
+type OrderStatusChangedEvent {
+    orderId: ID!
+    oldStatus: OrderStatus!
+    newStatus: OrderStatus!
+    changedAt: Instant!
+}
+
+# --- Queries (read operations) ---
+
+type Query {
+    # Get a single order by ID
+    order(id: ID!): Order
+    
+    # Get all orders, optionally filtered by customer
+    orders(customerId: ID): [Order!]!
+    
+    # Get a single customer by ID
+    customer(id: ID!): Customer
+    
+    # Get all customers
+    customers: [Customer!]!
+    
+    # Get a single product by ID
+    product(id: ID!): Product
+    
+    # Get all products, optionally filtered by category
+    products(category: String): [Product!]!
+}
+
+# --- Mutations (write operations) ---
+
+type Mutation {
+    # Create a new order
+    createOrder(input: CreateOrderInput!): Order!
+    
+    # Confirm a pending order
+    confirmOrder(id: ID!): Order!
+    
+    # Cancel an order
+    cancelOrder(id: ID!): Order!
+    
+    # Create a new customer
+    createCustomer(input: CreateCustomerInput!): Customer!
+    
+    # Create a new product
+    createProduct(input: CreateProductInput!): Product!
+}
+
+# --- Subscriptions (real-time updates) ---
+
+type Subscription {
+    # Subscribe to order status changes, optionally for a specific order
+    orderStatusChanged(orderId: ID): OrderStatusChangedEvent!
+}
+```
+
+### Key Points About the Schema
+
+1. **`scalar BigDecimal` and `scalar Instant`** — these tell GraphQL that we have custom types. We'll register Java implementations for them in our Spring Boot configuration
+2. **Input types** — mutations use `input` types instead of regular types. Inputs are for data going **in** to the API
+3. **`ID!`** — the `ID` type is a string-serialized unique identifier. The `!` makes it non-nullable
+4. **Relationships** — `Order` has a `customer` field of type `Customer`, and `Customer` has an `orders` field of type `[Order!]!`. This allows bidirectional traversal
+5. **The `Query` type is required** — it defines all read operations
+6. **The `Mutation` type is optional but common** — it defines all write operations
+7. **Arguments** — queries can accept arguments: `order(id: ID!)`, `products(category: String)`
+
+---
+
+## 3. Custom Scalars
 
 GraphQL has built-in scalars (`Int`, `Float`, `String`, `Boolean`, `ID`), but Java has types that GraphQL doesn't know about — `BigDecimal` and `Instant`. We need to register **custom scalar adapters** that tell GraphQL how to serialize and deserialize them.
 

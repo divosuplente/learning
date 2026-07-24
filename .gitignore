@@ -16,6 +16,3 @@ banks/
 # Astro build output
 site/dist/
 site/node_modules/
-
-# Old build output
-docs/

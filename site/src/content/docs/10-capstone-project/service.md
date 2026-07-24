@@ -3,7 +3,7 @@ title: "Module 10: Service Layer"
 description: "Service Layer"
 ---
 
-## 12. Service Layer
+## 1. Service Layer
 
 ```java
 package com.example.ordermgmt.service.exception;

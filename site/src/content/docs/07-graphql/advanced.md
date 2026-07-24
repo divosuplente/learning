@@ -3,11 +3,7 @@ title: "Module 07: Advanced Topics"
 description: "Advanced Topics"
 ---
 
-## --- Subscriptions (real-time updates) ---
-
-type Subscription {
-
-## 11. The N+1 Problem and DataLoader
+## 1. The N+1 Problem and DataLoader
 
 ### What Is the N+1 Problem?
 
@@ -111,7 +107,7 @@ This turns 101 queries into 2 queries.
 
 ---
 
-## 12. GraphQL Subscriptions
+## 2. GraphQL Subscriptions
 
 Subscriptions enable **real-time updates**. Instead of the client repeatedly polling for changes, the server pushes updates when they happen.
 

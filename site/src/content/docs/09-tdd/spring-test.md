@@ -3,7 +3,7 @@ title: "Module 09: Spring Boot Tests"
 description: "Spring Boot Tests"
 ---
 
-## 10. Spring Boot Test Slices
+## 1. Spring Boot Test Slices
 
 Spring Boot provides **test slices** — specialized test configurations that load only the parts of the application you need for each test type. This makes tests faster than loading the entire application.
 
@@ -234,7 +234,7 @@ class OrderRepositoryTest {
 
 ---
 
-## 11. JaCoCo: Measuring Test Coverage
+## 2. JaCoCo: Measuring Test Coverage
 
 **JaCoCo** (Java Code Coverage) measures how much of your code is exercised by tests. It reports the percentage of lines, branches, and methods covered.
 

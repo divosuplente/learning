@@ -3,7 +3,7 @@ title: "Module 07: Error Handling"
 description: "Error Handling"
 ---
 
-## 10. Error Handling in GraphQL
+## 1. Error Handling in GraphQL
 
 Unlike REST, where each request returns a single HTTP status code, GraphQL uses HTTP 200 for most responses (even errors) and includes an `errors` array in the response body.
 
@@ -83,56 +83,5 @@ This maps domain exceptions to appropriate GraphQL error types:
 - `BAD_REQUEST` — for validation errors (HTTP 400 equivalent)
 - `FORBIDDEN` — for authorization errors (HTTP 403 equivalent)
 - `INTERNAL_ERROR` — for unexpected errors (HTTP 500 equivalent)
-
----
-
-## 16. GraphQL Error Handling
-
-GraphQL returns 200 OK even when there are errors. Errors are included in the
-response body, alongside any partial data.
-
-### Custom Error Extensions
-
-```java
-@ControllerAdvice
-public class GraphQLExceptionHandler {
-
-    @ExceptionHandler(OrderNotFoundException.class)
-    public GraphQLError handleNotFound(OrderNotFoundException ex) {
-        return GraphQLError.newError()
-                .message(ex.getMessage())
-                .path(List.of("order"))
-                .extensions(Map.of(
-                        "code", "ORDER_NOT_FOUND",
-                        "orderId", ex.getOrderId()
-                ))
-                .build();
-    }
-
-    @ExceptionHandler(InsufficientStockException.class)
-    public GraphQLError handleStock(InsufficientStockException ex) {
-        return GraphQLError.newError()
-                .message(ex.getMessage())
-                .extensions(Map.of(
-                        "code", "INSUFFICIENT_STOCK",
-                        "productName", ex.getProductName(),
-                        "requested", ex.getRequested(),
-                        "available", ex.getAvailable()
-                ))
-                .build();
-    }
-}
-```
-
-### Error Taxonomy
-
-| Code | Meaning | HTTP-agnostic? |
-|------|---------|----------------|
-| `NOT_FOUND` | Resource doesn't exist | Yes |
-| `VALIDATION_ERROR` | Invalid input | Yes |
-| `UNAUTHORIZED` | Authentication required | Yes |
-| `FORBIDDEN` | Not enough permissions | Yes |
-| `CONFLICT` | State conflict (e.g., duplicate) | Yes |
-| `INTERNAL_ERROR` | Unexpected server error | Yes |
 
 ---

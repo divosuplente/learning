@@ -1,13 +1,9 @@
 ---
-title: "Module 07: Resolvers & Mutations"
-description: "Resolvers & Mutations"
+title: "Module 07: Resolvers"
+description: "Resolvers"
 ---
 
-## --- Queries (read operations) ---
-
-type Query {
-
-## 7. Adding the GraphQL Dependency
+## 1. Adding the GraphQL Dependency
 
 Add the Spring Boot GraphQL starter to your `pom.xml`:
 
@@ -34,7 +30,7 @@ Now you can open `http://localhost:8080/graphiql` in your browser to test querie
 
 ---
 
-## 9. Resolvers in Spring Boot
+## 2. Resolvers in Spring Boot
 
 A **resolver** is a Java method that provides the data for a GraphQL field. When a client queries `order(id: 42)`, a resolver method is called to fetch that order.
 

@@ -3,7 +3,7 @@ title: "Module 10: Configuration"
 description: "Configuration"
 ---
 
-## 3. pom.xml
+## 1. pom.xml
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -107,7 +107,7 @@ description: "Configuration"
 
 ---
 
-## 4. application.yml
+## 2. application.yml
 
 ```yaml
 server:
@@ -157,7 +157,7 @@ logging:
 
 ---
 
-## 5. docker-compose.yml
+## 3. docker-compose.yml
 
 ```yaml
 services:

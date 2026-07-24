@@ -21,14 +21,80 @@ description: "Introduction"
 
 ## Prerequisites
 
-- [Module 00: Java for Experienced Developers](../00-java-foundations/) — you understand Java classes, records, interfaces
-- [Module 01: Build Tools & Project Setup](../01-build-tools-and-project-setup/) — you have a Spring Boot project
-- [Module 02: Dependency Injection](../02-dependency-injection/) — you understand Spring beans and constructor injection
-- [Module 03: Spring Boot Fundamentals](../03-spring-boot-fundamentals/) — you understand REST controllers and DTOs
-- [Module 04: Repository Pattern](../04-repository-pattern/) — you understand JPA entities and repositories
-- [Module 05: Service-Oriented Architecture](../05-service-oriented-architecture/) — you understand the service layer
+- [Module 00: Java for Experienced Developers](./00-java-foundations.md) — you understand Java classes, records, interfaces
+- [Module 01: Build Tools & Project Setup](./01-build-tools-and-project-setup.md) — you have a Spring Boot project
+- [Module 02: Dependency Injection](./02-dependency-injection.md) — you understand Spring beans and constructor injection
+- [Module 03: Spring Boot Fundamentals](./03-spring-boot-fundamentals.md) — you understand REST controllers and DTOs
+- [Module 04: Repository Pattern](./04-repository-pattern.md) — you understand JPA entities and repositories
+- [Module 05: Service-Oriented Architecture](./05-service-oriented-architecture.md) — you understand the service layer
 
 ---
+
+<details>
+<summary>Table of Contents</summary>
+
+- [What You'll Learn](#what-youll-learn)
+- [Prerequisites](#prerequisites)
+- [1. What Is an API? (REST Recap)](#1-what-is-an-api-rest-recap)
+- [2. Problems with REST](#2-problems-with-rest)
+  - [Over-Fetching](#over-fetching)
+  - [Under-Fetching](#under-fetching)
+  - [The Root Cause](#the-root-cause)
+- [3. What Is GraphQL?](#3-what-is-graphql)
+  - [A GraphQL Query Example](#a-graphql-query-example)
+  - [A More Complex Query](#a-more-complex-query)
+- [4. GraphQL vs REST: Comparison](#4-graphql-vs-rest-comparison)
+  - [When to Use GraphQL?](#when-to-use-graphql)
+  - [When to Stay with REST?](#when-to-stay-with-rest)
+- [5. Core GraphQL Concepts](#5-core-graphql-concepts)
+  - [Schema](#schema)
+  - [Types](#types)
+  - [Queries](#queries)
+  - [Mutations](#mutations)
+  - [Subscriptions](#subscriptions)
+- [6. Schema Definition Language (SDL)](#6-schema-definition-language-sdl)
+  - [Key Points About the Schema](#key-points-about-the-schema)
+- [7. Adding the GraphQL Dependency](#7-adding-the-graphql-dependency)
+- [8. Custom Scalars](#8-custom-scalars)
+  - [What Is a Coercing?](#what-is-a-coercing)
+- [9. Resolvers in Spring Boot](#9-resolvers-in-spring-boot)
+  - [Query Resolvers](#query-resolvers)
+  - [What's Happening Here?](#whats-happening-here)
+  - [Mutation Resolvers](#mutation-resolvers)
+  - [Input Records](#input-records)
+  - [Field Resolvers with @SchemaMapping](#field-resolvers-with-schemamapping)
+- [10. Error Handling in GraphQL](#10-error-handling-in-graphql)
+  - [Error Response Format](#error-response-format)
+  - [Partial Results](#partial-results)
+  - [Custom Exceptions in Spring Boot GraphQL](#custom-exceptions-in-spring-boot-graphql)
+- [11. The N+1 Problem and DataLoader](#11-the-n1-problem-and-dataloader)
+  - [What Is the N+1 Problem?](#what-is-the-n1-problem)
+  - [How DataLoader Solves It](#how-dataloader-solves-it)
+  - [Implementing DataLoader in Spring Boot](#implementing-dataloader-in-spring-boot)
+  - [What @BatchMapping Does](#what-batchmapping-does)
+- [12. GraphQL Subscriptions](#12-graphql-subscriptions)
+  - [Setting Up Subscriptions](#setting-up-subscriptions)
+- [13. Testing GraphQL with GraphiQL](#13-testing-graphql-with-graphiql)
+  - [Example Queries to Try](#example-queries-to-try)
+- [14. Security Overview (Brief)](#14-security-overview-brief)
+  - [Authentication](#authentication)
+  - [Authorization](#authorization)
+  - [Query Depth Limiting](#query-depth-limiting)
+  - [Rate Limiting](#rate-limiting)
+- [What You Learned](#what-you-learned)
+- [13. GraphQL Schema Design Best Practices](#13-graphql-schema-design-best-practices)
+  - [Connection / Relay Pagination](#connection-relay-pagination)
+  - [Input Types vs Arguments](#input-types-vs-arguments)
+  - [Deprecation](#deprecation)
+- [14. GraphQL Error Handling](#14-graphql-error-handling)
+  - [Custom Error Extensions](#custom-error-extensions)
+  - [Error Taxonomy](#error-taxonomy)
+- [15. GraphQL Security](#15-graphql-security)
+  - [Query Depth Limiting](#query-depth-limiting)
+  - [Query Complexity Analysis](#query-complexity-analysis)
+  - [Authentication in Resolvers](#authentication-in-resolvers)
+
+</details>
 
 ## 1. What Is an API? (REST Recap)
 

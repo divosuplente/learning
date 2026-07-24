@@ -3,7 +3,7 @@ title: "Module 09: JUnit 5 & AssertJ"
 description: "JUnit 5 & AssertJ"
 ---
 
-## 5. JUnit 5
+## 1. JUnit 5
 
 **JUnit 5** is the most popular testing framework for Java. It provides annotations and classes for writing and running tests.
 
@@ -155,7 +155,7 @@ OrderCalculator
 
 ---
 
-## 6. AssertJ
+## 2. AssertJ
 
 **AssertJ** is a fluent assertion library that makes assertions more readable than JUnit's built-in assertions.
 

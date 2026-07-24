@@ -3,143 +3,7 @@ title: "Module 07: Testing, Design & Security"
 description: "Testing, Design & Security"
 ---
 
-## --- Enums ---
-
-enum OrderStatus {
-    PENDING
-    CONFIRMED
-    SHIPPED
-    DELIVERED
-    CANCELLED
-}
-
-## --- Types ---
-
-type Customer {
-    id: ID!
-    name: String!
-    email: String!
-    address: String
-    createdAt: Instant!
-    orders: [Order!]!
-}
-
-type Product {
-    id: ID!
-    name: String!
-    price: BigDecimal!
-    stock: Int!
-    category: String!
-    createdAt: Instant!
-}
-
-type Order {
-    id: ID!
-    customer: Customer!
-    status: OrderStatus!
-    totalAmount: BigDecimal!
-    createdAt: Instant!
-    items: [OrderItem!]!
-}
-
-type OrderItem {
-    id: ID!
-    product: Product!
-    quantity: Int!
-    unitPrice: BigDecimal!
-}
-
-## --- Input Types (for mutations) ---
-
-input CreateOrderInput {
-    customerId: ID!
-    items: [CreateOrderItemInput!]!
-}
-
-input CreateOrderItemInput {
-    productId: ID!
-    quantity: Int!
-}
-
-input CreateCustomerInput {
-    name: String!
-    email: String!
-    address: String
-}
-
-input CreateProductInput {
-    name: String!
-    price: BigDecimal!
-    stock: Int!
-    category: String!
-}
-
-## --- Response type for status change ---
-
-type OrderStatusChangedEvent {
-    orderId: ID!
-    oldStatus: OrderStatus!
-    newStatus: OrderStatus!
-    changedAt: Instant!
-}
-
-##    # Get a single order by ID
-    order(id: ID!): Order
-
-##    # Get all orders, optionally filtered by customer
-    orders(customerId: ID): [Order!]!
-
-##    # Get a single customer by ID
-    customer(id: ID!): Customer
-
-##    # Get all customers
-    customers: [Customer!]!
-
-##    # Get a single product by ID
-    product(id: ID!): Product
-
-##    # Get all products, optionally filtered by category
-    products(category: String): [Product!]!
-}
-
-## --- Mutations (write operations) ---
-
-type Mutation {
-
-##    # Create a new order
-    createOrder(input: CreateOrderInput!): Order!
-
-##    # Confirm a pending order
-    confirmOrder(id: ID!): Order!
-
-##    # Cancel an order
-    cancelOrder(id: ID!): Order!
-
-##    # Create a new customer
-    createCustomer(input: CreateCustomerInput!): Customer!
-
-##    # Create a new product
-    createProduct(input: CreateProductInput!): Product!
-}
-
-##    # Subscribe to order status changes, optionally for a specific order
-    orderStatusChanged(orderId: ID): OrderStatusChangedEvent!
-}
-```
-
-### Key Points About the Schema
-
-1. **`scalar BigDecimal` and `scalar Instant`** — these tell GraphQL that we have custom types. We'll register Java implementations for them in our Spring Boot configuration
-2. **Input types** — mutations use `input` types instead of regular types. Inputs are for data going **in** to the API
-3. **`ID!`** — the `ID` type is a string-serialized unique identifier. The `!` makes it non-nullable
-4. **Relationships** — `Order` has a `customer` field of type `Customer`, and `Customer` has an `orders` field of type `[Order!]!`. This allows bidirectional traversal
-5. **The `Query` type is required** — it defines all read operations
-6. **The `Mutation` type is optional but common** — it defines all write operations
-7. **Arguments** — queries can accept arguments: `order(id: ID!)`, `products(category: String)`
-
----
-
-## 13. Testing GraphQL with GraphiQL
+## 1. Testing GraphQL with GraphiQL
 
 Spring Boot includes **GraphiQL** — a browser-based IDE for writing and testing GraphQL queries.
 
@@ -234,7 +98,7 @@ subscription {
 
 ---
 
-## 14. Security Overview (Brief)
+## 2. Security Overview (Brief)
 
 GraphQL APIs need the same security measures as REST APIs:
 
@@ -262,8 +126,7 @@ public OrderResponse createOrder(@Argument CreateOrderInput input, Authenticatio
 A malicious client could send a deeply nested query that exhausts server resources:
 
 ```graphql
-
-## This is a denial-of-service attack
+# This is a denial-of-service attack
 { customer { orders { customer { orders { customer { orders { ... } } } } } } }
 ```
 
@@ -301,7 +164,7 @@ GraphQL operates on a single endpoint, so traditional HTTP rate limiting (X requ
 
 ---
 
-## 15. GraphQL Schema Design Best Practices
+## 3. GraphQL Schema Design Best Practices
 
 ### Connection / Relay Pagination
 
@@ -353,8 +216,7 @@ public OrderConnection orders(@Argument Integer first, @Argument String after) {
 ### Input Types vs Arguments
 
 ```graphql
-
-## GOOD — structured input type
+# GOOD — structured input type
 mutation CreateOrder($input: CreateOrderInput!) {
     createOrder(input: $input): Order!
 }
@@ -365,7 +227,7 @@ input CreateOrderInput {
     shippingAddress: AddressInput
 }
 
-## BAD — too many flat arguments
+# BAD — too many flat arguments
 mutation CreateOrder(
     customerId: ID!
     itemIds: [ID!]!
@@ -390,15 +252,65 @@ type Order {
 
 ---
 
-## 17. GraphQL Security
+## 4. GraphQL Error Handling
+
+GraphQL returns 200 OK even when there are errors. Errors are included in the
+response body, alongside any partial data.
+
+### Custom Error Extensions
+
+```java
+@ControllerAdvice
+public class GraphQLExceptionHandler {
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public GraphQLError handleNotFound(OrderNotFoundException ex) {
+        return GraphQLError.newError()
+                .message(ex.getMessage())
+                .path(List.of("order"))
+                .extensions(Map.of(
+                        "code", "ORDER_NOT_FOUND",
+                        "orderId", ex.getOrderId()
+                ))
+                .build();
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public GraphQLError handleStock(InsufficientStockException ex) {
+        return GraphQLError.newError()
+                .message(ex.getMessage())
+                .extensions(Map.of(
+                        "code", "INSUFFICIENT_STOCK",
+                        "productName", ex.getProductName(),
+                        "requested", ex.getRequested(),
+                        "available", ex.getAvailable()
+                ))
+                .build();
+    }
+}
+```
+
+### Error Taxonomy
+
+| Code | Meaning | HTTP-agnostic? |
+|------|---------|----------------|
+| `NOT_FOUND` | Resource doesn't exist | Yes |
+| `VALIDATION_ERROR` | Invalid input | Yes |
+| `UNAUTHORIZED` | Authentication required | Yes |
+| `FORBIDDEN` | Not enough permissions | Yes |
+| `CONFLICT` | State conflict (e.g., duplicate) | Yes |
+| `INTERNAL_ERROR` | Unexpected server error | Yes |
+
+---
+
+## 5. GraphQL Security
 
 ### Query Depth Limiting
 
 Malicious clients can send deeply nested queries to overload the server:
 
 ```graphql
-
-## Attack: infinitely nested query
+# Attack: infinitely nested query
 query { orders { items { product { category { parent { products { items { product { ... }}}}}}}}}
 ```
 
@@ -410,8 +322,7 @@ spring:
     schema:
       inspection:
         enabled: true
-
-##    # Max query depth
+    # Max query depth
     max-query-depth: 7
 ```
 
@@ -449,3 +360,8 @@ public OrderResponse order(@Argument Long id, GraphQLServletContext context) {
 ```
 
 ---
+
+
+---
+
+← [Previous: Module 06 — Apache Kafka](./06-kafka.md) | [Next: Module 08 — Reactor Pattern](./08-reactor-pattern.md) →

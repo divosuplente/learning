@@ -3,7 +3,7 @@ title: "Module 10: GraphQL"
 description: "GraphQL"
 ---
 
-## 15. GraphQL Schema
+## 1. GraphQL Schema
 
 **`src/main/resources/graphql/schema.graphqls`**
 
@@ -58,7 +58,7 @@ input OrderItemInput {
 
 ---
 
-## 16. GraphQL Resolvers
+## 2. GraphQL Resolvers
 
 Uses Spring for GraphQL annotations (`@QueryMapping`, `@MutationMapping`).
 Spring Boot auto-registers these via `spring-boot-starter-graphql`.

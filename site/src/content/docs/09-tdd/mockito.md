@@ -3,7 +3,7 @@ title: "Module 09: Mockito"
 description: "Mockito"
 ---
 
-## 7. Mockito
+## 1. Mockito
 
 **Mockito** is a library for creating **mocks** — fake versions of your dependencies that you control. In unit tests, you don't want to use a real database (too slow, too complex). Instead, you mock the repository and tell it what to return.
 

@@ -3,7 +3,7 @@ title: "Module 09: TDD Walkthrough"
 description: "TDD Walkthrough"
 ---
 
-## 8. TDD Walkthrough: Building OrderCalculator
+## 1. TDD Walkthrough: Building OrderCalculator
 
 Let's follow TDD to build an `OrderCalculator` — a class that calculates order totals.
 
@@ -158,7 +158,7 @@ public BigDecimal calculateTotal(BigDecimal unitPrice, int quantity) {
 
 ---
 
-## 9. TDD Walkthrough: Building OrderService
+## 2. TDD Walkthrough: Building OrderService
 
 Now let's build a piece of `OrderService` using TDD, with mocked repositories.
 

@@ -3,7 +3,7 @@ title: "Module 01: Application Configuration"
 description: "Application Configuration"
 ---
 
-## 8. application.yml
+## 1. application.yml
 
 Spring Boot reads its configuration from a file in `src/main/resources/`. You can use either `.properties` or `.yml` format. We use **YAML** because it's more readable and supports nested properties.
 
@@ -12,13 +12,92 @@ Spring Boot reads its configuration from a file in `src/main/resources/`. You ca
 Delete the auto-generated `application.properties` file and create `application.yml`:
 
 ```yaml
+# Server configuration
+server:
+  port: 8080
 
-##  # DevTools: enables hot reload
+# Spring configuration
+spring:
+  # Application name — shown in logs and actuator
+  application:
+    name: Order Management System
+
+  # Database configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ordermgmt
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # JPA / Hibernate configuration
+  jpa:
+    # Show SQL in the console (helpful during development)
+    show-sql: true
+
+    # Format SQL nicely in the console
+    properties:
+      hibernate:
+        format_sql: true
+
+    # What Hibernate should do with the database schema on startup
+    # update: create tables that don't exist and modify existing ones
+    # none: do nothing (use in production with Flyway or Liquibase)
+    hibernate:
+      ddl-auto: update
+
+  # GraphQL configuration (Module 07)
+  graphql:
+    graphiql:
+      enabled: true              # Enable GraphiQL IDE at /graphiql
+      path: /graphiql
+
+  # Kafka configuration (Module 06)
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: ordermgmt-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "com.example.ordermgmt.kafka.event"
+
+  # DevTools: enables hot reload
   devtools:
     restart:
       enabled: true
 
-## 10. Spring Boot DevTools
+# Logging configuration
+logging:
+  level:
+    com.example.ordermgmt: DEBUG    # Debug-level logging for our code
+    org.hibernate.SQL: DEBUG        # Show SQL queries
+```
+
+### YAML vs Properties
+
+The same configuration in `.properties` format looks like this:
+
+```properties
+server.port=8080
+spring.application.name=Order Management System
+spring.datasource.url=jdbc:postgresql://localhost:5432/ordermgmt
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=update
+```
+
+YAML is more readable and supports nesting, so we use it throughout the course.
+
+---
+
+## 2. Spring Boot DevTools
 
 **Spring Boot DevTools** is a development-time tool that makes coding faster:
 
@@ -53,7 +132,7 @@ Now, every time you save a file (`Cmd+S` / `Ctrl+S`), the application restarts w
 
 ---
 
-## 11. Spring Profiles
+## 3. Spring Profiles
 
 **Profiles** let you have different configuration for different environments (development, testing, production). For example:
 - **Dev:** use a local PostgreSQL, enable SQL logging, enable DevTools
@@ -165,7 +244,7 @@ The `${DATABASE_PASSWORD}` syntax reads the value from the environment variable 
 
 ---
 
-## 15. Spring Boot Profiles in Practice
+## 4. Spring Boot Profiles in Practice
 
 Profiles let you have different configuration for different environments
 (development, staging, production).
@@ -226,8 +305,14 @@ logging:
 ### Activating Profiles
 
 ```bash
+# Command line
+java -jar app.jar --spring.profiles.active=dev
 
-## In application.yml
+# Environment variable
+export SPRING_PROFILES_ACTIVE=prod
+java -jar app.jar
+
+# In application.yml
 spring:
   profiles:
     active: dev

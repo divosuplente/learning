@@ -3,7 +3,7 @@ title: "Module 10: Reactive Stream"
 description: "Reactive Stream"
 ---
 
-## 17. Reactive Order Status Stream
+## 1. Reactive Order Status Stream
 
 This component exposes order status changes as a reactive `Flux` that clients can
 subscribe to via GraphQL subscriptions or SSE endpoints. The `Sinks.Many` is a

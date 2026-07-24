@@ -3,7 +3,7 @@ title: "Module 09: Integration Testing"
 description: "Integration Testing"
 ---
 
-## 12. Testing Kafka Consumers
+## 1. Testing Kafka Consumers
 
 Spring Boot provides `@EmbeddedKafka` for testing Kafka without a Docker container:
 
@@ -74,7 +74,7 @@ class OrderEventConsumerTest {
 
 ---
 
-## 13. Testing Reactive Streams with StepVerifier
+## 2. Testing Reactive Streams with StepVerifier
 
 For testing Mono and Flux (from Module 08), use **StepVerifier** from the `reactor-test` library:
 

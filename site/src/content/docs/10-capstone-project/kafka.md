@@ -3,7 +3,7 @@ title: "Module 10: Kafka Integration"
 description: "Kafka Integration"
 ---
 
-## 9. Kafka Event Records
+## 1. Kafka Event Records
 
 Events are Java records — immutable message payloads.
 
@@ -53,7 +53,7 @@ public record OrderStatusChangedEvent(
 
 ---
 
-## 10. Kafka Producer
+## 2. Kafka Producer
 
 ```java
 package com.example.ordermgmt.kafka;
@@ -120,7 +120,7 @@ public class OrderEventProducer {
 
 ---
 
-## 11. Kafka Consumer
+## 3. Kafka Consumer
 
 ```java
 package com.example.ordermgmt.kafka;

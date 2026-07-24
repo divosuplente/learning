@@ -3,7 +3,7 @@ title: "Module 10: REST Controller"
 description: "REST Controller"
 ---
 
-## 13. REST Controller
+## 1. REST Controller
 
 ```java
 package com.example.ordermgmt.controller;
@@ -69,7 +69,7 @@ public class OrderController {
 
 ---
 
-## 14. Global Exception Handler
+## 2. Global Exception Handler
 
 ```java
 package com.example.ordermgmt.controller;

@@ -3,7 +3,7 @@ title: "Module 10: Testing"
 description: "Testing"
 ---
 
-## 18. Test Suite Overview
+## 1. Test Suite Overview
 
 | Test Class | Purpose |
 |------------|---------|
@@ -18,7 +18,7 @@ All tests live under `src/test/java/com/example/ordermgmt/` and run with
 
 ---
 
-## 19. Unit Test: OrderService
+## 2. Unit Test: OrderService
 
 ```java
 package com.example.ordermgmt.service;
@@ -124,7 +124,7 @@ class OrderServiceTest {
 
 ---
 
-## 20. Controller Test (MockMvc)
+## 3. Controller Test (MockMvc)
 
 ```java
 package com.example.ordermgmt.controller;
@@ -212,7 +212,7 @@ class OrderControllerTest {
 
 ---
 
-## 21. Repository Test (Testcontainers)
+## 4. Repository Test (Testcontainers)
 
 ```java
 package com.example.ordermgmt.repository;
@@ -302,7 +302,7 @@ class OrderRepositoryTest {
 
 ---
 
-## 22. Reactive Stream Test (StepVerifier)
+## 5. Reactive Stream Test (StepVerifier)
 
 ```java
 package com.example.ordermgmt.kafka;

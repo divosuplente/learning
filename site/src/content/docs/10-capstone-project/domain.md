@@ -3,7 +3,7 @@ title: "Module 10: Domain Layer"
 description: "Domain Layer"
 ---
 
-## 6. Domain Layer — JPA Entities
+## 1. Domain Layer — JPA Entities
 
 All entities use **explicit getters and setters** (no Lombok). JPA entities cannot
 be Java records because JPA requires a no-arg constructor and mutable fields.
@@ -179,7 +179,7 @@ public class OrderItemEntity {
 
 ---
 
-## 7. DTOs — Java Records
+## 2. DTOs — Java Records
 
 DTOs are Java **records** — immutable, concise, and perfect for API payloads.
 

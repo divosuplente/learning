@@ -3,7 +3,7 @@ title: "Module 10: Repository Layer"
 description: "Repository Layer"
 ---
 
-## 8. Repository Layer
+## 1. Repository Layer
 
 ```java
 package com.example.ordermgmt.repository;
