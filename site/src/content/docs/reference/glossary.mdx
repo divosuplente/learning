@@ -1,0 +1,88 @@
+---
+title: Glossary
+description: Key backend engineering terms and their definitions.
+---
+
+import Quiz from '../../components/Quiz.jsx';
+
+Opinionated definitions for this course. When several words exist for the same concept, we use one and list the rest as aliases.
+
+## Spring Core
+
+**Bean**
+: A Java object whose lifecycle is managed by the Spring IoC container. Created from classes annotated with `@Component`, `@Service`, `@Repository`, or declared via `@Bean`.
+
+**IoC Container**
+: The Spring runtime that instantiates, configures, and wires beans together. Short for Inversion of Control — the container controls object creation, not the objects themselves.
+
+**Dependency Injection (DI)**
+: A pattern where objects receive their collaborators from an external container rather than creating them directly. _Avoid: "passing dependencies", "wiring"_
+
+**Autowiring**
+: Spring's mechanism for automatically resolving bean dependencies by type, name, or qualifier. _Avoid: "auto-injection"_
+
+**Application Context**
+: The Spring IoC container instance for a Spring Boot application. Provides bean lookup, event propagation, and resource loading.
+
+## Data & Persistence
+
+**JPA (Java Persistence API)**
+: The standard Java specification for object-relational mapping. Spring Data JPA implements it. _Avoid: "Hibernate" (that's one implementation)_
+
+**Repository**
+: A Spring Data abstraction over data access. Extend `JpaRepository<T, ID>` to get CRUD + query methods with no implementation code.
+
+**Entity**
+: A JPA-annotated Java class mapped to a database table. Must have `@Entity` and `@Id`.
+
+**Transaction**
+: A unit of work that succeeds or fails atomically. Mark with `@Transactional`.
+
+## Messaging
+
+**Topic**
+: A named log in Kafka that stores messages in append-only order. Split into partitions for parallelism.
+
+**Partition**
+: An ordered, immutable sequence of messages within a topic. The unit of parallelism and ordering guarantee in Kafka.
+
+**Consumer Group**
+: A set of consumers that cooperatively read a topic — each partition is assigned to exactly one consumer in the group.
+
+**Offset**
+: The sequential position of a message within a partition. Consumers track their position by committing offsets.
+
+## Testing
+
+**Unit Test**
+: A test that verifies one small piece of logic in isolation, with dependencies replaced by test doubles. _Avoid: "micro test"_
+
+**Integration Test**
+: A test that verifies multiple components working together, often with a real or embedded database/message broker.
+
+**Test Double**
+: A stand-in for a real dependency in a test. Includes mocks, stubs, spies, and fakes. _Avoid: using "mock" as a catch-all_
+
+**Mock**
+: A test double that verifies interactions (was this method called?). Use Mockito. _Avoid: using "mock" for any test double_
+
+## Reactive
+
+**Mono**
+: A reactive type that emits 0 or 1 item. From Project Reactor. _Avoid: "single observable"_
+
+**Flux**
+: A reactive type that emits 0 to N items. From Project Reactor. _Avoid: "stream observable"_
+
+**Backpressure**
+: A mechanism for consumers to signal producers they are overwhelmed, controlling the data flow rate.
+
+---
+
+## Test Yourself
+
+<Quiz question="What manages bean lifecycles in Spring?" options={["IoC container", "JVM classloader", "Maven surefire"]} correctIndex={0} />
+
+<Quiz question="A JPA-annotated class mapped to a database table is called what?" options={["An entity", "A record", "A transfer"]} correctIndex={0} />
+
+<Quiz question="What reactive type emits 0 to N items?" options={["Flux", "Mono", "Stream"]} correctIndex={0} />
