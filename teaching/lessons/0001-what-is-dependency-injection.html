@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1 — What is Dependency Injection?</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>What is Dependency Injection?</h1>
+
+<p>Dependency Injection (DI) is a pattern where objects receive their
+collaborators from an external container rather than creating them directly.
+Instead of a service calling <code>new RepositoryImpl()</code>, the Spring IoC
+container wires the dependency at runtime.</p>
+
+<h2>Why it matters</h2>
+
+<p>DI decouples construction from usage. A class declares what it needs (via
+constructor parameters or <code>@Autowired</code>), and the container supplies
+it. This makes code testable (swap in mocks), modular (swap implementations),
+and explicit (dependencies are visible in the constructor).</p>
+
+<h2>The Spring IoC Container</h2>
+
+<p>Spring's <strong>Inversion of Control (IoC) container</strong> manages
+objects called <strong>beans</strong>. A bean is a Java object whose lifecycle
+is controlled by Spring. The container:</p>
+
+<ul>
+  <li>Creates beans from your <code>@Component</code>, <code>@Service</code>,
+      <code>@Repository</code> classes</li>
+  <li>Resolves their dependencies</li>
+  <li>Injects them where needed</li>
+</ul>
+
+<pre><code>@Service
+public class OrderService {
+    private final OrderRepository repo;
+
+    public OrderService(OrderRepository repo) {
+        this.repo = repo; // Spring injects this
+    }
+}</code></pre>
+
+<p><strong>Constructor injection</strong> is the recommended form — it makes
+the dependency immutable and required. Field injection (<code>@Autowired</code>
+on a field) exists but is discouraged because it hides dependencies and makes
+testing harder.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What does DI stand for in the Spring context?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-correct="true">Dependency Injection</li>
+    <li class="quiz-option">Direct Invocation</li>
+    <li class="quiz-option">Data Instance</li>
+  </ul>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. Which injection style does Spring recommend?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-correct="true">Constructor injection</li>
+    <li class="quiz-option">Field injection</li>
+    <li class="quiz-option">Setter injection</li>
+  </ul>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. What manages bean lifecycles in Spring?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-correct="true">IoC container</li>
+    <li class="quiz-option">JVM classloader</li>
+    <li class="quiz-option">Maven surefire</li>
+  </ul>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="lesson-footer">
+  <p><strong>Primary source:</strong> <a href="https://docs.spring.io/spring-framework/reference/core/beans.html" target="_blank">Spring IoC Container Reference</a></p>
+  <p><strong>Course material:</strong> <a href="../../site/src/content/docs/02-dependency-injection.md">Module 02 — Dependency Injection</a></p>
+  <p>Questions? Ask the teaching agent — it can explain anything unclear.</p>
+</div>
+
+<script>
+document.querySelectorAll('.quiz').forEach(quiz => {
+  const options = quiz.querySelectorAll('.quiz-option');
+  const feedback = quiz.querySelector('.quiz-feedback');
+  let answered = false;
+
+  options.forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (answered) return;
+      answered = true;
+      const isCorrect = opt.dataset.correct === 'true';
+      opt.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        options.forEach(o => {
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+        });
+      }
+      feedback.textContent = isCorrect ? '✓ Correct!' : '✗ Not quite — see the correct answer highlighted.';
+      feedback.style.color = isCorrect ? 'var(--correct)' : 'var(--wrong)';
+    });
+  });
+});
+</script>
+
+</body>
+</html>

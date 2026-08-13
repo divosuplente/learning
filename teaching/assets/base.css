@@ -1,0 +1,107 @@
+/* teaching/assets/base.css — Shared stylesheet for all lessons */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f172a;
+  --bg-surface: #1e293b;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent: #818cf8;
+  --accent-low: #4f46e5;
+  --accent-high: #a5b4fc;
+  --border: #334155;
+  --correct: #22c55e;
+  --wrong: #ef4444;
+  --font-body: 'Georgia', 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  line-height: 1.75;
+  color: var(--text);
+  background: var(--bg);
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+h1, h2, h3 { font-family: var(--font-body); color: var(--accent-high); }
+h1 { font-size: 1.75rem; margin-bottom: 1rem; }
+h2 { font-size: 1.35rem; margin-top: 2rem; margin-bottom: 0.75rem; }
+h3 { font-size: 1.15rem; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+
+p { margin-bottom: 1rem; }
+
+a { color: var(--accent); text-decoration: underline; }
+a:hover { color: var(--accent-high); }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--border);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+pre {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+pre code { background: none; padding: 0; }
+
+blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 1rem 0 1rem 1rem;
+  padding: 0.5rem 1rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.25rem; }
+
+/* Quiz styling */
+.quiz { margin: 1.5rem 0; }
+.quiz-question { font-weight: 600; margin-bottom: 0.75rem; }
+.quiz-options { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.quiz-option {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
+.quiz-option:hover { border-color: var(--accent); }
+.quiz-option.selected { border-color: var(--accent); background: var(--accent-low); }
+.quiz-option.correct { border-color: var(--correct); background: rgba(34, 197, 94, 0.15); }
+.quiz-option.wrong { border-color: var(--wrong); background: rgba(239, 68, 68, 0.15); }
+.quiz-feedback { margin-top: 0.75rem; font-weight: 600; }
+
+/* Lesson footer */
+.lesson-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Print */
+@media print {
+  body { background: white; color: black; max-width: 100%; }
+  a { color: #333; }
+  pre { border: 1px solid #ccc; }
+}
