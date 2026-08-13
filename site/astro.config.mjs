@@ -71,6 +71,16 @@ export default defineConfig({
           ],
         },
         { label: '11 — Migrating Java to Kotlin', slug: '11-migrating-java-to-kotlin' },
+        {
+          label: 'Reference',
+          items: [
+            { label: 'Overview', slug: 'reference' },
+            { label: 'Spring Annotations', slug: 'reference/spring-annotations' },
+            { label: 'Maven Cheatsheet', slug: 'reference/maven-cheatsheet' },
+            { label: 'Kafka API', slug: 'reference/kafka-api' },
+            { label: 'Glossary', slug: 'reference/glossary' },
+          ],
+        },
       ],
       customCss: ['./src/custom.css'],
     }),
