@@ -1,0 +1,39 @@
+---
+const { question, options, correctIndex } = Astro.props;
+---
+
+<div class="quiz" data-correct={correctIndex}>
+  <div class="quiz-question">{question}</div>
+  <ul class="quiz-options">
+    {options.map((option, index) => (
+      <li class="quiz-option" data-index={index}>{option}</li>
+    ))}
+  </ul>
+  <div class="quiz-feedback"></div>
+</div>
+
+<script>
+  document.querySelectorAll('.quiz').forEach((quiz) => {
+    const options = quiz.querySelectorAll('.quiz-option');
+    const feedback = quiz.querySelector('.quiz-feedback');
+    const correctIndex = parseInt(quiz.dataset.correct || '0', 10);
+    let answered = false;
+
+    options.forEach((opt) => {
+      opt.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        const index = parseInt((opt as HTMLElement).dataset.index || '0', 10);
+        const isCorrect = index === correctIndex;
+        opt.classList.add(isCorrect ? 'correct' : 'wrong');
+        if (!isCorrect) {
+          options[correctIndex].classList.add('correct');
+        }
+        feedback.textContent = isCorrect
+          ? '✓ Correct!'
+          : '✗ Not quite — correct answer highlighted.';
+        feedback.style.color = isCorrect ? '#22c55e' : '#ef4444';
+      });
+    });
+  });
+</script>
