@@ -99,6 +99,35 @@ li { margin-bottom: 0.25rem; }
   color: var(--text-muted);
 }
 
+/* Lesson navigation */
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+.nav-prev, .nav-next {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.nav-prev:hover, .nav-next:hover {
+  background: var(--bg-surface);
+  border-color: var(--accent);
+}
+.nav-disabled {
+  color: var(--text-muted);
+  border-color: var(--border);
+  pointer-events: none;
+  opacity: 0.4;
+}
+
 /* Print */
 @media print {
   body { background: white; color: black; max-width: 100%; }

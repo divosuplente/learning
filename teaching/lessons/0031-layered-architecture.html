@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 31 — Layered Architecture</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Layered Architecture</h1>
+
+<p>Inside every well-structured Spring Boot application, code is organized into <strong>layers</strong> — each with one job, each talking only to the layer directly below it. This lesson introduces the four layers you'll see in almost every Spring project: Controller, Service, Repository, and Database.</p>
+
+<h2>The four layers</h2>
+
+<pre><code>┌──────────────────────────────────────────────┐
+│               Client (Browser, Mobile)        │
+└──────────────────┬───────────────────────────┘
+                   │ HTTP
+┌──────────────────▼───────────────────────────┐
+│            Controller Layer                   │
+│  Receives HTTP requests, validates input,     │
+│  returns HTTP responses                       │
+│  Does NOT contain business logic              │
+└──────────────────┬───────────────────────────┘
+                   │ calls
+┌──────────────────▼───────────────────────────┐
+│              Service Layer                    │
+│  Contains business logic, orchestrates        │
+│  repository calls, enforces rules             │
+│  This is the "brain" of the application       │
+└──────────────────┬───────────────────────────┘
+                   │ calls
+┌──────────────────▼───────────────────────────┐
+│            Repository Layer                   │
+│  Talks to the database, executes queries      │
+│  No business logic, just data access          │
+└──────────────────┬───────────────────────────┘
+                   │ SQL
+┌──────────────────▼───────────────────────────┐
+│              Database                         │
+│  PostgreSQL — stores your data                │
+└──────────────────────────────────────────────┘</code></pre>
+
+<p>Each layer has a single, well-defined responsibility:</p>
+
+<table>
+  <tr><th>Layer</th><th>Responsibility</th><th>Spring annotation</th></tr>
+  <tr><td>Controller</td><td>Accept HTTP requests, return HTTP responses</td><td><code>@RestController</code></td></tr>
+  <tr><td>Service</td><td>Business logic and orchestration</td><td><code>@Service</code></td></tr>
+  <tr><td>Repository</td><td>Data access (queries, saves, deletes)</td><td><code>@Repository</code> / extends <code>JpaRepository</code></td></tr>
+  <tr><td>Database</td><td>Persistent storage</td><td>—</td></tr>
+</table>
+
+<h2>The golden rule</h2>
+
+<p><strong>Each layer may only talk to the layer directly below it.</strong></p>
+
+<ul>
+  <li>Controllers call Services. Controllers do <strong>not</strong> call Repositories directly.</li>
+  <li>Services call Repositories. Services do <strong>not</strong> return HTTP responses.</li>
+  <li>Repositories talk to the Database. Repositories do <strong>not</strong> contain business logic.</li>
+</ul>
+
+<p>This is not an arbitrary rule. It keeps responsibilities clean and makes the code easy to test, reason about, and change.</p>
+
+<h2>Why not skip layers?</h2>
+
+<p>You might think: <em>"The controller just needs to list orders — why not call the repository directly?"</em></p>
+
+<p>Because someday you'll need to add logic between the request and the database:</p>
+
+<ul>
+  <li>Check if the user is authorized to see these orders</li>
+  <li>Filter out cancelled orders</li>
+  <li>Cache the results</li>
+  <li>Send a notification when an order is viewed</li>
+</ul>
+
+<p>If the controller calls the repository directly, all that logic ends up in the controller. The controller becomes a 500-line mess. The service layer exists to keep the controller thin.</p>
+
+<p>The same argument works in the other direction: if the repository contained business logic, you couldn't reuse it from a different service or a scheduled task without duplicating that logic.</p>
+
+<h2>A full request flow</h2>
+
+<p>Here is what happens when a client requests <code>GET /api/orders/42</code>:</p>
+
+<pre><code>1.  Client sends GET /api/orders/42
+2.  Controller receives the request
+      @GetMapping("/orders/{id}")
+      public ResponseEntity&lt;OrderResponse&gt; getOrder(@PathVariable Long id) {
+          return ResponseEntity.ok(orderService.getOrderById(id));
+      }
+3.  Service executes business logic
+      @Transactional(readOnly = true)
+      public OrderResponse getOrderById(Long id) {
+          OrderEntity order = orderRepository.findById(id)
+              .orElseThrow(() -&gt; new OrderNotFoundException(id));
+          return OrderResponse.from(order);
+      }
+4.  Repository queries the database
+      findById(42) → SELECT * FROM orders WHERE id = 42
+5.  Database returns the row
+6.  Repository returns the entity to the service
+7.  Service converts entity → DTO and returns to controller
+8.  Controller wraps in ResponseEntity and sends HTTP 200 back</code></pre>
+
+<p>Notice what each layer does <em>not</em> do: the controller never touches the database, the repository never checks business rules, and the service never knows about HTTP.</p>
+
+<h2>What happens when you break the rule</h2>
+
+<p>A controller calling a repository directly <em>works</em> — the code compiles and runs. But it creates two real problems:</p>
+
+<p><strong>1. Logic leaks into the wrong place.</strong> Authorization checks, data transformation, and validation all merge into the controller. Now the controller depends on HTTP details <em>and</em> database details.</p>
+
+<p><strong>2. Duplication.</strong> When a second entry point (a scheduled job, a message listener) needs the same data, you must duplicate the logic that was baked into the controller — or refactor the controller into a service anyway.</p>
+
+<pre><code>// Bad: controller bypasses the service layer
+@RestController
+public class OrderController {
+    private final OrderRepository repo;   // ← wrong dependency
+    @GetMapping("/orders/{id}")
+    public OrderResponse get(@PathVariable Long id) {
+        return repo.findById(id)           // ← no authorization check
+            .map(OrderResponse::from)
+            .orElseThrow(() -&gt; new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+}
+
+// Good: controller delegates to the service layer
+@RestController
+public class OrderController {
+    private final OrderService service;    // ← correct dependency
+    @GetMapping("/orders/{id}")
+    public ResponseEntity&lt;OrderResponse&gt; get(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getOrderById(id));
+    }
+}</code></pre>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-framework/reference/core/beans/annotation-config.html" target="_blank" rel="noopener">Spring: Stereotype Annotations</a> · <a href="https://docs.spring.io/spring-boot/reference/web.html" target="_blank" rel="noopener">Spring Boot: Web</a> · <a href="https://martinfowler.com/bliki/PresentationDomainDataLayering.html" target="_blank" rel="noopener">Martin Fowler: Presentation-Domain-Data Layering</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. In a properly layered Spring Boot application, which layer contains business logic?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Controller layer</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Service layer</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Repository layer</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Database layer</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. A controller needs to fetch a list of orders. Can it call the repository directly?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes, because the code compiles and runs fine</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes, if the service layer has no extra logic yet</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">No — the golden rule says controllers call services, not repositories</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only if the method is annotated with @Transactional</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. A service method calls another service method instead of the repository. Does this violate the golden rule?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Yes — services must only call repositories</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">No — services can call other services for orchestration</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only if both services share the same repository</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only if the called service is in a different package</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Why is skipping the service layer problematic even if the controller just does a simple lookup?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The code will not compile without a service bean</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Spring Boot requires a service between controller and repository</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Future requirements like authorization or caching will leak into the controller</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The repository cannot be injected into a controller class</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Which statement about the layers is true?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Repositories return HTTP responses so the controller can forward them</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Services should construct and return ResponseEntity objects</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Repositories return entities; services convert them to DTOs; controllers wrap them in HTTP responses</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Each layer must depend on all other layers for flexibility</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0030-architecture-patterns.html" class="nav-prev">← Prev</a>
+  <a href="0032-service-layer.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 9 — Enums, Sealed Types &amp; Packages</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Enums, Sealed Types &amp; Packages</h1>
+
+<p>Real domains have <strong>fixed sets of variants</strong> — shipping methods, order statuses, payment types. Java enums make these type-safe at compile time, sealed types let you guarantee <em>no other variant exists</em>, and packages organize who can see what. Together they close the gap between your domain model and the type system.</p>
+
+<h2>Enums — type-safe constants with behavior</h2>
+
+<p>Each enum constant is a singleton instance. Enums can carry fields, implement interfaces, and override methods per constant:</p>
+
+<pre><code>public enum ShippingMethod {
+    STANDARD {
+        @Override
+        public BigDecimal cost(BigDecimal weight) {
+            return weight.multiply(new BigDecimal("5.00"));
+        }
+    },
+    EXPRESS {
+        @Override
+        public BigDecimal cost(BigDecimal weight) {
+            return new BigDecimal("15.00")
+                .add(weight.multiply(new BigDecimal("2.50")));
+        }
+    },
+    SAME_DAY {
+        @Override
+        public BigDecimal cost(BigDecimal weight) {
+            return new BigDecimal("50.00");
+        }
+    };
+
+    public abstract BigDecimal cost(BigDecimal weight);
+}
+</code></pre>
+
+<p>Because <code>cost</code> is <code>abstract</code>, every constant <strong>must</strong> implement it. Callers just write <code>method.cost(weight)</code> — no <code>if</code> chain, no missing case.</p>
+
+<p>Enums can also carry shared fields and constructors:</p>
+
+<pre><code>public enum OrderStatus {
+    PENDING("Waiting for confirmation"),
+    CONFIRMED("Payment received"),
+    SHIPPED("In transit"),
+    DELIVERED("Delivered to customer");
+
+    private final String description;
+
+    OrderStatus(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() { return description; }
+}
+</code></pre>
+
+<h2>Sealed interfaces — controlling the type hierarchy</h2>
+
+<p>A <code>sealed</code> type declares <em>exactly</em> which classes can implement or extend it. No one else can add a subtype:</p>
+
+<pre><code>public sealed interface Shape
+    permits Circle, Rectangle, Triangle {}
+
+public record Circle(double radius) implements Shape {}
+public record Rectangle(double width, double height) implements Shape {}
+public record Triangle(double base, double height) implements Shape {}
+</code></pre>
+
+<p>The compiler enforces three rules:</p>
+<ul>
+  <li>Every permitted subtype must be in the <strong>same package</strong> (or same compilation unit).</li>
+  <li>Each subtype must be <code>final</code>, <code>sealed</code>, or <code>non-sealed</code> — you must choose.</li>
+  <li><code>non-sealed</code> re-opens the hierarchy; anyone can extend that subtype.</li>
+</ul>
+
+<p>Sealed types unlock <strong>exhaustive pattern matching</strong>. When you switch over a sealed type and cover every permitted subtype, no <code>default</code> is needed — the compiler checks completeness.</p>
+
+<h2>Package organization — one-way dependency flow</h2>
+
+<p>Packages are namespaces. A clean structure makes dependencies flow one way:</p>
+
+<pre><code>com.example.ordermgmt
+├── domain/         # Records, enums, value objects
+├── repository/     # Data access interfaces
+├── service/        # Business logic
+├── controller/     # HTTP endpoints
+├── dto/            # Request/response objects
+└── config/         # Configuration classes
+</code></pre>
+
+<p>The rule: <code>controller → service → repository → domain</code>. No layer depends on a layer above it. The <code>domain</code> package has zero dependencies on other layers — it defines the core types that everything else builds on.</p>
+
+<h2>Visibility modifiers — who can see what</h2>
+
+<p>Java has four visibility levels. Use the most restrictive one that works:</p>
+
+<table>
+  <thead>
+    <tr><th>Modifier</th><th>Same class</th><th>Same package</th><th>Subclass</th><th>Anywhere</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>public</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td><code>protected</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+    <tr><td><em>package-private</em></td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
+    <tr><td><code>private</code></td><td>Yes</td><td>No</td><td>No</td><td>No</td></tr>
+  </tbody>
+</table>
+
+<ul>
+  <li><strong><code>private</code></strong> — fields and internal helpers. The default for most things.</li>
+  <li><strong>Package-private</strong> — classes only used within the same package. The implicit default when you write nothing.</li>
+  <li><strong><code>protected</code></strong> — for methods a subclass must override but outsiders shouldn't call.</li>
+  <li><strong><code>public</code></strong> — API surface: domain records, service interfaces, controller endpoints.</li>
+</ul>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.oracle.com/javase/21/docs/api/java.base/java/lang/Enum.html" target="_blank" rel="noopener">Oracle: Enum</a> · <a href="https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.1.2" target="_blank" rel="noopener">Oracle: Sealed Classes (JLS)</a> · <a href="https://docs.oracle.com/javase/tutorial/java/package/index.html" target="_blank" rel="noopener">Oracle: Packages</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. In the <code>ShippingMethod</code> enum, what happens if you add a new constant but forget to implement <code>cost</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It returns <code>null</code> at runtime</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It inherits the first constant's implementation</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">It fails to compile — abstract method unimplemented</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It throws <code>AbstractMethodError</code> at runtime</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. A sealed interface <code>permits A, B</code>. Class <code>C</code> in the same package tries <code>implements</code> on it. What happens?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It compiles if <code>C</code> is marked <code>final</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">It fails to compile — not in the permits list</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It compiles with a compiler warning only</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It compiles if <code>C</code> is marked <code>non-sealed</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. A method with no visibility modifier is accessible from:</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only the declaring class itself</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Any class in the same package</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Subclasses in any package</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Any class anywhere on the module path</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. In the layered package structure, which dependency violates the one-way rule?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Service layer importing domain types</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Domain layer importing service types</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Controller layer importing service types</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Repository layer importing domain types</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. A <code>switch</code> expression over a sealed interface <code>Payment permits Cash, Card</code> covers both cases. What happens if you add a <code>default</code> branch anyway?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The compiler rejects it — default is forbidden</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">It compiles — default is allowed but unreachable</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It crashes at runtime with an ambiguity error</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The compiler removes the default automatically</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0008-oop-fundamentals.html" class="nav-prev">← Prev</a>
+  <a href="#" class="nav-disabled">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

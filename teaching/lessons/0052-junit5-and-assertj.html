@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 52 — JUnit 5 &amp; AssertJ for Readable Assertions</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>JUnit 5 &amp; AssertJ for Readable Assertions</h1>
+
+<p>JUnit 5 is the standard testing framework for Java. AssertJ is the assertion library that makes your test verifications read like sentences. Together they turn the "assert" step of Arrange-Act-Assert into code you can scan at a glance.</p>
+
+<h2>JUnit 5 Core Annotations</h2>
+
+<table>
+  <tr><th>Annotation</th><th>Purpose</th></tr>
+  <tr><td><code>@Test</code></td><td>Marks a method as a test</td></tr>
+  <tr><td><code>@DisplayName</code></td><td>Human-readable name in test reports</td></tr>
+  <tr><td><code>@BeforeEach</code></td><td>Runs before <em>each</em> test — use for setup</td></tr>
+  <tr><td><code>@AfterEach</code></td><td>Runs after each test — use for cleanup</td></tr>
+  <tr><td><code>@BeforeAll</code></td><td>Runs once before all tests — must be <code>static</code></td></tr>
+  <tr><td><code>@AfterAll</code></td><td>Runs once after all tests — must be <code>static</code></td></tr>
+  <tr><td><code>@ParameterizedTest</code></td><td>Runs the same test with different inputs</td></tr>
+  <tr><td><code>@Nested</code></td><td>Groups related tests in an inner class</td></tr>
+  <tr><td><code>@Disabled</code></td><td>Skips a test</td></tr>
+</table>
+
+<h2>A Simple Test Class</h2>
+
+<pre><code>class OrderCalculatorTest {
+
+    private OrderCalculator calculator;
+
+    @BeforeEach
+    void setUp() {
+        calculator = new OrderCalculator();
+    }
+
+    @Test
+    @DisplayName("Should calculate total for a single item")
+    void shouldCalculateTotalForSingleItem() {
+        BigDecimal unitPrice = new BigDecimal("49.99");
+        int quantity = 3;
+
+        BigDecimal total = calculator.calculateTotal(unitPrice, quantity);
+
+        assertThat(total).isEqualByComparingTo("149.97");
+    }
+
+    @Test
+    @DisplayName("Should return zero when quantity is zero")
+    void shouldReturnZeroWhenQuantityIsZero() {
+        BigDecimal total = calculator.calculateTotal(
+            new BigDecimal("99.99"), 0);
+
+        assertThat(total).isEqualByComparingTo("0.00");
+    }
+}</code></pre>
+
+<p>Every test follows <strong>Arrange-Act-Assert</strong>: set up data, call the method under test, verify the result. The "act" line — where you call the production method — is always visible and unambiguous.</p>
+
+<h2>Parameterized Tests</h2>
+
+<p>When the same logic needs checking across several inputs, <code>@ParameterizedTest</code> with <code>@CsvSource</code> replaces N near-identical test methods with one:</p>
+
+<pre><code>@ParameterizedTest
+@CsvSource({
+    "49.99, 3, 149.97",
+    "10.00, 5, 50.00",
+    "0.01, 100, 1.00",
+    "99.99, 0, 0.00"
+})
+void shouldCalculateTotalCorrectly(
+        String unitPrice, int quantity, String expected) {
+    BigDecimal price = new BigDecimal(unitPrice);
+
+    BigDecimal total = calculator.calculateTotal(price, quantity);
+
+    assertThat(total).isEqualByComparingTo(expected);
+}</code></pre>
+
+<p>Each row in <code>@CsvSource</code> is one test execution. If the third row fails, the other three still pass — you get a precise signal about which input broke the logic.</p>
+
+<h2>Grouping with <code>@Nested</code></h2>
+
+<p><code>@Nested</code> lets you organize tests by the method or behavior they cover. Inner classes share the outer class's state and <code>@BeforeEach</code> setup:</p>
+
+<pre><code>@DisplayName("OrderCalculator")
+class OrderCalculatorTest {
+
+    private OrderCalculator calculator;
+
+    @BeforeEach
+    void setUp() {
+        calculator = new OrderCalculator();
+    }
+
+    @Nested
+    @DisplayName("calculateTotal")
+    class CalculateTotal {
+
+        @Test
+        void shouldMultiplyPriceByQuantity() { ... }
+
+        @Test
+        void shouldReturnZeroWhenQuantityIsZero() { ... }
+    }
+
+    @Nested
+    @DisplayName("calculateGrandTotal")
+    class CalculateGrandTotal {
+
+        @Test
+        void shouldSumAllItemTotals() { ... }
+    }
+}</code></pre>
+
+<p>The test runner displays a tree:</p>
+
+<pre><code>OrderCalculator
+  > calculateTotal
+    > shouldMultiplyPriceByQuantity
+    > shouldReturnZeroWhenQuantityIsZero
+  > calculateGrandTotal
+    > shouldSumAllItemTotals</code></pre>
+
+<p><strong>Key detail:</strong> <code>@BeforeAll</code> and <code>@AfterAll</code> inside a <code>@Nested</code> class <em>cannot</em> be <code>static</code> — they must be instance methods — because nested inner classes cannot have static members. In the outer class, they remain <code>static</code> as usual.</p>
+
+<h2>AssertJ — Fluent Assertions</h2>
+
+<p>JUnit ships with <code>assertEquals</code>, <code>assertTrue</code>, <code>assertNotNull</code>, and friends. AssertJ replaces all of them with a single <code>assertThat</code> entry point that chains fluently:</p>
+
+<table>
+  <tr><th>JUnit built-in</th><th>AssertJ fluent</th></tr>
+  <tr><td><code>assertEquals(expected, actual)</code></td><td><code>assertThat(actual).isEqualTo(expected)</code></td></tr>
+  <tr><td><code>assertTrue(list.size() > 0)</code></td><td><code>assertThat(list).isNotEmpty()</code></td></tr>
+  <tr><td><code>assertNotNull(customer)</code></td><td><code>assertThat(customer).isNotNull()</code></td></tr>
+  <tr><td><code>assertEquals(Status.PENDING, o.getStatus())</code></td><td><code>assertThat(o.getStatus()).isEqualTo(Status.PENDING)</code></td></tr>
+</table>
+
+<p>The AssertJ version reads left-to-right as a sentence: "assert that <em>actual</em> is equal to <em>expected</em>." When it fails, the error message tells you exactly what went wrong: <code>Expected size: 3 but was: 5</code> instead of a bare <code>AssertionError</code>.</p>
+
+<h2>Useful AssertJ Assertions</h2>
+
+<pre><code>// Strings
+assertThat(name).isNotBlank().startsWith("Alice");
+assertThat(email).contains("@");
+
+// Collections
+assertThat(orders).hasSize(3);
+assertThat(orders).extracting(OrderResponse::status)
+        .contains(Status.PENDING, Status.CONFIRMED);
+assertThat(orders).allSatisfy(order -> {
+    assertThat(order.getId()).isNotNull();
+    assertThat(order.getTotalAmount()).isPositive();
+});
+
+// Exceptions
+assertThatThrownBy(() -> orderService.confirmOrder(999L))
+        .isInstanceOf(OrderNotFoundException.class)
+        .hasMessageContaining("999");
+
+// BigDecimal — never use isEqualTo for decimals
+assertThat(total).isEqualByComparingTo("149.97");
+assertThat(total).isGreaterThan(new BigDecimal("100.00"));</code></pre>
+
+<p><strong>Common trap:</strong> <code>assertThat(new BigDecimal("1.0")).isEqualTo(new BigDecimal("1.00"))</code> fails — <code>isEqualTo</code> checks <code>.equals()</code>, which considers scale. Use <code>isEqualByComparingTo</code> for numeric comparison.</p>
+
+<h2>Writing Testable Code</h2>
+
+<p>Tests are only as good as the code they test. A class that is hard to test is telling you something: it has too many responsibilities, hidden dependencies, or tight coupling. Three rules keep code testable:</p>
+
+<ul>
+  <li><strong>Inject dependencies, don't create them.</strong> A service that <code>new</code>s its own <code>OrderRepository</code> cannot be tested with a fake. Accept it via constructor — the test supplies a mock or stub.</li>
+  <li><strong>Avoid static state and singletons.</strong> A static <code>Clock</code> or <code>Database.getInstance()</code> makes every test share mutable global state. Pass time as a parameter; inject the data source.</li>
+  <li><strong>Keep methods pure or explicitly side-effecting.</strong> A method that reads the database <em>and</em> writes a file <em>and</em> returns a result is three things to mock. Split the query from the command from the computation.</li>
+</ul>
+
+<pre><code>// Hard to test — hidden dependency
+class OrderService {
+    private final OrderRepository repo = new OrderRepository();
+
+    BigDecimal calculateTotal(Long orderId) {
+        Order order = repo.findById(orderId); // can't substitute
+        return order.getItems().stream()
+            .map(Item::getPrice)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+}
+
+// Testable — dependency injected
+class OrderService {
+    private final OrderRepository repo;
+
+    OrderService(OrderRepository repo) { this.repo = repo; }
+
+    BigDecimal calculateTotal(Long orderId) {
+        Order order = repo.findById(orderId); // test supplies mock
+        return order.getItems().stream()
+            .map(Item::getPrice)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+}</code></pre>
+
+<p>The production code is identical at runtime. The difference is that the testable version lets the test control the inputs — which is the entire point.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://junit.org/junit5/docs/current/user-guide/" target="_blank" rel="noopener">JUnit 5 User Guide</a> · <a href="https://assertj.github.io/doc/" target="_blank" rel="noopener">AssertJ Documentation</a> · <a href="https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests" target="_blank" rel="noopener">JUnit 5 Parameterized Tests</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. A <code>@Nested</code> inner class needs a <code>@BeforeAll</code> setup method. Which signature is correct?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>static void beforeAll()</code> — same rule as outer classes</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0"><code>void beforeAll()</code> — non-static, because inner classes cannot have static members</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>@BeforeAll</code> is not allowed inside <code>@Nested</code> classes at all</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>default void beforeAll()</code> — interface default method required</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. <code>assertThat(new BigDecimal("1.0")).isEqualTo(new BigDecimal("1.00"))</code> — does this pass or fail?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Fails — <code>isEqualTo</code> uses <code>.equals()</code>, and scale differs (1.0 &ne; 1.00)</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Passes — the numeric values are identical</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Fails — <code>isEqualTo</code> is not supported for BigDecimal</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Passes — AssertJ normalizes scale before comparing</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. <code>@BeforeEach</code> runs before every test. If a test class has one <code>@BeforeEach</code> in the outer class and another in a <code>@Nested</code> class, what happens when a test inside the nested class runs?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only the nested <code>@BeforeEach</code> runs</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only the outer <code>@BeforeEach</code> runs</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Both run — outer first, then nested</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The outer <code>@BeforeEach</code> runs only if the nested class lacks one</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Why is <code>assertThatThrownBy(() -> service.confirm(999L)).isInstanceOf(OrderNotFoundException.class)</code> preferable to <code>assertThrows(OrderNotFoundException.class, () -> service.confirm(999L))</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It is faster because it avoids reflection</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It catches checked exceptions that <code>assertThrows</code> cannot</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">It chains further assertions on the exception — <code>.hasMessageContaining("999")</code> — which <code>assertThrows</code> cannot do fluently</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">There is no difference; both are equivalent in every way</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. A service method calls <code>new OrderRepository()</code> internally instead of accepting it via constructor. What is the testability consequence?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">None — the test can still call the method and verify the result</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The test cannot substitute a mock or fake repository, so it must use the real database — making the test slow, fragile, and coupled to infrastructure</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The test can use reflection to replace the field — no real consequence</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The service is fine; repository creation is an implementation detail</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0051-tdd-red-green-refactor.html" class="nav-prev">← Prev</a>
+  <a href="0053-mockito-for-mocking.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

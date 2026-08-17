@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 60 — Kotlin Data Classes, Extension Functions &amp; DSLs</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Kotlin Data Classes, Extension Functions &amp; DSLs</h1>
+
+<p>Java records gave you compact carriers for data. Kotlin's <code>data class</code> goes further — it adds <code>copy()</code>, destructuring, and named arguments out of the box. But the real shift comes from <strong>extension functions</strong>, which let you add methods to classes you don't own, and <strong>DSL builders</strong>, which exploit Kotlin's syntax to create type-safe configuration languages. This lesson shows you how each works and when to reach for them in a Spring Boot project.</p>
+
+<h2>Data Classes vs Java Records</h2>
+
+<p>Both auto-generate <code>equals()</code>, <code>hashCode()</code>, <code>toString()</code>, and accessors. Kotlin's <code>data class</code> adds three things records lack.</p>
+
+<p><strong>Java (record):</strong></p>
+<pre><code>public record Customer(Long id, String name, String email) {}</code></pre>
+
+<p><strong>Kotlin (data class):</strong></p>
+<pre><code>data class Customer(
+    val id: Long,
+    val name: String,
+    val email: String
+)</code></pre>
+
+<h3>The three extras</h3>
+
+<ul>
+  <li><strong><code>copy()</code></strong> — create a modified clone without touching the original:<br>
+    <code>val updated = customer.copy(email = "new@mail.com")</code><br>
+    Only the named properties change; everything else carries over. Java records have no equivalent — you must construct a new instance and repeat every field.</li>
+  <li><strong><code>componentN()</code></strong> — destructuring declarations:<br>
+    <code>val (id, name, _) = customer</code><br>
+    The underscore discards a component. Each property gets a synthetic <code>component1()</code>, <code>component2()</code>, etc., which the compiler calls when you destructure.</li>
+  <li><strong>Named arguments</strong> — construct with names, not position:<br>
+    <code>Customer(id = 1, name = "Alice", email = "a@b.com")</code><br>
+    This works on <em>any</em> Kotlin function, not just data classes. Combined with default arguments, it eliminates the telescoping-constructor problem without builders.</li>
+</ul>
+
+<h3>When to use data class vs regular class</h3>
+
+<p>Use <code>data class</code> when the object's primary purpose is <strong>holding data</strong> — DTOs, request/response models, events. If the class has significant behavior or mutable state that shouldn't be part of <code>equals</code>/<code>hashCode</code>, use a regular <code>class</code>.</p>
+
+<div class="note">
+<p><strong>Watch out:</strong> Data classes are shallow. <code>equals()</code> and <code>hashCode()</code> use reference equality for mutable fields like <code>ArrayList</code>. Two data classes with identical list <em>contents</em> but different list <em>instances</em> will not be equal unless the list type itself implements structural equality.</p>
+</div>
+
+<h2>Properties — Auto-Generated Getters and Setters</h2>
+
+<p>In Java you write fields, getters, and setters explicitly. In Kotlin, <code>val</code> and <code>var</code> in the primary constructor <strong>are</strong> the properties — the compiler generates the accessors.</p>
+
+<pre><code>// Java
+public class Product {
+    private String name;
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+}
+
+// Kotlin — same thing, one line
+class Product(var name: String)</code></pre>
+
+<p><code>val</code> generates a getter only (immutable). <code>var</code> generates both getter and setter (mutable).</p>
+
+<h3>Custom getters and setters</h3>
+
+<p>You can override the auto-generated accessor inline, no wrapper method needed:</p>
+
+<pre><code>class Account(balance: Double) {
+    var balance: Double = balance
+        private set          // only readable from outside, not writable
+
+    var description: String = ""
+        get() = field.ifBlank { "No description" }  // computed getter with backing field
+
+    val isOverdrawn: Boolean
+        get() = balance < 0   // computed property, no backing field
+}</code></pre>
+
+<p>The <code>field</code> identifier is the <strong>backing field</strong> — it only exists inside custom accessors and refers to the actual storage. This prevents the infinite recursion you'd get in Java if a getter called itself.</p>
+
+<h2>Extension Functions</h2>
+
+<p>Extension functions add methods to an existing class <strong>without inheritance</strong>, <strong>without modifying the source</strong>, and <strong>without wrappers</strong>. They are resolved statically — the compiler rewrites them as top-level functions that take the receiver as the first argument.</p>
+
+<pre><code>// Add a method to String — no subclass needed
+fun String.isEmail(): Boolean =
+    this.contains("@") && this.contains(".")
+
+// Add a method to BigDecimal
+fun BigDecimal.toMoneyString(): String = "$${this.toPlainString()}"
+
+// Usage — looks like a native method
+val valid = "alice@example.com".isEmail()   // true
+val price = BigDecimal("19.99").toMoneyString()  // "$19.99"</code></pre>
+
+<h3>How it works under the hood</h3>
+
+<p>The compiler transforms <code>fun String.isEmail()</code> into a static function:</p>
+<pre><code>// Roughly what the compiler generates (JVM bytecode)
+fun isEmail(receiver: String): Boolean =
+    receiver.contains("@") && receiver.contains(".")</code></pre>
+
+<p>Call-site syntax <code>email.isEmail()</code> is syntactic sugar — the compiler passes <code>email</code> as the receiver. This means extensions are <strong>dispatched statically</strong>. If you call an extension on a variable typed as the base class, the base-class version runs, even if the runtime object is a subclass. This is the key difference from virtual method dispatch.</p>
+
+<h3>Practical Spring Boot extensions</h3>
+
+<pre><code>// Make logging less verbose
+fun Any.logger() = LoggerFactory.getLogger(this::class.java)
+
+// Convert DTOs fluently
+fun OrderEntity.toResponse() = OrderResponse(
+    id = id,
+    customerName = customer.name,
+    status = status,
+    totalAmount = totalAmount
+)
+
+// Usage in a service
+val log = this.logger()
+val responses = orders.map { it.toResponse() }</code></pre>
+
+<div class="note">
+<p><strong>Limitation:</strong> Extension functions cannot access private or protected members of the receiver. They see only the public API — same as code in any other file.</p>
+</div>
+
+<h2>Companion Objects — Kotlin's Static</h2>
+
+<p>Kotlin has no <code>static</code> keyword. Instead, a <code>companion object</code> is a singleton nested inside a class. Its members are accessible via the class name, just like Java statics.</p>
+
+<pre><code>data class OrderResponse(
+    val id: Long?,
+    val customerName: String,
+    val status: OrderStatus
+) {
+    companion object {
+        fun from(entity: OrderEntity): OrderResponse = OrderResponse(
+            id = entity.id,
+            customerName = entity.customer.name,
+            status = entity.status
+        )
+    }
+}
+
+// Call like a static method
+val response = OrderResponse.from(entity)</code></pre>
+
+<p>Why a full object instead of a keyword? Because a companion object can <strong>implement interfaces</strong> and <strong>be passed as a value</strong>:</p>
+
+<pre><code>class JsonFactory {
+    companion object : Loggable {     // implements an interface
+        override val tag = "JsonFactory"
+        fun create() = jacksonObjectMapper()
+    }
+}
+
+// Pass the companion as an argument
+fun configure(loggable: Loggable) { ... }
+configure(JsonFactory)   // the companion object itself</code></pre>
+
+<h2>DSLs — Domain-Specific Languages in Kotlin</h2>
+
+<p>A DSL is an API designed to read like natural language within a specific domain. Kotlin's syntax — trailing lambdas, receiver lambdas, and infix functions — makes DSLs concise and type-safe.</p>
+
+<h3>The two features that make DSLs work</h3>
+
+<ol>
+  <li><strong>Lambda with receiver</strong> — inside the lambda, <code>this</code> refers to the receiver object, so you can call its methods without qualification:
+    <pre><code>class QueryBuilder {
+    fun select(columns: String) { ... }
+    fun from(table: String) { ... }
+}
+
+fun query(init: QueryBuilder.() -> Unit): QueryBuilder {
+    val builder = QueryBuilder()
+    builder.init()   // 'this' inside init is the builder
+    return builder
+}
+
+// Usage — looks like SQL
+query {
+    select("id, name, email")
+    from("customers")
+}</code></pre>
+  </li>
+  <li><strong>Trailing lambda</strong> — if the last parameter is a function, you can move it outside the parentheses:
+    <pre><code>// These are identical
+query({ select("id") })   // lambda inside parens
+query { select("id") }    // trailing lambda — cleaner</code></pre>
+  </li>
+</ol>
+
+<h3>Spring Boot routing DSL</h3>
+
+<p>Spring ships a Kotlin DSL for defining routes — an alternative to <code>@Controller</code> annotations:</p>
+
+<pre><code>@Configuration
+class RoutesConfig {
+    @Bean
+    fun apiRoutes(ctrl: OrderController) = router {
+        "/api/orders".nest {
+            GET("/", ctrl::findAll)
+            GET("/{id}", ctrl::findById)
+            POST("/", ctrl::create)
+        }
+    }
+}</code></pre>
+
+<p>Inside the <code>router { }</code> block, <code>this</code> is a <code>RouterFunctionDsl</code>. The <code>nest</code>, <code>GET</code>, and <code>POST</code> calls are methods on that receiver — called without prefix because of the lambda-with-receiver syntax.</p>
+
+<h3>Building your own DSL</h3>
+
+<pre><code>class EmailBuilder {
+    var to: String = ""
+    var subject: String = ""
+    var body: String = ""
+
+    fun build() = Email(to, subject, body)
+}
+
+fun email(init: EmailBuilder.() -> Unit): Email {
+    val builder = EmailBuilder()
+    builder.init()
+    return builder.build()
+}
+
+// Usage
+val msg = email {
+    to = "alice@example.com"
+    subject = "Order confirmed"
+    body = "Your order #42 has shipped."
+}</code></pre>
+
+<p>The pattern: a builder class with mutable properties, a function that takes a <code>Builder.() -> Unit</code> lambda, and a <code>build()</code> that constructs the immutable result. This replaces the Java Builder pattern with less code and better readability.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://kotlinlang.org/docs/data-classes.html" target="_blank" rel="noopener">Kotlin Data Classes</a> · <a href="https://kotlinlang.org/docs/extensions.html" target="_blank" rel="noopener">Kotlin Extension Functions</a> · <a href="https://kotlinlang.org/docs/object-declarations.html#companion-objects" target="_blank" rel="noopener">Companion Objects</a> · <a href="https://kotlinlang.org/docs/type-safe-builders.html" target="_blank" rel="noopener">Type-Safe Builders (DSLs)</a> · <a href="https://docs.spring.io/spring-framework/reference/web/webflux-functional.html" target="_blank" rel="noopener">Spring Functional Routing</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. A Kotlin <code>data class</code> auto-generates several methods. Which of these is NOT auto-generated?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>equals()</code> and <code>hashCode()</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>toString()</code> and <code>copy()</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0"><code>clone()</code> for deep copying</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>componentN()</code> functions for destructuring</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. You define an extension function <code>fun Animal.sound() = "generic"</code> and a subclass <code>Dog : Animal</code> with its own <code>fun Dog.sound() = "woof"</code>. A variable <code>val pet: Animal = Dog()</code> — what does <code>pet.sound()</code> return?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0"><code>"generic"</code> — extensions are dispatched statically by the declared type</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>"woof"</code> — extensions use virtual dispatch like regular methods</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Compilation error — you cannot define extensions on both a class and its subclass</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Runtime exception — ambiguous extension resolution</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. Inside a custom property setter, what does the <code>field</code> identifier refer to?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The class instance (<code>this</code>)</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The new value being assigned (the setter parameter)</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">The auto-generated backing field that stores the property's value</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The property's reflection metadata object</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. What is the advantage of a <code>companion object</code> over Java's <code>static</code> keyword?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Companion object members run on a separate thread</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">A companion object can implement interfaces and be passed as a value</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Companion object members are lazily initialized by default</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Companion objects allow multiple inheritance</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. In a Kotlin DSL, a function signature like <code>fun router(init: RouterFunctionDsl.() -> Unit)</code> uses a lambda with receiver. Inside the lambda <code>router { }</code>, what does <code>this</code> refer to?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The enclosing class instance</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">A <code>RouterFunctionDsl</code> instance, so its methods can be called without qualification</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The lambda itself — a recursive reference</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The Spring <code>ApplicationContext</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0059-kotlin-syntax-basics.html" class="nav-prev">← Prev</a>
+  <a href="0061-kotlin-coroutines.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

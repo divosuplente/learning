@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 17 — Types of Injection: Why Constructor Is Preferred</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Types of Injection: Why Constructor Is Preferred</h1>
+
+<p>Spring gives you three ways to deliver a dependency into a bean. Two of them are traps. This lesson shows each style, explains what goes wrong with setter and field injection, and gives you the comparison table that decides every code review.</p>
+
+<h2>Constructor Injection — the one you should use</h2>
+
+<p>Dependencies arrive as constructor parameters. The fields are <code>final</code>. Spring sees one constructor and calls it automatically — no <code>@Autowired</code> needed.</p>
+
+<pre><code>@Service
+public class OrderService {
+
+    private final CustomerRepository customerRepo;
+    private final OrderRepository orderRepo;
+
+    public OrderService(CustomerRepository customerRepo,
+                        OrderRepository orderRepo) {
+        this.customerRepo = customerRepo;
+        this.orderRepo = orderRepo;
+    }
+}</code></pre>
+
+<p>Three things happen for free:</p>
+
+<ul>
+  <li><strong>Immutability</strong> — <code>final</code> fields cannot be reassigned. The dependency graph is locked after construction.</li>
+  <li><strong>Compile-time safety</strong> — You cannot instantiate <code>OrderService</code> without supplying both repositories. The compiler blocks invalid object states.</li>
+  <li><strong>Testability</strong> — In a unit test you pass mocks straight to the constructor. No Spring container, no reflection, no magic.</li>
+</ul>
+
+<pre><code>// Pure unit test — no Spring needed
+@Test
+void findsCustomerById() {
+    CustomerRepository mockRepo = mock(CustomerRepository.class);
+    when(mockRepo.findById(1L)).thenReturn(new Customer("Ada"));
+
+    OrderService service = new OrderService(mockRepo, mock(OrderRepository.class));
+    assertThat(service.findCustomer(1L).name()).isEqualTo("Ada");
+}</code></pre>
+
+<h2>Setter Injection — rarely justified</h2>
+
+<p>Dependencies arrive through setter methods annotated with <code>@Autowired</code>:</p>
+
+<pre><code>@Service
+public class OrderService {
+
+    private CustomerRepository customerRepo;
+
+    @Autowired
+    public void setCustomerRepository(CustomerRepository customerRepo) {
+        this.customerRepo = customerRepo;
+    }
+}</code></pre>
+
+<p>The field cannot be <code>final</code> — it is assigned after construction. That means an <code>OrderService</code> can exist in a half-initialized state: the object is alive but its dependency is <code>null</code>. This is legal Java and illegal good design.</p>
+
+<p>Setter injection has one legitimate use: <strong>optional dependencies</strong> that the class can function without. If the dependency truly may be absent, a setter communicates "nice to have" better than a constructor parameter. In practice, optional dependencies are rare — most beans need all of their collaborators.</p>
+
+<h2>Field Injection — avoid entirely</h2>
+
+<p>Dependencies are injected directly into private fields using <code>@Autowired</code>:</p>
+
+<pre><code>@Service
+public class OrderService {
+
+    @Autowired  // ❌ avoid this
+    private CustomerRepository customerRepo;
+}</code></pre>
+
+<p>Field injection looks concise, but every shortcut it offers is a problem:</p>
+
+<ul>
+  <li><strong>No <code>final</code></strong> — the field is mutable for the entire lifetime of the object.</li>
+  <li><strong>Untestable without Spring</strong> — a plain <code>new OrderService()</code> leaves <code>customerRepo</code> as <code>null</code>. Your only options are launching the full Spring context or using reflection to force a value into a private field. Both defeat the purpose of a unit test.</li>
+  <li><strong>Hidden dependencies</strong> — the constructor is empty. Someone reading <code>new OrderService()</code> has no idea that the class secretly requires a repository. Constructor parameters make the contract explicit; field injection buries it.</li>
+  <li><strong>No compile-time guarantee</strong> — the class compiles without its dependency. You discover the missing bean at runtime, when Spring fails to inject it.</li>
+</ul>
+
+<p>The Spring team themselves recommend against field injection. It survives in legacy code and tutorials because it saves keystrokes — but those keystrokes cost you every time you write a test.</p>
+
+<h2>Comparison</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Constructor</th>
+      <th>Setter</th>
+      <th>Field</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Immutable (<code>final</code>)</td><td>Yes</td><td>No</td><td>No</td></tr>
+    <tr><td>Testable without Spring</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+    <tr><td>Compile-time safety</td><td>Yes</td><td>No</td><td>No</td></tr>
+    <tr><td>Dependencies visible in API</td><td>Yes</td><td>No</td><td>No</td></tr>
+    <tr><td>Supports optional deps</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Needs <code>@Autowired</code></td><td>No*</td><td>Yes</td><td>Yes</td></tr>
+  </tbody>
+</table>
+
+<p><em>* When a class has exactly one constructor, Spring uses it automatically. Add a second constructor and you'll need <code>@Autowired</code> on the primary one.</em></p>
+
+<h2>The rule</h2>
+
+<p><strong>Always use constructor injection.</strong> Never use <code>@Autowired</code> on fields. Use setter injection only for genuinely optional dependencies — and question whether the dependency is truly optional before you write that setter.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html" target="_blank" rel="noopener">Spring: Dependency Injection</a> · <a href="https://martinfowler.com/articles/injection.html" target="_blank" rel="noopener">Fowler: IoC Containers and the DI Pattern</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. Why can constructor-injected fields be declared <code>final</code> while setter-injected fields cannot?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Spring only allows <code>final</code> on @Autowired fields</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Constructor injection assigns fields before the object is fully constructed; setters assign after</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The JVM forbids <code>final</code> on any managed bean</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Setter methods strip the <code>final</code> modifier at runtime</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. Can you unit-test a field-injected class without launching the Spring container?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes — just call the no-arg constructor and set fields directly</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes — Spring automatically injects mocks in test scope</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">No — the private field is null without Spring; you'd need reflection</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No — field injection requires a running servlet container</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. When does Spring require <code>@Autowired</code> on a constructor?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Always — every constructor must be annotated</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Never — Spring detects constructors automatically</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">When the class has more than one constructor</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only when injecting prototype-scoped beans</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. What is the one legitimate use case for setter injection?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">When you need to inject more than three dependencies</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">When a dependency is genuinely optional for the class to function</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">When the dependency might change at runtime per request</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">When you want to avoid writing a constructor</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. A class uses field injection. You call <code>new OrderService()</code> in a test. What happens when you invoke a method that uses the injected dependency?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Spring intercepts the call and injects a default bean</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The method returns the default value for the dependency's type</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">A NullPointerException — the field was never assigned</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The test passes with a stub implementation Spring provides</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0016-spring-ioc-and-stereotypes.html" class="nav-prev">← Prev</a>
+  <a href="0018-bean-scopes-and-config.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

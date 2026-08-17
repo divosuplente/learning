@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 30 — Architecture Patterns: Monolith vs Microservices vs SOA</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Architecture Patterns: Monolith vs Microservices vs SOA</h1>
+
+<p>When you build a house, you don't start placing bricks randomly — you follow a blueprint. Software is no different. An <strong>architecture pattern</strong> is that blueprint: it defines which parts of the code talk to which other parts, what each part is responsible for, and how data flows through the system. Without one, code becomes a tangled mess where everything depends on everything else. Changing one thing breaks five others. This is <strong>spaghetti code</strong>, and it is a nightmare to maintain.</p>
+
+<h2>Monolithic Architecture</h2>
+
+<p>A <strong>monolith</strong> is a single application where all the code lives in one codebase and runs as one process.</p>
+
+<pre><code>┌─────────────────────────────────┐
+│         Monolithic App           │
+│  ┌───────┐ ┌───────┐ ┌───────┐  │
+│  │Orders │ │Users  │ │Billing│  │
+│  └───────┘ └───────┘ └───────┘  │
+│         Single database          │
+└─────────────────────────────────┘</code></pre>
+
+<p><strong>Pros:</strong> Simple to develop, deploy, and test. One codebase, one deployment. No network calls between modules — everything runs in the same JVM.</p>
+
+<p><strong>Cons:</strong> As the application grows, it becomes hard to understand and change. One bug can bring down the entire system. A memory leak in the billing module takes the order module with it.</p>
+
+<h2>Microservices Architecture</h2>
+
+<p><strong>Microservices</strong> split the application into many small, independently deployable services, each owning its own database.</p>
+
+<pre><code>┌──────────┐  ┌──────────┐  ┌──────────┐
+│  Order   │  │   User   │  │  Billing │
+│ Service  │  │ Service  │  │ Service  │
+│  (DB)    │  │  (DB)    │  │  (DB)    │
+└──────────┘  └──────────┘  └──────────┘</code></pre>
+
+<p><strong>Pros:</strong> Each service is small and focused. Teams can work independently. Services can be deployed, scaled, and restarted separately.</p>
+
+<p><strong>Cons:</strong> Complexity. Distributed systems are hard — network failures, data consistency across databases, debugging across service boundaries, and deployment orchestration all become significant challenges. A simple feature that touches two services now requires coordinating two deployments and handling eventual consistency.</p>
+
+<h2>Service-Oriented Architecture (SOA) — the middle ground</h2>
+
+<p><strong>SOA</strong> as we use it in this course is a <strong>modular monolith</strong>: the application is a single deployable (one Spring Boot JAR), but the code is organized into logical <strong>services</strong> — groupings of business functionality. Each service has its own layered structure (controller, service, repository), but they share a database and run in the same process.</p>
+
+<pre><code>┌─────────────────────────────────────────┐
+│              Spring Boot App              │
+│                                           │
+│  ┌─────────────────┐  ┌────────────────┐ │
+│  │  Order Service   │  │ Customer Service│ │
+│  │  ┌────────────┐  │  │  ┌──────────┐ │ │
+│  │  │Controller  │  │  │  │Controller │ │ │
+│  │  │  Service   │  │  │  │  Service  │ │ │
+│  │  │ Repository │  │  │  │Repository │ │ │
+│  │  └────────────┘  │  │  └──────────┘ │ │
+│  └─────────────────┘  └────────────────┘ │
+│                                           │
+│           Shared Database                 │
+└─────────────────────────────────────────┘</code></pre>
+
+<p>This gives you clean separation of concerns without the complexity of distributed systems. When the day comes that Order Service truly needs to scale independently, you can split it out into a real microservice — but only then, not before.</p>
+
+<h2>When microservices are overkill</h2>
+
+<p>Microservices solve <strong>organizational scaling</strong> problems — hundreds of engineers working on the same product. If you are a team of five, the operational overhead of container orchestration, distributed tracing, service discovery, and inter-service network calls will consume more time than the features you're trying to ship. Start with a modular monolith. Extract services when you have a concrete reason: a module that needs different scaling, a different release cadence, or a different team.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.oracle.com/javase/tutorial/java/concepts/" target="_blank" rel="noopener">Oracle: Object-Oriented Programming Concepts</a> · <a href="https://spring.io/guides/gs/rest-service/" target="_blank" rel="noopener">Spring: Building REST Services</a> · <a href="https://martinfowler.com/articles/microservices.html" target="_blank" rel="noopener">Fowler: Microservices</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What does an architecture pattern primarily define?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The programming language and framework to use</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Which parts of the code talk to which other parts</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The color scheme and visual design of the UI</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The database schema and table relationships</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. In a microservices architecture, what is a key operational challenge that does not exist in a monolith?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Writing unit tests for individual modules</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Maintaining data consistency across separate databases</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Compiling Java source files into bytecode</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Deploying a single JAR to a production server</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. Why is SOA (as used in this course) called a "modular monolith"?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Each service runs in its own JVM process</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Services have no boundaries and share all code</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Code is organized into logical services but deploys as one unit</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Each service owns its own separate database</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. A startup with three developers is building an order management system. Which architecture should they choose?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Microservices — it will scale when they grow</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Modular monolith — simple to operate, organized for future extraction</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">A flat monolith with no internal structure at all</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Serverless functions for every business operation</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. What is a concrete reason to extract a service from a modular monolith into a true microservice?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The service has more than five classes</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">It needs a different scaling or release cadence than the rest</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The team wants to use a different IDE</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The service has no dependencies on other services</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0029-custom-queries-and-n-plus-1.html" class="nav-prev">← Prev</a>
+  <a href="0031-layered-architecture.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

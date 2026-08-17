@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 24 — Input Validation &amp; Exception Handling</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Input Validation &amp; Exception Handling</h1>
+
+<p>Every API receives bad input eventually — missing fields, negative quantities, malformed email addresses. Without validation, garbage slips into your database. Without structured error handling, clients get ugly stack traces. This lesson covers <strong>Jakarta Bean Validation</strong> for declaring constraints on input, and <strong>@RestControllerAdvice</strong> for turning exceptions into clean HTTP responses.</p>
+
+<h2>Jakarta Bean Validation — <code>jakarta.validation</code>, not <code>javax.validation</code></h2>
+
+<p>Bean Validation (JSR 380) is a Java standard. Spring Boot integrates it via the <code>@Valid</code> annotation. The first thing to get right is the import — <strong>Spring Boot 3.x uses Jakarta EE</strong>, the renamed Java EE. Everything moved from <code>javax.validation</code> to <code>jakarta.validation</code>:</p>
+
+<pre><code>// CORRECT — Spring Boot 3.x (Jakarta)
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+// WRONG — Spring Boot 2.x (Java EE, no longer used)
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;</code></pre>
+
+<p>If you import from <code>javax.validation</code> on Boot 3, the annotations silently fail — they're different classes that Spring's validator doesn't recognize. This is the single most common validation bug when migrating from Boot 2.</p>
+
+<h2>Validation annotations</h2>
+
+<p>Place constraint annotations directly on record fields or class properties:</p>
+
+<table>
+  <tr><th>Annotation</th><th>What it checks</th><th>Applies to</th></tr>
+  <tr><td><code>@NotNull</code></td><td>Value is not null</td><td>Any type</td></tr>
+  <tr><td><code>@NotBlank</code></td><td>Not null, not empty, not whitespace-only</td><td>String</td></tr>
+  <tr><td><code>@NotEmpty</code></td><td>Not null and not empty</td><td>String, Collection, Map</td></tr>
+  <tr><td><code>@Size(min, max)</code></td><td>Length is within range</td><td>String, Collection</td></tr>
+  <tr><td><code>@Min(value)</code></td><td>Number ≥ value</td><td>int, long, BigDecimal</td></tr>
+  <tr><td><code>@Max(value)</code></td><td>Number ≤ value</td><td>int, long, BigDecimal</td></tr>
+  <tr><td><code>@Email</code></td><td>Valid email format</td><td>String</td></tr>
+  <tr><td><code>@Pattern(regexp)</code></td><td>Matches regex</td><td>String</td></tr>
+  <tr><td><code>@Positive</code></td><td>Greater than 0</td><td>Numbers</td></tr>
+</table>
+
+<p>Key subtleties: <code>@NotBlank</code> rejects <code>"  "</code> (whitespace-only), but <code>@NotNull</code> and <code>@NotEmpty</code> do not. For a String that the user must provide meaningful content for, always prefer <code>@NotBlank</code>. <code>@Min(0)</code> allows zero; <code>@Positive</code> does not.</p>
+
+<h2>DTOs with validation</h2>
+
+<p>Validation annotations live on your DTOs (request records), not on your entities. The DTO is the trust boundary — it's the first thing your code sees after deserialization:</p>
+
+<pre><code>public record CreateOrderRequest(
+        @NotNull(message = "Customer ID is required")
+        Long customerId,
+
+        @NotEmpty(message = "Order must have at least one item")
+        List&lt;CreateOrderItemRequest&gt; items
+) {}
+
+public record CreateOrderItemRequest(
+        @NotNull(message = "Product ID is required")
+        Long productId,
+
+        @NotNull(message = "Quantity is required")
+        @Min(value = 1, message = "Quantity must be at least 1")
+        Integer quantity
+) {}</code></pre>
+
+<p>The <code>message</code> attribute is optional — Jakarta provides default messages — but explicit messages are clearer for API consumers.</p>
+
+<h2>Triggering validation with <code>@Valid</code></h2>
+
+<p>Annotations on the DTO do nothing by themselves. You must add <code>@Valid</code> to the controller parameter:</p>
+
+<pre><code>@PostMapping
+public ResponseEntity&lt;OrderResponse&gt; createOrder(
+        @Valid @RequestBody CreateOrderRequest request) {
+    // If validation fails, this method is NEVER called.
+    // Spring returns 400 Bad Request automatically.
+    return ResponseEntity.status(HttpStatus.CREATED)
+            .body(orderService.createOrder(request));
+}</code></pre>
+
+<p>When <code>@Valid</code> is present, Spring Boot: (1) deserializes JSON into the record, (2) runs every constraint annotation, (3) if any fail, returns 400 Bad Request — the controller method body never executes, (4) if all pass, the method runs normally.</p>
+
+<h2>Global exception handling with <code>@RestControllerAdvice</code></h2>
+
+<p>Without a handler, unhandled exceptions produce a 500 with an HTML stack trace — useless and leaking internals. <code>@RestControllerAdvice</code> lets you intercept exceptions from <em>any</em> controller and return structured JSON instead:</p>
+
+<pre><code>@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleValidation(
+            MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .reduce((a, b) -> a + "; " + b)
+                .orElse("Validation failed");
+        ErrorResponse error = new ErrorResponse(
+                Instant.now(), 400, "Bad Request", message);
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleGeneric(Exception ex) {
+        ErrorResponse error = new ErrorResponse(
+                Instant.now(), 500, "Internal Server Error",
+                "An unexpected error occurred");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+}</code></pre>
+
+<p><code>MethodArgumentNotValidException</code> is what Spring throws when <code>@Valid</code> fails. The <code>BindingResult</code> inside it carries every field error with the field name and message. The catch-all <code>Exception.class</code> handler ensures you never leak a stack trace — but log the exception internally so you can debug it.</p>
+
+<h2><code>ProblemDetail</code> — the RFC 7807 standard</h2>
+
+<p>Spring Framework 6 introduced <code>ProblemDetail</code>, a built-in class matching <a href="https://datatracker.ietf.org/doc/html/rfc7807" target="_blank" rel="noopener">RFC 7807 (Problem Details for HTTP APIs)</a>. It gives you a standard error shape without writing a custom record:</p>
+
+<pre><code>import org.springframework.http.ProblemDetail;
+
+@ExceptionHandler(OrderNotFoundException.class)
+public ProblemDetail handleNotFound(OrderNotFoundException ex) {
+    ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+    pd.setTitle("Order Not Found");
+    pd.setDetail(ex.getMessage());
+    pd.setProperty("orderId", ex.getOrderId());
+    return pd;
+}</code></pre>
+
+<p><code>ProblemDetail</code> serializes to JSON with the standard fields <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, and <code>instance</code>. You can add custom properties with <code>setProperty</code>. The response <code>Content-Type</code> is <code>application/problem+json</code>. This is the preferred approach for new Spring Boot 3 projects — it's less code than a custom error record and follows a web standard.</p>
+
+<p>Enable it globally by setting <code>spring.mvc.problemdetails.enabled=true</code> in <code>application.yml</code>, which makes Spring return <code>ProblemDetail</code> automatically for built-in errors (like 404s) too.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://jakarta.ee/specifications/bean-validation/3.0/apidocs/" target="_blank" rel="noopener">Jakarta Bean Validation 3.0 API</a> · <a href="https://docs.spring.io/spring-framework/reference/core/beans/validation.html" target="_blank" rel="noopener">Spring: Validation</a> · <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-advice.html" target="_blank" rel="noopener">Spring: @ControllerAdvice</a> · <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html" target="_blank" rel="noopener">Spring: ProblemDetail</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. You're using Spring Boot 3.2 and your <code>@NotBlank</code> annotation isn't triggering validation. The import reads <code>import javax.validation.constraints.NotBlank;</code>. What's wrong?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The <code>message</code> attribute is missing</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Boot 3 requires <code>jakarta.validation</code>, not <code>javax.validation</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>@NotBlank</code> only works on entities, not records</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>@Valid</code> must be placed on the class, not the parameter</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. What is the difference between <code>@NotBlank</code> and <code>@NotNull</code> on a String field?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">They are identical for String fields</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>@NotNull</code> also rejects whitespace-only strings</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0"><code>@NotBlank</code> rejects <code>"  "</code>; <code>@NotNull</code> accepts it</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>@NotBlank</code> requires <code>@Size</code> to function</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. When <code>@Valid</code> validation fails on a <code>@RequestBody</code> parameter, what happens?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The controller method runs with null fields</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">A <code>MethodArgumentNotValidException</code> is thrown; the method is never called</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring returns 500 Internal Server Error</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only the first failed constraint is reported</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Which <code>@ExceptionHandler</code> signature correctly handles validation errors in a <code>@RestControllerAdvice</code> class?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>@ExceptionHandler(ConstraintViolationException.class)</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0"><code>@ExceptionHandler(MethodArgumentNotValidException.class)</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>@ExceptionHandler(InvalidDataException.class)</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>@ExceptionHandler(ValidationException.class)</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. What does <code>ProblemDetail</code> provide that a custom <code>ErrorResponse</code> record does not?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Automatic database logging of errors</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">RFC 7807 standard fields and <code>application/problem+json</code> content type</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Faster serialization via bytecode generation</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Built-in retry logic for transient failures</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0023-http-responses.html" class="nav-prev">← Prev</a>
+  <a href="0025-databases-and-repository-pattern.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

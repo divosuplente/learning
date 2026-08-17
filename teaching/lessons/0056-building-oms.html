@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 56 — Building the Order Management System</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Building the Order Management System</h1>
+
+<p>The capstone project ties together every technology from this course: REST controllers, a service layer with transactional boundaries, Kafka event publishing, GraphQL resolvers, and Spring Data repositories. This lesson walks through the full implementation — not as isolated snippets, but as a working system where every layer cooperates.</p>
+
+<h2>REST Controller</h2>
+
+<p>The controller is thin by design — it receives HTTP requests, delegates to the service, and wraps the result in a <code>ResponseEntity</code>. No business logic lives here.</p>
+
+<pre><code>@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @GetMapping
+    public List&lt;OrderResponse&gt; findAll() {
+        return orderService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;OrderResponse&gt; findById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.findById(id));
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity&lt;List&lt;OrderResponse&gt;&gt; findByStatus(
+            @PathVariable OrderStatus status) {
+        return ResponseEntity.ok(orderService.findByStatus(status));
+    }
+
+    @PostMapping
+    public ResponseEntity&lt;OrderResponse&gt; create(
+            @Valid @RequestBody CreateOrderRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(orderService.createOrder(request));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity&lt;OrderResponse&gt; updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateOrderStatusRequest request) {
+        return ResponseEntity.ok(
+                orderService.updateOrderStatus(id, request.status()));
+    }
+}</code></pre>
+
+<p>The <code>@Valid</code> annotation triggers Bean Validation before the method body runs — invalid requests never reach the service. The <code>201 CREATED</code> status on <code>create</code> follows REST convention for resource creation.</p>
+
+<h2>Global Exception Handler</h2>
+
+<p>Instead of try-catch in every controller method, a single <code>@RestControllerAdvice</code> translates domain exceptions into HTTP responses:</p>
+
+<pre><code>@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleNotFound(
+            OrderNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(errorBody(HttpStatus.NOT_FOUND, ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBadRequest(
+            IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(errorBody(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleConflict(
+            IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(errorBody(HttpStatus.CONFLICT, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleValidation(
+            MethodArgumentNotValidException ex) {
+        String details = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(errorBody(HttpStatus.BAD_REQUEST, "Validation failed", details));
+    }
+}</code></pre>
+
+<p>Each domain exception maps to a specific HTTP status: not-found → 404, illegal argument → 400, illegal state (e.g., insufficient stock) → 409 Conflict. Validation errors return 400 with field-level details.</p>
+
+<h2>Service Layer — Where the Work Happens</h2>
+
+<p>The service layer owns business logic, transaction boundaries, <strong>and event publishing</strong>. This is the most important class in the system:</p>
+
+<pre><code>@Service
+public class OrderService {
+
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final CustomerRepository customerRepository;
+    private final OrderEventProducer eventProducer;
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        CustomerEntity customer = customerRepository.findById(request.customerId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Customer not found: " + request.customerId()));
+
+        OrderEntity order = new OrderEntity();
+        order.setCustomer(customer);
+
+        for (CreateOrderItemRequest itemRequest : request.items()) {
+            ProductEntity product = productRepository
+                    .findById(itemRequest.productId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Product not found: " + itemRequest.productId()));
+
+            if (product.getStock() &lt; itemRequest.quantity()) {
+                throw new IllegalStateException(
+                        "Insufficient stock for " + product.getName());
+            }
+
+            OrderItemEntity item = new OrderItemEntity();
+            item.setOrder(order);
+            item.setProduct(product);
+            item.setQuantity(itemRequest.quantity());
+            item.setUnitPrice(product.getPrice());
+            order.getItems().add(item);
+
+            product.setStock(product.getStock() - itemRequest.quantity());
+        }
+
+        order.recalculateTotal();
+        order = orderRepository.save(order);
+
+        eventProducer.publishOrderCreated(OrderCreatedEvent.from(order));
+
+        return OrderResponse.from(order);
+    }
+
+    @Transactional
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatus newStatus) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        OrderStatus oldStatus = order.getStatus();
+        order.setStatus(newStatus);
+        order = orderRepository.save(order);
+
+        eventProducer.publishOrderStatusChanged(
+                OrderStatusChangedEvent.from(order, oldStatus));
+
+        return OrderResponse.from(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;OrderResponse&gt; findAll() {
+        return orderRepository.findAll().stream()
+                .map(OrderResponse::from).toList();
+    }
+}</code></pre>
+
+<p>Two critical details:</p>
+
+<ul>
+  <li><strong>Event publishing happens inside the transaction.</strong> The producer calls <code>.get()</code> on the <code>CompletableFuture</code> returned by <code>kafkaTemplate.send()</code>, blocking until the broker acknowledges or a timeout expires. If the send fails or times out, the exception propagates and the transaction rolls back — you never get a committed order without its event. If you need the opposite guarantee (committed order <em>even if</em> the event fails), publish after commit using <code>TransactionSynchronizationManager.registerSynchronization()</code> or the <code>@TransactionalEventListener</code> pattern.</li>
+  <li><strong>Stock is decremented in the same transaction.</strong> The product's stock is reduced before the order is saved. If two concurrent orders exceed stock, one transaction will fail — either through an optimistic-lock conflict or a database constraint.</li>
+</ul>
+
+<h2>Kafka Events &amp; Producer</h2>
+
+<p>Events are Java records — lightweight, immutable message payloads. Each event has a static factory method that extracts data from the domain entity:</p>
+
+<pre><code>public record OrderCreatedEvent(
+        Long orderId, Long customerId,
+        OrderStatus status, BigDecimal totalAmount,
+        Instant createdAt) {
+
+    public static OrderCreatedEvent from(OrderEntity order) {
+        return new OrderCreatedEvent(
+                order.getId(), order.getCustomer().getId(),
+                order.getStatus(), order.getTotalAmount(),
+                order.getCreatedAt());
+    }
+}
+
+public record OrderStatusChangedEvent(
+        Long orderId, OrderStatus oldStatus,
+        OrderStatus newStatus, Instant changedAt) {
+
+    public static OrderStatusChangedEvent from(
+            OrderEntity order, OrderStatus oldStatus) {
+        return new OrderStatusChangedEvent(
+                order.getId(), oldStatus,
+                order.getStatus(), Instant.now());
+    }
+}</code></pre>
+
+<p>The producer wraps Spring's <code>KafkaTemplate</code> with topic names injected from configuration:</p>
+
+<pre><code>@Component
+public class OrderEventProducer {
+
+    private final KafkaTemplate&lt;String, Object&gt; kafkaTemplate;
+    private final String orderCreatedTopic;
+    private final String orderStatusTopic;
+
+    public OrderEventProducer(
+            KafkaTemplate&lt;String, Object&gt; kafkaTemplate,
+            @Value("${kafka.topic.order-created:order-created}")
+                    String orderCreatedTopic,
+            @Value("${kafka.topic.order-status:order-status}")
+                    String orderStatusTopic) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.orderCreatedTopic = orderCreatedTopic;
+        this.orderStatusTopic = orderStatusTopic;
+    }
+
+    public void publishOrderCreated(OrderCreatedEvent event) {
+        try {
+            kafkaTemplate.send(orderCreatedTopic, event)
+                    .get(10, TimeUnit.SECONDS);
+            log.info("Published OrderCreatedEvent for order {}",
+                    event.orderId());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(
+                    "Interrupted while publishing OrderCreatedEvent", e);
+        } catch (ExecutionException e) {
+            log.error("Failed to publish OrderCreatedEvent for order {}",
+                    event.orderId(), e.getCause());
+            throw new RuntimeException(
+                    "Failed to publish OrderCreatedEvent", e.getCause());
+        } catch (TimeoutException e) {
+            log.error("Timed out publishing OrderCreatedEvent for order {}",
+                    event.orderId(), e);
+            throw new RuntimeException(
+                    "Timed out publishing OrderCreatedEvent", e);
+        }
+    }
+}</code></pre>
+
+<p>The <code>send()</code> call returns a <code>CompletableFuture</code>, but the producer blocks on it with <code>.get(10, TimeUnit.SECONDS)</code> to ensure the broker acknowledges the message before the method returns. This is essential for transactional integrity: if the publish were async, a send failure could go unnoticed after the transaction has already committed, leaving the database and Kafka out of sync. The trade-off is that response latency now depends on broker availability — if the broker is down, the request blocks for up to 10 seconds before timing out.</p>
+<h2>Kafka Consumer</h2>
+
+<p>Consumers listen to topics and react. In the capstone, they log events — in production they would trigger emails, update dashboards, or push WebSocket notifications:</p>
+
+<pre><code>@Component
+public class OrderEventConsumer {
+
+    @KafkaListener(
+            topics = "${kafka.topic.order-created:order-created}",
+            groupId = "${spring.kafka.consumer.group-id:ordermgmt-group}")
+    public void handleOrderCreated(
+            ConsumerRecord&lt;String, OrderCreatedEvent&gt; record) {
+        log.info("Received OrderCreatedEvent: orderId={}, partition={}, offset={}",
+                record.value().orderId(), record.partition(), record.offset());
+    }
+
+    @KafkaListener(
+            topics = "${kafka.topic.order-status:order-status}",
+            groupId = "${spring.kafka.consumer.group-id:ordermgmt-group}")
+    public void handleOrderStatusChanged(
+            ConsumerRecord&lt;String, OrderStatusChangedEvent&gt; record) {
+        log.info("Received OrderStatusChangedEvent: orderId={}, {} -> {}",
+                record.value().orderId(),
+                record.value().oldStatus(),
+                record.value().newStatus());
+    }
+}</code></pre>
+
+<p>The <code>groupId</code> ensures that each event is delivered to exactly one consumer instance within the group — essential for horizontal scaling.</p>
+
+<h2>GraphQL Resolvers</h2>
+
+<p>The same <code>OrderService</code> powers both REST and GraphQL. Spring for GraphQL auto-registers annotated controllers:</p>
+
+<pre><code>@Controller
+public class OrderResolver {
+
+    private final OrderService orderService;
+
+    public OrderResolver(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @QueryMapping
+    public List&lt;OrderResponse&gt; orders() {
+        return orderService.findAll();
+    }
+
+    @QueryMapping
+    public OrderResponse order(@Argument Long id) {
+        return orderService.findById(id);
+    }
+
+    @QueryMapping
+    public List&lt;OrderResponse&gt; ordersByStatus(
+            @Argument OrderStatus status) {
+        return orderService.findByStatus(status);
+    }
+
+    @MutationMapping
+    public OrderResponse createOrder(@Argument CreateOrderInput input) {
+        var request = new CreateOrderRequest(
+                input.customerId(),
+                input.items().stream()
+                        .map(i -> new CreateOrderItemRequest(
+                                i.productId(), i.quantity()))
+                        .toList());
+        return orderService.createOrder(request);
+    }
+
+    @MutationMapping
+    public OrderResponse updateOrderStatus(
+            @Argument Long orderId, @Argument OrderStatus status) {
+        return orderService.updateOrderStatus(orderId, status);
+    }
+
+    public record CreateOrderInput(
+            Long customerId, List&lt;CreateOrderItemInput&gt; items) {}
+    public record CreateOrderItemInput(
+            Long productId, Integer quantity) {}
+}</code></pre>
+
+<p>Note the <code>createOrder</code> mutation converts the GraphQL input record into the same <code>CreateOrderRequest</code> DTO that the REST controller uses — shared service layer, shared validation, shared event publishing. The mutation triggers the same Kafka events because it calls the same <code>orderService.createOrder()</code>.</p>
+
+<h2>The Complete Request Flow</h2>
+
+<p>Whether the request arrives via REST or GraphQL, the execution path is identical:</p>
+
+<pre><code>HTTP/GraphQL request
+  → Controller/Resolver (thin, delegates to service)
+    → OrderService (@Transactional boundary)
+      → Repositories (JPA + Spring Data)
+      → OrderEventProducer (KafkaTemplate.send)
+        → Kafka broker
+    → OrderResponse DTO returned</code></pre>
+
+<p>The controller is a routing layer. The service is the transactional boundary. The repository is the persistence layer. Events flow out from the service to Kafka. This separation means you can add a new API surface (e.g., gRPC) without duplicating business logic — you just inject <code>OrderService</code>.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-boot/reference/web/spring-web.html" target="_blank" rel="noopener">Spring Web Reference</a> · <a href="https://docs.spring.io/spring-kafka/reference/html/" target="_blank" rel="noopener">Spring Kafka Reference</a> · <a href="https://docs.spring.io/spring-graphql/reference/" target="_blank" rel="noopener">Spring for GraphQL Reference</a> · <a href="https://docs.spring.io/spring-data/jpa/reference/" target="_blank" rel="noopener">Spring Data JPA Reference</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. In the capstone's <code>OrderService.createOrder()</code>, the Kafka event is published <em>after</em> <code>orderRepository.save()</code> but still inside the <code>@Transactional</code> method. What happens if the Kafka send fails?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">The exception propagates, the transaction rolls back, and no order is persisted</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The order is already committed to the database, so only the event is lost</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Spring automatically retries the Kafka send and the transaction waits</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The event is queued locally and delivered after the transaction commits</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. The GraphQL <code>createOrder</code> mutation and the REST <code>POST /api/orders</code> endpoint both call <code>orderService.createOrder()</code>. Does the GraphQL mutation also publish Kafka events?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No — only the REST controller triggers event publishing</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No — GraphQL mutations bypass the service layer entirely</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Yes — both call the same service method, which publishes events</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only if the GraphQL resolver explicitly calls the Kafka producer</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. The <code>GlobalExceptionHandler</code> maps <code>IllegalStateException</code> to HTTP 409 Conflict. In the order system, what business scenario triggers this?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A customer ID that does not exist in the database</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">An order ID that does not exist in the database</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Insufficient stock for a product in the order</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A request body that fails Bean Validation</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. The <code>OrderEventProducer.publishOrderCreated()</code> method calls <code>kafkaTemplate.send()</code> and blocks on the result with <code>.get(10, TimeUnit.SECONDS)</code>. Why must the publish be blocking inside a <code>@Transactional</code> method?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">To improve throughput — blocking sends are faster than async sends</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">If the publish were async, a Kafka failure could go unnoticed after the transaction commits, leaving the database and Kafka out of sync</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Spring requires all Kafka sends inside <code>@Transactional</code> to be synchronous</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The <code>.get()</code> call is optional — <code>whenComplete</code> works equally well inside a transaction</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Two Kafka consumers in the same consumer group both subscribe to <code>order-created</code>. How are messages distributed between them?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Every message is delivered to both consumers simultaneously</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Messages are round-robin distributed regardless of key or partition</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Each partition is consumed by exactly one consumer in the group</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The consumer that subscribes first receives all messages</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0055-capstone-architecture.html" class="nav-prev">← Prev</a>
+  <a href="0057-testing-deployment-oms.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

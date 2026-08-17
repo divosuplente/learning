@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 36 — Kafka Core Concepts: Topics, Partitions, Offsets, Consumer Groups</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Kafka Core Concepts: Topics, Partitions, Offsets, Consumer Groups</h1>
+
+<p>Kafka stores and routes millions of messages per second using a small set of abstractions. This lesson makes each one concrete with the <strong>newsstand analogy</strong>, then shows how they fit together in a real architecture.</p>
+
+<h2>The Newsstand</h2>
+
+<p>Imagine a newsstand that never runs out of shelf space:</p>
+
+<ol>
+  <li><strong>Publishers</strong> deliver newspapers to the newsstand — these are Kafka <em>producers</em>.</li>
+  <li>The newsstand organizes papers into sections: <em>Sports</em>, <em>Politics</em>, <em>Tech</em> — these are <em>topics</em>.</li>
+  <li>Each section has multiple shelves — these are <em>partitions</em>.</li>
+  <li>Every paper on a shelf has a numbered slot — that number is the <em>offset</em>.</li>
+  <li>Subscribers pick up papers from sections they care about — these are <em>consumers</em>.</li>
+  <li>A group of subscribers who share a section (one shelf each) forms a <em>consumer group</em>.</li>
+  <li>The newsstand itself — the building and its manager — is a <em>broker</em>.</li>
+</ol>
+
+<p>Papers stay on the shelf until they expire. Subscribers remember the last slot they read, so they can pick up where they left off the next day.</p>
+
+<h2>Topic</h2>
+
+<p>A <strong>topic</strong> is a named category for messages. Producers write to a topic; consumers read from it. Think of it as a folder — everything about <code>order-events</code> goes into the same topic.</p>
+
+<pre><code>Topic: order-events
+├── Partition 0: [msg1, msg2, msg3, msg4, msg5]
+├── Partition 1: [msg1, msg2, msg3]
+└── Partition 2: [msg1, msg2, msg3, msg4, msg5, msg6, msg7]</code></pre>
+
+<p>Topics are cheap. A Kafka cluster can handle thousands. You create one per event type or per domain stream — <code>order-events</code>, <code>payment-events</code>, <code>user-signups</code>.</p>
+
+<h2>Partition</h2>
+
+<p>Each topic is split into one or more <strong>partitions</strong> — ordered, append-only logs. New messages go to the end. Partitions are how Kafka scales: they can live on different brokers, allowing parallel reads and writes.</p>
+
+<pre><code>Topic: order-events (3 partitions)
+
+Partition 0:  [OrderCreated] [OrderConfirmed] [OrderShipped]
+Partition 1:  [OrderCreated] [OrderCancelled]
+Partition 2:  [OrderCreated] [OrderConfirmed] [OrderShipped] [OrderDelivered]</code></pre>
+
+<p><strong>Key rule:</strong> messages within a single partition are strictly ordered — you read them in the order they were written. <strong>Across partitions, there is no guaranteed order.</strong> A consumer might see <code>OrderShipped</code> on Partition 0 before <code>OrderCreated</code> on Partition 1. If you need total ordering for a specific entity, send all its events to the same partition using a <strong>message key</strong> (e.g., <code>orderId</code>).</p>
+
+<h2>Offset</h2>
+
+<p>Every message in a partition gets a sequential <strong>offset</strong> — an immutable, monotonically increasing integer starting at 0. It works like a page number: each consumer tracks its own offset, remembering "I've read up to offset 5."</p>
+
+<pre><code>Partition 0:  [msg at offset 0] [msg at offset 1] [msg at offset 2] [msg at offset 3]</code></pre>
+
+<p>Offsets are per-partition. Offset 3 in Partition 0 is a completely different message from offset 3 in Partition 1. Consumers commit their offsets back to Kafka (or to an external store) so they can resume after a restart.</p>
+
+<h2>Consumer Group</h2>
+
+<p>A <strong>consumer group</strong> is a set of consumers that cooperate to read a topic. Kafka assigns each partition to <strong>exactly one consumer</strong> within the group. This is the load-balancing mechanism: add more consumers, and they split the partitions among themselves.</p>
+
+<pre><code>Topic: order-events (3 partitions)
+
+Consumer Group "notification-service":
+  Consumer 1 → reads Partition 0
+  Consumer 2 → reads Partition 1
+  Consumer 3 → reads Partition 2
+
+Consumer Group "analytics-service":
+  Consumer 1 → reads Partition 0, 1, 2 (single consumer reads all)</code></pre>
+
+<p>Different consumer groups read independently. The notification group and analytics group both get every message — they just track separate offsets. This is how one event can trigger multiple processes without wiring them together.</p>
+
+<p>If a group has <em>more consumers than partitions</em>, the extra consumers sit idle — a partition cannot be shared within a group. A group of 5 consumers reading a 3-partition topic means 2 consumers do no work.</p>
+
+<h2>Broker</h2>
+
+<p>A <strong>broker</strong> is a Kafka server. It stores partitions on disk and serves read/write requests. A Kafka cluster is one or more brokers; for development, one is enough. Production typically runs 3+ brokers so that partition replicas can survive a broker failure.</p>
+
+<pre><code>Kafka Cluster:
+┌──────────┐  ┌──────────┐  ┌──────────┐
+│ Broker 1 │  │ Broker 2 │  │ Broker 3 │
+│ (leader) │  │(follower)│  │(follower)│
+└──────────┘  └──────────┘  └──────────┘</code></pre>
+
+<p>Each partition has a <strong>leader</strong> broker that handles all reads and writes, and zero or more <strong>followers</strong> that replicate the data. If the leader goes down, a follower is promoted automatically.</p>
+
+<h2>Architecture: How It Fits Together</h2>
+
+<pre><code>┌──────────────┐                    ┌───────────────────┐
+│  Order       │  produces          │   Kafka Cluster    │
+│  Service     │───────────────────>│                     │
+│  (Producer)  │   OrderCreated     │  Topic:             │
+└──────────────┘   Event            │  order-events       │
+                                     │                     │
+┌──────────────┐                    │  ┌───────────────┐ │
+│  Notification│  consumes          │  │ Partition 0   │ │
+│  Service     │&lt;───────────────────│  │ Partition 1   │ │
+│  (Consumer)  │                    │  │ Partition 2   │ │
+└──────────────┘                    │  └───────────────┘ │
+                                     │                     │
+┌──────────────┐                    │                     │
+│  Analytics   │  consumes          │                     │
+│  Service     │&lt;───────────────────│                     │
+│  (Consumer)  │                    │                     │
+└──────────────┘                    └───────────────────┘
+                (Different consumer groups)</code></pre>
+
+<p>The Order Service produces events. The Notification Service and Analytics Service consume them from <em>different consumer groups</em> — each group gets every message, each group tracks its own offsets. If Analytics crashes at 3 AM, it resumes from its last committed offset when it comes back. No data lost, no reprocessing needed.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://kafka.apache.org/documentation/#gettingStarted" target="_blank" rel="noopener">Apache Kafka: Documentation</a> · <a href="https://docs.confluent.io/platform/current/kafka/fundamentals.html" target="_blank" rel="noopener">Confluent: Kafka Fundamentals</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. A topic has 3 partitions. A producer sends two messages for the same order ID without specifying a message key. Where do they end up?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Always in the same partition, chosen by the order ID</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Always in partition 0, the default partition for keyless messages</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Possibly in different partitions — without a key, assignment is round-robin or random</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Kafka rejects keyless messages for topics with more than one partition</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. A consumer group has 6 consumers reading a topic with 4 partitions. How many consumers are actively processing messages?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">4 — each partition is assigned to exactly one consumer; the extra 2 are idle</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">6 — Kafka splits each partition across multiple consumers in the same group</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">2 — each consumer handles multiple partitions, but only 2 are needed for 4 partitions</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">0 — the group is over-provisioned, so Kafka disables it until consumers are removed</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. A topic has 2 partitions. Partition 0 contains <code>[A, B, C]</code> and Partition 1 contains <code>[D, E]</code>. Which order is guaranteed?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A consumer will always see A before D</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A consumer will always see E before C</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Within Partition 0, B always comes after A; nothing is guaranteed across partitions</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Kafka guarantees global chronological order across all partitions</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Two consumer groups — <em>shipping</em> and <em>analytics</em> — both read from <code>order-events</code>. The shipping group has consumed up to offset 10. What does the analytics group see?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Only messages beyond offset 10 — the shipping group's progress blocks other groups</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Nothing — a topic can only have one active consumer group at a time</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">All messages from its own last committed offset — each group tracks offsets independently</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The same offset range as the shipping group — all groups share offset state</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. What happens to a consumer's position when it crashes and restarts?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It starts from offset 0 and re-reads the entire partition</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Kafka automatically replays all messages the consumer missed while down</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">It resumes from its last committed offset — any uncommitted messages may be reprocessed</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It starts reading from the newest message, skipping everything that arrived while it was down</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0035-sync-vs-async.html" class="nav-prev">← Prev</a>
+  <a href="0037-spring-kafka-producers-consumers.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

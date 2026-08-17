@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 38 — Serialization, Error Handling &amp; Dead Letter Queues</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Serialization, Error Handling &amp; Dead Letter Queues</h1>
+
+<p>Kafka stores bytes — not Java objects. Getting your events safely across that boundary requires serialization on the way in and deserialization on the way out. When deserialization fails or a consumer throws, you need a strategy beyond "crash and loop." This lesson covers the JSON type-header mechanism, the trusted-packages security gate, error handling with <code>@RetryableTopic</code>, and Dead Letter Queues.</p>
+
+<h2>Serialization: Java Object → JSON Bytes</h2>
+
+<p>When a producer calls <code>kafkaTemplate.send()</code>, the <strong>value-serializer</strong> converts the Java object to bytes before Kafka stores it. With <code>JsonSerializer</code>, two things happen:</p>
+
+<pre><code>Java Object (OrderCreatedEvent)
+  → JsonSerializer converts to JSON string
+  → JsonSerializer adds a __TypeId__ header = "com.example...OrderCreatedEvent"
+  → Kafka stores: [headers + JSON bytes]</code></pre>
+
+<p>The <code>__TypeId__</code> header is the class name of the original object. The consumer needs it — without it, the deserializer only sees raw JSON and cannot know whether to build an <code>OrderCreatedEvent</code> or an <code>OrderStatusChangedEvent</code>.</p>
+
+<h2>Deserialization: JSON Bytes → Java Object</h2>
+
+<p>On the consumer side, <code>JsonDeserializer</code> reads the <code>__TypeId__</code> header, resolves it to a Java class, and uses Jackson to map the JSON fields into a new instance of that class.</p>
+
+<pre><code>Kafka stored bytes
+  → JsonDeserializer reads __TypeId__ header
+  → JsonDeserializer resolves the fully-qualified class name
+  → Jackson maps JSON fields → Java record fields
+  → Your @KafkaListener receives a typed object</code></pre>
+
+<p>This is why your consumer method's parameter type must match the producer's event type — Spring uses the header, not the method signature, to decide which class to instantiate.</p>
+
+<h2>Trusted Packages — The Security Gate</h2>
+
+<p>Deserializing JSON into an arbitrary class is dangerous: a malicious producer could set <code>__TypeId__</code> to something like <code>java.lang.ProcessBuilder</code> and trigger code execution on the consumer. Spring blocks this by requiring you to explicitly list which packages are safe to deserialize from:</p>
+
+<pre><code>spring:
+  kafka:
+    consumer:
+      properties:
+        spring.json.trusted.packages: "com.example.ordermgmt.kafka.event"</code></pre>
+
+<p>You can use <code>"*"</code> to trust everything — convenient for development, dangerous for production. The default (no config) trusts <em>nothing</em>, and every deserialization will fail with an exception like:</p>
+
+<pre><code>org.springframework.kafka.support.serializer.JsonDeserializer:
+  This package is not trusted</code></pre>
+
+<p>If you add a new event class in a different package and forget to add that package to <code>trusted.packages</code>, your consumer will silently reject those messages.</p>
+
+<h2>What Happens When a Consumer Fails?</h2>
+
+<p>Without error handling, a consumer that throws an exception creates a <strong>poison pill</strong>: Kafka keeps the message, the consumer keeps reading it, keeps failing, and never advances. The consumer is stuck in an infinite retry loop on a single bad message while every subsequent message waits behind it.</p>
+
+<p>Spring Kafka provides three layers of defense:</p>
+
+<ol>
+  <li><strong>Retry topics</strong> — automatically move the message to a retry topic with a delay, so the main consumer continues.</li>
+  <li><strong>Exponential backoff</strong> — wait longer between each retry (1 s, 2 s, 4 s) to give transient issues time to resolve.</li>
+  <li><strong>Dead Letter Queue</strong> — after all retries are exhausted, send the message to a DLT for manual inspection.</li>
+</ol>
+
+<h2>@RetryableTopic — Automatic Retries and DLQ</h2>
+
+<p>The <code>@RetryableTopic</code> annotation creates the retry topics and the dead letter topic automatically:</p>
+
+<pre><code>@RetryableTopic(
+        attempts = "3",                                    // 3 total attempts
+        backoff = @Backoff(delay = 1000, multiplier = 2), // 1s, 2s between retries
+        dltTopic = "order-events-dlt",                     // where failed messages land
+        topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE
+)
+@KafkaListener(
+        topics = "order-events",
+        groupId = "ordermgmt-notification-group"
+)
+public void handleOrderCreated(OrderCreatedEvent event) {
+    if (event.customerName() == null || event.customerName().isBlank()) {
+        throw new RuntimeException("Cannot process order: customer name is blank");
+    }
+    log.info("processed orderId={}", event.orderId());
+}</code></pre>
+
+<p>Spring creates these topics behind the scenes:</p>
+
+<pre><code>order-events               ← main topic (first attempt)
+order-events-retry-0       ← second attempt (after 1 s delay)
+order-events-retry-1       ← third attempt (after 2 s delay)
+order-events-dlt           ← dead letter (after all retries exhausted)</code></pre>
+
+<h2>Handling the Dead Letter Queue</h2>
+
+<p>Messages that fail all retries land in the DLT. You need a listener for them — even if that listener only logs:</p>
+
+<pre><code>@KafkaListener(topics = "order-events-dlt", groupId = "ordermgmt-dlt-group")
+public void handleDlt(OrderCreatedEvent failedEvent) {
+    log.error("dlq_received orderId={} — message failed after 3 retries",
+            failedEvent.orderId());
+    // Real-world: store in DB, alert ops team, fix data, re-publish
+}</code></pre>
+
+<p>In production, the DLT handler typically persists the failed message, sends an alert, and provides a manual re-publish path. The point is that the main consumer <strong>never blocks</strong> — a bad message is quarantined, not retried infinitely.</p>
+
+<h2>The Full Error-Handling Flow</h2>
+
+<pre><code>Message arrives at order-events
+  → Consumer processes it
+     ├─ Success → done, offset advances
+     └─ Exception → moved to order-events-retry-0 (delay 1 s)
+          → Consumer retries it
+             ├─ Success → done
+             └─ Exception → moved to order-events-retry-1 (delay 2 s)
+                  → Consumer retries it
+                     ├─ Success → done
+                     └─ Exception → moved to order-events-dlt
+                          → DLT handler logs/alerts
+                          → Operations investigates and re-publishes</code></pre>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-kafka/reference/serialization.html" target="_blank" rel="noopener">Spring Kafka: Serialization</a> · <a href="https://docs.spring.io/spring-kafka/reference/retrytopic.html" target="_blank" rel="noopener">Spring Kafka: Retry Topics &amp; DLQ</a> · <a href="https://docs.spring.io/spring-kafka/reference/error-handling.html" target="_blank" rel="noopener">Spring Kafka: Error Handling</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What does the <code>__TypeId__</code> header added by <code>JsonSerializer</code> contain?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The Kafka topic name the message was sent to</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">The fully-qualified class name of the serialized Java object</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The JSON schema used to validate the message</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The partition number the message was assigned to</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. You add a new event class in <code>com.example.ordermgmt.billing.event</code> but forget to update <code>spring.json.trusted.packages</code>. What happens to those messages?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">They are deserialized without any class information</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">They are rejected — the deserializer throws a "package is not trusted" exception</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">They are deserialized into <code>Object</code> instead of the target type</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">They are silently dropped with no error logged</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. A consumer throws an exception on every message and has no error handling configured. What is the result?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Kafka skips the failed message and advances the offset automatically</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">The consumer keeps retrying the same message indefinitely — a poison pill</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring automatically moves the message to a retry topic</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The consumer stops and must be restarted manually</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. With <code>@RetryableTopic(attempts = "3", backoff = @Backoff(delay = 1000, multiplier = 2))</code>, how many topics does Spring create for retries (not counting the main topic and DLT)?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">2 retry topics (retry-0 and retry-1)</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">3 retry topics (retry-0, retry-1, retry-2)</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">1 retry topic (retry-0)</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">0 retry topics — retries happen on the main topic with delays</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Setting <code>spring.json.trusted.packages</code> to <code>"*"</code> means the consumer will deserialize classes from any package. Why is this dangerous in production?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It increases memory usage because Spring loads every class on the classpath</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">A malicious producer could set <code>__TypeId__</code> to a dangerous class and trigger arbitrary code execution</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Jackson will fail to resolve ambiguous class names across packages</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It disables the <code>__TypeId__</code> header entirely, breaking type-based deserialization</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0037-spring-kafka-producers-consumers.html" class="nav-prev">← Prev</a>
+  <a href="0039-kafka-delivery-semantics.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

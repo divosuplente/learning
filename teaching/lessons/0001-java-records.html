@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1 — Java Records: Boilerplate-Free Data Classes</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Java Records: Boilerplate-Free Data Classes</h1>
+
+<p>If you've written data-carrying classes in any language, you know the drill: constructor, getters, <code>equals()</code>, <code>hashCode()</code>, <code>toString()</code> — easily 50 lines of identical structure for something that should be one.</p>
+
+<p>Java 16 introduced <strong>records</strong> to solve this. A record is an <strong>immutable data carrier</strong>. The compiler generates all that boilerplate for you.</p>
+<p><strong>JDK version:</strong> Spring Boot 4.1 supports Java 17, 21, 25, and 26. Java 21+ is recommended as the practical baseline — it gives you records, sealed types, pattern matching, and virtual threads. If you're starting fresh, install JDK 21.</p>
+
+<h2>Your first record</h2>
+
+<pre><code>public record Customer(
+    String id,
+    String name,
+    String email) {}
+</code></pre>
+
+<p>That's it. You automatically get:</p>
+
+<ul>
+  <li><code>customer.id()</code>, <code>customer.name()</code>, <code>customer.email()</code> — accessor methods</li>
+  <li><code>equals()</code> and <code>hashCode()</code> — correct, field-based implementations</li>
+  <li><code>toString()</code> — readable output like <code>Customer[id=1, name=Alice, email=alice@example.com]</code></li>
+  <li>A constructor — <code>new Customer("1", "Alice", "alice@example.com")</code></li>
+</ul>
+
+<p>Records are <strong>immutable by design</strong>. There are no setters. Once created, a record's state cannot change. This makes them thread-safe and predictable — two qualities you'll rely on constantly in backend systems.</p>
+
+<h2>Why this matters for your mission</h2>
+
+<p>Records appear everywhere in the courses ahead: as DTOs (data transfer objects) between API layers, as domain models, and as Kafka message payloads. Mastering them now saves you from boilerplate fatigue for the entire learning path.</p>
+
+<p><strong>Primary source:</strong> <a href="https://docs.oracle.com/en/java/javase/21/language/records.html" target="_blank" rel="noopener">Oracle: Records (Java 21)</a></p>
+
+<h2>Validating record fields</h2>
+
+<p>By default, records accept <code>null</code> values. In backend systems, <code>null</code> almost always means a bug waiting to happen. Records support a <strong>compact constructor</strong> — a validation block that runs during construction (before field assignment):</p>
+
+<pre><code>public record Order(
+    String id,
+    String customerName,
+    java.math.BigDecimal total) {
+
+    // Compact constructor — validates during construction
+    public Order {
+        if (id == null || customerName == null) {
+            throw new IllegalArgumentException("id and customerName must not be null");
+        }
+        if (total == null || total.compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("total must be a non-negative amount");
+        }
+    }
+}
+</code></pre>
+
+<p>This fails <strong>fast and close to the source</strong>. Instead of a <code>NullPointerException</code> deep in some other method, the error surfaces at the point where bad data enters.</p>
+
+<p><strong>Key takeaway:</strong> Records allow <code>null</code> by default. Add a compact constructor when <code>null</code> would break your logic.</p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. Which of the following is true about Java records?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">They provide mutable state via setters</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">They are immutable and auto-generate equals/hashCode/toString</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">They can only hold primitive types</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">They require manual constructor definition</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. How do you access the <code>name</code> field of <code>Customer c</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">c.name</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">c.getName()</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">c.name()</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">c.get("name")</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. What happens if you try to create a record with a <code>null</code> field?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Compile-time error</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">It is allowed unless you add validation</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Runtime exception always thrown</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The field is silently replaced</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. In a compact constructor, what happens if you reassign a parameter?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Compile-time error — reassignment is forbidden</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The reassigned value is used for that field</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The original value is kept, reassignment ignored</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">A runtime exception is always thrown</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Which statement about records vs regular classes is <strong>incorrect</strong>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Records cannot extend another class</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Records can declare instance fields outside the header</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Records are implicitly final and cannot be subclassed</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Records can implement interfaces</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="#" class="nav-disabled">← Prev</a>
+  <a href="0002-record-composition-and-dtos.html" class="nav-next">Next →</a>
+</div>
+
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 3 — Generics</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Generics</h1>
+
+<p>Without generics, collections held <code>Object</code> and you cast on retrieval — bugs surfaced at runtime, not compile time. Generics let you write <strong>type-safe, reusable code</strong> where the compiler catches mismatches before the program runs.</p>
+
+<h2>A generic class</h2>
+
+<pre><code>class Box&lt;T&gt; {
+    private final List&lt;T&gt; items = new ArrayList&lt;&gt;();
+
+    public void add(T item) { items.add(item); }
+    public T get(int index)    { return items.get(index); }
+    public int size()          { return items.size(); }
+}
+</code></pre>
+
+<p><code>Box&lt;String&gt;</code> only accepts strings; <code>Box&lt;Integer&gt;</code> only accepts integers. The wrong type is a compile error, not a runtime <code>ClassCastException</code>.</p>
+
+<pre><code>Box&lt;String&gt; sb = new Box&lt;&gt;();
+sb.add("hello");  // ✅
+sb.add(42);       // ❌ compile-time error
+</code></pre>
+
+<h2>Bounded type parameters</h2>
+
+<p>Constrain <code>T</code> to a hierarchy with <code>extends</code>:</p>
+
+<pre><code>public class Statistics&lt;T extends Number&gt; {
+    private final List&lt;T&gt; data = new ArrayList&lt;&gt;();
+
+    public void add(T value) { data.add(value); }
+
+    public double average() {
+        double sum = 0;
+        for (T n : data) {
+            sum += n.doubleValue(); // Number method — available because T extends Number
+        }
+        return sum / data.size();
+    }
+}
+</code></pre>
+
+<p>Without the bound, the compiler wouldn't know <code>T</code> has <code>doubleValue()</code>. The bound makes that method available and prevents <code>Statistics&lt;String&gt;</code> from compiling.</p>
+
+<h2>Wildcards and PECS</h2>
+
+<p>Wildcards make generic APIs flexible. The mnemonic is <strong>PECS</strong>: <em>Producer Extends, Consumer Super</em>.</p>
+
+<pre><code>// Reading from the list (it "produces" values) → ? extends T
+public double sumAll(List&lt;? extends Number&gt; numbers) {
+    double sum = 0;
+    for (Number n : numbers) { sum += n.doubleValue(); }
+    return sum;
+}
+
+// Writing to the list (it "consumes" values) → ? super T
+public void addIntegers(List&lt;? super Integer&gt; list) {
+    for (int i = 1; i &lt;= 10; i++) { list.add(i); }
+}
+</code></pre>
+
+<p><code>? extends Number</code> lets you read <code>Number</code> safely but you <strong>cannot add</strong> — you don't know whether the list holds <code>Integer</code>, <code>Double</code>, or something else. <code>? super Integer</code> lets you add <code>Integer</code> safely but you can only read <code>Object</code>. If you need to read <em>and</em> write, don't use a wildcard — use <code>&lt;T&gt;</code>.</p>
+
+<h2>Type erasure</h2>
+
+<p>Generics exist only at compile time. At runtime, <code>Box&lt;String&gt;</code> and <code>Box&lt;Integer&gt;</code> are both just <code>Box</code>. This is <strong>type erasure</strong>:</p>
+
+<pre><code>Box&lt;String&gt; a = new Box&lt;&gt;();
+Box&lt;Integer&gt; b = new Box&lt;&gt;();
+System.out.println(a.getClass() == b.getClass()); // true — both are Box.class
+</code></pre>
+
+<p>Consequences: you <strong>cannot</strong> write <code>new T()</code>, <code>T.class</code>, or <code>instanceof T</code>. If you need the class at runtime, pass it explicitly:</p>
+
+<pre><code>public &lt;T&gt; List&lt;T&gt; filterByType(List&lt;?&gt; items, Class&lt;T&gt; type) {
+    List&lt;T&gt; result = new ArrayList&lt;&gt;();
+    for (Object item : items) {
+        if (type.isInstance(item)) { result.add(type.cast(item)); }
+    }
+    return result;
+}
+</code></pre>
+
+<p><strong>Primary source:</strong> <a href="https://docs.oracle.com/javase/tutorial/java/generics/" target="_blank" rel="noopener">Oracle: Generics (Java Tutorials)</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What is the main benefit of generics over using Object with casts?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Generics make code run significantly faster at runtime</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Type errors are caught at compile time instead of runtime</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Generics reduce the total memory used by objects</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Generics allow a single class to extend multiple parents</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. Given <code>class Stats&lt;T extends Number&gt;</code>, why does <code>T.doubleValue()</code> compile?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Every Java object has a doubleValue method defined</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">The bound guarantees T is a Number, which defines doubleValue</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The compiler infers doubleValue from the variable name</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Type erasure replaces T with Object, which has doubleValue</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. A method reads values from <code>List&lt;? extends Number&gt;</code>. Why can't it add an Integer to the list?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">The actual list might be List&lt;Double&gt;, which rejects Integer</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Integer does not extend Number, so it is not a valid element</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Wildcards disable all mutation regardless of the bound type</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The extends keyword makes the list immutable at compile time</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. <code>List&lt;? super Integer&gt;</code> can hold which of these as actual list types?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Only List&lt;Integer&gt; — the super must match exactly</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">List&lt;Integer&gt; and List&lt;Double&gt; — any Number subtype</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">List&lt;Integer&gt;, List&lt;Number&gt;, and List&lt;Object&gt; — Integer or supertypes</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">List&lt;Object&gt; only — super always means Object in practice</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Why does <code>new T()</code> fail inside a generic class <code>Box&lt;T&gt;</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The T constructor requires arguments that are not available</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Generic classes are forbidden from instantiating type variables</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Type erasure removes T at runtime, so the JVM cannot know which constructor to call</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The compiler cannot verify that T has a public no-arg constructor</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0002-record-composition-and-dtos.html">← Prev</a>
+  <a href="0004-pattern-matching.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

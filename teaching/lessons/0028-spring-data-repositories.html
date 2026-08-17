@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 28 — Spring Data Repositories: JpaRepository &amp; Derived Queries</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Spring Data Repositories: JpaRepository &amp; Derived Queries</h1>
+
+<p>You defined your entities in the last lesson. Now comes the surprising part: <strong>you write almost no data-access code</strong>. Spring Data JPA's <code>JpaRepository</code> interface gives you a full CRUD repository just by extending it — and when the built-in methods aren't enough, you name a method and Spring <em>generates the SQL</em>.</p>
+
+<h2>JpaRepository — the interface that replaces your DAO</h2>
+
+<p>Declare a repository by extending <code>JpaRepository&lt;Entity, Id&gt;</code>:</p>
+
+<pre><code>@Repository
+public interface CustomerRepository
+    extends JpaRepository&lt;CustomerEntity, Long&gt; {
+}</code></pre>
+
+<p>That's it. No class, no implementation. At startup, Spring Data <strong>generates a proxy class</strong> that implements every method. You inject <code>CustomerRepository</code> wherever you need data access and call methods on it like any other bean.</p>
+
+<p>The two type parameters tell Spring everything: <code>CustomerEntity</code> is the domain type, <code>Long</code> is the primary-key type.</p>
+
+<h2>The free CRUD methods</h2>
+
+<p><code>JpaRepository</code> inherits from three parent interfaces (<code>CrudRepository</code>, <code>ListCrudRepository</code>, <code>PagingAndSortingRepository</code>), giving you these methods <strong>without writing a single line</strong>:</p>
+
+<table>
+  <tr><th>Method</th><th>What it does</th></tr>
+  <tr><td><code>save(entity)</code></td><td>INSERT if new, UPDATE if the entity has an ID</td></tr>
+  <tr><td><code>findById(id)</code></td><td>Returns <code>Optional&lt;T&gt;</code> — empty if not found</td></tr>
+  <tr><td><code>findAll()</code></td><td>Returns <code>List&lt;T&gt;</code> of every row</td></tr>
+  <tr><td><code>findAllById(ids)</code></td><td>All entities matching the given IDs</td></tr>
+  <tr><td><code>deleteById(id)</code></td><td>Delete by primary key</td></tr>
+  <tr><td><code>delete(entity)</code></td><td>Delete a managed entity</td></tr>
+  <tr><td><code>count()</code></td><td>Number of rows</td></tr>
+  <tr><td><code>existsById(id)</code></td><td><code>true</code> if a row with that key exists</td></tr>
+  <tr><td><code>findAll(Pageable)</code></td><td>Paginated result (covered in lesson 29)</td></tr>
+</table>
+
+<p>Using them is straightforward:</p>
+
+<pre><code>// Create
+CustomerEntity alice = new CustomerEntity("Alice", "alice@ex.com", "1 Main St");
+customerRepository.save(alice);
+
+// Read
+Optional&lt;CustomerEntity&gt; found = customerRepository.findById(1L);
+CustomerEntity c = found.orElseThrow(() ->
+    new NoSuchElementException("customer not found"));
+
+// Delete
+customerRepository.deleteById(1L);
+
+// Check
+boolean exists = customerRepository.existsById(1L); // false</code></pre>
+
+<h2>Derived query methods — name it, Spring writes it</h2>
+
+<p>The free methods handle lookups by ID. For everything else — find by email, find by category, find by status — you add a <strong>derived query method</strong> to your interface. Spring parses the method name at startup and generates the SQL:</p>
+
+<pre><code>@Repository
+public interface CustomerRepository
+    extends JpaRepository&lt;CustomerEntity, Long&gt; {
+
+    // SELECT * FROM customers WHERE email = ?
+    Optional&lt;CustomerEntity&gt; findByEmail(String email);
+}</code></pre>
+
+<pre><code>@Repository
+public interface ProductRepository
+    extends JpaRepository&lt;ProductEntity, Long&gt; {
+
+    // SELECT * FROM products WHERE category = ?
+    List&lt;ProductEntity&gt; findByCategory(String category);
+
+    // SELECT * FROM products WHERE stock < ?
+    List&lt;ProductEntity&gt; findByStockLessThan(int threshold);
+
+    // SELECT * FROM products WHERE LOWER(name) LIKE LOWER(?)
+    List&lt;ProductEntity&gt; findByNameContainingIgnoreCase(String name);
+}</code></pre>
+
+<pre><code>@Repository
+public interface OrderRepository
+    extends JpaRepository&lt;OrderEntity, Long&gt; {
+
+    // SELECT * FROM orders WHERE customer_id = ?
+    List&lt;OrderEntity&gt; findByCustomerId(Long customerId);
+
+    // SELECT * FROM orders WHERE customer_id = ? AND status = ?
+    List&lt;OrderEntity&gt; findByCustomerIdAndStatus(
+        Long customerId, OrderStatus status);
+}</code></pre>
+
+<p><strong>No implementation. No SQL. No <code>@Query</code>.</strong> The method name <em>is</em> the query.</p>
+
+<h2>How Spring parses the method name</h2>
+
+<p>The parser splits the name into subject, predicate, and order clauses:</p>
+
+<pre><code>find  By  Category  And  StockLessThan  OrderByNameAsc
+───── ──  ────────  ───  ──────────────  ──────────────
+subj  By  property  And  property+op     sort clause</code></pre>
+
+<p>The subject prefix determines the return shape:</p>
+
+<table>
+  <tr><th>Prefix</th><th>Typical return type</th><th>Example</th></tr>
+  <tr><td><code>findBy</code></td><td><code>List&lt;T&gt;</code> or <code>Optional&lt;T&gt;</code></td><td><code>findByEmail</code></td></tr>
+  <tr><td><code>existsBy</code></td><td><code>boolean</code></td><td><code>existsByEmail</code></td></tr>
+  <tr><td><code>countBy</code></td><td><code>long</code></td><td><code>countByCategory</code></td></tr>
+  <tr><td><code>deleteBy</code></td><td><code>long</code> (count deleted)</td><td><code>deleteByStatus</code></td></tr>
+</table>
+
+<h2>Keyword reference</h2>
+
+<p>Between property names you connect with <code>And</code> / <code>Or</code>. After a property name you can append a keyword:</p>
+
+<table>
+  <tr><th>Keyword</th><th>SQL equivalent</th><th>Example method</th></tr>
+  <tr><td><code>Containing</code></td><td><code>LIKE '%val%'</code></td><td><code>findByNameContaining</code></td></tr>
+  <tr><td><code>StartingWith</code></td><td><code>LIKE 'val%'</code></td><td><code>findByNameStartingWith</code></td></tr>
+  <tr><td><code>EndingWith</code></td><td><code>LIKE '%val'</code></td><td><code>findByEmailEndingWith</code></td></tr>
+  <tr><td><code>IgnoreCase</code></td><td>case-insensitive comparison</td><td><code>findByEmailIgnoreCase</code></td></tr>
+  <tr><td><code>LessThan</code></td><td><code>&lt;</code></td><td><code>findByStockLessThan</code></td></tr>
+  <tr><td><code>GreaterThan</code></td><td><code>&gt;</code></td><td><code>findByPriceGreaterThan</code></td></tr>
+  <tr><td><code>Between</code></td><td><code>BETWEEN ? AND ?</code></td><td><code>findByPriceBetween</code></td></tr>
+  <tr><td><code>After</code></td><td><code>&gt;</code> (dates)</td><td><code>findByCreatedAtAfter</code></td></tr>
+  <tr><td><code>Before</code></td><td><code>&lt;</code> (dates)</td><td><code>findByCreatedAtBefore</code></td></tr>
+  <tr><td><code>In</code></td><td><code>IN (?)</code></td><td><code>findByStatusIn</code></td></tr>
+  <tr><td><code>IsNull</code></td><td><code>IS NULL</code></td><td><code>findByAddressIsNull</code></td></tr>
+  <tr><td><code>OrderBy…Asc/Desc</code></td><td><code>ORDER BY</code></td><td><code>findByCategoryOrderByPriceDesc</code></td></tr>
+</table>
+
+<p><strong>Limit:</strong> Derived queries work for straightforward lookups. When you need <code>JOIN</code>s, subqueries, <code>GROUP BY</code>, or projections, switch to <code>@Query</code> (covered in lesson 29).</p>
+
+<h2>Nested property traversal</h2>
+
+<p>You can traverse relationships in the method name. Given <code>OrderEntity</code> has a <code>customer</code> field of type <code>CustomerEntity</code>:</p>
+
+<pre><code>// SELECT * FROM orders o
+//   JOIN customers c ON o.customer_id = c.id
+//   WHERE c.name = ?
+List&lt;OrderEntity&gt; findByCustomerName(String name);</code></pre>
+
+<p>Spring resolves <code>CustomerName</code> as <code>customer.name</code> — it walks the object graph. This is convenient but generates a JOIN, so be aware of the query cost.</p>
+
+<h2>Using repositories in a service</h2>
+
+<p>Repositories are Spring beans — inject them via constructor injection:</p>
+
+<pre><code>@Service
+public class CustomerService {
+
+    private final CustomerRepository customerRepository;
+
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
+
+    public Optional&lt;CustomerEntity&gt; findByEmail(String email) {
+        return customerRepository.findByEmail(email);
+    }
+
+    public CustomerEntity create(String name, String email, String addr) {
+        CustomerEntity customer = new CustomerEntity(name, email, addr);
+        return customerRepository.save(customer);
+    }
+}</code></pre>
+
+<p>Note that <code>findByEmail</code> is our derived method — the service never writes SQL.</p>
+
+<p><strong>Primary source:</strong> <a href="https://docs.spring.io/spring-data/jpa/reference/repositories/core-extensions.html" target="_blank" rel="noopener">Spring Data JPA: JpaRepository</a> · <a href="https://docs.spring.io/spring-data/jpa/reference/repositories/query-methods-details.html" target="_blank" rel="noopener">Query Method Details</a> · <a href="https://docs.spring.io/spring-data/jpa/reference/repositories/definition.html" target="_blank" rel="noopener">Repository Definition</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What do you have to implement when you extend <code>JpaRepository&lt;CustomerEntity, Long&gt;</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">All CRUD methods (save, findById, findAll, delete)</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Nothing — Spring generates the implementation at runtime</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only the derived query methods you declare</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">A no-argument constructor and a factory method</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. What SQL does <code>findByEmailIgnoreCase(String email)</code> generate?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>SELECT * FROM customers WHERE email = ?</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>SELECT * FROM customers WHERE email LIKE ?</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0"><code>SELECT * FROM customers WHERE LOWER(email) = LOWER(?)</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>SELECT * FROM customers WHERE email ILIKE ?</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. What does <code>save(entity)</code> do if the entity already has a non-null ID?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Throws <code>DuplicateKeyException</code></li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Inserts a duplicate row with a new generated ID</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Performs an UPDATE on the existing row</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Merges only the non-null fields into the database</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. What is a limitation of derived query methods that should push you toward <code>@Query</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">They cannot accept more than one parameter</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">They only work with <code>findBy</code>; <code>existsBy</code> and <code>countBy</code> are unsupported</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">They cannot express JOINs, subqueries, or GROUP BY</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">They bypass the JPA provider and execute raw SQL directly</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Given <code>OrderEntity</code> has a <code>customer</code> field, what does <code>findByCustomerName(String n)</code> do?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Finds orders where the customer field name equals <code>n</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Traverses the relationship and generates a JOIN on the customers table</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Fails at startup — nested property traversal is not supported</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Calls <code>customer.getName()</code> on every order loaded by <code>findAll()</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0027-jpa-entities.html" class="nav-prev">← Prev</a>
+  <a href="0029-custom-queries-and-n-plus-1.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

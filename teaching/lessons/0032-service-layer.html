@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 32 — The Service Layer &amp; @Transactional</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>The Service Layer &amp; <code>@Transactional</code></h1>
+
+<p>In layered architecture, the service layer is the <strong>brain</strong> — it enforces business rules, orchestrates repository calls, and keeps controllers thin. But when a single method touches multiple tables, you need a guarantee: either everything saves correctly, or nothing does. That guarantee is <code>@Transactional</code>.</p>
+
+<h2>What belongs in a service method?</h2>
+
+<p>A service method does three things a controller or repository won't:</p>
+
+<ul>
+  <li><strong>Business rules</strong> — "An order must be PENDING to confirm it."</li>
+  <li><strong>Orchestration</strong> — look up the customer, check stock, reserve stock, calculate total, save the order — all in one call.</li>
+  <li><strong>Transaction boundaries</strong> — if any step fails, undo every database change made so far.</li>
+</ul>
+
+<p>Controllers handle HTTP. Repositories handle SQL. <strong>Everything between them is the service layer's job.</strong></p>
+
+<h2>The <code>@Transactional</code> annotation</h2>
+
+<p>Spring's <code>@Transactional</code> wraps a method in a database transaction. The lifecycle is simple:</p>
+
+<ol>
+  <li><strong>Before the method</strong> — Spring opens a transaction (starts a database connection and begins a unit of work).</li>
+  <li><strong>During the method</strong> — every <code>save()</code>, <code>delete()</code>, or update happens inside that transaction. Other transactions can't see your uncommitted changes.</li>
+  <li><strong>After the method</strong> — if the method returns normally, Spring <strong>commits</strong> the transaction (all changes become permanent). If an unhandled runtime exception propagates out, Spring <strong>rolls back</strong> the transaction (every change is undone).</li>
+</ol>
+
+<pre><code>@Transactional
+public OrderResponse createOrder(CreateOrderRequest request) {
+    // Transaction starts here ─────────────────────┐
+    Customer customer = customerRepository           // │
+            .findById(request.customerId())          // │
+            .orElseThrow(() -> new CustomerNotFoundException(...));
+                                                     // │
+    // If this throws, everything above is rolled back
+    product.setStock(product.getStock() - qty);      // │
+    productRepository.save(product);                 // │
+                                                     // │
+    OrderEntity saved = orderRepository.save(order);
+    return OrderResponse.from(saved);
+    // Transaction commits here ─────────────────────┘
+}</code></pre>
+
+<p>Coincidence is not a strategy. Without <code>@Transactional</code>, each <code>save()</code> commits independently — a crash after the first save leaves the database inconsistent.</p>
+
+<h2>Read-only transactions</h2>
+
+<p>Not every service method writes data. For read operations, use <code>@Transactional(readOnly = true)</code>:</p>
+
+<pre><code>@Transactional(readOnly = true)
+public OrderResponse getOrderById(Long id) {
+    return orderRepository.findById(id)
+            .map(OrderResponse::from)
+            .orElseThrow(() -> new OrderNotFoundException(id));
+}</code></pre>
+
+<p><code>readOnly = true</code> is not just documentation — it's a <strong>performance hint</strong>. The database and ORM can:</p>
+
+<ul>
+  <li>Skip dirty-checking (no need to compare entity state at flush time).</li>
+  <li>Avoid acquiring write locks on rows.</li>
+  <li>Route the query to a read replica if one is configured.</li>
+</ul>
+
+<p>Rule of thumb: <strong>every public service method should be <code>@Transactional</code></strong>. If it only reads, add <code>readOnly = true</code>. If it writes, leave the default.</p>
+
+<h2>How <code>@Transactional</code> really works — proxy-based AOP</h2>
+
+<p>Spring does not modify your class bytecode. Instead, it creates a <strong>proxy</strong> — a wrapper object that intercepts calls to your bean. When you call <code>orderService.createOrder(…)</code>, you're calling the proxy, which:</p>
+
+<ol>
+  <li>Opens a transaction from the <code>PlatformTransactionManager</code>.</li>
+  <li>Delegates to the real <code>createOrder</code> method.</li>
+  <li>On normal return: commits. On exception: rolls back.</li>
+</ol>
+
+<p>This proxy mechanism has a critical consequence: <strong><code>@Transactional</code> on a <code>private</code> or <code>protected</code> method does nothing.</strong> The proxy can only intercept <code>public</code> methods. A <code>private</code> method call is a direct <code>this.method()</code> inside the class — the proxy never sees it, no transaction is opened.</p>
+
+<pre><code>// WRONG — transaction is never created
+@Transactional
+private void reserveStock(ProductEntity product, int qty) { ... }
+
+// RIGHT — make it public, or call it from a transactional public method
+@Transactional
+public void reserveStock(ProductEntity product, int qty) { ... }</code></pre>
+
+<h2>Rollback rules</h2>
+
+<p>By default, <code>@Transactional</code> rolls back on <strong>unchecked exceptions</strong> (subclasses of <code>RuntimeException</code>) but <strong>not</strong> on checked exceptions. This is a deliberate design choice — checked exceptions are declared in the method signature and are expected; runtime exceptions signal unexpected failure.</p>
+
+<pre><code>// Rolls back: runtime exception
+@Transactional
+public void createOrder() {
+    throw new InsufficientStockException(...); // unchecked → rollback
+}
+
+// Does NOT roll back by default: checked exception
+@Transactional
+public void createOrder() throws IOException {
+    throw new IOException("disk full"); // checked → committed!
+}
+
+// Override: roll back on checked exceptions too
+@Transactional(rollbackFor = Exception.class)
+public void createOrder() throws IOException {
+    throw new IOException("disk full"); // now rolls back
+}</code></pre>
+
+<p>Always use <code>rollbackFor = Exception.class</code> when your method declares checked exceptions. For service methods that only throw runtime exceptions (the common case), the default is fine.</p>
+
+<h2>Complete <code>OrderService</code> example</h2>
+
+<pre><code>@Service
+public class OrderService {
+
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final CustomerRepository customerRepository;
+
+    public OrderService(OrderRepository orderRepository,
+                        ProductRepository productRepository,
+                        CustomerRepository customerRepository) {
+        this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+        this.customerRepository = customerRepository;
+    }
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        CustomerEntity customer = customerRepository.findById(request.customerId())
+                .orElseThrow(() -> new CustomerNotFoundException(request.customerId()));
+
+        OrderEntity order = new OrderEntity();
+        order.setCustomer(customer);
+        order.setStatus(OrderStatus.PENDING);
+        order.setCreatedAt(Instant.now());
+
+        BigDecimal total = BigDecimal.ZERO;
+        for (CreateOrderItemRequest item : request.items()) {
+            ProductEntity product = productRepository.findById(item.productId())
+                    .orElseThrow(() -> new ProductNotFoundException(item.productId()));
+
+            if (product.getStock() < item.quantity()) {
+                throw new InsufficientStockException(
+                        product.getId(), product.getStock(), item.quantity());
+            }
+
+            product.setStock(product.getStock() - item.quantity());
+            productRepository.save(product);
+
+            OrderItemEntity orderItem = new OrderItemEntity();
+            orderItem.setProduct(product);
+            orderItem.setQuantity(item.quantity());
+            orderItem.setUnitPrice(product.getPrice());
+            orderItem.setOrder(order);
+            order.getItems().add(orderItem);
+
+            total = total.add(product.getPrice()
+                    .multiply(BigDecimal.valueOf(item.quantity())));
+        }
+        order.setTotalAmount(total);
+
+        return OrderResponse.from(orderRepository.save(order));
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderById(Long id) {
+        return orderRepository.findById(id)
+                .map(OrderResponse::from)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;OrderResponse&gt; getOrdersByCustomer(Long customerId) {
+        return orderRepository.findByCustomerId(customerId).stream()
+                .map(OrderResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public OrderResponse confirmOrder(Long orderId) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Order must be PENDING to confirm");
+        }
+        order.setStatus(OrderStatus.CONFIRMED);
+        return OrderResponse.from(orderRepository.save(order));
+    }
+
+    @Transactional
+    public OrderResponse cancelOrder(Long orderId) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        if (order.getStatus() == OrderStatus.DELIVERED) {
+            throw new IllegalStateException("Cannot cancel a delivered order");
+        }
+
+        for (OrderItemEntity item : order.getItems()) {
+            ProductEntity product = item.getProduct();
+            product.setStock(product.getStock() + item.getQuantity());
+            productRepository.save(product);
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        return OrderResponse.from(orderRepository.save(order));
+    }
+}</code></pre>
+
+<p>Notice the pattern: <strong>write methods use <code>@Transactional</code></strong>, <strong>read methods use <code>@Transactional(readOnly = true)</code></strong>. Every public method is transactional. Every method tosses domain-specific exceptions rather than returning <code>null</code>.</p>
+
+<h2>What makes this a good service?</h2>
+
+<ul>
+  <li><strong>Single responsibility</strong> — only order-related business logic.</li>
+  <li><strong>Constructor injection</strong> — dependencies are explicit and <code>final</code>.</li>
+  <li><strong>Transaction boundaries</strong> — every method declares its transactional intent.</li>
+  <li><strong>Domain exceptions</strong> — <code>OrderNotFoundException</code>, <code>InsufficientStockException</code> — not generic <code>RuntimeException</code>.</li>
+  <li><strong>DTOs in and out</strong> — <code>CreateOrderRequest</code> enters, <code>OrderResponse</code> exits. Entities never leak to the controller.</li>
+</ul>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html" target="_blank" rel="noopener">Spring: @Transactional</a> · <a href="https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-advice-above.html" target="_blank" rel="noopener">Spring: Transactional Advice</a> · <a href="https://docs.oracle.com/javase/tutorial/jdbc/basics/transactions.html" target="_blank" rel="noopener">Oracle: JDBC Transactions</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What happens when a method annotated with <code>@Transactional</code> throws a <code>RuntimeException</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The transaction commits and the exception is logged</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">The transaction rolls back and no changes are persisted</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The transaction is paused until the exception is caught</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only changes made before the exception are committed</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. Why does <code>@Transactional</code> on a <code>private</code> method have no effect?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Private methods cannot access the database</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Spring replaces private methods with public ones at startup</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">The Spring proxy intercepts only public calls; private and protected calls bypass it</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Private methods are always transactional by default</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. What is the concrete benefit of <code>@Transactional(readOnly = true)</code> over plain <code>@Transactional</code> for a method that only reads data?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">It prevents the method from calling any repository methods</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">It skips dirty-checking and avoids write locks, allowing database optimizations</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">It makes the method execute in a separate thread</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">It disables lazy loading of entity relationships</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. In <code>createOrder</code>, if <code>InsufficientStockException</code> is thrown after two products have already had their stock decremented and saved, what is the state of the database?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The two products are decremented but the order is not saved</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">All changes are rolled back — stock and order are unchanged</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Only the second product's stock change is rolled back</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The changes are committed because the saves already happened</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. By default, <code>@Transactional</code> does <strong>not</strong> roll back on which kind of exception?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>NullPointerException</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>IllegalArgumentException</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0"><code>IOException</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>RuntimeException</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0031-layered-architecture.html" class="nav-prev">← Prev</a>
+  <a href="0033-dtos-and-events.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

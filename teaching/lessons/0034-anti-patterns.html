@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 34 — Common Anti-Patterns &amp; Module Review</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Common Anti-Patterns &amp; Module Review</h1>
+
+<p>Knowing the right architecture is half the battle. The other half is <strong>recognizing when you've drifted</strong>. This lesson covers four anti-patterns that creep into Spring Boot codebases, explains when pragmatism beats purity, and ties together everything from Modules 02–05.</p>
+
+<h2>Anti-Pattern 1: Fat Controller</h2>
+
+<p>A <strong>fat controller</strong> stuffs business logic — validation, calculations, data access — into the controller instead of delegating to the service layer. The controller inflates from 5 lines per method to 50.</p>
+
+<pre><code>// BAD — controller doing business logic
+@PostMapping("/orders")
+public ResponseEntity&lt;OrderResponse&gt; createOrder(
+        @RequestBody CreateOrderRequest request) {
+    CustomerEntity customer = customerRepository
+        .findById(request.customerId()).orElseThrow();
+    OrderEntity order = new OrderEntity();
+    order.setCustomer(customer);
+    for (CreateOrderItemRequest item : request.items()) {
+        ProductEntity product = productRepository
+            .findById(item.productId()).orElseThrow();
+        product.setStock(product.getStock() - item.quantity());
+        productRepository.save(product);
+        // ... 20 more lines of logic
+    }
+    orderRepository.save(order);
+    return ResponseEntity.ok(OrderResponse.from(order));
+}</code></pre>
+
+<p>The controller now <em>depends on</em> <code>CustomerRepository</code>, <code>ProductRepository</code>, and <code>OrderRepository</code> — three dependencies it should never know about. It also bypasses <code>@Transactional</code>, so a partial failure leaves the database in an inconsistent state.</p>
+
+<p><strong>Fix:</strong> Move every business rule into the service. A controller method should be receive → delegate → return — three lines.</p>
+
+<pre><code>// GOOD — thin controller
+@PostMapping("/orders")
+public ResponseEntity&lt;OrderResponse&gt; createOrder(
+        @Valid @RequestBody CreateOrderRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(orderService.createOrder(request));
+}</code></pre>
+
+<h2>Anti-Pattern 2: Anemic Domain Model</h2>
+
+<p>An <strong>anemic domain model</strong> has entities that are just bags of getters and setters — no behavior. All logic lives in the service, which becomes a procedural script draped over objects.</p>
+
+<pre><code>// BAD — entity with no behavior
+order.setStatus(OrderStatus.CONFIRMED);
+order.setTotalAmount(BigDecimal.ZERO);
+// Service calculates totals, enforces state transitions, etc.</code></pre>
+
+<p>Nothing stops a caller from setting an <code>OrderStatus</code> of <code>CONFIRMED</code> on a cancelled order, or a negative total. The entity can't defend its own invariants.</p>
+
+<pre><code>// GOOD — entity encapsulates its rules
+OrderEntity order = new OrderEntity(customer);
+order.addItem(product, 3);   // entity calculates line total
+order.confirm();              // entity enforces state transitions</code></pre>
+
+<p>When the entity owns its rules, the service orchestrates <em>workflow</em> (find customer, reserve stock, save) without micromanaging state. If the rule for "confirmed" changes, you change it in one place — the entity — not across twelve service methods.</p>
+
+<h2>Anti-Pattern 3: Transaction Manager Anti-Pattern</h2>
+
+<p>This is the subtlest anti-pattern. It happens when a <strong>service method manages transactions manually</strong> or when transaction boundaries are placed at the wrong layer. The classic form: a service calls multiple repository methods without <code>@Transactional</code>, relying on each save to commit independently — or slapping <code>@Transactional</code> on the controller instead of the service.</p>
+
+<pre><code>// BAD — no transaction boundary; partial writes on failure
+public OrderResponse createOrder(CreateOrderRequest request) {
+    CustomerEntity customer = customerRepo.findById(request.customerId())
+        .orElseThrow(() -> new CustomerNotFoundException(request.customerId()));
+    OrderEntity order = buildOrder(request);
+    orderRepo.save(order);         // commits immediately
+    reserveStock(request.items()); // if this fails, order is already committed!
+    return OrderResponse.from(order);
+}</code></pre>
+
+<p>The order is committed before stock is reserved. If <code>reserveStock</code> throws, you have an order with unavailable products — an inconsistent database.</p>
+
+<p>The mirror mistake: putting <code>@Transactional</code> on the controller. Now the transaction boundary depends on the HTTP layer, making the service untestable in isolation and tying database semantics to web requests.</p>
+
+<pre><code>// GOOD — transaction on the service, the layer that owns the logic
+@Service
+public class OrderService {
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        // ALL operations succeed or ALL roll back
+        CustomerEntity customer = customerRepo.findById(request.customerId())
+            .orElseThrow(() -> new CustomerNotFoundException(request.customerId()));
+        OrderEntity order = buildOrder(request);
+        reserveStock(request.items());
+        orderRepo.save(order);
+        return OrderResponse.from(order);
+    }
+}</code></pre>
+
+<p>Another variant: <strong>self-invocation</strong> bypassing the proxy. Calling a <code>@Transactional(propagation = REQUIRES_NEW)</code> method via <code>this.processOne(id)</code> skips the Spring proxy entirely — the annotation has no effect. Extract the method into a separate bean or inject a self-reference.</p>
+
+<h2>Anti-Pattern 4: God Object</h2>
+
+<p>A <strong>god object</strong> is one class that does everything — orders, payments, shipping, notifications, inventory. Its constructor takes ten dependencies. Its methods stretch to hundreds of lines. Changing anything requires understanding everything.</p>
+
+<pre><code>// BAD — one service to rule them all
+@Service
+public class OrderManagementService {
+    private final OrderRepository orderRepo;
+    private final PaymentGateway paymentGateway;
+    private final ShippingClient shippingClient;
+    private final EmailService emailService;
+    private final InventoryService inventoryService;
+    private final SmsService smsService;
+    // ... 6+ more dependencies
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        // 100 lines spanning payment, shipping, email, inventory...
+    }
+}</code></pre>
+
+<p><strong>Fix:</strong> Split into focused services with single responsibilities. <code>OrderService</code> orchestrates the order; <code>PaymentService</code> handles payment; <code>InventoryService</code> manages stock. Use application events for side effects like notifications.</p>
+
+<h2>When to Violate the Layered Rule</h2>
+
+<p>The layered rule (controller → service → repository) is a guideline, not a law. Pragmatic violations are fine when the alternative is worse. A few justified cases:</p>
+
+<p><strong>Read-only passthrough.</strong> If a controller needs a simple list and the service would just call <code>repo.findAll()</code> and return it, a thin service method is still preferred — but a <em>dedicated</em> service method, not a direct repository injection in the controller. The cost is one trivial method; the payoff is that when authorization, caching, or filtering get added later, there's already a place for them.</p>
+
+<p><strong>Reporting queries.</strong> A dashboard that joins five tables and aggregates results may need a dedicated <code>ReportRepository</code> with a native query. The service layer can still own the method call, keeping the boundary clean even when the SQL is complex.</p>
+
+<p><strong>Rapid prototyping.</strong> In a hackathon or a proof-of-concept, skip the service layer. But add a <code>// TODO: extract to service</code> comment so the shortcut is visible when the prototype becomes production code.</p>
+
+<p>The rule of thumb: <strong>violate the rule deliberately, not accidentally.</strong> If you can explain why the shortcut is there and when you'd remove it, it's a conscious trade-off. If you can't, it's probably an anti-pattern.</p>
+
+<h2>Module Review: Tying It All Together</h2>
+
+<p>Modules 02–05 built a complete, layered Spring Boot application one concept at a time. Here is how each module connects:</p>
+
+<table>
+  <tr><th>Module</th><th>Core Idea</th><th>Key Annotation / Pattern</th></tr>
+  <tr><td>02 — Dependency Injection</td><td>Spring creates and wires objects; you declare what you need</td><td><code>@Component</code>, <code>@Service</code>, <code>@Autowired</code>, constructor injection</td></tr>
+  <tr><td>03 — Spring Boot Fundamentals</td><td>Auto-configuration and REST endpoints</td><td><code>@SpringBootApplication</code>, <code>@RestController</code>, <code>@Valid</code>, <code>ResponseEntity</code></td></tr>
+  <tr><td>04 — Repository Pattern</td><td>Database access through interfaces, not SQL strings</td><td><code>@Entity</code>, <code>JpaRepository</code>, derived queries, <code>@Query</code></td></tr>
+  <tr><td>05 — Service-Oriented Architecture</td><td>Business logic in the service layer, thin controllers, events for decoupling</td><td><code>@Transactional</code>, DTOs, domain exceptions, <code>@EventListener</code></td></tr>
+</table>
+
+<p>The data flows in one direction:</p>
+
+<pre><code>HTTP request
+  → Controller (validates, delegates)
+    → Service (business logic, transaction boundary)
+      → Repository (data access)
+        → Database</code></pre>
+
+<p>And the responses flow back:</p>
+
+<pre><code>Database
+  → Repository (entity)
+    → Service (converts entity → DTO)
+      → Controller (wraps DTO in ResponseEntity)
+        → HTTP response</code></pre>
+
+<p>Every piece has one job. Every dependency points downward. Every layer can be tested in isolation with a mock of the layer below. That is the payoff of service-oriented architecture.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-framework/reference/core/beans.html" target="_blank" rel="noopener">Spring: IoC Container</a> · <a href="https://docs.spring.io/spring-boot/reference/features/profiles.html" target="_blank" rel="noopener">Spring Boot: Auto-configuration</a> · <a href="https://docs.spring.io/spring-data/jpa/reference/" target="_blank" rel="noopener">Spring Data JPA Reference</a> · <a href="https://docs.spring.io/spring-framework/reference/data-access/transaction.html" target="_blank" rel="noopener">Spring: Transaction Management</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. A controller directly injects <code>OrderRepository</code> and calls <code>save()</code> inside a <code>@PostMapping</code> method. Which anti-pattern is this?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Fat controller</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Anemic domain model</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">God object</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Transaction manager anti-pattern</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. A service method saves an order and then reserves stock, but the method has no <code>@Transactional</code>. The stock reservation fails. What happens to the order?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The order is rolled back automatically</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">The order is already committed — the database is now inconsistent</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Spring detects the failure and reverts both operations</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The JPA provider keeps the save in a pending buffer until stock reserves</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. An <code>OrderEntity</code> has only getters and setters — no methods that enforce state transitions. All status-change logic lives in <code>OrderService</code>. Which anti-pattern does this describe?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Fat controller</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Anemic domain model</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">God object</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Transaction manager anti-pattern</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. A service calls <code>this.processOne(id)</code> on its own <code>@Transactional(propagation = REQUIRES_NEW)</code> method. What actually happens?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">A new independent transaction starts for <code>processOne</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The proxy is bypassed — the method runs in the caller's existing transaction</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Spring throws an error at startup</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The method runs without any transaction at all</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Your team is prototyping and a controller calls a repository directly for a simple lookup, with a <code>// TODO</code> comment. Is this acceptable?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">No — the layered rule must never be violated under any circumstance</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — if the method returns a DTO instead of an entity</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Yes — for rapid prototyping with an explicit comment marking it as a shortcut</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — but only if the repository method is annotated with <code>@Transactional</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0033-dtos-and-events.html" class="nav-prev">← Prev</a>
+  <a href="0035-sync-vs-async.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

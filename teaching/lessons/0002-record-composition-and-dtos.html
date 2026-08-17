@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2 — Composing Records and Backend DTOs</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Composing Records and Backend DTOs</h1>
+
+<p>Lesson 1 covered single records. Real backend systems model relationships: an order contains a buyer and line items. Records <strong>compose</strong> naturally — one record can contain another.</p>
+
+<h2>Nested records</h2>
+
+<pre><code>public record Product(String sku, String name, int stock, java.math.BigDecimal price) {}
+
+public record OrderItem(Product product, int quantity, java.math.BigDecimal lineTotal) {}
+
+public record Order(String id, Customer buyer, List&lt;OrderItem&gt; items, java.math.BigDecimal grandTotal) {}
+</code></pre>
+
+<p><code>Order</code> contains a <code>Customer</code> and a list of <code>OrderItem</code>. Each <code>OrderItem</code> contains a <code>Product</code>. This is how domain models look in production — flat at each level, composed across levels.</p>
+
+<h2>Why composition matters</h2>
+
+<p>REST APIs return JSON. Records map directly to JSON structure:</p>
+
+<pre><code>{
+  "id": "ORD-1",
+  "buyer": { "id": "CUST-1", "name": "Alice" },
+  "items": [
+    { "product": { "sku": "WIDGET", "name": "Widget" }, "quantity": 2 }
+  ]
+}
+</code></pre>
+
+<p>Spring Boot serializes records to JSON automatically. No extra configuration. This is why records are the default choice for <strong>DTOs</strong> (Data Transfer Objects) — objects that carry data between layers.</p>
+
+<p><strong>Primary source:</strong> <a href="https://docs.oracle.com/en/java/javase/21/language/records.html" target="_blank" rel="noopener">Oracle: Records (Java 21)</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. Can a record contain another record as a field?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Yes, records compose naturally by nesting</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">No, records can only hold primitives</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only if both records are in the same file</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only with special @Nested annotation</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. What does Spring Boot do with records in REST responses?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Throws an error — must use classes</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Serializes them to JSON automatically</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Converts them to XML by default</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Ignores them and returns null</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. What is a DTO (Data Transfer Object)?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A database connection pool</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">An object that carries data between layers</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A testing framework component</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A type of HTTP authentication</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. When Spring Boot serializes an Order record (containing a Customer record) to JSON, what happens to the nested Customer?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">It appears as a nested JSON object inside the parent</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It is flattened into the parent with prefixed keys</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It is omitted unless marked with @JsonProperty</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It is serialized as a separate top-level array</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. A record field is null when serialized to JSON by Spring Boot's default Jackson config. What appears in the JSON output?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The key is omitted entirely from the output</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The key is present with the string value "null"</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The key is present with the JSON literal null</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Serialization throws a NullPointerException</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0001-java-records.html">← Prev</a>
+  <a href="0003-generics.html" class="nav-next">Next →</a>
+</div>
+
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

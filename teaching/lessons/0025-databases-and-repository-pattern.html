@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 25 — Databases, SQL Crash Course &amp; the Repository Pattern</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Databases, SQL Crash Course &amp; the Repository Pattern</h1>
+
+<p>Your application's objects vanish the moment the process stops. A <strong>database</strong> persists data to disk so it survives restarts, crashes, and deploys. This lesson covers how relational databases organize that data, the SQL you need to talk to them, and the Repository Pattern that keeps data-access logic from infecting your business code.</p>
+
+<h2>Relational Databases</h2>
+
+<p>The most common kind of database is a <strong>relational database</strong> (RDBMS). It stores data in <strong>tables</strong> — think of each table as a spreadsheet with strict rules:</p>
+
+<p><strong>customers</strong></p>
+<table>
+  <tr><th>id</th><th>name</th><th>email</th><th>address</th></tr>
+  <tr><td>1</td><td>Alice</td><td>alice@example.com</td><td>123 Main St</td></tr>
+  <tr><td>2</td><td>Bob</td><td>bob@example.com</td><td>456 Oak Ave</td></tr>
+</table>
+
+<p><strong>products</strong></p>
+<table>
+  <tr><th>id</th><th>name</th><th>price</th><th>stock</th></tr>
+  <tr><td>1</td><td>Widget</td><td>19.99</td><td>100</td></tr>
+  <tr><td>2</td><td>Gadget</td><td>49.99</td><td>50</td></tr>
+</table>
+
+<h3>Key terms</h3>
+
+<table>
+  <tr><th>Concept</th><th>What it means</th></tr>
+  <tr><td><strong>Table</strong></td><td>A named, structured collection of data — rows and columns</td></tr>
+  <tr><td><strong>Row</strong></td><td>A single record (one customer, one product)</td></tr>
+  <tr><td><strong>Column</strong></td><td>A named attribute across all rows (name, email, price)</td></tr>
+  <tr><td><strong>Primary Key</strong></td><td>A column (or columns) that <em>uniquely</em> identifies each row — usually an <code>id</code></td></tr>
+  <tr><td><strong>Foreign Key</strong></td><td>A column that references a primary key in <em>another</em> table, creating a relationship</td></tr>
+</table>
+
+<h3>Relationships</h3>
+
+<p>Tables connect through foreign keys:</p>
+
+<ul>
+  <li>A <strong>customer</strong> can have many <strong>orders</strong> (one-to-many)</li>
+  <li>An <strong>order</strong> belongs to one <strong>customer</strong> (many-to-one)</li>
+  <li>An <strong>order</strong> has many <strong>order items</strong> (one-to-many)</li>
+  <li>An <strong>order item</strong> references one <strong>product</strong> (many-to-one)</li>
+</ul>
+
+<pre><code>Customer 1 ────&lt; Order 1 ────&lt; OrderItem &gt;──── 1 Product
+                                       &gt;──── 1 Product</code></pre>
+
+<p>The <code>&lt;</code> means "one to many" — one customer, many orders. The foreign key lives on the "many" side: <code>orders.customer_id</code> points back to <code>customers.id</code>.</p>
+
+<h2>SQL Crash Course</h2>
+
+<p><strong>SQL</strong> (Structured Query Language) is how you read and mutate data in a relational database. You won't write much raw SQL in Spring — JPA generates it — but understanding the four fundamental operations helps you reason about what your repository calls actually do.</p>
+
+<h3>SELECT — read data</h3>
+
+<pre><code>-- All rows and columns
+SELECT * FROM customers;
+
+-- Filter by primary key
+SELECT * FROM customers WHERE id = 1;
+
+-- Specific columns only
+SELECT name, email FROM customers WHERE id = 1;</code></pre>
+
+<h3>INSERT — create data</h3>
+
+<pre><code>INSERT INTO customers (name, email, address)
+VALUES ('Charlie', 'charlie@example.com', '789 Pine St');</code></pre>
+
+<h3>UPDATE — modify data</h3>
+
+<pre><code>UPDATE customers SET address = '999 New St' WHERE id = 1;</code></pre>
+
+<p>Forgetting the <code>WHERE</code> clause updates <em>every</em> row. Always include it.</p>
+
+<h3>DELETE — remove data</h3>
+
+<pre><code>DELETE FROM customers WHERE id = 1;</code></pre>
+
+<p>Same rule: omit <code>WHERE</code> and you delete everything in the table.</p>
+
+<h3>JOIN — combine data across tables</h3>
+
+<pre><code>SELECT o.id, o.status, c.name
+FROM orders o
+JOIN customers c ON o.customer_id = c.id;</code></pre>
+
+<p>A <code>JOIN</code> links rows from two tables where a condition matches. Here, each order row is paired with its customer row through the foreign key <code>customer_id → id</code>. Without <code>JOIN</code>, you'd need two separate queries and manual stitching in your code.</p>
+
+<h3>What JPA does for you</h3>
+
+<p>Instead of writing <code>SELECT * FROM customers WHERE id = 1</code>, you call <code>customerRepository.findById(1L)</code> and JPA generates the SQL. The repository calls in your service layer are SQL in disguise.</p>
+
+<h2>The Repository Pattern</h2>
+
+<p>Without a repository, data-access code <strong>infects every layer</strong>. Your service opens connections, writes SQL strings, and maps result sets — all tangled with business logic:</p>
+
+<pre><code>// BAD — SQL scattered throughout the service
+public class OrderService {
+    public Order createOrder(...) {
+        Connection conn = DriverManager.getConnection("jdbc:postgresql://...");
+        PreparedStatement stmt = conn.prepareStatement(
+            "INSERT INTO orders (customer_id, status) VALUES (?, ?)");
+        stmt.setLong(1, customerId);
+        stmt.setString(2, "PENDING");
+        stmt.executeUpdate();
+        // ... more SQL in every method
+    }
+}</code></pre>
+
+<p>The <strong>Repository Pattern</strong> puts all data access in one place. The service tells the repository <em>what</em> it needs — never <em>how</em> to get it:</p>
+
+<pre><code>// GOOD — service knows nothing about SQL
+public class OrderService {
+    private final OrderRepository orderRepository;
+
+    public OrderResponse createOrder(...) {
+        OrderEntity order = new OrderEntity();
+        order.setCustomer(customer);
+        order.setStatus(OrderStatus.PENDING);
+        orderRepository.save(order);   // JPA generates the INSERT
+        return OrderResponse.from(order);
+    }
+}</code></pre>
+
+<h3>Why it matters</h3>
+
+<ul>
+  <li><strong>Single responsibility.</strong> The service handles business rules; the repository handles persistence. Change your database? Modify the repository, not the service.</li>
+  <li><strong>Testability.</strong> Swap the repository for a fake in tests — no database needed.</li>
+  <li><strong>No duplicated queries.</strong> "Find by email" is written once in the repository, not copy-pasted across five services.</li>
+</ul>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.oracle.com/javase/tutorial/jdbc/basics/index.html" target="_blank" rel="noopener">Oracle: JDBC Basics</a> · <a href="https://www.postgresql.org/docs/current/tutorial-sql.html" target="_blank" rel="noopener">PostgreSQL: The SQL Language</a> · <a href="https://martinfowler.com/eaaCatalog/repository.html" target="_blank" rel="noopener">Martin Fowler: Repository Pattern</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. A <strong>foreign key</strong> in the <code>orders</code> table that references <code>customers.id</code> means:</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Each customer can belong to only one order</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Each order is associated with exactly one customer</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The foreign key uniquely identifies each row in orders</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The orders table must have the same number of rows as customers</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. What does <code>JOIN</code> accomplish in SQL?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It merges two tables into a single permanent table</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It concatenates two columns within the same row</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">It combines rows from two tables where a specified condition matches</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It filters rows in a single table based on a condition</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. What happens if you run <code>UPDATE customers SET name = 'X'</code> without a <code>WHERE</code> clause?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">No rows are updated because the syntax is invalid</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only the first row is updated</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Every row in the table has its name set to 'X'</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The database rejects the query as a safety precaution</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. In the Repository Pattern, who is responsible for writing SQL?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The service layer, because it knows the business rules</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The repository, so the service layer stays unaware of persistence details</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The controller, because it receives the HTTP request</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">No one — SQL is never needed when using Spring Boot</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Which statement correctly distinguishes a primary key from a foreign key?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">A primary key references another table; a foreign key is local</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">A primary key uniquely identifies rows in its own table; a foreign key references a primary key in another table</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">A table can have many primary keys but only one foreign key</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Both are interchangeable terms for the same concept</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0024-validation-and-exceptions.html" class="nav-prev">← Prev</a>
+  <a href="0026-orm-jpa-hibernate.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

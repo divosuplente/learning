@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 61 — Kotlin Coroutines vs Reactor Mono/Flux</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Kotlin Coroutines vs Reactor Mono/Flux</h1>
+
+<p>In Module 08 you learned Reactor's <code>Mono</code> and <code>Flux</code> — declarative pipelines that model async data flows. Kotlin offers an alternative: <strong>coroutines</strong>, which let you write non-blocking code that <em>looks synchronous</em>. This lesson covers <code>suspend</code> functions, <code>Flow</code>, structured concurrency, and when to pick coroutines over Reactor.</p>
+
+<h2>Why Coroutines?</h2>
+
+<p>Reactive pipelines chain operators like <code>.map()</code>, <code>.flatMap()</code>, and <code>.onErrorResume()</code>. The resulting code is powerful but hard to read — the control flow is spread across a declaration chain, stack traces are opaque, and debugging a <code>flatMap</code> chain can take hours.</p>
+
+<p>Coroutines solve the same non-blocking problem with a different trade-off: <strong>the compiler transforms your synchronous-looking code into a state machine</strong> that suspends and resumes at every <code>suspend</code> point. You get imperative style — <code>try</code>/<code>catch</code>, loops, variables — without blocking a thread.</p>
+
+<table>
+  <tr><th>Reactor (Java)</th><th>Coroutines (Kotlin)</th></tr>
+  <tr><td><code>Mono&lt;Order&gt;</code></td><td><code>suspend fun getOrder(): Order</code></td></tr>
+  <tr><td><code>Flux&lt;Order&gt;</code></td><td><code>Flow&lt;Order&gt;</code></td></tr>
+  <tr><td><code>.map(it -&gt; ...)</code></td><td>direct code (synchronous-looking)</td></tr>
+  <tr><td><code>.flatMap(...)</code></td><td>direct code (synchronous-looking)</td></tr>
+  <tr><td><code>.subscribe()</code></td><td>coroutine builder (<code>launch { }</code>, <code>runBlocking { }</code>)</td></tr>
+  <tr><td><code>StepVerifier</code></td><td>direct assertions on <code>suspend</code> results</td></tr>
+</table>
+
+<h2>The <code>suspend</code> Keyword</h2>
+
+<p>A function marked <code>suspend</code> can <strong>pause execution</strong> without blocking the calling thread. When a <code>suspend</code> function hits an awaitable operation, the coroutine suspends — the thread is freed to do other work. When the result is ready, the coroutine resumes exactly where it left off.</p>
+
+<pre><code>// A suspending function — non-blocking but looks synchronous
+suspend fun findById(id: Long): Order? {
+    val row = dbQuery(id)   // suspends here, thread is free
+    return row?.toOrder()   // resumes when dbQuery returns
+}</code></pre>
+
+<p><strong>Critical rule:</strong> a <code>suspend</code> function can <em>only</em> be called from a coroutine or another <code>suspend</code> function. Calling it from regular code is a compile error. This is Kotlin's way of ensuring suspension context is always available.</p>
+
+<pre><code>// WON'T COMPILE — suspend function called from non-suspend context
+fun main() {
+    findById(1L)   // Error: Suspend function 'findById' should be called only from a coroutine or another suspend function
+}
+
+// CORRECT — call from a coroutine scope
+fun main() = runBlocking {
+    val order = findById(1L)   // OK — inside a coroutine
+    println(order)
+}</code></pre>
+
+<h2>Adding Coroutine Support</h2>
+
+<p>Add the coroutines dependencies to your <code>pom.xml</code>:</p>
+
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.jetbrains.kotlinx&lt;/groupId&gt;
+    &lt;artifactId&gt;kotlinx-coroutines-core&lt;/artifactId&gt;
+    &lt;version&gt;1.8.1&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.jetbrains.kotlinx&lt;/groupId&gt;
+    &lt;artifactId&gt;kotlinx-coroutines-reactor&lt;/artifactId&gt;
+    &lt;version&gt;1.8.1&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
+<p>The <code>kotlinx-coroutines-reactor</code> module provides interoperability — you can convert between <code>Mono</code>/<code>Flux</code> and <code>suspend</code>/<code>Flow</code> when mixing Java and Kotlin code.</p>
+
+<h2>Coroutine Controller Example</h2>
+
+<p>Spring WebFlux understands <code>suspend</code> functions natively. When a controller method is marked <code>suspend</code>, Spring subscribes to the coroutine automatically — no <code>Mono</code> wrapping needed.</p>
+
+<pre><code>@RestController
+@RequestMapping("/api/coroutine/orders")
+class CoroutineOrderController(
+    private val service: CoroutineOrderService
+) {
+    @GetMapping
+    suspend fun findAll(): List&lt;OrderResponse&gt; =
+        service.findAll()   // looks synchronous, runs non-blocking
+
+    @GetMapping("/{id}")
+    suspend fun findById(@PathVariable id: Long): OrderResponse =
+        service.findById(id)   // no Mono wrapping needed
+
+    @GetMapping("/{id}/status/stream", produces = ["text/event-stream"])
+    fun streamStatus(@PathVariable id: Long): Flow&lt;OrderStatus&gt; =
+        service.streamStatusUpdates(id)   // Flow replaces Flux
+
+    @PostMapping
+    suspend fun create(@Valid @RequestBody request: CreateOrderRequest): OrderResponse =
+        service.createOrder(request)
+}</code></pre>
+
+<p>Note three patterns:</p>
+<ul>
+  <li><strong>Single value</strong> → <code>suspend fun</code> returning the type directly (replaces <code>Mono&lt;T&gt;</code>)</li>
+  <li><strong>Stream of values</strong> → <code>fun</code> returning <code>Flow&lt;T&gt;</code> (replaces <code>Flux&lt;T&gt;</code>)</li>
+  <li><strong>SSE endpoint</strong> → <code>Flow</code> with <code>produces = ["text/event-stream"]</code>, same as <code>Flux</code></li>
+</ul>
+
+<h2>Coroutine Service Example</h2>
+
+<pre><code>@Service
+class CoroutineOrderService(
+    private val orderRepository: OrderRepository
+) {
+    // suspending function — non-blocking but looks synchronous
+    suspend fun findAll(): List&lt;OrderResponse&gt; =
+        orderRepository.findAll().map { OrderResponse.from(it) }
+
+    suspend fun findById(id: Long): OrderResponse =
+        orderRepository.findById(id)
+            ?.let { OrderResponse.from(it) }
+            ?: throw IllegalArgumentException("Order not found: $id")
+
+    @Transactional
+    suspend fun createOrder(request: CreateOrderRequest): OrderResponse {
+        val order = OrderEntity().apply {
+            // build order
+        }
+        val saved = orderRepository.save(order)
+        return OrderResponse.from(saved)
+    }
+
+    // Flow replaces Flux — cold stream that produces items lazily
+    fun streamStatusUpdates(orderId: Long): Flow&lt;OrderStatus&gt; = flow {
+        var current = orderRepository.findById(orderId)?.status
+        while (current != OrderStatus.DELIVERED &amp;&amp; current != OrderStatus.CANCELLED) {
+            delay(1000)  // suspends — no thread blocked
+            val updated = orderRepository.findById(orderId)?.status
+            if (updated != current) {
+                current = updated
+                emit(current!!)
+            }
+        }
+    }
+}</code></pre>
+
+<p><strong>Important:</strong> <code>@Transactional</code> on a <code>suspend</code> function requires <strong>Spring 6.2+</strong> with coroutine-aware transaction management. In earlier versions, <code>@Transactional</code> uses <code>ThreadLocal</code>-based context — when a coroutine suspends and resumes on a different thread, the transaction is lost. Spring 6.2 introduced <code>CoroutineTransactionManager</code> that propagates the transaction through the coroutine context instead. If you are on an earlier version, use <code>TransactionalOperator</code> or wrap the call in a blocking transaction boundary.</p>
+
+<p>The <code>delay()</code> call is a <strong>suspending function</strong> — unlike <code>Thread.sleep()</code>, it does not occupy a thread. The coroutine suspends, the thread moves on, and the coroutine resumes after the delay.</p>
+
+<h2>Flow — Coroutine's Flux</h2>
+
+<p><code>Flow&lt;T&gt;</code> is the coroutine equivalent of <code>Flux&lt;T&gt;</code>. It is a <strong>cold</strong> stream — nothing happens until a collector subscribes, and each collector gets its own independent stream.</p>
+
+<pre><code>fun countdown(from: Int): Flow&lt;Int&gt; = flow {
+    for (i in from downTo 1) {
+        emit(i)       // emit one value to the collector
+        delay(1000)   // suspend 1 second between emissions
+    }
+}
+
+// Collecting a Flow — this suspends until the flow completes
+suspend fun main() {
+    countdown(5).collect { value ->
+        println(value)   // prints 5, 4, 3, 2, 1 (one per second)
+    }
+}</code></pre>
+
+<p>Flow operators look like collection operators, not Reactor operators:</p>
+
+<pre><code>countdown(10)
+    .map { it * 2 }               // transform each value
+    .filter { it &gt; 10 }           // keep values &gt; 10
+    .take(3)                       // take first 3 matching values
+    .collect { println(it) }</code></pre>
+
+<p>There is no <code>.subscribe()</code> — <code>collect</code> is a <code>suspend</code> function that processes the entire flow. Error handling uses plain <code>try</code>/<code>catch</code>.</p>
+
+<h2>Structured Concurrency</h2>
+
+<p>Every coroutine runs inside a <strong>CoroutineScope</strong>, which defines its lifetime. When the scope ends, all child coroutines are cancelled. This discipline — <strong>structured concurrency</strong> — prevents leaked coroutines and ensures resources are cleaned up.</p>
+
+<pre><code>runBlocking {                          // scope 1 — lives until the block ends
+    launch {                           // child coroutine of scope 1
+        delay(2000)
+        println("child 1 done")
+    }
+    launch {                           // another child of scope 1
+        delay(1000)
+        println("child 2 done")
+    }
+    // runBlocking waits for both children to finish
+}</code></pre>
+
+<p>If a child coroutine throws an exception, structured concurrency cancels its siblings and propagates the failure up. No orphaned work, no silent hangs.</p>
+
+<h2><code>Flow</code> vs <code>Flux</code>: Key Differences</h2>
+
+<table>
+  <tr><th>Aspect</th><th>Flux (Reactor)</th><th>Flow (Coroutines)</th></tr>
+  <tr><td>Backpressure</td><td>Explicit via <code>Subscription.request(n)</code></td><td>Implicit — collector pulls via <code>suspend</code></td></tr>
+  <tr><td>Cold vs Hot</td><td>Cold by default; <code>share()</code>/<code>cache()</code> for hot</td><td>Cold by default; <code>StateFlow</code>/<code>SharedFlow</code> for hot</td></tr>
+  <tr><td>Error handling</td><td><code>onErrorResume</code>, <code>onErrorMap</code></td><td>Standard <code>try</code>/<code>catch</code></td></tr>
+  <tr><td>Lifecycle</td><td>Managed by Reactor's <code>Disposable</code></td><td>Managed by structured concurrency scope</td></tr>
+  <tr><td>Operators</td><td>Rich library (~100+ operators)</td><td>Smaller set; use suspend for complex logic</td></tr>
+  <tr><td>Thread model</td><td>Event-loop schedulers</td><td>Dispatchers (<code>Dispatchers.Default</code>, <code>IO</code>)</td></tr>
+</table>
+
+<h2>Interoperability: Mixing Coroutines and Reactor</h2>
+
+<p>In a mixed Java/Kotlin codebase, you will need to convert between the two models. The <code>kotlinx-coroutines-reactor</code> module provides bridges:</p>
+
+<pre><code>// Mono → suspend
+suspend fun getOrder(id: Long): Order =
+    orderMono(id).awaitSingle()       // Mono&lt;Order&gt; → Order
+
+// Flux → Flow
+fun allOrders(): Flow&lt;Order&gt; =
+    ordersFlux().asFlow()             // Flux&lt;Order&gt; → Flow&lt;Order&gt;
+
+// suspend → Mono
+fun getOrderMono(id: Long): Mono&lt;Order&gt; =
+    mono { getOrder(id) }             // suspend → Mono&lt;Order&gt;
+
+// Flow → Flux
+fun allOrdersFlux(): Flux&lt;Order&gt; =
+    allOrdersFlow().asFlux()          // Flow&lt;Order&gt; → Flux&lt;Order&gt;</code></pre>
+
+<p>This lets you call Java Reactor-based services from Kotlin coroutines and vice versa — no rewrite needed.</p>
+
+<h2>Coroutine R2DBC Repositories</h2>
+
+<p>Spring Data R2DBC supports coroutines directly. When you write a Kotlin interface extending <code>R2dbcRepository</code>, Spring generates <code>suspend</code> and <code>Flow</code>-based methods:</p>
+
+<pre><code>@Repository
+interface ReactiveOrderRepository : R2dbcRepository&lt;OrderEntity, Long&gt; {
+    fun findByStatus(status: OrderStatus): Flow&lt;OrderEntity&gt;   // replaces Flux
+    suspend fun findById(id: Long): OrderEntity?              // replaces Mono
+}</code></pre>
+
+<p>No <code>Mono</code> or <code>Flux</code> in sight — the repository speaks coroutine types, and your service layer stays imperative.</p>
+
+<h2>When to Use Coroutines vs Reactor</h2>
+
+<table>
+  <tr><th>Factor</th><th>Choose Coroutines</th><th>Choose Reactor</th></tr>
+  <tr><td>Language</td><td>Kotlin-first project</td><td>Java-only project</td></tr>
+  <tr><td>Code readability</td><td>Imperative style preferred</td><td>Declarative pipeline style preferred</td></tr>
+  <tr><td>Stack traces</td><td>Normal, readable traces</td><td>Assembly-time traces, harder to debug</td></tr>
+  <tr><td>Operator library</td><td>Common cases; complex logic via suspend</td><td>Rich operators (~100+) for specialized transforms</td></tr>
+  <tr><td>Team experience</td><td>Team knows Kotlin</td><td>Team knows Reactor</td></tr>
+  <tr><td>Hot streams / caching</td><td><code>StateFlow</code>, <code>SharedFlow</code></td><td><code>.share()</code>, <code>.cache()</code>, <code>retryWhen</code></td></tr>
+</table>
+
+<p><strong>Rule of thumb:</strong> If your project is Kotlin, prefer coroutines — you get the same non-blocking behavior with far simpler code. If your project is Java-only, Reactor is your only option. In mixed projects, use the interop bridges at module boundaries.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://kotlinlang.org/docs/coroutines-guide.html" target="_blank" rel="noopener">Kotlin Coroutines Guide</a> · <a href="https://docs.spring.io/spring-framework/reference/languages/kotlin/coroutines.html" target="_blank" rel="noopener">Spring Kotlin Coroutines</a> · <a href="https://kotlinlang.org/docs/flow.html" target="_blank" rel="noopener">Kotlin Flow Guide</a> · <a href="https://projectreactor.io/docs/core/release/reference/" target="_blank" rel="noopener">Project Reactor Reference</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What happens if you call a <code>suspend</code> function from a regular (non-suspend) function?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Compilation error — suspend functions can only be called from a coroutine or another suspend function</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The function runs synchronously, blocking the calling thread</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The compiler silently wraps the call in a coroutine scope</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">A runtime exception is thrown when the suspension point is reached</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. In a Spring WebFlux controller, what is the coroutine equivalent of returning <code>Mono&lt;Order&gt;</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">A regular function returning <code>Flow&lt;Order&gt;</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">A <code>suspend fun</code> returning <code>Order</code> directly</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">A regular function returning <code>Mono&lt;Order&gt;</code> with <code>.awaitSingle()</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">A <code>suspend fun</code> returning <code>Mono&lt;Order&gt;</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. What does <code>delay(1000)</code> do inside a coroutine, compared to <code>Thread.sleep(1000)</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Both block the current thread for one second</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>delay</code> blocks the coroutine but frees the dispatcher thread; <code>sleep</code> blocks the thread entirely</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0"><code>delay</code> suspends the coroutine and frees the thread; <code>sleep</code> blocks the thread entirely</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>delay</code> is syntactic sugar for <code>Thread.sleep</code> with no behavioral difference</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. What does structured concurrency guarantee when a child coroutine throws an exception?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The exception is silently swallowed and sibling coroutines continue</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Only the failed coroutine is cancelled; siblings run to completion</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Sibling coroutines are cancelled and the exception propagates to the parent scope</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The parent scope is cancelled but siblings become orphaned and continue running</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. You have a Java-only Spring WebFlux service returning <code>Flux&lt;Order&gt;</code>. A new Kotlin module needs to consume it using coroutines. What is the correct approach?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Rewrite the Java service in Kotlin coroutines first, then call it directly</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Call the <code>Flux</code>-returning method from a <code>suspend fun</code> — Flux is already a suspend-compatible type</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Use <code>flux.asFlow()</code> from <code>kotlinx-coroutines-reactor</code> to convert <code>Flux</code> to <code>Flow</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Wrap the <code>Flux</code> in <code>mono { }</code> and call <code>awaitSingle()</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0060-kotlin-classes-extensions.html" class="nav-prev">← Prev</a>
+  <a href="0062-kotlin-migration-strategy.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 50 — What Testing Is &amp; The Test Pyramid</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>What Testing Is &amp; The Test Pyramid</h1>
+
+<p><strong>Testing</strong> is the deliberate execution of your code to verify it does what you intend. You write code, then you write <em>another</em> piece of code that calls the first and checks whether the result is correct. If that sounds circular — good. The test defines what "correct" means, and the production code satisfies it.</p>
+
+<h2>Why We Test</h2>
+
+<table>
+  <tr><th>Reason</th><th>What it means</th></tr>
+  <tr><td><strong>Catch bugs early</strong></td><td>A bug found during development costs minutes. The same bug found in production costs hours or days.</td></tr>
+  <tr><td><strong>Prevent regressions</strong></td><td>When you change code, old tests verify you didn't break existing behavior.</td></tr>
+  <tr><td><strong>Living documentation</strong></td><td>Tests show how code is supposed to be used. A new developer can read tests to understand the system.</td></tr>
+  <tr><td><strong>Design feedback</strong></td><td>Code that's hard to test is usually badly designed — too many dependencies, too much coupling.</td></tr>
+  <tr><td><strong>Confidence to refactor</strong></td><td>With good tests, you can restructure code without fear of breaking things.</td></tr>
+  <tr><td><strong>Faster debugging</strong></td><td>A failing test points you to exactly which code is broken.</td></tr>
+</table>
+
+<h3>What happens without tests</h3>
+
+<ol>
+  <li>You write code and manually test it (click through the UI or <code>curl</code>).</li>
+  <li>It works, so you move on.</li>
+  <li>Six months later, you add a new feature.</li>
+  <li>The new feature breaks something you didn't think about.</li>
+  <li>The bug reaches production; a customer reports it.</li>
+  <li>You spend hours debugging because you don't remember how the old code works.</li>
+</ol>
+
+<p>Tests prevent steps 3 through 7.</p>
+
+<h2>Types of Tests</h2>
+
+<h3>Unit Tests</h3>
+
+<p>A <strong>unit test</strong> tests a single method or class in isolation. All external dependencies are replaced with <strong>mocks</strong> — fake versions that return predetermined values.</p>
+
+<p><em>Analogy:</em> Testing a single car part on a workbench — you test whether the alternator produces electricity, without needing the entire car.</p>
+
+<p><strong>Speed:</strong> milliseconds. You can run hundreds per second.</p>
+
+<pre><code>// Unit test: OrderService with a mocked repository
+@Test
+void shouldThrowWhenStockIsInsufficient() {
+    Product product = new Product("widget", 2);
+    when(productRepo.findById(1L)).thenReturn(Optional.of(product));
+
+    assertThatThrownBy(() -> orderService.createOrder(1L, 5))
+        .isInstanceOf(InsufficientStockException.class);
+}</code></pre>
+
+<h3>Integration Tests</h3>
+
+<p>An <strong>integration test</strong> tests how multiple components work together. Dependencies are real, not mocked.</p>
+
+<p><em>Analogy:</em> Installing the alternator in the car and testing whether the battery charges when the engine runs.</p>
+
+<p><strong>Speed:</strong> seconds. They start a Spring context and talk to a real (or test) database.</p>
+
+<pre><code>// Integration test: real Spring context, real database
+@DataJpaTest
+class OrderRepositoryIntegrationTest {
+
+    @Autowired
+    private OrderRepository orderRepo;
+
+    @Test
+    void shouldPersistAndRetrieveOrder() {
+        Order order = new Order("widget", 3);
+        orderRepo.save(order);
+
+        Order found = orderRepo.findById(order.getId()).orElseThrow();
+        assertThat(found.getQuantity()).isEqualTo(3);
+    }
+}</code></pre>
+
+<h3>End-to-End (E2E) Tests</h3>
+
+<p>An <strong>E2E test</strong> tests the entire system from the outside, simulating a real user.</p>
+
+<p><em>Analogy:</em> Driving the car on the road to see if it starts, accelerates, and brakes.</p>
+
+<p><strong>Speed:</strong> minutes. They start the entire application and make real HTTP requests.</p>
+
+<pre><code>// E2E test: full application running, real HTTP
+@Test
+void shouldCreateOrderViaApi() {
+    mockMvc.perform(post("/api/orders")
+            .contentType("application/json")
+            .content("{\"product\":\"widget\",\"quantity\":3}"))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.product").value("widget"));
+}</code></pre>
+
+<h2>The Test Pyramid</h2>
+
+<p>The <strong>test pyramid</strong> is a guideline for how many of each test type you should have:</p>
+
+<pre class="pyramid">
+          ╱╲
+         ╱  ╲           E2E Tests (few)
+        ╱────╲
+       ╱      ╲         Integration Tests (some)
+      ╱────────╲
+     ╱          ╲       Unit Tests (many)
+    ╱────────────╲
+</pre>
+
+<table>
+  <tr><th>Level</th><th>Quantity</th><th>Why</th></tr>
+  <tr><td>Unit tests</td><td>~80% of tests</td><td>Fast, isolate bugs, easy to write</td></tr>
+  <tr><td>Integration tests</td><td>~15% of tests</td><td>Verify components work together</td></tr>
+  <tr><td>E2E tests</td><td>~5% of tests</td><td>Slow, fragile, but verify the whole system</td></tr>
+</table>
+
+<p><strong>Why more unit tests?</strong> They're fast (milliseconds), reliable (no external dependencies to fail), and precise (when one fails, you know exactly which code is broken). Integration and E2E tests are slower, and when they fail, the cause could be <em>anywhere</em> in the stack — the database, the network, the configuration, the code itself.</p>
+
+<p>The pyramid is not a rigid formula — it's a heuristic. If your codebase breaks the ratio and has more E2E tests than unit tests, you'll feel it: slow CI, flakes that are hard to diagnose, and long feedback loops. Push tests <em>down</em> the pyramid whenever you can. A bug caught by a unit test is fixed in seconds; the same bug caught by an E2E test is fixed in minutes or hours because you have to locate it first.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://martinfowler.com/articles/practical-test-pyramid.html" target="_blank" rel="noopener">Martin Fowler — The Practical Test Pyramid</a> · <a href="https://junit.org/junit5/docs/current/user-guide/" target="_blank" rel="noopener">JUnit 5 User Guide</a> · <a href="https://docs.spring.io/spring-boot/reference/testing/index.html" target="_blank" rel="noopener">Spring Boot Testing Reference</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. A unit test for <code>OrderService.createOrder()</code> uses a mocked <code>ProductRepository</code> that returns a product with zero stock. What is this test primarily verifying?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">That the product can be saved to the database</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">That the service throws an exception when stock is insufficient</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">That the repository returns the correct product from PostgreSQL</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">That the HTTP endpoint returns a 400 status code</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. According to the test pyramid, you have 100 integration tests and 50 E2E tests. Approximately how many unit tests should you aim for?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">About 150 — roughly equal to the other two combined</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">About 200 — twice as many as integration and E2E combined</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">About 800 — unit tests should be ~80% of the total</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">About 500 — the exact ratio depends on team preference, so any number works</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. An E2E test fails. Why is it harder to locate the bug than when a unit test fails?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">E2E tests run in a different JVM, so stack traces are lost</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">The failure could be in any layer — code, database, network, config — so you must narrow it down first</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">E2E tests don't produce error messages, only pass/fail</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Unit tests catch the same bugs, so the E2E failure is always a false positive</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Your team has 200 E2E tests, 300 integration tests, and 100 unit tests. The CI pipeline takes 45 minutes. What is the most effective way to speed it up?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Add more E2E tests to catch more bugs before production</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Delete the integration tests since unit and E2E already cover the same ground</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Push tests down the pyramid — replace E2E scenarios with unit and integration tests</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Run the E2E tests in parallel across more machines without changing the test mix</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Which of these is a valid reason to write an <em>integration</em> test instead of a unit test?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The method you're testing is private and can't be called directly</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">You need to verify that a JPA repository query returns the correct rows from a real database</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Unit tests are always sufficient — integration tests are never necessary</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Integration tests run faster than unit tests, so they're preferred for CI</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0049-webflux-virtual-threads.html" class="nav-prev">← Prev</a>
+  <a href="0051-tdd-red-green-refactor.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

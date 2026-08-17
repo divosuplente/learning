@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 29 — Custom Queries, Pagination &amp; the N+1 Problem</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Custom Queries, Pagination &amp; the N+1 Problem</h1>
+
+<p>Derived query methods take you far — but not everywhere. When you need aggregates, complex joins, or database-specific functions, you write the query yourself. This lesson covers <code>@Query</code> with JPQL and native SQL, pagination with <code>Pageable</code>, and the N+1 problem: a silent performance killer that turns one database round-trip into hundreds.</p>
+
+<h2>@Query with JPQL</h2>
+
+<p><strong>JPQL</strong> (Java Persistence Query Language) looks like SQL but operates on <em>entities and fields</em>, not tables and columns. You write it as a string inside <code>@Query</code>:</p>
+
+<pre><code>@Repository
+public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; {
+
+    // JPQL — entity name, field name, named parameter
+    @Query("SELECT o FROM OrderEntity o WHERE o.status = :status AND o.createdAt > :after")
+    List&lt;OrderEntity&gt; findRecentByStatus(@Param("status") OrderStatus status,
+                                          @Param("after") Instant after);
+
+    // Aggregate — SUM returns a number, not an entity
+    @Query("SELECT SUM(o.totalAmount) FROM OrderEntity o WHERE o.status = 'CONFIRMED'")
+    BigDecimal getTotalConfirmedRevenue();
+
+    // JOIN FETCH — fetches related data in one query (more on this below)
+    @Query("SELECT DISTINCT o FROM OrderEntity o LEFT JOIN FETCH o.items WHERE o.status = :status")
+    List&lt;OrderEntity&gt; findByStatusWithItems(@Param("status") OrderStatus status);
+}</code></pre>
+
+<p>Key rules: entity name (<code>OrderEntity</code>), not table name (<code>orders</code>); field name (<code>o.createdAt</code>), not column name (<code>created_at</code>); named parameters prefixed with <code>:</code> and bound via <code>@Param</code>.</p>
+
+<h2>@Query with Native SQL</h2>
+
+<p>When JPQL can't express what you need — database-specific functions, complex subqueries, window functions — switch to native SQL with <code>nativeQuery = true</code>:</p>
+
+<pre><code>// Native SQL uses table/column names, not entity/field names
+@Query(value = "SELECT * FROM orders WHERE EXTRACT(MONTH FROM created_at) = :month",
+       nativeQuery = true)
+List&lt;OrderEntity&gt; findByMonth(@Param("month") int month);
+
+// Native SQL with pagination — Spring appends LIMIT/OFFSET for you
+@Query(value = "SELECT * FROM orders WHERE status = :status",
+       nativeQuery = true)
+Page&lt;OrderEntity&gt; findByStatusNative(@Param("status") String status, Pageable pageable);</code></pre>
+
+<p>Trade-off: native SQL couples you to a specific database. If you ever switch from PostgreSQL to MySQL, your <code>EXTRACT</code> call may break. Reach for native SQL <strong>only</strong> when JPQL genuinely cannot do the job.</p>
+
+<table>
+  <tr><th></th><th>JPQL</th><th>Native SQL</th></tr>
+  <tr><td>Operates on</td><td>Entities &amp; fields</td><td>Tables &amp; columns</td></tr>
+  <tr><td>Database portability</td><td>Portable</td><td>Database-specific</td></tr>
+  <tr><td>Named parameters</td><td><code>:name</code></td><td><code>:name</code></td></tr>
+  <tr><td>Aggregates</td><td>Yes</td><td>Yes</td></tr>
+  <tr><td>DB-specific functions</td><td>No</td><td>Yes</td></tr>
+  <tr><td>Set with</td><td><code>@Query("...")</code></td><td><code>@Query(value="...", nativeQuery=true)</code></td></tr>
+</table>
+
+<h2>Pagination &amp; Sorting</h2>
+
+<p>Returning thousands of rows at once kills performance and memory. Spring Data gives you <code>Pageable</code> — pass it to any repository method and Spring generates <code>LIMIT</code>/<code>OFFSET</code> SQL automatically:</p>
+
+<pre><code>// In the repository — just add Pageable as the last parameter
+Page&lt;OrderEntity&gt; findByStatus(OrderStatus status, Pageable pageable);
+
+// In the caller
+Pageable pageable = PageRequest.of(0, 20, Sort.by("createdAt").descending());
+//           page index ↑  ↑ page size          ↑ sort direction
+
+Page&lt;OrderEntity&gt; page = orderRepository.findByStatus(OrderStatus.PENDING, pageable);
+
+page.getContent();        // List of orders on this page
+page.getTotalElements();  // Total count across all pages
+page.getTotalPages();     // Total number of pages
+page.getNumber();         // Current page number (0-based)
+page.hasNext();           // Is there a next page?
+page.hasPrevious();       // Is there a previous page?</code></pre>
+
+<p><code>PageRequest.of(page, size)</code> gives you unsorted results. Add a <code>Sort</code> for ordering. For derived query methods, you can also return <code>Slice&lt;T&gt;</code> — same API but skips the <code>COUNT</code> query, making it faster when you only need "is there more?"</p>
+
+<h2>The N+1 Problem</h2>
+
+<p>This is the most common JPA performance pitfall. It happens when you fetch a list of entities and then <em>access their lazy-loaded relationships</em>:</p>
+
+<pre><code>// 1 query: fetch 10 orders
+List&lt;OrderEntity&gt; orders = orderRepository.findAll();
+// SELECT * FROM orders LIMIT 10
+
+for (OrderEntity order : orders) {
+    // N queries: one per order to fetch the customer
+    String name = order.getCustomer().getName();
+    // SELECT * FROM customers WHERE id = ?
+}</code></pre>
+
+<p><strong>1 query for orders + 10 queries for customers = 11 queries.</strong> With a hundred orders you fire a hundred and one. The caller never sees the extra queries — they happen silently inside the loop. The symptom: the endpoint is slow and gets slower as data grows.</p>
+
+<p>The root cause: the <code>OrderEntity</code> uses <code>@ManyToOne(fetch = FetchType.LAZY)</code>. Each <code>.getCustomer()</code> inside the loop triggers a separate <code>SELECT</code>. The N+1 problem: 1 query for <code>findAll()</code> + N queries for lazy association access. Eager loading would also fire per-entity queries — the fundamental issue is accessing an association inside a loop without a JOIN FETCH or @EntityGraph.</p>
+
+<h3>Fix 1: JOIN FETCH</h3>
+
+<p>Add <code>JOIN FETCH</code> to your JPQL query. It tells JPA to fetch the related entity in the <em>same</em> <code>SELECT</code>:</p>
+
+<pre><code>@Query("SELECT o FROM OrderEntity o JOIN FETCH o.customer WHERE o.status = :status")
+List&lt;OrderEntity&gt; findByStatusWithCustomer(@Param("status") OrderStatus status);</code></pre>
+
+<p>This generates a single SQL query with a JOIN:</p>
+
+<pre><code>SELECT o.*, c.* FROM orders o
+JOIN customers c ON o.customer_id = c.id
+WHERE o.status = ?</code></pre>
+
+<p><strong>11 queries → 1 query.</strong> Use <code>DISTINCT</code> when fetching <code>@OneToMany</code> collections to deduplicate parent rows:</p>
+
+<pre><code>@Query("SELECT DISTINCT o FROM OrderEntity o LEFT JOIN FETCH o.items")
+List&lt;OrderEntity&gt; findAllWithItems();</code></pre>
+
+<h3>Fix 2: @EntityGraph</h3>
+
+<p>When you want eager fetching <em>without</em> modifying the JPQL string, use <code>@EntityGraph</code>. It declares which associations to load eagerly for that query only:</p>
+
+<pre><code>@EntityGraph(attributePaths = {"customer", "items", "items.product"})
+@Query("SELECT o FROM OrderEntity o WHERE o.status = :status")
+List&lt;OrderEntity&gt; findByStatusWithAllRelations(@Param("status") OrderStatus status);</code></pre>
+
+<p><code>@EntityGraph</code> is ideal when the same JPQL should sometimes fetch relations and sometimes not — you keep one query, add different graphs at call sites. It does <em>not</em> change the entity's default fetch strategy; it only overrides it for this specific call.</p>
+
+<table>
+  <tr><th></th><th>JOIN FETCH</th><th>@EntityGraph</th></tr>
+  <tr><td>Where specified</td><td>In the JPQL string</td><td>Annotation on the method</td></tr>
+  <tr><td>Multiple levels</td><td>Manual <code>JOIN FETCH</code> per level</td><td><code>attributePaths = {"a", "a.b"}</code></td></tr>
+  <tr><td>Reuse query text</td><td>No — different JPQL</td><td>Yes — same JPQL, different graph</td></tr>
+  <tr><td>Collection dedup</td><td>Need <code>DISTINCT</code></td><td>Need <code>DISTINCT</code></td></tr>
+</table>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html" target="_blank" rel="noopener">Spring Data JPA: Query Methods</a> · <a href="https://jakarta.ee/specifications/persistence/3.1/jakarta-persistence-spec-3.1.html#jpql" target="_blank" rel="noopener">Jakarta Persistence: JPQL</a> · <a href="https://docs.spring.io/spring-data/jpa/reference/jpa/entity-graph.html" target="_blank" rel="noopener">Spring Data JPA: @EntityGraph</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. In a JPQL query, what do you reference — table and column names, or entity and field names?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Table and column names — JPQL is translated directly to SQL</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Entity and field names — JPQL operates on the object model</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Either — JPQL accepts both interchangeably</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only table names — JPQL infers the columns automatically</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. What does <code>nativeQuery = true</code> change about a <code>@Query</code> declaration?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It makes the query return native Java arrays instead of entities</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It enables JPQL aggregate functions like SUM and COUNT</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">It switches the query language from JPQL to actual SQL</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It makes the query run without the Hibernate session</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. You call <code>findAll()</code> on orders, then loop and call <code>order.getCustomer().getName()</code> for each. With 50 orders, how many SQL queries execute?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">1 — JPA batches lazy loads into one query</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">50 — one per order; the initial findAll is cached</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">51 — one for findAll plus one per order for the lazy customer</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">2 — one for orders, one batched query for all customers</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Why would you choose <code>@EntityGraph</code> over <code>JOIN FETCH</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">@EntityGraph loads data in a separate thread for better concurrency</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">@EntityGraph replaces the lazy/eager setting on the entity permanently</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">You want to reuse the same JPQL but vary which associations are fetched</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">@EntityGraph does not require DISTINCT for collection relationships</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. What does <code>PageRequest.of(2, 10, Sort.by("price").ascending())</code> return?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Rows 2 through 10, sorted by price ascending</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The third page of 10 rows each, sorted by price ascending</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Rows 10 through 20, skipping the first 2, sorted by price</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The second page of 10 rows, sorted by price descending</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0028-spring-data-repositories.html" class="nav-prev">← Prev</a>
+  <a href="0030-architecture-patterns.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

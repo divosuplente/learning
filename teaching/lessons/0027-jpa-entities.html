@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 27 — JPA Entities</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>JPA Entities</h1>
+
+<p>A JPA entity is a Java class that maps to a database table. Each instance of the class represents one row. JPA uses annotations to describe exactly how objects become rows and back again — closing the gap between your object model and your relational schema.</p>
+
+<h2>Anatomy of an Entity</h2>
+
+<p>Here is a <code>CustomerEntity</code> that maps to a <code>customers</code> table:</p>
+
+<pre><code>@Entity
+@Table(name = "customers")
+public class CustomerEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "address")
+    private String address;
+
+    // Required by JPA — no-argument constructor
+    protected CustomerEntity() {}
+
+    public CustomerEntity(String name, String email, String address) {
+        this.name = name;
+        this.email = email;
+        this.address = address;
+    }
+
+    // getters and setters ...
+}</code></pre>
+
+<p>Every entity needs three things: <code>@Entity</code> on the class, <code>@Id</code> on the primary-key field, and a <strong>no-argument constructor</strong> (which can be <code>protected</code>). Hibernate uses the no-arg constructor to instantiate a proxy, then populates fields via reflection or setters. Without it, persistence fails at runtime.</p>
+
+<h2>Core Annotations</h2>
+
+<table>
+  <tr><th>Annotation</th><th>Purpose</th></tr>
+  <tr><td><code>@Entity</code></td><td>Marks the class as a JPA entity (maps to a table)</td></tr>
+  <tr><td><code>@Table(name = "x")</code></td><td>Explicit table name; defaults to the class name</td></tr>
+  <tr><td><code>@Id</code></td><td>Marks a field as the primary key</td></tr>
+  <tr><td><code>@GeneratedValue</code></td><td>Auto-generates primary key values</td></tr>
+  <tr><td><code>@Column</code></td><td>Maps a field to a column; controls nullability, length, uniqueness</td></tr>
+</table>
+
+<h3><code>@GeneratedValue</code> strategies</h3>
+
+<table>
+  <tr><th>Strategy</th><th>Behavior</th></tr>
+  <tr><td><code>GenerationType.IDENTITY</code></td><td>Database auto-increment — the DB assigns the id</td></tr>
+  <tr><td><code>GenerationType.SEQUENCE</code></td><td>Uses a database sequence; portable and efficient for batch inserts</td></tr>
+  <tr><td><code>GenerationType.TABLE</code></td><td>Uses a separate table as a sequence; rarely needed</td></tr>
+  <tr><td><code>GenerationType.AUTO</code></td><td>JPA provider picks a strategy; varies by dialect — avoid for production</td></tr>
+</table>
+
+<p><code>IDENTITY</code> is simplest for PostgreSQL auto-increment columns. <code>SEQUENCE</code> is better for batch inserts because IDENTITY forces Hibernate to insert one row at a time to retrieve each generated id.</p>
+
+<h3><code>@Column</code> attributes</h3>
+
+<pre><code>@Column(name = "email", nullable = false, unique = true, length = 200)
+private String email;</code></pre>
+
+<p><code>name</code> overrides the column name (defaults to the field name). <code>nullable = false</code> adds a NOT NULL constraint. <code>unique = true</code> adds a UNIQUE constraint. <code>length</code> sets the VARCHAR size. <code>updatable = false</code> prevents the column from being changed after insert — useful for timestamps and created-by fields.</p>
+
+<h2>Why Not Records?</h2>
+
+<p>Java records are immutable and <code>final</code>. JPA needs to create instances with no-argument constructors, mutate fields after instantiation, and generate lazy-loading proxies by subclassing. None of this is possible with records. Use traditional classes for entities; keep records for DTOs.</p>
+
+<h2>Relationships</h2>
+
+<p>Entities don't live in isolation. A customer has many orders; an order has many items. JPA models these with relationship annotations.</p>
+
+<h3>OrderEntity with relationships</h3>
+
+<pre><code>@Entity
+@Table(name = "orders")
+public class OrderEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private CustomerEntity customer;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL,
+               orphanRemoval = true)
+    private List&lt;OrderItemEntity&gt; items = new ArrayList&lt;&gt;();
+
+    protected OrderEntity() {}
+
+    // getters and setters ...
+}</code></pre>
+
+<h3>The four relationship types</h3>
+
+<table>
+  <tr><th>Annotation</th><th>Example</th><th>Foreign key lives on</th></tr>
+  <tr><td><code>@OneToOne</code></td><td>User → UserProfile</td><td>Either side (owner defines it)</td></tr>
+  <tr><td><code>@OneToMany</code></td><td>Customer → Orders</td><td>The "many" side (orders table has <code>customer_id</code>)</td></tr>
+  <tr><td><code>@ManyToOne</code></td><td>Order → Customer</td><td>This side (the owning side)</td></tr>
+  <tr><td><code>@ManyToMany</code></td><td>Student ↔ Course</td><td>A join table (e.g. <code>student_courses</code>)</td></tr>
+</table>
+
+<h3>Owning side and <code>@JoinColumn</code></h3>
+
+<p>In every bidirectional relationship, one side <strong>owns</strong> the foreign key. The owning side declares <code>@JoinColumn</code>. The other side uses <code>mappedBy</code> to point back:</p>
+
+<pre><code>// Owning side — has the foreign key column
+@ManyToOne
+@JoinColumn(name = "customer_id")
+private CustomerEntity customer;
+
+// Inverse side — no foreign key, just a mirror
+@OneToMany(mappedBy = "customer")
+private List&lt;OrderEntity&gt; orders;</code></pre>
+
+<p><code>@JoinColumn</code> goes on the side that <em>has</em> the foreign key column in its table. If you put it on both sides, you get two foreign key columns — almost certainly a bug.</p>
+
+<h3>Fetch types</h3>
+
+<p><code>FetchType.EAGER</code> loads the related entity immediately. <code>FetchType.LAZY</code> loads it only when you access the field. <code>@ManyToOne</code> defaults to <code>EAGER</code>; <code>@OneToMany</code> defaults to <code>LAZY</code>. Prefer <code>LAZY</code> everywhere — eager fetching is the root cause of N+1 disasters and bloated responses.</p>
+
+<h3>Cascade and orphan removal</h3>
+
+<p><code>cascade = CascadeType.ALL</code> means <code>save</code>, <code>merge</code>, <code>remove</code>, <code>refresh</code>, and <code>detach</code> all propagate from the parent to the children. <code>orphanRemoval = true</code> goes one step further: removing an item from the list deletes it from the database. Without it, the item stays in the DB with a null foreign key.</p>
+
+<h3>Many-to-many with a join table</h3>
+
+<pre><code>@ManyToMany
+@JoinTable(
+    name = "student_courses",
+    joinColumns = @JoinColumn(name = "student_id"),
+    inverseJoinColumns = @JoinColumn(name = "course_id")
+)
+private Set&lt;CourseEntity&gt; courses = new HashSet&lt;&gt;();</code></pre>
+
+<p>The join table has two foreign key columns. Prefer <code>Set</code> over <code>List</code> for many-to-many to avoid duplicate entries and simplify <code>equals</code>/<code>hashCode</code>.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://jakarta.ee/specifications/persistence/3.1/apidocs/jakarta.persistence/package-summary.html" target="_blank" rel="noopener">Jakarta Persistence API</a> · <a href="https://docs.jboss.org/hibernate/orm/6.4/userguide/html_single/Hibernate_User_Guide.html#annotations" target="_blank" rel="noopener">Hibernate: Mapping Annotations</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. Why does every JPA entity require a no-argument constructor?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It is a Java language requirement for all annotated classes</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Hibernate instantiates proxy objects using it, then populates fields</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Spring needs it to call <code>@PostConstruct</code> lifecycle methods</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The JPA specification forbids constructors with parameters</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. Where should <code>@JoinColumn(name = "customer_id")</code> be placed in a bidirectional Customer–Order relationship?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">On the <code>@OneToMany</code> side (Customer entity)</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">On the <code>@ManyToOne</code> side (Order entity), which owns the foreign key</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">On both sides for redundancy and safety</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">On neither side — JPA infers the column from field names</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. What happens if <code>orphanRemoval = true</code> and you remove an OrderItem from an Order's items list?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The item's foreign key is set to NULL in the database</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">The item row is deleted from the database</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A <code>ConstraintViolationException</code> is thrown</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The item is detached but the row remains unchanged</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Why is <code>GenerationType.SEQUENCE</code> preferred over <code>IDENTITY</code> for batch inserts?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">SEQUENCE generates shorter primary key values</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">IDENTITY forces Hibernate to insert rows one at a time to retrieve each id</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">SEQUENCE is the only strategy PostgreSQL supports</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">IDENTITY does not guarantee unique values across restarts</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. What is the default fetch type for <code>@ManyToOne</code>, and what risk does it carry?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>LAZY</code> — risk of <code>LazyInitializationException</code> outside a transaction</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0"><code>EAGER</code> — risk of loading the entire object graph in a single query</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>EAGER</code> — risk of data loss when the related entity is deleted</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>LAZY</code> — risk of duplicate rows in the result set</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0026-orm-jpa-hibernate.html" class="nav-prev">← Prev</a>
+  <a href="0028-spring-data-repositories.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

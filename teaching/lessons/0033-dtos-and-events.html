@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 33 — DTOs, Domain Exceptions &amp; Application Events</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>DTOs, Domain Exceptions &amp; Application Events</h1>
+
+<p>So far your service layer returns entities straight to the controller. That works — until a client overwrites a server-managed field, or you add a lazy-loaded association that crashes during serialization, or two services need to talk without creating a circular dependency. This lesson covers three patterns that solve all three problems: <strong>Data Transfer Objects</strong> to control what crosses layer boundaries, <strong>domain exceptions</strong> to make errors meaningful, and <strong>application events</strong> to decouple services that need to react to each other.</p>
+
+<h2>Why Not Return Entities Directly?</h2>
+
+<p>It's tempting — the entity has all the data, so just serialize it as JSON. Three things go wrong:</p>
+
+<p><strong>1. Security.</strong> Your <code>OrderEntity</code> has <code>id</code> and <code>createdAt</code> set by the server. If you accept the entity as a request body, a malicious client can set <code>id</code> to overwrite an existing order or fake <code>createdAt</code>. You've just let the client tamper with server-managed fields.</p>
+
+<p><strong>2. Coupling.</strong> Jackson serializes every field it can reach — including lazy-loaded <code>@ManyToOne</code> relationships. Add a field to the entity, and every API consumer sees it. Your database schema becomes your API contract, and you can never change one without breaking the other.</p>
+
+<p><strong>3. Shape mismatch.</strong> A create request needs <code>customerId</code> and <code>items</code>. A response needs <code>id</code>, <code>status</code>, and <code>totalAmount</code>. They carry different data — one object can't do both jobs well.</p>
+
+<h2>Data Transfer Objects</h2>
+
+<p>A <strong>DTO</strong> is a simple object that carries data between layers. Request DTOs define what comes in; response DTOs define what goes out. <strong>Java records</strong> are ideal — they're immutable, compact, and don't need boilerplate getters.</p>
+
+<h3>Request DTO</h3>
+
+<pre><code>public record CreateOrderRequest(
+        @NotNull(message = "Customer ID is required") Long customerId,
+        @NotEmpty(message = "Order must have at least one item")
+        List&lt;@NotNull CreateOrderItemRequest&gt; items
+) {}</code></pre>
+
+<pre><code>public record CreateOrderItemRequest(
+        @NotNull(message = "Product ID is required") Long productId,
+        @NotNull(message = "Quantity is required")
+        @Min(value = 1, message = "Quantity must be at least 1") Integer quantity
+) {}</code></pre>
+
+<p>Validation annotations (<code>@NotNull</code>, <code>@Min</code>, <code>@NotEmpty</code>) come from the <strong>Jakarta Bean Validation</strong> API. Spring Boot 3.x uses the <code>jakarta.validation</code> namespace — not the older <code>javax.validation</code>.</p>
+
+<h3>Response DTO</h3>
+
+<pre><code>public record OrderResponse(
+        Long id,
+        Long customerId,
+        String customerName,
+        OrderStatus status,
+        BigDecimal totalAmount,
+        Instant createdAt,
+        List&lt;OrderItemResponse&gt; items
+) {
+    public static OrderResponse from(OrderEntity entity) {
+        return new OrderResponse(
+                entity.getId(),
+                entity.getCustomer().getId(),
+                entity.getCustomer().getName(),
+                entity.getStatus(),
+                entity.getTotalAmount(),
+                entity.getCreatedAt(),
+                entity.getItems().stream()
+                        .map(OrderItemResponse::from)
+                        .toList()
+        );
+    }
+}</code></pre>
+
+<h3>The <code>from()</code> Factory Method</h3>
+
+<p>Each response DTO has a <code>static from(Entity)</code> method that maps the entity to the DTO. This keeps the conversion in one place, is easy to test, and avoids needing a separate mapper class. For complex mappings with dozens of fields, <strong>MapStruct</strong> generates mapper code at compile time — but manual <code>from()</code> methods are clearer for learning and sufficient for most services.</p>
+
+<p>The key principle: <strong>entities never leave the service layer.</strong> The controller receives a DTO and returns a DTO. The repository returns an entity. The service converts between them.</p>
+
+<h2>Domain Exceptions</h2>
+
+<p>Throwing <code>RuntimeException("Not found")</code> tells the caller nothing. Throwing <code>OrderNotFoundException(orderId)</code> tells the caller <em>exactly</em> what went wrong and with what data. Domain exceptions make your errors part of your API.</p>
+
+<h3>Custom Exception Hierarchy</h3>
+
+<pre><code>// Base exception — all domain errors extend this
+public class OrderManagementException extends RuntimeException {
+    public OrderManagementException(String message) {
+        super(message);
+    }
+    public OrderManagementException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+// Specific exception carries the ID that wasn't found
+public class OrderNotFoundException extends OrderManagementException {
+    private final Long orderId;
+    public OrderNotFoundException(Long orderId) {
+        super("Order not found: " + orderId);
+        this.orderId = orderId;
+    }
+    public Long getOrderId() { return orderId; }
+}
+
+// Rich exception carries multiple relevant fields
+public class InsufficientStockException extends OrderManagementException {
+    private final Long productId;
+    private final int availableStock;
+    private final int requestedQuantity;
+    public InsufficientStockException(Long productId,
+            int availableStock, int requestedQuantity) {
+        super(String.format(
+            "Insufficient stock for product %d: available=%d, requested=%d",
+            productId, availableStock, requestedQuantity));
+        this.productId = productId;
+        this.availableStock = availableStock;
+        this.requestedQuantity = requestedQuantity;
+    }
+    // getters
+}</code></pre>
+
+<h3>Why a Hierarchy?</h3>
+
+<p>Having all custom exceptions extend <code>OrderManagementException</code> means:</p>
+
+<ul>
+  <li>Catch all domain errors with one <code>catch</code> block if needed</li>
+  <li>Handle specific exceptions differently in <code>@RestControllerAdvice</code></li>
+  <li>The exception type itself documents what went wrong</li>
+</ul>
+
+<p>Your <code>@RestControllerAdvice</code> catches <code>OrderNotFoundException</code> → 404, <code>InsufficientStockException</code> → 409, and the base <code>OrderManagementException</code> → 400 as a catch-all. Specific handlers first; generic last.</p>
+
+<h2>Application Events</h2>
+
+<p>When <code>OrderService</code> needs to notify <code>CustomerService</code> that an order was placed, you <em>could</em> inject <code>CustomerService</code> directly. But if <code>CustomerService</code> also calls <code>OrderService</code>, you get a <strong>circular dependency</strong> — Spring won't start. Application events solve this: the publisher doesn't know who listens.</p>
+
+<h3>Define an Event</h3>
+
+<pre><code>public record OrderCreatedEvent(
+        Long orderId,
+        Long customerId,
+        BigDecimal totalAmount,
+        Instant createdAt
+) {}</code></pre>
+
+<p>A record — immutable, trivial to construct. Events should carry only what the listener needs, not the entire entity.</p>
+
+<h3>Publish from the Service</h3>
+
+<pre><code>@Service
+public class OrderService {
+    private final ApplicationEventPublisher eventPublisher;
+    private final OrderRepository orderRepository;
+
+    public OrderService(ApplicationEventPublisher eventPublisher,
+            OrderRepository orderRepository /*, ... */) {
+        this.eventPublisher = eventPublisher;
+        this.orderRepository = orderRepository;
+    }
+
+    @Transactional
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        // ... order creation logic ...
+
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        // Publish — anyone listening will be notified
+        eventPublisher.publishEvent(new OrderCreatedEvent(
+                savedOrder.getId(),
+                savedOrder.getCustomer().getId(),
+                savedOrder.getTotalAmount(),
+                savedOrder.getCreatedAt()
+        ));
+
+        return OrderResponse.from(savedOrder);
+    }
+}</code></pre>
+
+<h3>Listen to Events</h3>
+
+<pre><code>@Component
+public class OrderEventListener {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(OrderEventListener.class);
+
+    // Fires immediately — even if the transaction rolls back
+    @EventListener
+    public void onOrderCreated(OrderCreatedEvent event) {
+        log.info("order_created_event orderId={}", event.orderId());
+    }
+
+    // Fires ONLY after the transaction commits successfully
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onOrderCreatedAfterCommit(OrderCreatedEvent event) {
+        notificationService.sendOrderConfirmation(event.orderId());
+    }
+}</code></pre>
+
+<p><code>@EventListener</code> fires synchronously when <code>publishEvent()</code> is called — even if the transaction later rolls back. <code>@TransactionalEventListener(phase = AFTER_COMMIT)</code> fires <strong>only after</strong> the transaction commits. Use <code>@EventListener</code> for synchronous side-effects within the same transaction (like updating a cache). Use <code>@TransactionalEventListener</code> for anything that must only happen if the data actually persisted — sending emails, calling external APIs, publishing to Kafka.</p>
+
+<h3>Events vs Direct Calls</h3>
+
+<table>
+  <thead>
+    <tr><th>Approach</th><th>Coupling</th><th>When to Use</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Direct method call</td><td>Tight — caller depends on callee</td><td>You need the result immediately</td></tr>
+    <tr><td>Application event</td><td>Loose — publisher unaware of listeners</td><td>You want to notify without waiting</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-framework/reference/core/beans/context-introduction.html" target="_blank" rel="noopener">Spring: The IoC Container</a> · <a href="https://docs.spring.io/spring-framework/reference/core/beans/factory-nature.html#beans-factory-extension-factorybean" target="_blank" rel="noopener">Spring: Application Events</a> · <a href="https://jakarta.ee/specifications/bean-validation/3.0/apidocs/" target="_blank" rel="noopener">Jakarta Bean Validation 3.0</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What is the primary security risk of returning a JPA entity directly as a REST response?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The entity's <code>equals()</code> method may leak data</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">A malicious client could set server-managed fields like <code>id</code> in a request</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Jackson cannot serialize JPA entities to JSON</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The entity will fail validation annotations</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. Why should all domain exceptions extend a common base class like <code>OrderManagementException</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Java requires it for custom exceptions</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It makes every exception return the same HTTP status</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">You can catch all domain errors with one block and handle specifics separately</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It prevents checked exceptions in the service layer</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. What happens if <code>@EventListener</code> processes an event and the publishing transaction then rolls back?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The listener's work is also rolled back automatically</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The event is queued and redelivered after rollback</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">The listener already executed — its side-effects are not rolled back</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring throws an exception during rollback</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. A response DTO uses a <code>static from(Entity)</code> method instead of a separate mapper class. When would MapStruct be the better choice?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">When the entity has fewer than three fields</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">When mappings involve dozens of fields and nested objects</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">When you need runtime reflection for dynamic mapping</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">When the DTO and entity have identical field names</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. You want to send an order confirmation email only if the order actually persisted to the database. Which approach is correct?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Call the email service at the end of the <code>@Transactional</code> method</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Use <code>@EventListener</code> on <code>OrderCreatedEvent</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Use <code>@TransactionalEventListener(phase = AFTER_COMMIT)</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Publish the event from the controller after the service returns</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0032-service-layer.html" class="nav-prev">← Prev</a>
+  <a href="0034-anti-patterns.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

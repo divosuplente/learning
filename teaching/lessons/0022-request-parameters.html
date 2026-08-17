@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 22 — Request Parameters</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Request Parameters</h1>
+
+<p>Every HTTP request carries data in different places — the URL path, the query string, the body, the headers. Spring gives you one annotation per location. Pick the right one and the framework does the parsing for you. Pick the wrong one and you're fighting the framework instead of using it.</p>
+
+<h2><code>@PathVariable</code> — data in the URL</h2>
+
+<p>When the identifier is part of the URL itself, use <code>@PathVariable</code>. It extracts a named segment from the path template:</p>
+
+<pre><code>// GET /api/orders/42
+@GetMapping("/{id}")
+public ResponseEntity&lt;OrderResponse&gt; getOrder(@PathVariable Long id) {
+    // id = 42
+}</code></pre>
+
+<p>The variable name in the annotation path (<code>{id}</code>) must match the method parameter name. If they differ, specify it explicitly: <code>@PathVariable("orderId") Long id</code>.</p>
+
+<p>Path variables are <strong>always required</strong> by default — there is no <code>required = false</code>. If the segment is missing, Spring returns 404 because the route doesn't match at all, not because a parameter is null.</p>
+
+<h2><code>@RequestParam</code> — data in the query string</h2>
+
+<p>Query parameters sit after the <code>?</code> in a URL: <code>/api/orders?status=PENDING&amp;page=2</code>. Use <code>@RequestParam</code> to pull them out:</p>
+
+<pre><code>// GET /api/orders?customerId=7&status=PENDING
+@GetMapping
+public ResponseEntity&lt;List&lt;OrderResponse&gt;&gt; listOrders(
+        @RequestParam(required = false) Long customerId,
+        @RequestParam(required = false) String status) {
+    // customerId = 7, status = "PENDING"
+}</code></pre>
+
+<p>By default, <code>@RequestParam</code> is <strong>required</strong>. Omit a required parameter and Spring returns <strong>400 Bad Request</strong> — not null, not an empty string. Setting <code>required = false</code> makes it optional; the value will be <code>null</code> when absent. For a safer default, use <code>defaultValue</code>:</p>
+
+<pre><code>@RequestParam(defaultValue = "0") int page,
+@RequestParam(defaultValue = "20") int size</code></pre>
+
+<p>With <code>defaultValue</code>, the parameter is never null and <code>required</code> is implicitly false. This avoids <code>null</code> checks and <code>NumberFormatException</code> on primitive types.</p>
+
+<h2><code>@RequestBody</code> — data in the request body</h2>
+
+<p>POST and PUT requests send structured data (usually JSON) in the body. <code>@RequestBody</code> tells Jackson to deserialize it into a Java object:</p>
+
+<pre><code>// POST /api/orders  body: {"customerId":7,"items":[...]}
+@PostMapping
+public ResponseEntity&lt;OrderResponse&gt; createOrder(
+        @Valid @RequestBody CreateOrderRequest request) {
+    // request.customerId() = 7
+}</code></pre>
+
+<p>Without <code>@RequestBody</code>, Spring tries to bind body fields to method parameters individually (form-encoded style) — which almost never works with JSON. If you're sending JSON, you need this annotation.</p>
+
+<p><code>@RequestBody</code> is required by default. Send an empty body and you get <strong>400 Bad Request</strong>. Pair it with <code>@Valid</code> to trigger Bean Validation on the incoming object before it reaches your logic.</p>
+
+<h2><code>@RequestHeader</code> — data in HTTP headers</h2>
+
+<p>Headers carry metadata: authentication tokens, content types, tracing IDs. Pull them out with <code>@RequestHeader</code>:</p>
+
+<pre><code>@GetMapping
+public ResponseEntity&lt;List&lt;OrderResponse&gt;&gt; listOrders(
+        @RequestHeader(value = "Authorization", required = false) String auth,
+        @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
+    // auth = "Bearer eyJhbGc..."
+}</code></pre>
+
+<p>Like <code>@RequestParam</code>, headers are required by default. Set <code>required = false</code> for optional headers. For common headers, Spring provides <code>HttpHeaders</code> as a type-safe alternative — inject the whole object and read what you need.</p>
+
+<h2>When to use each</h2>
+
+<table>
+  <thead>
+    <tr><th>Annotation</th><th>Where the data lives</th><th>Use for</th><th>Required by default</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>@PathVariable</code></td><td>URL path segment</td><td>Identifying a resource (<code>/orders/42</code>)</td><td>Yes (no opt-out)</td></tr>
+    <tr><td><code>@RequestParam</code></td><td>Query string</td><td>Filtering, sorting, pagination (<code>?page=2</code>)</td><td>Yes</td></tr>
+    <tr><td><code>@RequestBody</code></td><td>Request body (JSON)</td><td>Creating or updating resources</td><td>Yes</td></tr>
+    <tr><td><code>@RequestHeader</code></td><td>HTTP header</td><td>Auth tokens, tracing IDs, content negotiation</td><td>Yes</td></tr>
+  </tbody>
+</table>
+
+<p>Rule of thumb: if it <em>identifies</em> the resource, it's a path variable. If it <em>filters</em> results, it's a query param. If it <em>is</em> the resource, it's a body. If it's <em>about</em> the request itself, it's a header.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestparam.html" target="_blank" rel="noopener">Spring: @RequestParam</a> · <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/pathvariable.html" target="_blank" rel="noopener">Spring: @PathVariable</a> · <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestbody.html" target="_blank" rel="noopener">Spring: @RequestBody</a> · <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/requestheader.html" target="_blank" rel="noopener">Spring: @RequestHeader</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. A request to <code>GET /api/orders/7</code> returns 404 — the route is <code>@GetMapping("/{id}")</code> with <code>@PathVariable Long id</code>. What happens if the path variable is missing?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Spring sets <code>id</code> to null and invokes the method</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Spring returns 400 Bad Request</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">The route doesn't match at all — no controller method is invoked</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Spring sets <code>id</code> to 0 and invokes the method</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. <code>@RequestParam</code> with <code>required = false</code> is used on a <code>Long</code> parameter. The client omits that query parameter entirely. What is the parameter's value inside the method?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>0L</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0"><code>null</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Spring returns 400 Bad Request</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">An empty string <code>""</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. You send a JSON body to a POST endpoint but forget <code>@RequestBody</code> on the parameter. What happens?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring deserializes the JSON normally</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Spring tries form-style binding and the object fields are all null or default</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring throws a compile-time error</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring automatically applies @RequestBody by convention</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Which annotation lets you set <code>defaultValue = "0"</code> so a primitive <code>int</code> parameter never equals null and is never required?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>@PathVariable</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0"><code>@RequestParam</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>@RequestBody</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>@RequestHeader</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. A client sends <code>GET /api/orders?status=</code> (the key exists but the value is empty). The parameter is <code>@RequestParam(required = false) String status</code>. What is <code>status</code> in the method?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">An empty string <code>""</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>null</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Spring returns 400 Bad Request</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The string <code>"null"</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0021-rest-controllers.html" class="nav-prev">← Prev</a>
+  <a href="0023-http-responses.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

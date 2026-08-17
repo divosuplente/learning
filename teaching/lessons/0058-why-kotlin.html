@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 58 — Why Kotlin &amp; Setting Up Kotlin in Spring Boot</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Why Kotlin &amp; Setting Up Kotlin in Spring Boot</h1>
+
+<p>Every Java Spring Boot project can run Kotlin instead — same JVM, same libraries, same deployment pipeline. This lesson explains what Kotlin fixes in Java, when a migration makes sense, and how to wire the Kotlin compiler into an existing Maven project so both languages coexist during the transition.</p>
+
+<h2>What Is Kotlin?</h2>
+
+<p><strong>Kotlin</strong> is a statically-typed language for the JVM, created by JetBrains and first released in 2011. It is fully <strong>interoperable</strong> with Java: call Java from Kotlin, call Kotlin from Java — no wrappers, no adapters, no IDL. Google made it the preferred Android language in 2019; Spring Framework has had first-class Kotlin support since 5.0 (2017).</p>
+
+<p>The key promise: <strong>write less code with fewer bugs</strong>. Kotlin's type system catches null-pointer errors at compile time, its data classes eliminate getter/setter boilerplate, and its coroutine model replaces callback chains with sequential-looking code.</p>
+
+<h2>Java vs Kotlin — Comparison</h2>
+
+<table>
+  <tr><th>Feature</th><th>Java 21</th><th>Kotlin</th></tr>
+  <tr><td>Null safety</td><td>Optional API (runtime)</td><td>Built-in type system (compile-time)</td></tr>
+  <tr><td>Data classes</td><td>Records (Java 16+)</td><td><code>data class</code> (since 1.0)</td></tr>
+  <tr><td>String interpolation</td><td><code>String.format()</code> or concatenation</td><td><code>"Hello $name"</code></td></tr>
+  <tr><td>Smart casting</td><td><code>instanceof</code> + cast</td><td><code>is</code> check, automatic cast</td></tr>
+  <tr><td>Extension functions</td><td>Not available</td><td>Built-in</td></tr>
+  <tr><td>Coroutines</td><td>Virtual threads (blocking I/O scaling)</td><td><code>suspend</code> functions, structured concurrency</td></tr>
+  <tr><td>Pattern matching</td><td>Switch expressions (Java 21)</td><td><code>when</code> expression</td></tr>
+  <tr><td>Properties</td><td>Getters/setters boilerplate</td><td><code>val</code>/<code>var</code> — auto-generated</td></tr>
+  <tr><td>Default arguments</td><td>Not available</td><td>Built-in</td></tr>
+  <tr><td>Named arguments</td><td>Not available</td><td>Built-in</td></tr>
+  <tr><td>Sealed classes</td><td>Sealed interfaces (Java 17+)</td><td><code>sealed class</code> (since 1.0)</td></tr>
+  <tr><td>Class mutability</td><td>Open by default</td><td>Final by default</td></tr>
+</table>
+
+<p>The last row matters most for Spring Boot. Kotlin classes are <code>final</code> by default — the opposite of Java. Spring's CGLIB proxies need open classes, so Kotlin requires compiler plugins to opt in. More on that below.</p>
+
+<h2>When to Migrate — and When Not To</h2>
+
+<p><strong>Migrate when:</strong></p>
+
+<ul>
+  <li>Starting a <strong>new microservice</strong> in an existing Java/Spring ecosystem</li>
+  <li>Adding features to a project where the team wants to <strong>gradually adopt</strong> Kotlin</li>
+  <li>You need <strong>concise code</strong> with fewer bugs (null safety, immutability by default)</li>
+  <li>Your team values <strong>expressiveness</strong> (DSLs, extension functions, coroutines)</li>
+</ul>
+
+<p><strong>Do NOT migrate when:</strong></p>
+
+<ul>
+  <li>Your team has <strong>no Kotlin experience</strong> and ramp-up time is not acceptable</li>
+  <li>You rely heavily on <strong>annotation processing tools</strong> that don't support Kotlin well</li>
+  <li>Your codebase is <strong>stable and low-churn</strong> — migration effort outweighs benefits</li>
+</ul>
+
+<p>Kotlin and Java can coexist in the same Maven module. The safest migration is <strong>file-by-file</strong>: convert one class at a time using IntelliJ's Java-to-Kotlin converter, run the tests, commit. You never need a "big bang" rewrite.</p>
+
+<h2>Setting Up Kotlin in Maven</h2>
+
+<p>The fastest path is Spring Initializr: pick <strong>Kotlin</strong> as the language, and everything below is configured for you. But most teams add Kotlin to an <strong>existing</strong> Java project. Here's what you add to <code>pom.xml</code>:</p>
+
+<h3>Dependencies</h3>
+
+<pre><code>&lt;properties&gt;
+    &lt;java.version&gt;21&lt;/java.version&gt;
+    &lt;kotlin.version&gt;2.0.21&lt;/kotlin.version&gt;
+&lt;/properties&gt;
+
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+        &lt;artifactId&gt;kotlin-stdlib&lt;/artifactId&gt;
+        &lt;version&gt;${kotlin.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+        &lt;artifactId&gt;kotlin-reflect&lt;/artifactId&gt;
+        &lt;version&gt;${kotlin.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.fasterxml.jackson.module&lt;/groupId&gt;
+        &lt;artifactId&gt;jackson-module-kotlin&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+<p>Three libraries:</p>
+<ul>
+  <li><strong><code>kotlin-stdlib</code></strong> — the runtime (collections, built-in functions, coroutines primitives)</li>
+  <li><strong><code>kotlin-reflect</code></strong> — reflection support (required by Spring's classpath scanning)</li>
+  <li><strong><code>jackson-module-kotlin</code></strong> — serializes/deserializes Kotlin data classes without a no-arg constructor</li>
+</ul>
+
+<h3>The kotlin-maven-plugin</h3>
+
+<pre><code>&lt;plugin&gt;
+    &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+    &lt;artifactId&gt;kotlin-maven-plugin&lt;/artifactId&gt;
+    &lt;version&gt;${kotlin.version}&lt;/version&gt;
+    &lt;configuration&gt;
+        &lt;compilerPlugins&gt;
+            &lt;plugin&gt;spring&lt;/plugin&gt;
+            &lt;plugin&gt;jpa&lt;/plugin&gt;
+            &lt;plugin&gt;all-open&lt;/plugin&gt;
+        &lt;/compilerPlugins&gt;
+        &lt;jvmTarget&gt;21&lt;/jvmTarget&gt;
+    &lt;/configuration&gt;
+    &lt;executions&gt;
+        &lt;execution&gt;
+            &lt;id&gt;compile&lt;/id&gt;
+            &lt;goals&gt;&lt;goal&gt;compile&lt;/goal&gt;&lt;/goals&gt;
+            &lt;configuration&gt;
+                &lt;sourceDirs&gt;
+                    &lt;sourceDir&gt;src/main/kotlin&lt;/sourceDir&gt;
+                    &lt;sourceDir&gt;src/main/java&lt;/sourceDir&gt;
+                &lt;/sourceDirs&gt;
+            &lt;/configuration&gt;
+        &lt;/execution&gt;
+        &lt;execution&gt;
+            &lt;id&gt;test-compile&lt;/id&gt;
+            &lt;goals&gt;&lt;goal&gt;test-compile&lt;/goal&gt;&lt;/goals&gt;
+            &lt;configuration&gt;
+                &lt;sourceDirs&gt;
+                    &lt;sourceDir&gt;src/test/kotlin&lt;/sourceDir&gt;
+                    &lt;sourceDir&gt;src/test/java&lt;/sourceDir&gt;
+                &lt;/sourceDirs&gt;
+            &lt;/configuration&gt;
+        &lt;/execution&gt;
+    &lt;/executions&gt;
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+            &lt;artifactId&gt;kotlin-maven-allopen&lt;/artifactId&gt;
+            &lt;version&gt;${kotlin.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+            &lt;artifactId&gt;kotlin-maven-noarg&lt;/artifactId&gt;
+            &lt;version&gt;${kotlin.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/plugin&gt;</code></pre>
+
+<p>The Kotlin compiler must run <strong>before</strong> <code>maven-compiler-plugin</code> because Kotlin can see Java sources, but <code>javac</code> cannot see Kotlin sources. The <code>sourceDirs</code> include both <code>src/main/kotlin</code> and <code>src/main/java</code> so the Kotlin compiler processes both. Then you disable javac's default compile phase and let it run only for remaining Java files:</p>
+
+<pre><code>&lt;plugin&gt;
+    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+    &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+    &lt;executions&gt;
+        &lt;execution&gt;
+            &lt;id&gt;default-compile&lt;/id&gt;
+            &lt;phase&gt;none&lt;/phase&gt;
+        &lt;/execution&gt;
+        &lt;execution&gt;
+            &lt;id&gt;default-testCompile&lt;/id&gt;
+            &lt;phase&gt;none&lt;/phase&gt;
+        &lt;/execution&gt;
+        &lt;execution&gt;
+            &lt;id&gt;java-compile&lt;/id&gt;
+            &lt;phase&gt;compile&lt;/phase&gt;
+            &lt;goals&gt;&lt;goal&gt;compile&lt;/goal&gt;&lt;/goals&gt;
+        &lt;/execution&gt;
+        &lt;execution&gt;
+            &lt;id&gt;java-test-compile&lt;/id&gt;
+            &lt;phase&gt;test-compile&lt;/phase&gt;
+            &lt;goals&gt;&lt;goal&gt;testCompile&lt;/goal&gt;&lt;/goals&gt;
+        &lt;/execution&gt;
+    &lt;/executions&gt;
+&lt;/plugin&gt;</code></pre>
+
+<p>Setting <code>&lt;phase&gt;none&lt;/phase&gt;</code> on the default compilations prevents javac from running before Kotlin has finished. The renamed executions pick up whatever Java files the Kotlin compiler did not consume.</p>
+
+<h2>The Three Compiler Plugins</h2>
+
+<p>These are not optional — without them, Spring Boot <strong>fails to start</strong> with Kotlin:</p>
+
+<ol>
+  <li><strong><code>spring</code></strong> (allopen) — Kotlin classes are <code>final</code> by default. Spring's CGLIB creates subclass proxies for <code>@Service</code>, <code>@Configuration</code>, <code>@RestController</code> — but it cannot subclass a <code>final</code> class. The <code>spring</code> plugin opens any class annotated with Spring stereotypes.</li>
+  <li><strong><code>jpa</code></strong> (noarg) — JPA requires a no-argument constructor on <code>@Entity</code> classes. Kotlin data classes have only the all-args constructor. The <code>jpa</code> plugin synthesizes a no-arg constructor at compile time.</li>
+  <li><strong><code>all-open</code></strong> — A general escape hatch. Opens classes annotated with any annotation you specify (e.g., a custom <code>@MyOpen</code>), used alongside <code>spring</code> for non-Spring frameworks that also need proxying.</li>
+</ol>
+
+<p>The <code>kotlin-maven-allopen</code> artifact provides the runtime for the <code>spring</code> and <code>all-open</code> plugins. The <code>kotlin-maven-noarg</code> artifact provides the runtime for the <code>jpa</code> plugin. Both are declared as <strong>dependencies of the kotlin-maven-plugin</strong>, not of the project itself.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://kotlinlang.org/docs/home.html" target="_blank" rel="noopener">Kotlin Official Documentation</a> · <a href="https://docs.spring.io/spring-boot/reference/kotlin.html" target="_blank" rel="noopener">Spring Boot Kotlin Support</a> · <a href="https://kotlinlang.org/docs/all-open-plugin.html" target="_blank" rel="noopener">Kotlin all-open Plugin</a> · <a href="https://kotlinlang.org/docs/no-arg-plugin.html" target="_blank" rel="noopener">Kotlin no-arg Plugin</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. You write a Kotlin <code>@Service</code> class but forget to include the <code>spring</code> compiler plugin. What happens at startup?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Spring creates the bean normally — <code>@Service</code> implies the class is open</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Spring fails because CGLIB cannot subclass a final class to create the proxy</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Spring falls back to JDK dynamic proxies and the app starts successfully</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The Kotlin compiler refuses to compile a final class with <code>@Service</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. Why is <code>kotlin-maven-allopen</code> declared as a dependency of the <code>kotlin-maven-plugin</code> rather than as a project dependency?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It needs to be on the classpath before Spring Boot starts</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Maven requires all plugin dependencies to be in the plugin classpath for security</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">The allopen artifact is a compiler plugin resolved at build time, not a runtime library needed by the application</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It must be loaded by the Maven Surefire plugin during test execution</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. In a mixed Java/Kotlin Maven project, why does the Kotlin compiler's <code>sourceDirs</code> include <code>src/main/java</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Kotlin can parse Java sources to resolve types, but javac cannot parse Kotlin — so Kotlin must compile first</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The Kotlin compiler translates Java files into Kotlin automatically during compilation</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">It is a mistake — Java and Kotlin source directories should never overlap</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Maven requires at least one shared source directory for interop to work</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. A Kotlin <code>@Entity</code> class has no explicit no-argument constructor. What makes JPA instantiation work?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">JPA uses reflection to bypass the constructor — no plugin needed</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The <code>jpa</code> compiler plugin synthesizes a no-arg constructor at compile time</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The <code>kotlin-reflect</code> library generates one at runtime via proxies</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Spring Data's <code>SimpleJpaRepository</code> calls the all-args constructor with null values</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Your team has a stable, low-churn Java Spring Boot service with heavy use of Lombok and MapStruct annotation processors. Should you migrate it to Kotlin?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — Kotlin's data classes replace both Lombok and MapStruct entirely</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — annotation processing tools work identically in Kotlin and Java</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">No — annotation processor compatibility is uncertain and the stable codebase doesn't benefit enough to justify the risk</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">No — Kotlin cannot coexist with Java in the same Maven module</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0057-testing-deployment-oms.html" class="nav-prev">← Prev</a>
+  <a href="0059-kotlin-syntax-basics.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

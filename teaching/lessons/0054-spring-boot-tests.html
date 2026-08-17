@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 54 — Spring Boot Tests: @WebMvcTest, @DataJpaTest, Testcontainers &amp; Module Review</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Spring Boot Tests: @WebMvcTest, @DataJpaTest, Testcontainers &amp; Module Review</h1>
+
+<p>Unit tests verify isolated methods. But bugs often hide in the wiring — between controllers and services, between repositories and the database, between JSON payloads and object fields. Spring Boot provides <strong>test slices</strong> that load exactly one layer of your application, making integration-focused tests fast and targeted.</p>
+
+<h2>Test Slices — Load Only What You Need</h2>
+
+<p>A full <code>@SpringBootTest</code> starts the entire application context — every bean, every auto-configuration. That is slow and tests too many things at once. Spring Boot's test slices load <strong>only the layer you care about</strong> and mock everything else:</p>
+
+<table>
+  <tr><th>Annotation</th><th>Loads</th><th>Mocks Automatically</th><th>Use For</th></tr>
+  <tr><td><code>@WebMvcTest(MyController.class)</code></td><td>One controller + Spring MVC infrastructure</td><td>All <code>@Service</code> and <code>@Repository</code> beans</td><td>Controller HTTP behavior</td></tr>
+  <tr><td><code>@DataJpaTest</code></td><td>JPA entities, repositories, entity manager, test DB</td><td>Controllers and services</td><td>Repository queries and constraints</td></tr>
+  <tr><td><code>@SpringBootTest</code></td><td>The entire application context</td><td>Nothing (or mock specific beans)</td><td>Full integration tests</td></tr>
+  <tr><td><code>@JsonTest</code></td><td>Jackson <code>ObjectMapper</code> only</td><td>Everything else</td><td>DTO serialization and deserialization</td></tr>
+</table>
+
+<p>The key insight: <strong>narrower slices run faster and fail closer to the bug.</strong> A <code>@WebMvcTest</code> runs in ~2 seconds. A <code>@SpringBootTest</code> often takes 10–30 seconds. Reach for the narrowest slice that proves what you need.</p>
+
+<h2>Controller Tests with @WebMvcTest and MockMvc</h2>
+
+<p><code>@WebMvcTest</code> loads your controller and Spring MVC's request-handling pipeline — but <strong>not</strong> your services, repositories, or any other beans. You must supply mocks for the controller's dependencies.</p>
+
+<pre><code>@WebMvcTest(OrderController.class)
+class OrderControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;       // simulates HTTP requests
+
+    @Autowired
+    private ObjectMapper objectMapper;  // auto-configured by @WebMvcTest
+
+    @MockBean
+    private OrderService orderService;  // replaced with a Mockito mock
+
+    @Test
+    void shouldReturnOrderWhenIdExists() throws Exception {
+        OrderResponse response = new OrderResponse(
+            1L, 7L, "Alice", OrderStatus.CONFIRMED,
+            new BigDecimal("149.97"), Instant.now(), List.of()
+        );
+        when(orderService.getOrderById(1L)).thenReturn(response);
+
+        mockMvc.perform(get("/api/orders/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.status").value("CONFIRMED"))
+            .andExpect(jsonPath("$.customerName").value("Alice"));
+    }
+
+    @Test
+    void shouldReturn404WhenOrderNotFound() throws Exception {
+        when(orderService.getOrderById(999L))
+            .thenThrow(new OrderNotFoundException(999L));
+
+        mockMvc.perform(get("/api/orders/999"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message").value("Order not found: 999"));
+    }
+
+    @Test
+    void shouldCreateOrderWhenInputIsValid() throws Exception {
+        String requestBody = """
+            {
+                "customerId": 1,
+                "items": [{"productId": 10, "quantity": 2}]
+            }
+            """;
+
+        OrderResponse response = new OrderResponse(
+            1L, 1L, "Alice", OrderStatus.PENDING,
+            new BigDecimal("39.98"), Instant.now(), List.of()
+        );
+        when(orderService.createOrder(any())).thenReturn(response);
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.status").value("PENDING"));
+    }
+
+    @Test
+    void shouldReturn400WhenCustomerIdIsNull() throws Exception {
+        String requestBody = """
+            {
+                "customerId": null,
+                "items": [{"productId": 10, "quantity": 2}]
+            }
+            """;
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+            .andExpect(status().isBadRequest());
+    }
+}</code></pre>
+
+<p>What happened here:</p>
+<ul>
+  <li><strong><code>MockMvc</code></strong> sends HTTP requests to your controller without starting a real server — no Tomcat, no network socket.</li>
+  <li><strong><code>@MockBean</code></strong> replaces the real <code>OrderService</code> with a Mockito mock. The controller runs real code; the service returns stubbed data.</li>
+  <li><strong><code>jsonPath("$.id")</code></strong> inspects the JSON response body using JSONPath — like CSS selectors for JSON.</li>
+  <li><strong>The 400 test</strong> proves <code>@Valid</code> rejects bad input at the controller boundary — no service is involved at all.</li>
+</ul>
+
+<h2>Repository Tests with @DataJpaTest</h2>
+
+<p><code>@DataJpaTest</code> loads JPA infrastructure — Hibernate, the entity manager, and your repositories — then gives you a throwaway test database. By default, it uses an in-memory H2 database, even if your production app uses PostgreSQL. That is fast but <strong>misleading</strong>: H2 accepts SQL that PostgreSQL rejects, and vice versa.</p>
+
+<pre><code>@DataJpaTest
+class OrderRepositoryTest {
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Test
+    void shouldSaveAndFindOrderById() {
+        CustomerEntity customer = new CustomerEntity();
+        customer.setName("Alice");
+        customer.setEmail("alice@example.com");
+        CustomerEntity savedCustomer = customerRepository.save(customer);
+
+        OrderEntity order = new OrderEntity();
+        order.setCustomer(savedCustomer);
+        order.setStatus(OrderStatus.PENDING);
+        order.setTotalAmount(new BigDecimal("99.99"));
+        order.setCreatedAt(Instant.now());
+
+        OrderEntity saved = orderRepository.save(order);
+        var found = orderRepository.findById(saved.getId());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getStatus()).isEqualTo(OrderStatus.PENDING);
+        assertThat(found.get().getCustomer().getName()).isEqualTo("Alice");
+    }
+
+    @Test
+    void shouldFindOrdersByCustomerId() {
+        CustomerEntity customer = new CustomerEntity();
+        customer.setName("Bob");
+        customer.setEmail("bob@example.com");
+        CustomerEntity savedCustomer = customerRepository.save(customer);
+
+        OrderEntity order1 = new OrderEntity();
+        order1.setCustomer(savedCustomer);
+        order1.setStatus(OrderStatus.PENDING);
+        order1.setTotalAmount(new BigDecimal("50.00"));
+        order1.setCreatedAt(Instant.now());
+        orderRepository.save(order1);
+
+        OrderEntity order2 = new OrderEntity();
+        order2.setCustomer(savedCustomer);
+        order2.setStatus(OrderStatus.CONFIRMED);
+        order2.setTotalAmount(new BigDecimal("75.00"));
+        order2.setCreatedAt(Instant.now());
+        orderRepository.save(order2);
+
+        var orders = orderRepository.findByCustomerId(savedCustomer.getId());
+
+        assertThat(orders).hasSize(2);
+        assertThat(orders).extracting(OrderEntity::getStatus)
+            .containsExactlyInAnyOrder(OrderStatus.PENDING, OrderStatus.CONFIRMED);
+    }
+}</code></pre>
+
+<p>Each test method runs inside a transaction that is <strong>rolled back</strong> after the test — so tests do not pollute each other's data.</p>
+
+<h2>Testcontainers — Real Databases in Docker</h2>
+
+<p>In-memory H2 does not behave like PostgreSQL. Native array types, JSON columns, and complex queries can pass on H2 and fail in production. <strong>Testcontainers</strong> solves this by starting a real database in a Docker container for your tests:</p>
+
+<pre><code>@DataJpaTest
+@Testcontainers
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class OrderRepositoryTestcontainersTest {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer&lt;?&gt; postgres =
+        new PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Test
+    void shouldPersistOrderWithRealPostgres() {
+        // ...same test code, but now running against real PostgreSQL
+    }
+}</code></pre>
+
+<p>Four annotations make this work:</p>
+<ul>
+  <li><strong><code>@Testcontainers</code></strong> — enables the Testcontainers JUnit extension.</li>
+  <li><strong><code>@Container</code></strong> — marks the container field; Testcontainers starts it before tests and stops it after.</li>
+  <li><strong><code>@ServiceConnection</code></strong> — Spring Boot reads the container's host/port and auto-configures the <code>DataSource</code>. No manual URL, username, or password needed.</li>
+  <li><strong><code>@AutoConfigureTestDatabase(replace = NONE)</code></strong> — tells Spring <em>not</em> to replace our PostgreSQL with H2. Without this, Spring Boot would ignore the container and use in-memory H2 anyway.</li>
+</ul>
+
+<p>The container starts once per test class. For faster suites, use <a href="https://java.testcontainers.org/features/reuse/" target="_blank" rel="noopener">container reuse</a> to keep the database running across test runs.</p>
+
+<h2>Full Integration Tests with @SpringBootTest</h2>
+
+<p>When you need the entire application wired together — controller → service → repository → database — use <code>@SpringBootTest</code>. It starts the full context. Combined with <code>@AutoConfigureMockMvc</code>, you can send real HTTP requests through every layer:</p>
+
+<pre><code>@SpringBootTest
+@AutoConfigureMockMvc
+@Testcontainers
+class OrderIntegrationTest {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer&lt;?&gt; postgres =
+        new PostgreSQLContainer&lt;&gt;("postgres:16-alpine");
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Test
+    void shouldCreateAndRetrieveOrderEndToEnd() throws Exception {
+        // Seed the database with a customer
+        CustomerEntity customer = new CustomerEntity();
+        customer.setName("Alice");
+        customer.setEmail("alice@example.com");
+        customerRepository.save(customer);
+
+        // Create order via HTTP
+        String requestBody = """
+            {
+                "customerId": 1,
+                "items": [{"productId": 10, "quantity": 2}]
+            }
+            """;
+
+        mockMvc.perform(post("/api/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+            .andExpect(status().isCreated());
+
+        // Retrieve it back
+        mockMvc.perform(get("/api/orders/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.customerName").value("Alice"));
+    }
+}</code></pre>
+
+<p>Use <code>@SpringBootTest</code> sparingly — it is slow. A handful of integration tests at the top of the pyramid are enough to prove the wiring works. The bulk of your tests should be unit tests and slice tests.</p>
+
+<h2>Module 09 Review</h2>
+
+<p>Module 09 covered testing from principles to practice:</p>
+
+<table>
+  <tr><th>Lesson</th><th>Core Idea</th></tr>
+  <tr><td>50 — What Testing Is &amp; The Test Pyramid</td><td>Why we test; the pyramid: many unit tests, fewer integration, few end-to-end</td></tr>
+  <tr><td>51 — TDD: Red-Green-Refactor</td><td>Write a failing test first, make it pass, then clean up — the cycle that drives design</td></tr>
+  <tr><td>52 — JUnit 5 &amp; AssertJ</td><td>JUnit 5 lifecycle and annotations; AssertJ's fluent, readable assertions</td></tr>
+  <tr><td>53 — Mockito for Mocking Dependencies</td><td>Isolate the class under test by replacing collaborators with stubs and mocks</td></tr>
+  <tr><td>54 — Spring Boot Tests &amp; Module Review</td><td>Test slices (<code>@WebMvcTest</code>, <code>@DataJpaTest</code>), MockMvc, Testcontainers, and the full integration test</td></tr>
+</table>
+
+<p>The through-line: <strong>test at the right level of abstraction.</strong> Use unit tests for logic, slice tests for one layer at a time, and <code>@SpringBootTest</code> only to prove the wiring. Testcontainers ensures your repository tests match production.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-boot/reference/testing/spring-boot-applications.html" target="_blank" rel="noopener">Spring Boot Testing Reference</a> · <a href="https://docs.spring.io/spring-boot/reference/test-auto-configuration.html" target="_blank" rel="noopener">Test Auto-Configuration (Slices)</a> · <a href="https://java.testcontainers.org/" target="_blank" rel="noopener">Testcontainers Documentation</a> · <a href="https://docs.spring.io/spring-framework/reference/testing/servlet.html" target="_blank" rel="noopener">MockMvc Reference</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. A test uses <code>@WebMvcTest(OrderController.class)</code>. The controller calls <code>OrderService</code>, which calls <code>OrderRepository</code>. Which beans exist in the test context?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">OrderController, OrderService, and OrderRepository — the full chain</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">OrderController and a Mockito mock for OrderService; no OrderRepository at all</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">OrderController and OrderService; only OrderRepository is mocked</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only the MockMvc bean — no controllers, services, or repositories</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. You write a <code>@DataJpaTest</code> that uses <code>@AutoConfigureTestDatabase(replace = NONE)</code> and <code>@Container</code> + <code>@ServiceConnection</code> on a <code>PostgreSQLContainer</code>. What happens if you remove the <code>replace = NONE</code> setting?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Spring Boot uses the PostgreSQL container by default — no change</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Spring Boot replaces the DataSource with an in-memory H2 database, ignoring your PostgreSQL container</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The test fails because no DataSource is configured at all</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Spring Boot creates both an H2 and PostgreSQL DataSource and routes queries to H2</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. In a <code>@WebMvcTest</code>, you want to test that a POST endpoint returns 400 when the request body has an invalid field. The controller method has <code>@Valid</code> on its <code>@RequestBody</code> parameter. Do you need to mock the service for this test?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Yes — Spring validation runs inside the service method</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Yes — the controller cannot return 400 without calling the service first</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">No — <code>@Valid</code> rejects the input before the controller method body executes, so the service is never called</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">No — but only because MockMvc skips validation entirely</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Your <code>@DataJpaTest</code> passes against H2 but the same query fails in production PostgreSQL. What is the most reliable fix?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Add <code>@Transactional</code> to the test — the transaction isolation differs between H2 and PostgreSQL</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Configure H2 to run in PostgreSQL compatibility mode by setting <code>spring.datasource.url=jdbc:h2:mem:test;MODE=PostgreSQL</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Use Testcontainers with a real PostgreSQL container so your test database matches production</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Rewrite the query in HQL instead of native SQL — HQL is portable across databases</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. A team has 200 unit tests, 15 <code>@WebMvcTest</code> slice tests, 10 <code>@DataJpaTest</code> slice tests, and 3 <code>@SpringBootTest</code> integration tests. This distribution best matches which principle?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The Ice Cream Cone — many slow integration tests at the top, few fast unit tests at the bottom</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The Test Pyramid — many fast unit tests at the base, fewer slice tests, few integration tests at the top</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The Diamond — most tests should be integration tests, with few unit and few end-to-end tests</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The Hourglass — equal numbers of unit and integration tests, with fewer slice tests in the middle</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0053-mockito-for-mocking.html" class="nav-prev">← Prev</a>
+  <a href="0055-capstone-architecture.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>
