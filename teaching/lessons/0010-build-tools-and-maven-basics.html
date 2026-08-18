@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 10 — Build Tools &amp; Maven Basics</title>
+  <title>Lesson 10: Build Tools &amp; Maven Basics</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
@@ -14,37 +14,37 @@
 
 <h2>What a build tool does</h2>
 
-<p>Every Java build — regardless of tool — performs the same five jobs:</p>
+<p>Every Java build, regardless of tool, performs the same five jobs:</p>
 
 <ol>
-  <li><strong>Compile</strong> — convert <code>.java</code> source into <code>.class</code> bytecode the JVM can execute</li>
-  <li><strong>Resolve dependencies</strong> — download external libraries (Spring Boot, Jackson, etc.) your code imports</li>
-  <li><strong>Package</strong> — bundle compiled code and dependencies into a single runnable JAR file</li>
-  <li><strong>Test</strong> — compile and run your test suite, fail the build if anything breaks</li>
-  <li><strong>Run</strong> — execute the packaged application</li>
+  <li><strong>Compile</strong>: convert <code>.java</code> source into <code>.class</code> bytecode the JVM can execute</li>
+  <li><strong>Resolve dependencies</strong>: download external libraries (Spring Boot, Jackson, etc.) your code imports</li>
+  <li><strong>Package</strong>: bundle compiled code and dependencies into a single runnable JAR file</li>
+  <li><strong>Test</strong>: compile and run your test suite, fail the build if anything breaks</li>
+  <li><strong>Run</strong>: execute the packaged application</li>
 </ol>
 
-<p>You <em>could</em> do each step by hand with <code>javac</code>, <code>jar</code>, and <code>java</code> commands. But a project with 30 dependencies and 200 source files would mean typing hundreds of classpaths by rote — and re-typing them every time anything changes. A build tool does it in one command, reproducibly, across every machine.</p>
+<p>You <em>could</em> do each step by hand with <code>javac</code>, <code>jar</code>, and <code>java</code> commands. But a project with 30 dependencies and 200 source files would mean typing hundreds of classpaths by rote, and re-typing them every time anything changes. A build tool does it in one command, reproducibly, across every machine.</p>
 
 <h2>Why Maven</h2>
 
 <p>The two dominant Java build tools are <strong>Maven</strong> and <strong>Gradle</strong>. This course uses Maven because:</p>
 
 <ul>
-  <li>Its configuration (<code>pom.xml</code>) is declarative XML — easy to read, easy to diagnose</li>
+  <li>Its configuration (<code>pom.xml</code>) is declarative XML: easy to read, easy to diagnose</li>
   <li>Convention over configuration: a standard project layout works out of the box</li>
   <li>It's the most widely used build tool in enterprise Java</li>
 </ul>
 
-<p>Maven reads a single file — <code>pom.xml</code> — to know your project's name, dependencies, plugins, and target Java version. From that, it derives every build step automatically.</p>
+<p>Maven reads a single file, <code>pom.xml</code>, to know your project's name, dependencies, plugins, and target Java version. From that, it derives every build step automatically.</p>
 
 <h2>Installing the JDK</h2>
 
-<p>Maven needs a JDK (Java Development Kit), version 21 or later. Just the JRE is not enough — Maven runs the compiler, and the compiler lives in the JDK.</p>
+<p>Maven needs a JDK (Java Development Kit), version 21 or later. Just the JRE is not enough; Maven runs the compiler, and the compiler lives in the JDK.</p>
 
-<h3>macOS &amp; Linux — SDKMAN</h3>
+<h3>macOS &amp; Linux: SDKMAN</h3>
 
-<p><strong>SDKMAN</strong> is a version manager for JVM tools. It lets you install multiple JDK versions and switch between them — essential when different projects require different Java versions:</p>
+<p><strong>SDKMAN</strong> is a version manager for JVM tools. It lets you install multiple JDK versions and switch between them, essential when different projects require different Java versions:</p>
 
 <pre><code># Install SDKMAN
 curl -s "https://get.sdkman.io" | bash
@@ -100,7 +100,7 @@ winget install Apache.Maven
 # Java version: 21.0.x, vendor: ...
 </code></pre>
 
-<p>The <code>mvn -version</code> output confirms both Maven <em>and</em> the JDK are installed correctly. If it shows a Java version below 21, Maven is picking up the wrong JDK — check your <code>JAVA_HOME</code> environment variable.</p>
+<p>The <code>mvn -version</code> output confirms both Maven <em>and</em> the JDK are installed correctly. If it shows a Java version below 21, Maven is picking up the wrong JDK; check your <code>JAVA_HOME</code> environment variable.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html" target="_blank" rel="noopener">Apache Maven: Introduction to the POM</a> · <a href="https://sdkman.io/install" target="_blank" rel="noopener">SDKMAN: Installation</a></p>
 
@@ -109,10 +109,10 @@ winget install Apache.Maven
 <div class="quiz" id="q1">
   <div class="quiz-question">1. Without a build tool, which of these would you have to manage manually in a project with many dependencies?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only the compilation step — the rest are automatic</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only the compilation step: the rest are automatic</li>
     <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Compiling, downloading libraries, bundling, and running</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only downloading libraries — the JDK handles the rest</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Nothing — the JVM resolves dependencies at runtime</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only downloading libraries: the JDK handles the rest</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Nothing: the JVM resolves dependencies at runtime</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
@@ -120,10 +120,10 @@ winget install Apache.Maven
 <div class="quiz" id="q2">
   <div class="quiz-question">2. You run <code>mvn -version</code> and it shows Java 11. Maven works fine. Should you fix this?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No — Maven runs on any Java version</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No: Maven runs on any Java version</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only if you plan to use Gradle instead</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Yes — this course requires JDK 21 or later</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only if compilation fails — otherwise it's fine</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Yes: this course requires JDK 21 or later</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only if compilation fails: otherwise it's fine</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>
@@ -180,7 +180,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite, review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

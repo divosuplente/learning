@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/002
 
 # Custom Queries, Pagination & the N+1 Problem
 
-Derived query methods take you far — but not everywhere. When you need aggregates, complex joins, or database-specific functions, you write the query yourself. This lesson covers `@Query` with JPQL and native SQL, pagination with `Pageable`, and the N+1 problem: a silent performance killer that turns one database round-trip into hundreds.
+Derived query methods take you far, but not everywhere. When you need aggregates, complex joins, or database-specific functions, you write the query yourself. This lesson covers `@Query` with JPQL and native SQL, pagination with `Pageable`, and the N+1 problem: a silent performance killer that turns one database round-trip into hundreds.
 
 ## @Query with JPQL
 
@@ -35,7 +35,7 @@ Key rules: entity name (`OrderEntity`), not table name (`orders`); field name (`
 
 ## @Query with Native SQL
 
-When JPQL can't express what you need — database-specific functions, complex subqueries, window functions — switch to native SQL with `nativeQuery = true`:
+When JPQL can't express what you need (database-specific functions, complex subqueries, window functions), switch to native SQL with `nativeQuery = true`:
 
 ```
 // Native SQL uses table/column names, not entity/field names
@@ -62,7 +62,7 @@ Trade-off: native SQL couples you to a specific database. If you ever switch fro
 
 ## Pagination & Sorting
 
-Returning thousands of rows at once kills performance and memory. Spring Data gives you `Pageable` — pass it to any repository method and Spring generates `LIMIT`/`OFFSET` SQL automatically:
+Returning thousands of rows at once kills performance and memory. Spring Data gives you `Pageable`: pass it to any repository method and Spring generates `LIMIT`/`OFFSET` SQL automatically.
 
 ```
 // In the repository — just add Pageable as the last parameter
@@ -82,7 +82,7 @@ page.hasNext();           // Is there a next page?
 page.hasPrevious();       // Is there a previous page?
 ```
 
-`PageRequest.of(page, size)` gives you unsorted results. Add a `Sort` for ordering. For derived query methods, you can also return `Slice<T>` — same API but skips the `COUNT` query, making it faster when you only need "is there more?"
+`PageRequest.of(page, size)` gives you unsorted results. Add a `Sort` for ordering. For derived query methods, you can also return `Slice<T>`: same API but skips the `COUNT` query, making it faster when you only need "is there more?"
 
 ## The N+1 Problem
 
@@ -100,9 +100,9 @@ for (OrderEntity order : orders) {
 }
 ```
 
-**1 query for orders + 10 queries for customers = 11 queries.** With a hundred orders you fire a hundred and one. The caller never sees the extra queries — they happen silently inside the loop. The symptom: the endpoint is slow and gets slower as data grows.
+**1 query for orders + 10 queries for customers = 11 queries.** With a hundred orders you fire a hundred and one. The caller never sees the extra queries because they happen silently inside the loop. The symptom: the endpoint is slow and gets slower as data grows.
 
-The root cause: the `OrderEntity` uses `@ManyToOne(fetch = FetchType.LAZY)`. Each `.getCustomer()` inside the loop triggers a separate `SELECT`. The N+1 problem: 1 query for `findAll()` + N queries for lazy association access. Eager loading would also fire per-entity queries — the fundamental issue is accessing an association inside a loop without a JOIN FETCH or @EntityGraph.
+The root cause: the `OrderEntity` uses `@ManyToOne(fetch = FetchType.LAZY)`. Each `.getCustomer()` inside the loop triggers a separate `SELECT`. The N+1 problem: 1 query for `findAll()` + N queries for lazy association access. Eager loading would also fire per-entity queries. The fundamental issue is accessing an association inside a loop without a JOIN FETCH or @EntityGraph.
 
 ### Fix 1: JOIN FETCH
 
@@ -138,13 +138,13 @@ When you want eager fetching *without* modifying the JPQL string, use `@EntityGr
 List<OrderEntity> findByStatusWithAllRelations(@Param("status") OrderStatus status);
 ```
 
-`@EntityGraph` is ideal when the same JPQL should sometimes fetch relations and sometimes not — you keep one query, add different graphs at call sites. It does *not* change the entity's default fetch strategy; it only overrides it for this specific call.
+`@EntityGraph` is ideal when the same JPQL should sometimes fetch relations and sometimes not: you keep one query, add different graphs at call sites. It does *not* change the entity's default fetch strategy; it only overrides it for this specific call.
 
 |  | JOIN FETCH | @EntityGraph |
 | --- | --- | --- |
 | Where specified | In the JPQL string | Annotation on the method |
 | Multiple levels | Manual `JOIN FETCH` per level | `attributePaths = {"a", "a.b"}` |
-| Reuse query text | No — different JPQL | Yes — same JPQL, different graph |
+| Reuse query text | No: different JPQL | Yes: same JPQL, different graph |
 | Collection dedup | Need `DISTINCT` | Need `DISTINCT` |
 
 **Primary sources:** [Spring Data JPA: Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html) · [Jakarta Persistence: JPQL](https://jakarta.ee/specifications/persistence/3.1/jakarta-persistence-spec-3.1.html#jpql) · [Spring Data JPA: @EntityGraph](https://docs.spring.io/spring-data/jpa/reference/jpa/entity-graph.html)
@@ -152,8 +152,8 @@ List<OrderEntity> findByStatusWithAllRelations(@Param("status") OrderStatus stat
 ## Check your understanding
 
 <details>
-<summary>1. In a JPQL query, what do you reference — table and column names, or entity and field names?</summary>
-<p><strong>Correct answer:</strong> Entity and field names — JPQL operates on the object model</p>
+<summary>1. In a JPQL query, what do you reference: table and column names, or entity and field names?</summary>
+<p><strong>Correct answer:</strong> Entity and field names; JPQL operates on the object model</p>
 </details>
 
 <details>
@@ -163,7 +163,7 @@ List<OrderEntity> findByStatusWithAllRelations(@Param("status") OrderStatus stat
 
 <details>
 <summary>3. You call findAll() on orders, then loop and call order.getCustomer().getName() for each. With 50 orders, how many SQL queries execute?</summary>
-<p><strong>Correct answer:</strong> 51 — one for findAll plus one per order for the lazy customer</p>
+<p><strong>Correct answer:</strong> 51; one for findAll plus one per order for the lazy customer</p>
 </details>
 
 <details>

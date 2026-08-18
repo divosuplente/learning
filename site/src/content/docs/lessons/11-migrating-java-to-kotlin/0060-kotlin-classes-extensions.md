@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/006
 
 # Kotlin Data Classes, Extension Functions & DSLs
 
-Java records gave you compact carriers for data. Kotlin's `data class` goes further — it adds `copy()`, destructuring, and named arguments out of the box. But the real shift comes from **extension functions**, which let you add methods to classes you don't own, and **DSL builders**, which exploit Kotlin's syntax to create type-safe configuration languages. This lesson shows you how each works and when to reach for them in a Spring Boot project.
+Java records gave you compact carriers for data. Kotlin's `data class` adds `copy()`, destructuring, and named arguments out of the box. But the bigger shift comes from **extension functions**, which let you add methods to classes you don't own, and **DSL builders**, which use Kotlin's syntax to create type-safe configuration languages. This lesson shows you how each works and when to reach for them in a Spring Boot project.
 
 ## Data Classes vs Java Records
 
@@ -30,25 +30,25 @@ data class Customer(
 
 ### The three extras
 
--   **`copy()`** — create a modified clone without touching the original:  
+-   **`copy()`**: create a modified clone without touching the original:  
     `val updated = customer.copy(email = "new@mail.com")`  
-    Only the named properties change; everything else carries over. Java records have no equivalent — you must construct a new instance and repeat every field.
--   **`componentN()`** — destructuring declarations:  
+    Only the named properties change; everything else carries over. Java records have no equivalent: you must construct a new instance and repeat every field.
+-   **`componentN()`**: destructuring declarations:  
     `val (id, name, _) = customer`  
     The underscore discards a component. Each property gets a synthetic `component1()`, `component2()`, etc., which the compiler calls when you destructure.
--   **Named arguments** — construct with names, not position:  
+-   **Named arguments**: construct with names, not position:  
     `Customer(id = 1, name = "Alice", email = "a@b.com")`  
     This works on *any* Kotlin function, not just data classes. Combined with default arguments, it eliminates the telescoping-constructor problem without builders.
 
 ### When to use data class vs regular class
 
-Use `data class` when the object's primary purpose is **holding data** — DTOs, request/response models, events. If the class has significant behavior or mutable state that shouldn't be part of `equals`/`hashCode`, use a regular `class`.
+Use `data class` when the object's primary purpose is **holding data** (DTOs, request/response models, events). If the class has significant behavior or mutable state that shouldn't be part of `equals`/`hashCode`, use a regular `class`.
 
 **Watch out:** Data classes are shallow. `equals()` and `hashCode()` use reference equality for mutable fields like `ArrayList`. Two data classes with identical list *contents* but different list *instances* will not be equal unless the list type itself implements structural equality.
 
-## Properties — Auto-Generated Getters and Setters
+## Properties: Auto-Generated Getters and Setters
 
-In Java you write fields, getters, and setters explicitly. In Kotlin, `val` and `var` in the primary constructor **are** the properties — the compiler generates the accessors.
+In Java you write fields, getters, and setters explicitly. In Kotlin, `val` and `var` in the primary constructor **are** the properties. The compiler generates the accessors.
 
 ```
 // Java
@@ -81,11 +81,11 @@ class Account(balance: Double) {
 }
 ```
 
-The `field` identifier is the **backing field** — it only exists inside custom accessors and refers to the actual storage. This prevents the infinite recursion you'd get in Java if a getter called itself.
+The `field` identifier is the **backing field**. It only exists inside custom accessors and refers to the actual storage. This prevents the infinite recursion you'd get in Java if a getter called itself.
 
 ## Extension Functions
 
-Extension functions add methods to an existing class **without inheritance**, **without modifying the source**, and **without wrappers**. They are resolved statically — the compiler rewrites them as top-level functions that take the receiver as the first argument.
+Extension functions add methods to an existing class **without inheritance**, **without modifying the source**, and **without wrappers**. They are resolved statically: the compiler rewrites them as top-level functions that take the receiver as the first argument.
 
 ```
 // Add a method to String — no subclass needed
@@ -110,7 +110,7 @@ fun isEmail(receiver: String): Boolean =
     receiver.contains("@") && receiver.contains(".")
 ```
 
-Call-site syntax `email.isEmail()` is syntactic sugar — the compiler passes `email` as the receiver. This means extensions are **dispatched statically**. If you call an extension on a variable typed as the base class, the base-class version runs, even if the runtime object is a subclass. This is the key difference from virtual method dispatch.
+Call-site syntax `email.isEmail()` is syntactic sugar: the compiler passes `email` as the receiver. This means extensions are **dispatched statically**. If you call an extension on a variable typed as the base class, the base-class version runs, even if the runtime object is a subclass. This is the key difference from virtual method dispatch.
 
 ### Practical Spring Boot extensions
 
@@ -131,9 +131,9 @@ val log = this.logger()
 val responses = orders.map { it.toResponse() }
 ```
 
-**Limitation:** Extension functions cannot access private or protected members of the receiver. They see only the public API — same as code in any other file.
+**Limitation:** Extension functions cannot access private or protected members of the receiver. They see only the public API, same as code in any other file.
 
-## Companion Objects — Kotlin's Static
+## Companion Objects: Kotlin's Static
 
 Kotlin has no `static` keyword. Instead, a `companion object` is a singleton nested inside a class. Its members are accessible via the class name, just like Java statics.
 
@@ -171,13 +171,13 @@ fun configure(loggable: Loggable) { ... }
 configure(JsonFactory)   // the companion object itself
 ```
 
-## DSLs — Domain-Specific Languages in Kotlin
+## DSLs: Domain-Specific Languages in Kotlin
 
-A DSL is an API designed to read like natural language within a specific domain. Kotlin's syntax — trailing lambdas, receiver lambdas, and infix functions — makes DSLs concise and type-safe.
+A DSL is an API designed to read like natural language within a specific domain. Kotlin's syntax (trailing lambdas, receiver lambdas, and infix functions) makes DSLs concise and type-safe.
 
 ### The two features that make DSLs work
 
-1.  **Lambda with receiver** — inside the lambda, `this` refers to the receiver object, so you can call its methods without qualification:
+1.  **Lambda with receiver**: inside the lambda, `this` refers to the receiver object, so you can call its methods without qualification:
     
     ```
     class QueryBuilder {
@@ -198,7 +198,7 @@ A DSL is an API designed to read like natural language within a specific domain.
     }
     ```
     
-2.  **Trailing lambda** — if the last parameter is a function, you can move it outside the parentheses:
+2.  **Trailing lambda**: if the last parameter is a function, you can move it outside the parentheses:
     
     ```
     // These are identical
@@ -209,7 +209,7 @@ A DSL is an API designed to read like natural language within a specific domain.
 
 ### Spring Boot routing DSL
 
-Spring ships a Kotlin DSL for defining routes — an alternative to `@Controller` annotations:
+Spring ships a Kotlin DSL for defining routes, an alternative to `@Controller` annotations:
 
 ```
 @Configuration
@@ -225,7 +225,7 @@ class RoutesConfig {
 }
 ```
 
-Inside the `router { }` block, `this` is a `RouterFunctionDsl`. The `nest`, `GET`, and `POST` calls are methods on that receiver — called without prefix because of the lambda-with-receiver syntax.
+Inside the `router { }` block, `this` is a `RouterFunctionDsl`. The `nest`, `GET`, and `POST` calls are methods on that receiver, called without prefix because of the lambda-with-receiver syntax.
 
 ### Building your own DSL
 
@@ -264,8 +264,8 @@ The pattern: a builder class with mutable properties, a function that takes a `B
 </details>
 
 <details>
-<summary>2. You define an extension function fun Animal.sound() = "generic" and a subclass Dog : Animal with its own fun Dog.sound() = "woof". A variable val pet: Animal = Dog() — what does pet.sound() return?</summary>
-<p><strong>Correct answer:</strong> "generic" — extensions are dispatched statically by the declared type</p>
+<summary>2. You define an extension function fun Animal.sound() = "generic" and a subclass Dog : Animal with its own fun Dog.sound() = "woof". A variable val pet: Animal = Dog(): what does pet.sound() return?</summary>
+<p><strong>Correct answer:</strong> "generic": extensions are dispatched statically by the declared type</p>
 </details>
 
 <details>

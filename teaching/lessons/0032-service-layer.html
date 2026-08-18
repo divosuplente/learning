@@ -10,16 +10,16 @@
 
 <h1>The Service Layer &amp; <code>@Transactional</code></h1>
 
-<p>In layered architecture, the service layer is the <strong>brain</strong> — it enforces business rules, orchestrates repository calls, and keeps controllers thin. But when a single method touches multiple tables, you need a guarantee: either everything saves correctly, or nothing does. That guarantee is <code>@Transactional</code>.</p>
+<p>In layered architecture, the service layer is the <strong>brain</strong>: it enforces business rules, orchestrates repository calls, and keeps controllers thin. But when a single method touches multiple tables, you need a guarantee: either everything saves correctly, or nothing does. That guarantee is <code>@Transactional</code>.</p>
 
 <h2>What belongs in a service method?</h2>
 
 <p>A service method does three things a controller or repository won't:</p>
 
 <ul>
-  <li><strong>Business rules</strong> — "An order must be PENDING to confirm it."</li>
-  <li><strong>Orchestration</strong> — look up the customer, check stock, reserve stock, calculate total, save the order — all in one call.</li>
-  <li><strong>Transaction boundaries</strong> — if any step fails, undo every database change made so far.</li>
+  <li><strong>Business rules:</strong> "An order must be PENDING to confirm it."</li>
+  <li><strong>Orchestration:</strong> look up the customer, check stock, reserve stock, calculate total, save the order, all in one call.</li>
+  <li><strong>Transaction boundaries:</strong> if any step fails, undo every database change made so far.</li>
 </ul>
 
 <p>Controllers handle HTTP. Repositories handle SQL. <strong>Everything between them is the service layer's job.</strong></p>
@@ -29,9 +29,9 @@
 <p>Spring's <code>@Transactional</code> wraps a method in a database transaction. The lifecycle is simple:</p>
 
 <ol>
-  <li><strong>Before the method</strong> — Spring opens a transaction (starts a database connection and begins a unit of work).</li>
-  <li><strong>During the method</strong> — every <code>save()</code>, <code>delete()</code>, or update happens inside that transaction. Other transactions can't see your uncommitted changes.</li>
-  <li><strong>After the method</strong> — if the method returns normally, Spring <strong>commits</strong> the transaction (all changes become permanent). If an unhandled runtime exception propagates out, Spring <strong>rolls back</strong> the transaction (every change is undone).</li>
+  <li><strong>Before the method:</strong> Spring opens a transaction (starts a database connection and begins a unit of work).</li>
+  <li><strong>During the method:</strong> every <code>save()</code>, <code>delete()</code>, or update happens inside that transaction. Other transactions can't see your uncommitted changes.</li>
+  <li><strong>After the method:</strong> if the method returns normally, Spring <strong>commits</strong> the transaction (all changes become permanent). If an unhandled runtime exception propagates out, Spring <strong>rolls back</strong> the transaction (every change is undone).</li>
 </ol>
 
 <pre><code>@Transactional
@@ -50,7 +50,7 @@ public OrderResponse createOrder(CreateOrderRequest request) {
     // Transaction commits here ─────────────────────┘
 }</code></pre>
 
-<p>Coincidence is not a strategy. Without <code>@Transactional</code>, each <code>save()</code> commits independently — a crash after the first save leaves the database inconsistent.</p>
+<p>Coincidence is not a strategy. Without <code>@Transactional</code>, each <code>save()</code> commits independently; a crash after the first save leaves the database inconsistent.</p>
 
 <h2>Read-only transactions</h2>
 
@@ -63,7 +63,7 @@ public OrderResponse getOrderById(Long id) {
             .orElseThrow(() -> new OrderNotFoundException(id));
 }</code></pre>
 
-<p><code>readOnly = true</code> is not just documentation — it's a <strong>performance hint</strong>. The database and ORM can:</p>
+<p><code>readOnly = true</code> is not just documentation. It's a <strong>performance hint</strong>. The database and ORM can:</p>
 
 <ul>
   <li>Skip dirty-checking (no need to compare entity state at flush time).</li>
@@ -73,9 +73,9 @@ public OrderResponse getOrderById(Long id) {
 
 <p>Rule of thumb: <strong>every public service method should be <code>@Transactional</code></strong>. If it only reads, add <code>readOnly = true</code>. If it writes, leave the default.</p>
 
-<h2>How <code>@Transactional</code> really works — proxy-based AOP</h2>
+<h2>How <code>@Transactional</code> really works: proxy-based AOP</h2>
 
-<p>Spring does not modify your class bytecode. Instead, it creates a <strong>proxy</strong> — a wrapper object that intercepts calls to your bean. When you call <code>orderService.createOrder(…)</code>, you're calling the proxy, which:</p>
+<p>Spring does not modify your class bytecode. Instead, it creates a <strong>proxy</strong>, a wrapper object that intercepts calls to your bean. When you call <code>orderService.createOrder(…)</code>, you're calling the proxy, which:</p>
 
 <ol>
   <li>Opens a transaction from the <code>PlatformTransactionManager</code>.</li>
@@ -83,7 +83,7 @@ public OrderResponse getOrderById(Long id) {
   <li>On normal return: commits. On exception: rolls back.</li>
 </ol>
 
-<p>This proxy mechanism has a critical consequence: <strong><code>@Transactional</code> on a <code>private</code> or <code>protected</code> method does nothing.</strong> The proxy can only intercept <code>public</code> methods. A <code>private</code> method call is a direct <code>this.method()</code> inside the class — the proxy never sees it, no transaction is opened.</p>
+<p>This proxy mechanism has a critical consequence: <strong><code>@Transactional</code> on a <code>private</code> or <code>protected</code> method does nothing.</strong> The proxy can only intercept <code>public</code> methods. A <code>private</code> method call is a direct <code>this.method()</code> inside the class, so the proxy never sees it and no transaction is opened.</p>
 
 <pre><code>// WRONG — transaction is never created
 @Transactional
@@ -95,7 +95,7 @@ public void reserveStock(ProductEntity product, int qty) { ... }</code></pre>
 
 <h2>Rollback rules</h2>
 
-<p>By default, <code>@Transactional</code> rolls back on <strong>unchecked exceptions</strong> (subclasses of <code>RuntimeException</code>) but <strong>not</strong> on checked exceptions. This is a deliberate design choice — checked exceptions are declared in the method signature and are expected; runtime exceptions signal unexpected failure.</p>
+<p>By default, <code>@Transactional</code> rolls back on <strong>unchecked exceptions</strong> (subclasses of <code>RuntimeException</code>) but <strong>not</strong> on checked exceptions. This is a deliberate design choice: checked exceptions are declared in the method signature and are expected; runtime exceptions signal unexpected failure.</p>
 
 <pre><code>// Rolls back: runtime exception
 @Transactional
@@ -224,11 +224,11 @@ public class OrderService {
 <h2>What makes this a good service?</h2>
 
 <ul>
-  <li><strong>Single responsibility</strong> — only order-related business logic.</li>
-  <li><strong>Constructor injection</strong> — dependencies are explicit and <code>final</code>.</li>
-  <li><strong>Transaction boundaries</strong> — every method declares its transactional intent.</li>
-  <li><strong>Domain exceptions</strong> — <code>OrderNotFoundException</code>, <code>InsufficientStockException</code> — not generic <code>RuntimeException</code>.</li>
-  <li><strong>DTOs in and out</strong> — <code>CreateOrderRequest</code> enters, <code>OrderResponse</code> exits. Entities never leak to the controller.</li>
+  <li><strong>Single responsibility:</strong> only order-related business logic.</li>
+  <li><strong>Constructor injection:</strong> dependencies are explicit and <code>final</code>.</li>
+  <li><strong>Transaction boundaries:</strong> every method declares its transactional intent.</li>
+  <li><strong>Domain exceptions:</strong> <code>OrderNotFoundException</code>, <code>InsufficientStockException</code>, not generic <code>RuntimeException</code>.</li>
+  <li><strong>DTOs in and out:</strong> <code>CreateOrderRequest</code> enters, <code>OrderResponse</code> exits. Entities never leak to the controller.</li>
 </ul>
 
 <p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html" target="_blank" rel="noopener">Spring: @Transactional</a> · <a href="https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-advice-above.html" target="_blank" rel="noopener">Spring: Transactional Advice</a> · <a href="https://docs.oracle.com/javase/tutorial/jdbc/basics/transactions.html" target="_blank" rel="noopener">Oracle: JDBC Transactions</a></p>

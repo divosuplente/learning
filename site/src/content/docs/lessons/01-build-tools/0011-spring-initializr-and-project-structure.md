@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/001
 
 # Spring Initializr & Project Structure
 
-Instead of creating every file by hand, **Spring Initializr** generates a complete Spring Boot project skeleton from a web form. Fill it in, download the zip, and open it in your IDE — you have a running project in under a minute.
+Instead of creating every file by hand, **Spring Initializr** generates a complete Spring Boot project skeleton from a web form. Fill it in, download the zip, and open it in your IDE. You have a running project in under a minute.
 
 ## Using Spring Initializr
 
@@ -22,18 +22,18 @@ Go to [start.spring.io](https://start.spring.io) and fill the form:
 
 Then click **Add Dependencies** and select:
 
--   **Spring Web** — REST APIs
--   **Spring Data JPA** — database access
--   **PostgreSQL Driver** — PostgreSQL connectivity
--   **Spring for GraphQL** — GraphQL API support
--   **Spring for Apache Kafka** — Kafka messaging
--   **Spring Boot DevTools** — hot reload during development
+-   **Spring Web**: REST APIs
+-   **Spring Data JPA**: database access
+-   **PostgreSQL Driver**: PostgreSQL connectivity
+-   **Spring for GraphQL**: GraphQL API support
+-   **Spring for Apache Kafka**: Kafka messaging
+-   **Spring Boot DevTools**: hot reload during development
 
-Skip **Lombok**. We use Java records instead — no annotation processor, no IDE plugin, no hidden getters.
+Skip **Lombok**. We use Java records instead: no annotation processor, no IDE plugin, no hidden getters.
 
 Click **Generate**, download the zip, and unzip it. That's your project.
 
-## The main class — `@SpringBootApplication`
+## The main class: `@SpringBootApplication`
 
 Initializr creates one Java class with a `main` method:
 
@@ -54,11 +54,11 @@ public class OrderManagementApplication {
 
 `@SpringBootApplication` is a **compound annotation** that combines three:
 
-1.  **`@Configuration`** — marks this class as a source of bean definitions
-2.  **`@EnableAutoConfiguration`** — tells Spring Boot to auto-configure beans based on the classpath (e.g., if Spring Web is present, set up an embedded server)
-3.  **`@ComponentScan`** — scans the package `com.example.ordermgmt` and all sub-packages for `@Component`, `@Service`, `@Repository`, `@Controller` classes
+1.  **`@Configuration`**: marks this class as a source of bean definitions
+2.  **`@EnableAutoConfiguration`**: tells Spring Boot to auto-configure beans based on the classpath (e.g., if Spring Web is present, set up an embedded server)
+3.  **`@ComponentScan`**: scans the package `com.example.ordermgmt` and all sub-packages for `@Component`, `@Service`, `@Repository`, `@Controller` classes
 
-That's why the main class must live in the **root package** — `@ComponentScan` starts from there and scans downward.
+That's why the main class must live in the **root package**: `@ComponentScan` starts from there and scans downward.
 
 ## Project directory layout
 
@@ -97,17 +97,17 @@ Three directories matter:
 | --- | --- |
 | `src/main/java` | All production Java source code |
 | `src/main/resources` | Configuration files, schemas, static assets |
-| `src/test/java` | Test code — mirrors the main structure |
+| `src/test/java` | Test code, mirrors the main structure |
 
 ## Key rules
 
--   **One public class per file.** The file name must match the public class name — `OrderController.java` contains `public class OrderController`.
--   **Non-code files go in resources.** YAML configs, GraphQL schemas, static web files — never in `src/main/java`.
+-   **One public class per file.** The file name must match the public class name: `OrderController.java` contains `public class OrderController`.
+-   **Non-code files go in resources.** YAML configs, GraphQL schemas, static web files: never in `src/main/java`.
 -   **Package naming follows the group + artifact.** Group `com.example` + artifact `ordermgmt` = base package `com.example.ordermgmt`.
 -   **Test packages mirror production packages.** A test for `com.example.ordermgmt.service.OrderService` lives in `com.example.ordermgmt.service.OrderServiceTest`.
 -   **The main class sits in the root package.** This ensures `@ComponentScan` picks up every sub-package.
 
-**Primary source:** [Spring Boot Reference — Developing Your First Application](https://docs.spring.io/spring-boot/docs/current/reference/html/getting-started.html#getting-started.first-application)
+**Primary source:** [Spring Boot Reference: Developing Your First Application](https://docs.spring.io/spring-boot/docs/current/reference/html/getting-started.html#getting-started.first-application)
 
 ## Check your understanding
 

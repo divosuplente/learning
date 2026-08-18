@@ -6,11 +6,11 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/004
 
 # GraphQL Queries, Mutations & Schema Definition
 
-In Lesson 40 you saw why REST's fixed-shape responses cause over-fetching and under-fetching. GraphQL solves this by letting the **client** declare exactly what it needs. But before you can write queries, you need a schema — the contract that tells both sides what data exists and what operations are available. This lesson covers the query language, the difference between queries and mutations, and the Schema Definition Language (SDL) that ties it all together.
+In Lesson 40 you saw why REST's fixed-shape responses cause over-fetching and under-fetching. GraphQL solves this by letting the **client** declare exactly what it needs. But before you can write queries, you need a schema: the contract that tells both sides what data exists and what operations are available. This lesson covers the query language, the difference between queries and mutations, and the Schema Definition Language (SDL) that ties it all together.
 
 ## Queries: Reading Data
 
-A **query** reads data — the GraphQL equivalent of a `GET` request. The client sends a query document to a single endpoint:
+A **query** reads data, the GraphQL equivalent of a `GET` request. The client sends a query document to a single endpoint:
 
 ```
 POST /graphql
@@ -20,7 +20,7 @@ POST /graphql
 }
 ```
 
-The response contains exactly the fields requested — nothing more:
+The response contains exactly the fields requested, nothing more:
 
 ```
 {
@@ -37,7 +37,7 @@ No over-fetching. The client asked for `id` and `status`, and that is all it rec
 
 ### Nested Fields
 
-Related data lives in the same query — no under-fetching either. A single request fetches the order, its customer, and every item's product:
+Related data lives in the same query, so no under-fetching either. A single request fetches the order, its customer, and every item's product:
 
 ```
 {
@@ -64,7 +64,7 @@ This one query replaces the 3+ REST calls you would have needed in Lesson 40.
 
 ### Query Arguments
 
-Fields can accept arguments — like path parameters and query parameters combined, but typed:
+Fields can accept arguments: like path parameters and query parameters combined, but typed:
 
 ```
 {
@@ -80,7 +80,7 @@ The `customerId` argument filters the list. The field's return type and argument
 
 ## Mutations: Writing Data
 
-A **mutation** modifies data — the GraphQL equivalent of `POST`, `PUT`, or `DELETE`. The key difference from a query is intent: mutations change state, queries do not. The server can batch and optimize queries however it likes; mutations execute sequentially.
+A **mutation** modifies data, the GraphQL equivalent of `POST`, `PUT`, or `DELETE`. The key difference from a query is intent: mutations change state, queries do not. The server can batch and optimize queries however it likes; mutations execute sequentially.
 
 ```
 mutation {
@@ -91,7 +91,7 @@ mutation {
 }
 ```
 
-Mutations also return data — the client specifies which fields of the result it wants, just like a query. This avoids a second round trip to fetch the updated object.
+Mutations also return data: the client specifies which fields of the result it wants, just like a query. This avoids a second round trip to fetch the updated object.
 
 ### Input Types
 
@@ -142,7 +142,7 @@ GraphQL has five built-in scalar types:
 | `Boolean` | `boolean` / `Boolean` | true / false |
 | `ID` | `String` | Unique identifier, serialized as string |
 
-Java types without a built-in GraphQL equivalent — `BigDecimal`, `Instant` — require **custom scalars** registered in your Spring configuration.
+Java types without a built-in GraphQL equivalent, like `BigDecimal` and `Instant`, require **custom scalars** registered in your Spring configuration.
 
 ### Object Types
 
@@ -162,7 +162,7 @@ The `!` suffix means **non-nullable**. `[OrderItem!]!` reads right to left: a no
 
 ### Enums
 
-Enums work just like Java enums — a closed set of values:
+Enums work just like Java enums: a closed set of values:
 
 ```
 enum OrderStatus {
@@ -176,7 +176,7 @@ enum OrderStatus {
 
 ### Input Types
 
-Input types define the shape of data **going in** to a mutation. They differ from object types: they cannot have relationships (no `customer: Customer` field), and their purpose is purely structural — grouping arguments:
+Input types define the shape of data **going in** to a mutation. They differ from object types: they cannot have relationships (no `customer: Customer` field), and their purpose is purely structural, grouping arguments:
 
 ```
 input CreateOrderInput {
@@ -209,7 +209,7 @@ type Mutation {
 }
 ```
 
-Notice that `order(id: ID!): Order` returns a nullable `Order` — the order might not exist. Meanwhile `orders(customerId: ID): [Order!]!` returns a non-null list that *can be empty* (the `!` outside the brackets guarantees the list itself is never null, but there may be zero items), and `customerId` is optional — omit it to get all orders.
+Notice that `order(id: ID!): Order` returns a nullable `Order`: the order might not exist. Meanwhile `orders(customerId: ID): [Order!]!` returns a non-null list that *can be empty* (the `!` outside the brackets guarantees the list itself is never null, but there may be zero items), and `customerId` is optional. Omit it to get all orders.
 
 ## GraphQL vs REST: The Structural Difference
 
@@ -218,7 +218,7 @@ Notice that `order(id: ID!): Order` returns a nullable `Order` — the order mig
 | Endpoints | Many resource URLs | One (`/graphql`) |
 | Data shape | Fixed by the server | Chosen by the client |
 | Relationships | Extra calls or embedded (chose one) | Nested in a single query |
-| Versioning | URL versioning (`/v1/`) | Add fields — old clients unaffected |
+| Versioning | URL versioning (`/v1/`) | Add fields; old clients unaffected |
 | HTTP methods | GET, POST, PUT, DELETE | POST for everything |
 | Caching | Browser / CDN (HTTP-level) | Custom (Apollo Client, etc.) |
 
@@ -230,7 +230,7 @@ You can run **both** in the same Spring Boot application. REST for simple resour
 
 <details>
 <summary>1. What HTTP method does a GraphQL query use?</summary>
-<p><strong>Correct answer:</strong> POST — GraphQL uses POST for both queries and mutations</p>
+<p><strong>Correct answer:</strong> POST: GraphQL uses POST for both queries and mutations</p>
 </details>
 
 <details>
@@ -244,11 +244,11 @@ You can run **both** in the same Spring Boot application. REST for simple resour
 </details>
 
 <details>
-<summary>4. A query field is declared as order(id: ID!): Order — without a ! on the return type. What does this mean?</summary>
-<p><strong>Correct answer:</strong> The order might not exist — the result can be null</p>
+<summary>4. A query field is declared as order(id: ID!): Order, without a ! on the return type. What does this mean?</summary>
+<p><strong>Correct answer:</strong> The order might not exist: the result can be null</p>
 </details>
 
 <details>
 <summary>5. Your team adds a new discountCode field to the Order type in the GraphQL schema. What happens to existing clients that don't request this field?</summary>
-<p><strong>Correct answer:</strong> Nothing — they didn't request the field, so it doesn't appear in their response</p>
+<p><strong>Correct answer:</strong> Nothing: they didn't request the field, so it doesn't appear in their response</p>
 </details>

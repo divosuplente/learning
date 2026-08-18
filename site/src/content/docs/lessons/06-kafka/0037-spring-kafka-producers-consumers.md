@@ -1,6 +1,6 @@
 ---
-title: "Spring Boot Kafka Producers & Consumers"
-description: "Spring Boot Kafka Producers & Consumers"
+title: "Lesson 37: Spring Boot Kafka Producers & Consumers"
+description: "Lesson 37: Spring Boot Kafka Producers & Consumers"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0037-spring-kafka-producers-consumers.html
 ---
 
@@ -10,7 +10,7 @@ Now that you understand Kafka's core concepts, it's time to write real code. Thi
 
 ## Docker Compose for Local Kafka
 
-Modern Kafka (3.7+) runs in **KRaft mode** — no Zookeeper needed. A single-container `docker-compose.yml` is enough for development:
+Modern Kafka (3.7+) runs in **KRaft mode**: no Zookeeper needed. A single-container `docker-compose.yml` is enough for development:
 
 ```
 # docker-compose.yml
@@ -40,7 +40,7 @@ docker-compose down        # stop and remove containers
 docker logs kafka          # verify startup
 ```
 
-The `KAFKA_ADVERTISED_LISTENERS` line is the one that matters most — it tells clients to connect at `localhost:9092`. Wrong value here is the #1 reason Kafka connections fail from the host.
+The `KAFKA_ADVERTISED_LISTENERS` line is the one that matters most: it tells clients to connect at `localhost:9092`. Wrong value here is the #1 reason Kafka connections fail from the host.
 
 ## Adding the Spring Kafka Dependency
 
@@ -82,15 +82,15 @@ Key decisions explained:
 
 | Property | Why |
 | --- | --- |
-| `bootstrap-servers` | Address of the Kafka broker — matches Docker's published port |
+| `bootstrap-servers` | Address of the Kafka broker, matches Docker's published port |
 | `StringSerializer` / `StringDeserializer` for keys | Keys are simple strings (e.g., `"42"` for an order ID) |
 | `JsonSerializer` / `JsonDeserializer` for values | Converts Java records ↔ JSON bytes; adds a `__TypeId__` header so the consumer knows which class to deserialize to |
-| `auto-offset-reset: earliest` | If no stored offset exists (new consumer group), start reading from the beginning of the topic — don't miss historical messages during development |
-| `spring.json.trusted.packages` | Security allowlist — the deserializer refuses to instantiate classes from untrusted packages |
+| `auto-offset-reset: earliest` | If no stored offset exists (new consumer group), start reading from the beginning of the topic so you don't miss historical messages during development |
+| `spring.json.trusted.packages` | Security allowlist: the deserializer refuses to instantiate classes from untrusted packages |
 
 ## Defining the Event
 
-Events are simple records. They travel through Kafka as JSON, so include everything the consumer needs — no round-trips to query the database:
+Events are simple records. They travel through Kafka as JSON, so include everything the consumer needs. No round-trips to query the database:
 
 ```
 package com.example.ordermgmt.kafka.event;
@@ -147,8 +147,8 @@ public class OrderEventProducer {
 Three things to notice:
 
 1.  **The key is the order ID.** Kafka hashes the key to pick a partition. Same key → same partition → messages for the same order are always in order. Without a key, Kafka distributes round-robin and ordering is lost.
-2.  **`send()` is async.** It returns a `CompletableFuture`. Use `whenComplete` to log success or failure — don't block the calling thread with `.get()`.
-3.  **`KafkaTemplate<String, Object>`** — `Object` because we send different event types to the same topic. The `JsonSerializer` adds a `__TypeId__` header so the consumer knows the concrete type.
+2.  **`send()` is async.** It returns a `CompletableFuture`. Use `whenComplete` to log success or failure; don't block the calling thread with `.get()`.
+3.  **`KafkaTemplate<String, Object>`**: `Object` because we send different event types to the same topic. The `JsonSerializer` adds a `__TypeId__` header so the consumer knows the concrete type.
 
 ## Integrating the Producer with the Service
 
@@ -216,7 +216,7 @@ Spring does the heavy lifting:
 
 -   Deserializes the JSON bytes into an `OrderCreatedEvent` using the `__TypeId__` header
 -   Commits the offset automatically after the method returns successfully
--   If the method throws, the offset is not committed — the message will be redelivered
+-   If the method throws, the offset is not committed: the message will be redelivered
 
 ## Multiple Consumer Groups
 
@@ -237,17 +237,17 @@ public class AnalyticsConsumer {
 }
 ```
 
-The notification group and the analytics group maintain **separate offsets**. If the notification consumer goes down for an hour, it resumes where it left off — the analytics consumer is unaffected.
+The notification group and the analytics group maintain **separate offsets**. If the notification consumer goes down for an hour, it resumes where it left off. The analytics consumer is unaffected.
 
 ## Consumer Group Rebalancing
 
-When a consumer joins or leaves a group, Kafka **rebalances** — it reassigns partitions among the current members. This is automatic, but has consequences:
+When a consumer joins or leaves a group, Kafka **rebalances**: it reassigns partitions among the current members. This is automatic, but has consequences:
 
 -   **Consumer added:** partitions are redistributed. Some messages in-flight during the swap may be redelivered (at-least-once).
 -   **Consumer removed (crash):** its partitions are reassigned to surviving members. Uncommitted offsets are reprocessed.
 -   **Key ordering preserved:** a given partition always goes to exactly one consumer in the group. Same key → same partition → same consumer → order maintained.
 
-This is why your consumers **must be idempotent** — rebalancing will occasionally cause redelivery. The next lesson covers this in detail.
+This is why your consumers **must be idempotent**: rebalancing will occasionally cause redelivery. The next lesson covers this in detail.
 
 **Primary sources:** [Spring Kafka Reference](https://docs.spring.io/spring-kafka/reference/) · [Kafka Producer Configs](https://kafka.apache.org/documentation/#producerconfigs) · [Kafka Consumer Configs](https://kafka.apache.org/documentation/#consumerconfigs) · [Docker Compose Docs](https://docs.docker.com/compose/)
 
@@ -260,12 +260,12 @@ This is why your consumers **must be idempotent** — rebalancing will occasiona
 
 <details>
 <summary>2. You call kafkaTemplate.send(topic, value) without a key. What happens to message ordering?</summary>
-<p><strong>Correct answer:</strong> Messages are distributed round-robin across partitions — ordering is lost</p>
+<p><strong>Correct answer:</strong> Messages are distributed round-robin across partitions: ordering is lost</p>
 </details>
 
 <details>
 <summary>3. A @KafkaListener method throws a RuntimeException. What does Spring Kafka do?</summary>
-<p><strong>Correct answer:</strong> Does not commit the offset — the message will be redelivered on the next poll</p>
+<p><strong>Correct answer:</strong> Does not commit the offset: the message will be redelivered on the next poll</p>
 </details>
 
 <details>

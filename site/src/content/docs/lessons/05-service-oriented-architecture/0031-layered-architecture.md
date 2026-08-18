@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/003
 
 # Layered Architecture
 
-Inside every well-structured Spring Boot application, code is organized into **layers** — each with one job, each talking only to the layer directly below it. This lesson introduces the four layers you'll see in almost every Spring project: Controller, Service, Repository, and Database.
+Inside every well-structured Spring Boot application, code is organized into **layers**, each with one job, each talking only to the layer directly below it. This lesson introduces the four layers you'll see in almost every Spring project: Controller, Service, Repository, and Database.
 
 ## The four layers
 
@@ -62,7 +62,7 @@ This is not an arbitrary rule. It keeps responsibilities clean and makes the cod
 
 ## Why not skip layers?
 
-You might think: *"The controller just needs to list orders — why not call the repository directly?"*
+You might think: *"The controller just needs to list orders, so why not call the repository directly?"*
 
 Because someday you'll need to add logic between the request and the database:
 
@@ -105,11 +105,11 @@ Notice what each layer does *not* do: the controller never touches the database,
 
 ## What happens when you break the rule
 
-A controller calling a repository directly *works* — the code compiles and runs. But it creates two real problems:
+A controller calling a repository directly *works*: the code compiles and runs. But it creates two real problems:
 
 **1\. Logic leaks into the wrong place.** Authorization checks, data transformation, and validation all merge into the controller. Now the controller depends on HTTP details *and* database details.
 
-**2\. Duplication.** When a second entry point (a scheduled job, a message listener) needs the same data, you must duplicate the logic that was baked into the controller — or refactor the controller into a service anyway.
+**2\. Duplication.** When a second entry point (a scheduled job, a message listener) needs the same data, you must duplicate the logic that was baked into the controller, or refactor the controller into a service anyway.
 
 ```
 // Bad: controller bypasses the service layer

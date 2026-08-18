@@ -4,9 +4,9 @@ description: "ORM, JPA, Hibernate — The Stack Explained"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0026-orm-jpa-hibernate.html
 ---
 
-# ORM, JPA, Hibernate — The Stack Explained
+# ORM, JPA, Hibernate: The Stack Explained
 
-Java thinks in objects. Databases think in tables and rows. Something has to translate between these two worlds — and that something is the ORM layer. This lesson untangles the four pieces you'll see in every Spring Data project: the concept (ORM), the spec (JPA), the engine (Hibernate), and the convenience layer (Spring Data JPA). Understanding which piece does what saves you from debugging the wrong abstraction.
+Java thinks in objects. Databases think in tables and rows. Something has to translate between these two worlds, and the ORM layer fills that role. This lesson untangles the four pieces you'll see in every Spring Data project: the concept (ORM), the spec (JPA), the engine (Hibernate), and the convenience layer (Spring Data JPA). Understanding which piece does what saves you from debugging the wrong abstraction.
 
 ## The Impedance Mismatch
 
@@ -38,23 +38,23 @@ CREATE TABLE orders (
 );
 ```
 
-When you call `order.getCustomer()`, the database doesn't have an object — it has a `customer_id` column. Something must turn that number into a `Customer` object. **ORM does this automatically.**
+When you call `order.getCustomer()`, the database doesn't have an object. It has a `customer_id` column. Something must turn that number into a `Customer` object. **ORM does this automatically.**
 
-## ORM — Object-Relational Mapping
+## ORM: Object-Relational Mapping
 
 **ORM** is the concept, not a library. It describes any technique that maps between object graphs and relational tables. In Java, the ORM layer:
 
 -   Reads annotations on your classes (`@Entity`, `@Column`) to learn the mapping
 -   Generates SQL from method calls (`repository.save()` → `INSERT`)
 -   Converts `ResultSet` rows back into Java objects
--   Manages dirty checking — tracks which fields changed and only updates those
--   Handles lazy loading — fetches related data only when you access it
+-   Manages dirty checking: tracks which fields changed and only updates those
+-   Handles lazy loading: fetches related data only when you access it
 
 You *could* write JDBC code by hand. After the third `PreparedStatement` and `ResultSet.getString("email")`, you'll want ORM.
 
-## JPA — the Specification
+## JPA: the Specification
 
-**JPA (Jakarta Persistence API)** is a *specification* — a set of interfaces and annotations that define how ORM should work in Java. Defines annotations like `@Entity`, `@Id`, `@OneToMany` and the `EntityManager` API. JPA itself **does nothing**. It is a contract, not an engine:
+**JPA (Jakarta Persistence API)** is a *specification*, a set of interfaces and annotations that define how ORM should work in Java. Defines annotations like `@Entity`, `@Id`, `@OneToMany` and the `EntityManager` API. JPA itself **does nothing**. It is a contract, not an engine:
 
 ```
 // JPA is just interfaces — no implementation code here
@@ -65,9 +65,9 @@ public interface EntityManager {
 }
 ```
 
-Anyone can write a JPA *provider* — an implementation that fulfills this contract. The specification lives in the `jakarta.persistence` package (moved from `javax.persistence` in Jakarta EE 9+).
+Anyone can write a JPA *provider*, an implementation that fulfills this contract. The specification lives in the `jakarta.persistence` package (moved from `javax.persistence` in Jakarta EE 9+).
 
-## Hibernate — the Implementation
+## Hibernate: the Implementation
 
 **Hibernate** is the most popular JPA provider. It's the actual runtime engine that:
 
@@ -77,9 +77,9 @@ Anyone can write a JPA *provider* — an implementation that fulfills this contr
 -   Generates schema DDL from your entity definitions
 -   Provides features beyond the JPA spec: `@Cache`, natural IDs, multi-tenancy, envers auditing
 
-When Spring Boot detects Hibernate on the classpath, it configures it as the JPA provider automatically. You rarely configure Hibernate directly — you configure JPA, and Hibernate does the work.
+When Spring Boot detects Hibernate on the classpath, it configures it as the JPA provider automatically. You rarely configure Hibernate directly. You configure JPA, and Hibernate does the work.
 
-## Spring Data JPA — the Abstraction Layer
+## Spring Data JPA: the Abstraction Layer
 
 **Spring Data JPA** sits on top of JPA/Hibernate and eliminates boilerplate. You define an interface and Spring Data generates the implementation at runtime:
 
@@ -111,9 +111,9 @@ Each layer has a job. Spring Data JPA saves you from writing `EntityManager` boi
 
 ## Why Java Records Can't Be JPA Entities
 
-Java 16 introduced **records** — concise, immutable data carriers. They look like natural fits for entities, but JPA **cannot use records as entities**. Three reasons:
+Java 16 introduced **records**: concise, immutable data carriers. They look like natural fits for entities, but JPA **cannot use records as entities**. Three reasons:
 
-**1\. No no-argument constructor.** JPA creates entity instances by calling a no-arg constructor, then populating fields. Records require all components in the constructor — there's no way to create a blank instance:
+**1\. No no-argument constructor.** JPA creates entity instances by calling a no-arg constructor, then populating fields. Records require all components in the constructor. There's no way to create a blank instance:
 
 ```
 // Record — every field is a constructor parameter, no default constructor
@@ -123,9 +123,9 @@ public record CustomerRecord(String name, String email) {}
 // protected CustomerRecord() {}
 ```
 
-**2\. Immutability.** JPA populates fields *after* construction. With setters on regular classes, that's straightforward. Records are immutable — no setters, no way to change a field after creation. JPA's dirty-checking mechanism also requires the ability to detect and apply changes.
+**2\. Immutability.** JPA populates fields *after* construction. With setters on regular classes, that's straightforward. Records are immutable: no setters, no way to change a field after creation. JPA's dirty-checking mechanism also requires the ability to detect and apply changes.
 
-**3\. Can't be subclassed.** Records are implicitly `final`. Hibernate uses **proxies** (runtime-generated subclasses) for lazy loading — when you call `order.getCustomer()`, Hibernate may return a proxy that loads the `Customer` from the database only when you first access it. If the entity class is `final`, Hibernate cannot create that proxy.
+**3\. Can't be subclassed.** Records are implicitly `final`. Hibernate uses **proxies** (runtime-generated subclasses) for lazy loading. When you call `order.getCustomer()`, Hibernate may return a proxy that loads the `Customer` from the database only when you first access it. If the entity class is `final`, Hibernate cannot create that proxy.
 
 **The rule: entities are mutable classes with a no-arg constructor; records are for DTOs and value objects that don't need persistence.**
 
@@ -154,6 +154,6 @@ public record CustomerRecord(String name, String email) {}
 </details>
 
 <details>
-<summary>5. Hibernate uses runtime-generated proxies for lazy loading. What property of JPA entities makes this possible — and what breaks if it's missing?</summary>
+<summary>5. Hibernate uses runtime-generated proxies for lazy loading. What property of JPA entities makes this possible, and what breaks if it's missing?</summary>
 <p><strong>Correct answer:</strong> Entities must be non-final so Hibernate can subclass them; final classes break it</p>
 </details>

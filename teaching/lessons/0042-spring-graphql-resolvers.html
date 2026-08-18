@@ -76,15 +76,15 @@ public class OrderQueryResolver {
 <p>Key points:</p>
 
 <ul>
-  <li><code>@Controller</code> marks the class — like <code>@RestController</code> but for GraphQL (no <code>@ResponseBody</code> needed).</li>
+  <li><code>@Controller</code> marks the class, like <code>@RestController</code> but for GraphQL (no <code>@ResponseBody</code> needed).</li>
   <li><code>@Argument</code> extracts a query argument. The parameter name must match the schema argument name.</li>
-  <li><code>@Argument(required = false)</code> marks nullable arguments — the schema says <code>customerId: ID</code> (no <code>!</code>), so the Java parameter is optional.</li>
+  <li><code>@Argument(required = false)</code> marks nullable arguments. The schema says <code>customerId: ID</code> (no <code>!</code>), so the Java parameter is optional.</li>
   <li>The return type is serialized to JSON, but <strong>only the fields the client asked for</strong> are returned.</li>
 </ul>
 
 <h2>Mutation Resolvers</h2>
 
-<p>A <code>@MutationMapping</code> method resolves a field in the <code>Mutation</code> type — for creating, updating, or deleting data.</p>
+<p>A <code>@MutationMapping</code> method resolves a field in the <code>Mutation</code> type, for creating, updating, or deleting data.</p>
 
 <pre><code>@Controller
 public class OrderMutationResolver {
@@ -131,7 +131,7 @@ public record CreateOrderItemInput(
         Integer quantity
 ) {}</code></pre>
 
-<p>Spring auto-maps the GraphQL input object to the record — no manual parsing needed.</p>
+<p>Spring auto-maps the GraphQL input object to the record, with no manual parsing needed.</p>
 
 <h2>Field Resolvers with @SchemaMapping</h2>
 
@@ -152,7 +152,7 @@ public class OrderFieldResolver {
     }
 }</code></pre>
 
-<p><code>@SchemaMapping</code> tells Spring: "when a client queries the <code>customer</code> field on an <code>Order</code>, call this method." Spring passes the parent object (<code>OrderResponse</code>) as the first argument automatically. The method is <strong>only called if the client actually requests the <code>customer</code> field</strong> — if the query omits it, this resolver never runs.</p>
+<p><code>@SchemaMapping</code> tells Spring: "when a client queries the <code>customer</code> field on an <code>Order</code>, call this method." Spring passes the parent object (<code>OrderResponse</code>) as the first argument automatically. The method is <strong>only called if the client actually requests the <code>customer</code> field</strong>. If the query omits it, this resolver never runs.</p>
 
 <p>This is what makes GraphQL's selective fetching work at the server level: you don't pay the cost of resolving fields nobody asked for.</p>
 
@@ -186,7 +186,7 @@ type Order {
 
 <h2>Resolver → Service Wiring</h2>
 
-<p>Resolvers should <strong>delegate to services</strong>, not contain business logic — the same thin-controller pattern from REST. The resolver receives input, converts it, calls the service, and returns the result:</p>
+<p>Resolvers should <strong>delegate to services</strong>, not contain business logic: the same thin-controller pattern from REST. The resolver receives input, converts it, calls the service, and returns the result:</p>
 
 <pre><code>@Controller
 public class OrderQueryResolver {
@@ -225,7 +225,7 @@ public class OrderQueryResolver {
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>@QueryMapping</code> on a method named <code>customer</code></li>
     <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0"><code>@SchemaMapping(typeName = "Order", field = "customer")</code></li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>@MutationMapping</code> on a method named <code>resolveCustomer</code></li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No annotation needed — Spring auto-resolves it from the service</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No annotation needed: Spring auto-resolves it from the service</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>
@@ -242,10 +242,10 @@ public class OrderQueryResolver {
 </div>
 
 <div class="quiz" id="q4">
-  <div class="quiz-question">4. A client queries <code>{ order(id: 1) { id status } }</code> — omitting the <code>customer</code> field. A <code>@SchemaMapping</code> method for <code>Order.customer</code> exists. What happens?</div>
+  <div class="quiz-question">4. A client queries <code>{ order(id: 1) { id status } }</code>, omitting the <code>customer</code> field. A <code>@SchemaMapping</code> method for <code>Order.customer</code> exists. What happens?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The method runs but returns null since the field wasn't requested</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The method is never called — Spring only invokes it when the field is requested</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The method is never called: Spring only invokes it when the field is requested</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The method runs and the result is cached for future queries</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Spring throws an error because the field resolver must always run</li>
   </ul>
@@ -255,9 +255,9 @@ public class OrderQueryResolver {
 <div class="quiz" id="q5">
   <div class="quiz-question">5. Your <code>@MutationMapping</code> method for <code>createOrder</code> contains 40 lines of stock validation, price calculation, and order persistence. What should you do?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Keep it — mutation resolvers are expected to hold business logic</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Keep it: mutation resolvers are expected to hold business logic</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Move it to a <code>@SchemaMapping</code> method instead</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Move the logic into <code>OrderService</code> — resolvers should delegate, not implement</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Move the logic into <code>OrderService</code>: resolvers should delegate, not implement</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Split the method into multiple <code>@MutationMapping</code> methods</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
@@ -282,7 +282,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite: review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

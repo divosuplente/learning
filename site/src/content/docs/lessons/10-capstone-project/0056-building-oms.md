@@ -6,11 +6,11 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/005
 
 # Building the Order Management System
 
-The capstone project ties together every technology from this course: REST controllers, a service layer with transactional boundaries, Kafka event publishing, GraphQL resolvers, and Spring Data repositories. This lesson walks through the full implementation — not as isolated snippets, but as a working system where every layer cooperates.
+The capstone project brings together every technology from this course: REST controllers, a service layer with transactional boundaries, Kafka event publishing, GraphQL resolvers, and Spring Data repositories. This lesson walks through the full implementation as a working system where every layer cooperates, not as isolated snippets.
 
 ## REST Controller
 
-The controller is thin by design — it receives HTTP requests, delegates to the service, and wraps the result in a `ResponseEntity`. No business logic lives here.
+The controller is thin by design. It receives HTTP requests, delegates to the service, and wraps the result in a `ResponseEntity`. No business logic lives here.
 
 ```
 @RestController
@@ -56,7 +56,7 @@ public class OrderController {
 }
 ```
 
-The `@Valid` annotation triggers Bean Validation before the method body runs — invalid requests never reach the service. The `201 CREATED` status on `create` follows REST convention for resource creation.
+The `@Valid` annotation triggers Bean Validation before the method body runs, so invalid requests never reach the service. The `201 CREATED` status on `create` follows REST convention for resource creation.
 
 ## Global Exception Handler
 
@@ -175,14 +175,14 @@ public class OrderService {
 }
 ```
 
-Two critical details:
+Two details:
 
--   **Event publishing happens inside the transaction.** The producer calls `.get()` on the `CompletableFuture` returned by `kafkaTemplate.send()`, blocking until the broker acknowledges or a timeout expires. If the send fails or times out, the exception propagates and the transaction rolls back — you never get a committed order without its event. If you need the opposite guarantee (committed order *even if* the event fails), publish after commit using `TransactionSynchronizationManager.registerSynchronization()` or the `@TransactionalEventListener` pattern.
--   **Stock is decremented in the same transaction.** The product's stock is reduced before the order is saved. If two concurrent orders exceed stock, one transaction will fail — either through an optimistic-lock conflict or a database constraint.
+-   **Event publishing happens inside the transaction.** The producer calls `.get()` on the `CompletableFuture` returned by `kafkaTemplate.send()`, blocking until the broker acknowledges or a timeout expires. If the send fails or times out, the exception propagates and the transaction rolls back. You never get a committed order without its event. If you need the opposite guarantee (committed order *even if* the event fails), publish after commit using `TransactionSynchronizationManager.registerSynchronization()` or the `@TransactionalEventListener` pattern.
+-   **Stock is decremented in the same transaction.** The product's stock is reduced before the order is saved. If two concurrent orders exceed stock, one transaction will fail, either through an optimistic-lock conflict or a database constraint.
 
 ## Kafka Events & Producer
 
-Events are Java records — lightweight, immutable message payloads. Each event has a static factory method that extracts data from the domain entity:
+Events are Java records: lightweight, immutable message payloads. Each event has a static factory method that extracts data from the domain entity:
 
 ```
 public record OrderCreatedEvent(
@@ -257,11 +257,11 @@ public class OrderEventProducer {
 }
 ```
 
-The `send()` call returns a `CompletableFuture`, but the producer blocks on it with `.get(10, TimeUnit.SECONDS)` to ensure the broker acknowledges the message before the method returns. This is essential for transactional integrity: if the publish were async, a send failure could go unnoticed after the transaction has already committed, leaving the database and Kafka out of sync. The trade-off is that response latency now depends on broker availability — if the broker is down, the request blocks for up to 10 seconds before timing out.
+The `send()` call returns a `CompletableFuture`, but the producer blocks on it with `.get(10, TimeUnit.SECONDS)` to ensure the broker acknowledges the message before the method returns. This is necessary for transactional integrity: if the publish were async, a send failure could go unnoticed after the transaction has already committed, leaving the database and Kafka out of sync. The trade-off is that response latency now depends on broker availability. If the broker is down, the request blocks for up to 10 seconds before timing out.
 
 ## Kafka Consumer
 
-Consumers listen to topics and react. In the capstone, they log events — in production they would trigger emails, update dashboards, or push WebSocket notifications:
+Consumers listen to topics and react. In the capstone, they log events. In production they would trigger emails, update dashboards, or push WebSocket notifications:
 
 ```
 @Component
@@ -289,7 +289,7 @@ public class OrderEventConsumer {
 }
 ```
 
-The `groupId` ensures that each event is delivered to exactly one consumer instance within the group — essential for horizontal scaling.
+The `groupId` ensures that each event is delivered to exactly one consumer instance within the group, which is necessary for horizontal scaling.
 
 ## GraphQL Resolvers
 
@@ -345,7 +345,7 @@ public class OrderResolver {
 }
 ```
 
-Note the `createOrder` mutation converts the GraphQL input record into the same `CreateOrderRequest` DTO that the REST controller uses — shared service layer, shared validation, shared event publishing. The mutation triggers the same Kafka events because it calls the same `orderService.createOrder()`.
+The `createOrder` mutation converts the GraphQL input record into the same `CreateOrderRequest` DTO that the REST controller uses. The service layer, validation, and event publishing are all shared. The mutation triggers the same Kafka events because it calls the same `orderService.createOrder()`.
 
 ## The Complete Request Flow
 
@@ -361,7 +361,7 @@ HTTP/GraphQL request
     → OrderResponse DTO returned
 ```
 
-The controller is a routing layer. The service is the transactional boundary. The repository is the persistence layer. Events flow out from the service to Kafka. This separation means you can add a new API surface (e.g., gRPC) without duplicating business logic — you just inject `OrderService`.
+The controller is a routing layer. The service is the transactional boundary. The repository is the persistence layer. Events flow out from the service to Kafka. This separation means you can add a new API surface (e.g., gRPC) without duplicating business logic. You just inject `OrderService`.
 
 **Primary sources:** [Spring Web Reference](https://docs.spring.io/spring-boot/reference/web/spring-web.html) · [Spring Kafka Reference](https://docs.spring.io/spring-kafka/reference/html/) · [Spring for GraphQL Reference](https://docs.spring.io/spring-graphql/reference/) · [Spring Data JPA Reference](https://docs.spring.io/spring-data/jpa/reference/)
 

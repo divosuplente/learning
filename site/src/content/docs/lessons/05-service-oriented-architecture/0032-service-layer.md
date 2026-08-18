@@ -6,15 +6,15 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/003
 
 # The Service Layer & `@Transactional`
 
-In layered architecture, the service layer is the **brain** — it enforces business rules, orchestrates repository calls, and keeps controllers thin. But when a single method touches multiple tables, you need a guarantee: either everything saves correctly, or nothing does. That guarantee is `@Transactional`.
+In layered architecture, the service layer is the **brain**: it enforces business rules, orchestrates repository calls, and keeps controllers thin. But when a single method touches multiple tables, you need a guarantee: either everything saves correctly, or nothing does. That guarantee is `@Transactional`.
 
 ## What belongs in a service method?
 
 A service method does three things a controller or repository won't:
 
--   **Business rules** — "An order must be PENDING to confirm it."
--   **Orchestration** — look up the customer, check stock, reserve stock, calculate total, save the order — all in one call.
--   **Transaction boundaries** — if any step fails, undo every database change made so far.
+-   **Business rules:** "An order must be PENDING to confirm it."
+-   **Orchestration:** look up the customer, check stock, reserve stock, calculate total, save the order, all in one call.
+-   **Transaction boundaries:** if any step fails, undo every database change made so far.
 
 Controllers handle HTTP. Repositories handle SQL. **Everything between them is the service layer's job.**
 
@@ -22,9 +22,9 @@ Controllers handle HTTP. Repositories handle SQL. **Everything between them is t
 
 Spring's `@Transactional` wraps a method in a database transaction. The lifecycle is simple:
 
-1.  **Before the method** — Spring opens a transaction (starts a database connection and begins a unit of work).
-2.  **During the method** — every `save()`, `delete()`, or update happens inside that transaction. Other transactions can't see your uncommitted changes.
-3.  **After the method** — if the method returns normally, Spring **commits** the transaction (all changes become permanent). If an unhandled runtime exception propagates out, Spring **rolls back** the transaction (every change is undone).
+1.  **Before the method:** Spring opens a transaction (starts a database connection and begins a unit of work).
+2.  **During the method:** every `save()`, `delete()`, or update happens inside that transaction. Other transactions can't see your uncommitted changes.
+3.  **After the method:** if the method returns normally, Spring **commits** the transaction (all changes become permanent). If an unhandled runtime exception propagates out, Spring **rolls back** the transaction (every change is undone).
 
 ```
 @Transactional
@@ -44,7 +44,7 @@ public OrderResponse createOrder(CreateOrderRequest request) {
 }
 ```
 
-Coincidence is not a strategy. Without `@Transactional`, each `save()` commits independently — a crash after the first save leaves the database inconsistent.
+Coincidence is not a strategy. Without `@Transactional`, each `save()` commits independently; a crash after the first save leaves the database inconsistent.
 
 ## Read-only transactions
 
@@ -59,7 +59,7 @@ public OrderResponse getOrderById(Long id) {
 }
 ```
 
-`readOnly = true` is not just documentation — it's a **performance hint**. The database and ORM can:
+`readOnly = true` is not just documentation. It's a **performance hint**. The database and ORM can:
 
 -   Skip dirty-checking (no need to compare entity state at flush time).
 -   Avoid acquiring write locks on rows.
@@ -67,15 +67,15 @@ public OrderResponse getOrderById(Long id) {
 
 Rule of thumb: **every public service method should be `@Transactional`**. If it only reads, add `readOnly = true`. If it writes, leave the default.
 
-## How `@Transactional` really works — proxy-based AOP
+## How `@Transactional` really works: proxy-based AOP
 
-Spring does not modify your class bytecode. Instead, it creates a **proxy** — a wrapper object that intercepts calls to your bean. When you call `orderService.createOrder(…)`, you're calling the proxy, which:
+Spring does not modify your class bytecode. Instead, it creates a **proxy**, a wrapper object that intercepts calls to your bean. When you call `orderService.createOrder(…)`, you're calling the proxy, which:
 
 1.  Opens a transaction from the `PlatformTransactionManager`.
 2.  Delegates to the real `createOrder` method.
 3.  On normal return: commits. On exception: rolls back.
 
-This proxy mechanism has a critical consequence: **`@Transactional` on a `private` or `protected` method does nothing.** The proxy can only intercept `public` methods. A `private` method call is a direct `this.method()` inside the class — the proxy never sees it, no transaction is opened.
+This proxy mechanism has a critical consequence: **`@Transactional` on a `private` or `protected` method does nothing.** The proxy can only intercept `public` methods. A `private` method call is a direct `this.method()` inside the class, so the proxy never sees it and no transaction is opened.
 
 ```
 // WRONG — transaction is never created
@@ -89,7 +89,7 @@ public void reserveStock(ProductEntity product, int qty) { ... }
 
 ## Rollback rules
 
-By default, `@Transactional` rolls back on **unchecked exceptions** (subclasses of `RuntimeException`) but **not** on checked exceptions. This is a deliberate design choice — checked exceptions are declared in the method signature and are expected; runtime exceptions signal unexpected failure.
+By default, `@Transactional` rolls back on **unchecked exceptions** (subclasses of `RuntimeException`) but **not** on checked exceptions. This is a deliberate design choice: checked exceptions are declared in the method signature and are expected; runtime exceptions signal unexpected failure.
 
 ```
 // Rolls back: runtime exception
@@ -221,11 +221,11 @@ Notice the pattern: **write methods use `@Transactional`**, **read methods use `
 
 ## What makes this a good service?
 
--   **Single responsibility** — only order-related business logic.
--   **Constructor injection** — dependencies are explicit and `final`.
--   **Transaction boundaries** — every method declares its transactional intent.
--   **Domain exceptions** — `OrderNotFoundException`, `InsufficientStockException` — not generic `RuntimeException`.
--   **DTOs in and out** — `CreateOrderRequest` enters, `OrderResponse` exits. Entities never leak to the controller.
+-   **Single responsibility:** only order-related business logic.
+-   **Constructor injection:** dependencies are explicit and `final`.
+-   **Transaction boundaries:** every method declares its transactional intent.
+-   **Domain exceptions:** `OrderNotFoundException`, `InsufficientStockException`, not generic `RuntimeException`.
+-   **DTOs in and out:** `CreateOrderRequest` enters, `OrderResponse` exits. Entities never leak to the controller.
 
 **Primary sources:** [Spring: @Transactional](https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html) · [Spring: Transactional Advice](https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-advice-above.html) · [Oracle: JDBC Transactions](https://docs.oracle.com/javase/tutorial/jdbc/basics/transactions.html)
 

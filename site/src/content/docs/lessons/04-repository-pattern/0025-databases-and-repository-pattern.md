@@ -10,7 +10,7 @@ Your application's objects vanish the moment the process stops. A **database** p
 
 ## Relational Databases
 
-The most common kind of database is a **relational database** (RDBMS). It stores data in **tables** — think of each table as a spreadsheet with strict rules:
+The most common kind of database is a **relational database** (RDBMS). It stores data in **tables**: think of each table as a spreadsheet with strict rules.
 
 **customers**
 
@@ -30,10 +30,10 @@ The most common kind of database is a **relational database** (RDBMS). It stores
 
 | Concept | What it means |
 | --- | --- |
-| **Table** | A named, structured collection of data — rows and columns |
+| **Table** | A named, structured collection of data, rows and columns |
 | **Row** | A single record (one customer, one product) |
 | **Column** | A named attribute across all rows (name, email, price) |
-| **Primary Key** | A column (or columns) that *uniquely* identifies each row — usually an `id` |
+| **Primary Key** | A column (or columns) that *uniquely* identifies each row, usually an `id` |
 | **Foreign Key** | A column that references a primary key in *another* table, creating a relationship |
 
 ### Relationships
@@ -50,13 +50,13 @@ Customer 1 ────< Order 1 ────< OrderItem >──── 1 Product
                                        >──── 1 Product
 ```
 
-The `<` means "one to many" — one customer, many orders. The foreign key lives on the "many" side: `orders.customer_id` points back to `customers.id`.
+The `<` means "one to many": one customer, many orders. The foreign key lives on the "many" side: `orders.customer_id` points back to `customers.id`.
 
 ## SQL Crash Course
 
-**SQL** (Structured Query Language) is how you read and mutate data in a relational database. You won't write much raw SQL in Spring — JPA generates it — but understanding the four fundamental operations helps you reason about what your repository calls actually do.
+**SQL** (Structured Query Language) is how you read and mutate data in a relational database. You won't write much raw SQL in Spring (JPA generates it), but understanding the four fundamental operations helps you reason about what your repository calls actually do.
 
-### SELECT — read data
+### SELECT: read data
 
 ```
 -- All rows and columns
@@ -69,14 +69,14 @@ SELECT * FROM customers WHERE id = 1;
 SELECT name, email FROM customers WHERE id = 1;
 ```
 
-### INSERT — create data
+### INSERT: create data
 
 ```
 INSERT INTO customers (name, email, address)
 VALUES ('Charlie', 'charlie@example.com', '789 Pine St');
 ```
 
-### UPDATE — modify data
+### UPDATE: modify data
 
 ```
 UPDATE customers SET address = '999 New St' WHERE id = 1;
@@ -84,7 +84,7 @@ UPDATE customers SET address = '999 New St' WHERE id = 1;
 
 Forgetting the `WHERE` clause updates *every* row. Always include it.
 
-### DELETE — remove data
+### DELETE: remove data
 
 ```
 DELETE FROM customers WHERE id = 1;
@@ -92,7 +92,7 @@ DELETE FROM customers WHERE id = 1;
 
 Same rule: omit `WHERE` and you delete everything in the table.
 
-### JOIN — combine data across tables
+### JOIN: combine data across tables
 
 ```
 SELECT o.id, o.status, c.name
@@ -108,7 +108,7 @@ Instead of writing `SELECT * FROM customers WHERE id = 1`, you call `customerRep
 
 ## The Repository Pattern
 
-Without a repository, data-access code **infects every layer**. Your service opens connections, writes SQL strings, and maps result sets — all tangled with business logic:
+Without a repository, data-access code **infects every layer**. Your service opens connections, writes SQL strings, and maps result sets, all tangled with business logic:
 
 ```
 // BAD — SQL scattered throughout the service
@@ -125,7 +125,7 @@ public class OrderService {
 }
 ```
 
-The **Repository Pattern** puts all data access in one place. The service tells the repository *what* it needs — never *how* to get it:
+The **Repository Pattern** puts all data access in one place. The service tells the repository *what* it needs, never *how* to get it:
 
 ```
 // GOOD — service knows nothing about SQL
@@ -145,7 +145,7 @@ public class OrderService {
 ### Why it matters
 
 -   **Single responsibility.** The service handles business rules; the repository handles persistence. Change your database? Modify the repository, not the service.
--   **Testability.** Swap the repository for a fake in tests — no database needed.
+-   **Testability.** Swap the repository for a fake in tests: no database needed.
 -   **No duplicated queries.** "Find by email" is written once in the repository, not copy-pasted across five services.
 
 **Primary sources:** [Oracle: JDBC Basics](https://docs.oracle.com/javase/tutorial/jdbc/basics/index.html) · [PostgreSQL: The SQL Language](https://www.postgresql.org/docs/current/tutorial-sql.html) · [Martin Fowler: Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html)

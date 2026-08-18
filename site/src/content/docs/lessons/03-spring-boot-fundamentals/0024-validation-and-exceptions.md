@@ -1,16 +1,16 @@
 ---
-title: "Input Validation & Exception Handling"
-description: "Input Validation & Exception Handling"
+title: "Lesson 24: Input Validation & Exception Handling"
+description: "Lesson 24: Input Validation & Exception Handling"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0024-validation-and-exceptions.html
 ---
 
 # Input Validation & Exception Handling
 
-Every API receives bad input eventually — missing fields, negative quantities, malformed email addresses. Without validation, garbage slips into your database. Without structured error handling, clients get ugly stack traces. This lesson covers **Jakarta Bean Validation** for declaring constraints on input, and **@RestControllerAdvice** for turning exceptions into clean HTTP responses.
+Every API receives bad input eventually: missing fields, negative quantities, malformed email addresses. Without validation, garbage slips into your database. Without structured error handling, clients get ugly stack traces. This lesson covers **Jakarta Bean Validation** for declaring constraints on input, and **@RestControllerAdvice** for turning exceptions into clean HTTP responses.
 
-## Jakarta Bean Validation — `jakarta.validation`, not `javax.validation`
+## Jakarta Bean Validation: `jakarta.validation`, not `javax.validation`
 
-Bean Validation (JSR 380) is a Java standard. Spring Boot integrates it via the `@Valid` annotation. The first thing to get right is the import — **Spring Boot 3.x uses Jakarta EE**, the renamed Java EE. Everything moved from `javax.validation` to `jakarta.validation`:
+Bean Validation (JSR 380) is a Java standard. Spring Boot integrates it via the `@Valid` annotation. The first thing to get right is the import: **Spring Boot 3.x uses Jakarta EE**, the renamed Java EE. Everything moved from `javax.validation` to `jakarta.validation`:
 
 ```
 // CORRECT — Spring Boot 3.x (Jakarta)
@@ -23,7 +23,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 ```
 
-If you import from `javax.validation` on Boot 3, the annotations silently fail — they're different classes that Spring's validator doesn't recognize. This is the single most common validation bug when migrating from Boot 2.
+If you import from `javax.validation` on Boot 3, the annotations silently fail. They're different classes that Spring's validator doesn't recognize. This is the single most common validation bug when migrating from Boot 2.
 
 ## Validation annotations
 
@@ -45,7 +45,7 @@ Key subtleties: `@NotBlank` rejects `" "` (whitespace-only), but `@NotNull` and 
 
 ## DTOs with validation
 
-Validation annotations live on your DTOs (request records), not on your entities. The DTO is the trust boundary — it's the first thing your code sees after deserialization:
+Validation annotations live on your DTOs (request records), not on your entities. The DTO is the trust boundary: it's the first thing your code sees after deserialization:
 
 ```
 public record CreateOrderRequest(
@@ -66,7 +66,7 @@ public record CreateOrderItemRequest(
 ) {}
 ```
 
-The `message` attribute is optional — Jakarta provides default messages — but explicit messages are clearer for API consumers.
+The `message` attribute is optional. Jakarta provides default messages, but explicit messages are clearer for API consumers.
 
 ## Triggering validation with `@Valid`
 
@@ -83,11 +83,11 @@ public ResponseEntity<OrderResponse> createOrder(
 }
 ```
 
-When `@Valid` is present, Spring Boot: (1) deserializes JSON into the record, (2) runs every constraint annotation, (3) if any fail, returns 400 Bad Request — the controller method body never executes, (4) if all pass, the method runs normally.
+When `@Valid` is present, Spring Boot: (1) deserializes JSON into the record, (2) runs every constraint annotation, (3) if any fail, returns 400 Bad Request (the controller method body never executes), (4) if all pass, the method runs normally.
 
 ## Global exception handling with `@RestControllerAdvice`
 
-Without a handler, unhandled exceptions produce a 500 with an HTML stack trace — useless and leaking internals. `@RestControllerAdvice` lets you intercept exceptions from *any* controller and return structured JSON instead:
+Without a handler, unhandled exceptions produce a 500 with an HTML stack trace, useless and leaking internals. `@RestControllerAdvice` lets you intercept exceptions from *any* controller and return structured JSON instead:
 
 ```
 @RestControllerAdvice
@@ -116,9 +116,9 @@ public class GlobalExceptionHandler {
 }
 ```
 
-`MethodArgumentNotValidException` is what Spring throws when `@Valid` fails. The `BindingResult` inside it carries every field error with the field name and message. The catch-all `Exception.class` handler ensures you never leak a stack trace — but log the exception internally so you can debug it.
+`MethodArgumentNotValidException` is what Spring throws when `@Valid` fails. The `BindingResult` inside it carries every field error with the field name and message. The catch-all `Exception.class` handler ensures you never leak a stack trace, but log the exception internally so you can debug it.
 
-## `ProblemDetail` — the RFC 7807 standard
+## `ProblemDetail`: the RFC 7807 standard
 
 Spring Framework 6 introduced `ProblemDetail`, a built-in class matching [RFC 7807 (Problem Details for HTTP APIs)](https://datatracker.ietf.org/doc/html/rfc7807). It gives you a standard error shape without writing a custom record:
 
@@ -135,7 +135,7 @@ public ProblemDetail handleNotFound(OrderNotFoundException ex) {
 }
 ```
 
-`ProblemDetail` serializes to JSON with the standard fields `type`, `title`, `status`, `detail`, and `instance`. You can add custom properties with `setProperty`. The response `Content-Type` is `application/problem+json`. This is the preferred approach for new Spring Boot 3 projects — it's less code than a custom error record and follows a web standard.
+`ProblemDetail` serializes to JSON with the standard fields `type`, `title`, `status`, `detail`, and `instance`. You can add custom properties with `setProperty`. The response `Content-Type` is `application/problem+json`. This is the preferred approach for new Spring Boot 3 projects: it's less code than a custom error record and follows a web standard.
 
 Enable it globally by setting `spring.mvc.problemdetails.enabled=true` in `application.yml`, which makes Spring return `ProblemDetail` automatically for built-in errors (like 404s) too.
 

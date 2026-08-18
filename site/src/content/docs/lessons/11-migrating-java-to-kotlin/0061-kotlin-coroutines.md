@@ -6,13 +6,13 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/006
 
 # Kotlin Coroutines vs Reactor Mono/Flux
 
-In Module 08 you learned Reactor's `Mono` and `Flux` — declarative pipelines that model async data flows. Kotlin offers an alternative: **coroutines**, which let you write non-blocking code that *looks synchronous*. This lesson covers `suspend` functions, `Flow`, structured concurrency, and when to pick coroutines over Reactor.
+In Module 08 you learned Reactor's `Mono` and `Flux`, declarative pipelines that model async data flows. Kotlin offers an alternative: **coroutines**, which let you write non-blocking code that *looks synchronous*. This lesson covers `suspend` functions, `Flow`, structured concurrency, and when to pick coroutines over Reactor.
 
 ## Why Coroutines?
 
-Reactive pipelines chain operators like `.map()`, `.flatMap()`, and `.onErrorResume()`. The resulting code is powerful but hard to read — the control flow is spread across a declaration chain, stack traces are opaque, and debugging a `flatMap` chain can take hours.
+Reactive pipelines chain operators like `.map()`, `.flatMap()`, and `.onErrorResume()`. The resulting code is capable but hard to read: the control flow is spread across a declaration chain, stack traces are opaque, and debugging a `flatMap` chain can take hours.
 
-Coroutines solve the same non-blocking problem with a different trade-off: **the compiler transforms your synchronous-looking code into a state machine** that suspends and resumes at every `suspend` point. You get imperative style — `try`/`catch`, loops, variables — without blocking a thread.
+Coroutines solve the same non-blocking problem with a different trade-off: **the compiler transforms your synchronous-looking code into a state machine** that suspends and resumes at every `suspend` point. You get imperative style (`try`/`catch`, loops, variables) without blocking a thread.
 
 | Reactor (Java) | Coroutines (Kotlin) |
 | --- | --- |
@@ -25,7 +25,7 @@ Coroutines solve the same non-blocking problem with a different trade-off: **the
 
 ## The `suspend` Keyword
 
-A function marked `suspend` can **pause execution** without blocking the calling thread. When a `suspend` function hits an awaitable operation, the coroutine suspends — the thread is freed to do other work. When the result is ready, the coroutine resumes exactly where it left off.
+A function marked `suspend` can **pause execution** without blocking the calling thread. When a `suspend` function hits an awaitable operation, the coroutine suspends and the thread is freed to do other work. When the result is ready, the coroutine resumes exactly where it left off.
 
 ```
 // A suspending function — non-blocking but looks synchronous
@@ -67,11 +67,11 @@ Add the coroutines dependencies to your `pom.xml`:
 </dependency>
 ```
 
-The `kotlinx-coroutines-reactor` module provides interoperability — you can convert between `Mono`/`Flux` and `suspend`/`Flow` when mixing Java and Kotlin code.
+The `kotlinx-coroutines-reactor` module provides interoperability: you can convert between `Mono`/`Flux` and `suspend`/`Flow` when mixing Java and Kotlin code.
 
 ## Coroutine Controller Example
 
-Spring WebFlux understands `suspend` functions natively. When a controller method is marked `suspend`, Spring subscribes to the coroutine automatically — no `Mono` wrapping needed.
+Spring WebFlux understands `suspend` functions natively. When a controller method is marked `suspend`, Spring subscribes to the coroutine automatically. No `Mono` wrapping needed.
 
 ```
 @RestController
@@ -143,13 +143,13 @@ class CoroutineOrderService(
 }
 ```
 
-**Important:** `@Transactional` on a `suspend` function requires **Spring 6.2+** with coroutine-aware transaction management. In earlier versions, `@Transactional` uses `ThreadLocal`\-based context — when a coroutine suspends and resumes on a different thread, the transaction is lost. Spring 6.2 introduced `CoroutineTransactionManager` that propagates the transaction through the coroutine context instead. If you are on an earlier version, use `TransactionalOperator` or wrap the call in a blocking transaction boundary.
+**Important:** `@Transactional` on a `suspend` function requires **Spring 6.2+** with coroutine-aware transaction management. In earlier versions, `@Transactional` uses `ThreadLocal`\-based context. When a coroutine suspends and resumes on a different thread, the transaction is lost. Spring 6.2 introduced `CoroutineTransactionManager` that propagates the transaction through the coroutine context instead. If you are on an earlier version, use `TransactionalOperator` or wrap the call in a blocking transaction boundary.
 
-The `delay()` call is a **suspending function** — unlike `Thread.sleep()`, it does not occupy a thread. The coroutine suspends, the thread moves on, and the coroutine resumes after the delay.
+The `delay()` call is a **suspending function**. Unlike `Thread.sleep()`, it does not occupy a thread. The coroutine suspends, the thread moves on, and the coroutine resumes after the delay.
 
-## Flow — Coroutine's Flux
+## Flow: Coroutine's Flux
 
-`Flow<T>` is the coroutine equivalent of `Flux<T>`. It is a **cold** stream — nothing happens until a collector subscribes, and each collector gets its own independent stream.
+`Flow<T>` is the coroutine equivalent of `Flux<T>`. It is a **cold** stream: nothing happens until a collector subscribes, and each collector gets its own independent stream.
 
 ```
 fun countdown(from: Int): Flow<Int> = flow {
@@ -177,11 +177,11 @@ countdown(10)
     .collect { println(it) }
 ```
 
-There is no `.subscribe()` — `collect` is a `suspend` function that processes the entire flow. Error handling uses plain `try`/`catch`.
+There is no `.subscribe()`. `collect` is a `suspend` function that processes the entire flow. Error handling uses plain `try`/`catch`.
 
 ## Structured Concurrency
 
-Every coroutine runs inside a **CoroutineScope**, which defines its lifetime. When the scope ends, all child coroutines are cancelled. This discipline — **structured concurrency** — prevents leaked coroutines and ensures resources are cleaned up.
+Every coroutine runs inside a **CoroutineScope**, which defines its lifetime. When the scope ends, all child coroutines are cancelled. This discipline, **structured concurrency**, prevents leaked coroutines and ensures resources are cleaned up.
 
 ```
 runBlocking {                          // scope 1 — lives until the block ends
@@ -203,7 +203,7 @@ If a child coroutine throws an exception, structured concurrency cancels its sib
 
 | Aspect | Flux (Reactor) | Flow (Coroutines) |
 | --- | --- | --- |
-| Backpressure | Explicit via `Subscription.request(n)` | Implicit — collector pulls via `suspend` |
+| Backpressure | Explicit via `Subscription.request(n)` | Implicit: collector pulls via `suspend` |
 | Cold vs Hot | Cold by default; `share()`/`cache()` for hot | Cold by default; `StateFlow`/`SharedFlow` for hot |
 | Error handling | `onErrorResume`, `onErrorMap` | Standard `try`/`catch` |
 | Lifecycle | Managed by Reactor's `Disposable` | Managed by structured concurrency scope |
@@ -232,7 +232,7 @@ fun allOrdersFlux(): Flux<Order> =
     allOrdersFlow().asFlux()          // Flow<Order> → Flux<Order>
 ```
 
-This lets you call Java Reactor-based services from Kotlin coroutines and vice versa — no rewrite needed.
+This lets you call Java Reactor-based services from Kotlin coroutines and vice versa. No rewrite needed.
 
 ## Coroutine R2DBC Repositories
 
@@ -246,7 +246,7 @@ interface ReactiveOrderRepository : R2dbcRepository<OrderEntity, Long> {
 }
 ```
 
-No `Mono` or `Flux` in sight — the repository speaks coroutine types, and your service layer stays imperative.
+No `Mono` or `Flux` in sight. The repository speaks coroutine types, and your service layer stays imperative.
 
 ## When to Use Coroutines vs Reactor
 
@@ -259,7 +259,7 @@ No `Mono` or `Flux` in sight — the repository speaks coroutine types, and your
 | Team experience | Team knows Kotlin | Team knows Reactor |
 | Hot streams / caching | `StateFlow`, `SharedFlow` | `.share()`, `.cache()`, `retryWhen` |
 
-**Rule of thumb:** If your project is Kotlin, prefer coroutines — you get the same non-blocking behavior with far simpler code. If your project is Java-only, Reactor is your only option. In mixed projects, use the interop bridges at module boundaries.
+**Rule of thumb:** If your project is Kotlin, prefer coroutines: you get the same non-blocking behavior with far simpler code. If your project is Java-only, Reactor is your only option. In mixed projects, use the interop bridges at module boundaries.
 
 **Primary sources:** [Kotlin Coroutines Guide](https://kotlinlang.org/docs/coroutines-guide.html) · [Spring Kotlin Coroutines](https://docs.spring.io/spring-framework/reference/languages/kotlin/coroutines.html) · [Kotlin Flow Guide](https://kotlinlang.org/docs/flow.html) · [Project Reactor Reference](https://projectreactor.io/docs/core/release/reference/)
 
@@ -267,7 +267,7 @@ No `Mono` or `Flux` in sight — the repository speaks coroutine types, and your
 
 <details>
 <summary>1. What happens if you call a suspend function from a regular (non-suspend) function?</summary>
-<p><strong>Correct answer:</strong> Compilation error — suspend functions can only be called from a coroutine or another suspend function</p>
+<p><strong>Correct answer:</strong> Compilation error: suspend functions can only be called from a coroutine or another suspend function</p>
 </details>
 
 <details>

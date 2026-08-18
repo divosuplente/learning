@@ -1,14 +1,14 @@
 ---
-title: "Reactive Programming Paradigm & the C10K Problem"
-description: "Reactive Programming Paradigm & the C10K Problem"
+title: "Lesson 45: Reactive Programming Paradigm & the C10K Problem"
+description: "Lesson 45: Reactive Programming Paradigm & the C10K Problem"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0045-reactive-programming-paradigm.html
 ---
 
 # Reactive Programming Paradigm & the C10K Problem
 
-Every I/O operation your code performs — a database query, an HTTP call, reading a file — takes time. The question is: **what does your thread do while it waits?** If the answer is "nothing," you're writing blocking code. Reactive programming flips the model: your thread never waits. It moves on, and gets notified when the result arrives.
+Every I/O operation your code performs (a database query, an HTTP call, reading a file) takes time. The question is: **what does your thread do while it waits?** If the answer is "nothing," you're writing blocking code. Reactive programming flips the model: your thread never waits. It moves on, and gets notified when the result arrives.
 
-## Imperative vs Reactive — An Analogy
+## Imperative vs Reactive: An Analogy
 
 Think of a restaurant.
 
@@ -18,7 +18,7 @@ Think of a restaurant.
 
 | Imperative (Blocking) | Reactive (Non-Blocking) |
 | --- | --- |
-| `Thread.sleep(1000)` — thread blocked, doing nothing | `Flux.interval(Duration.ofSeconds(1))` — thread is free between emissions |
+| `Thread.sleep(1000)`: thread blocked, doing nothing | `Flux.interval(Duration.ofSeconds(1))`: thread is free between emissions |
 | You **ask** for data and **wait** | You **subscribe** to data and get **notified** |
 | Calling thread is occupied for the entire operation | Calling thread initiates the operation and returns immediately |
 
@@ -56,13 +56,13 @@ The **C10K problem** refers to the challenge of handling 10,000+ concurrent conn
 -   Each thread consumes **~1 MB of stack memory**
 -   10,000 threads = **~10 GB of memory** just for thread stacks
 -   Context switching between 10,000 threads wastes CPU cycles
--   Most threads are **blocked on I/O** — waiting for database, HTTP, file reads — doing nothing at all
+-   Most threads are **blocked on I/O**, waiting for database, HTTP, or file reads, doing nothing at all
 
 You're paying for 10,000 threads, but at any given moment most of them are idle, waiting for I/O to complete. The server runs out of memory before it runs out of CPU.
 
 ## How Reactive Solves This
 
-Reactive frameworks use a **small pool of threads** (typically 2× CPU cores) and **non-blocking I/O**. When a thread initiates an I/O operation, it doesn't wait — it moves on to the next task. When the I/O completes, a callback fires on one of the available threads.
+Reactive frameworks use a **small pool of threads** (typically 2× CPU cores) and **non-blocking I/O**. When a thread initiates an I/O operation, it doesn't wait. It moves on to the next task. When the I/O completes, a callback fires on one of the available threads.
 
 | Thread-Per-Request (Blocking) | Reactive (Non-Blocking) |
 | --- | --- |
@@ -71,11 +71,11 @@ Reactive frameworks use a **small pool of threads** (typically 2× CPU cores) an
 | Threads blocked on I/O waste CPU | Threads always doing useful work |
 | Scaling requires more hardware | Scaling requires better I/O utilization |
 
-The math is stark: 10,000 threads × 1 MB per stack = 10 GB of memory consumed before your application code even runs. With reactive, the same 10,000 connections share a handful of threads, and memory usage stays flat as connections grow.
+10,000 threads × 1 MB per stack = 10 GB of memory consumed before your application code even runs. With reactive, the same 10,000 connections share a handful of threads, and memory usage stays flat as connections grow.
 
 ## When Java 21 Virtual Threads Help
 
-Java 21's **virtual threads** (Project Loom) offer an alternative: lightweight threads that can be blocked without wasting OS resources. Virtual threads make *blocking code scale* — but they don't give you the pipeline composition, backpressure, and stream operators that Reactor provides. Virtual threads and Reactor are **complementary, not exclusive**. We'll revisit this trade-off in Lesson 49.
+Java 21's **virtual threads** (Project Loom) offer an alternative: lightweight threads that can be blocked without wasting OS resources. Virtual threads make *blocking code scale*, but they don't give you the pipeline composition, backpressure, and stream operators that Reactor provides. Virtual threads and Reactor work well together. We'll revisit this trade-off in Lesson 49.
 
 **Primary sources:** [Reactive Streams Specification](https://www.reactive-streams.org/) · [Project Reactor Reference](https://projectreactor.io/docs/core/release/reference/) · [JEP 444: Virtual Threads](https://openjdk.org/jeps/444)
 
@@ -83,7 +83,7 @@ Java 21's **virtual threads** (Project Loom) offer an alternative: lightweight t
 
 <details>
 <summary>1. In the restaurant analogy, what does the "ticket system" represent?</summary>
-<p><strong>Correct answer:</strong> Non-blocking I/O — workers pick up tasks as they arrive without waiting</p>
+<p><strong>Correct answer:</strong> Non-blocking I/O: workers pick up tasks as they arrive without waiting</p>
 </details>
 
 <details>

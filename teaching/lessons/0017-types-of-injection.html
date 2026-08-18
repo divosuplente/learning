@@ -12,9 +12,9 @@
 
 <p>Spring gives you three ways to deliver a dependency into a bean. Two of them are traps. This lesson shows each style, explains what goes wrong with setter and field injection, and gives you the comparison table that decides every code review.</p>
 
-<h2>Constructor Injection — the one you should use</h2>
+<h2>Constructor Injection: the one you should use</h2>
 
-<p>Dependencies arrive as constructor parameters. The fields are <code>final</code>. Spring sees one constructor and calls it automatically — no <code>@Autowired</code> needed.</p>
+<p>Dependencies arrive as constructor parameters. The fields are <code>final</code>. Spring sees one constructor and calls it automatically, no <code>@Autowired</code> needed.</p>
 
 <pre><code>@Service
 public class OrderService {
@@ -32,9 +32,9 @@ public class OrderService {
 <p>Three things happen for free:</p>
 
 <ul>
-  <li><strong>Immutability</strong> — <code>final</code> fields cannot be reassigned. The dependency graph is locked after construction.</li>
-  <li><strong>Compile-time safety</strong> — You cannot instantiate <code>OrderService</code> without supplying both repositories. The compiler blocks invalid object states.</li>
-  <li><strong>Testability</strong> — In a unit test you pass mocks straight to the constructor. No Spring container, no reflection, no magic.</li>
+  <li><strong>Immutability</strong>: <code>final</code> fields cannot be reassigned. The dependency graph is locked after construction.</li>
+  <li><strong>Compile-time safety</strong>: You cannot instantiate <code>OrderService</code> without supplying both repositories. The compiler blocks invalid object states.</li>
+  <li><strong>Testability</strong>: In a unit test you pass mocks straight to the constructor. No Spring container, no reflection, no magic.</li>
 </ul>
 
 <pre><code>// Pure unit test — no Spring needed
@@ -47,7 +47,7 @@ void findsCustomerById() {
     assertThat(service.findCustomer(1L).name()).isEqualTo("Ada");
 }</code></pre>
 
-<h2>Setter Injection — rarely justified</h2>
+<h2>Setter Injection: rarely justified</h2>
 
 <p>Dependencies arrive through setter methods annotated with <code>@Autowired</code>:</p>
 
@@ -62,11 +62,11 @@ public class OrderService {
     }
 }</code></pre>
 
-<p>The field cannot be <code>final</code> — it is assigned after construction. That means an <code>OrderService</code> can exist in a half-initialized state: the object is alive but its dependency is <code>null</code>. This is legal Java and illegal good design.</p>
+<p>The field cannot be <code>final</code> because it is assigned after construction. That means an <code>OrderService</code> can exist in a half-initialized state: the object is alive but its dependency is <code>null</code>. This is legal Java and illegal good design.</p>
 
-<p>Setter injection has one legitimate use: <strong>optional dependencies</strong> that the class can function without. If the dependency truly may be absent, a setter communicates "nice to have" better than a constructor parameter. In practice, optional dependencies are rare — most beans need all of their collaborators.</p>
+<p>Setter injection has one legitimate use: <strong>optional dependencies</strong> that the class can function without. If the dependency truly may be absent, a setter communicates "nice to have" better than a constructor parameter. In practice, optional dependencies are rare. Most beans need all of their collaborators.</p>
 
-<h2>Field Injection — avoid entirely</h2>
+<h2>Field Injection: avoid entirely</h2>
 
 <p>Dependencies are injected directly into private fields using <code>@Autowired</code>:</p>
 
@@ -80,13 +80,13 @@ public class OrderService {
 <p>Field injection looks concise, but every shortcut it offers is a problem:</p>
 
 <ul>
-  <li><strong>No <code>final</code></strong> — the field is mutable for the entire lifetime of the object.</li>
-  <li><strong>Untestable without Spring</strong> — a plain <code>new OrderService()</code> leaves <code>customerRepo</code> as <code>null</code>. Your only options are launching the full Spring context or using reflection to force a value into a private field. Both defeat the purpose of a unit test.</li>
-  <li><strong>Hidden dependencies</strong> — the constructor is empty. Someone reading <code>new OrderService()</code> has no idea that the class secretly requires a repository. Constructor parameters make the contract explicit; field injection buries it.</li>
-  <li><strong>No compile-time guarantee</strong> — the class compiles without its dependency. You discover the missing bean at runtime, when Spring fails to inject it.</li>
+  <li><strong>No <code>final</code></strong>: the field is mutable for the entire lifetime of the object.</li>
+  <li><strong>Untestable without Spring</strong>: a plain <code>new OrderService()</code> leaves <code>customerRepo</code> as <code>null</code>. Your only options are launching the full Spring context or using reflection to force a value into a private field. Both defeat the purpose of a unit test.</li>
+  <li><strong>Hidden dependencies</strong>: the constructor is empty. Someone reading <code>new OrderService()</code> has no idea that the class secretly requires a repository. Constructor parameters make the contract explicit; field injection buries it.</li>
+  <li><strong>No compile-time guarantee</strong>: the class compiles without its dependency. You discover the missing bean at runtime, when Spring fails to inject it.</li>
 </ul>
 
-<p>The Spring team themselves recommend against field injection. It survives in legacy code and tutorials because it saves keystrokes — but those keystrokes cost you every time you write a test.</p>
+<p>The Spring team themselves recommend against field injection. It survives in legacy code and tutorials because it saves keystrokes, but those keystrokes cost you every time you write a test.</p>
 
 <h2>Comparison</h2>
 
@@ -113,7 +113,7 @@ public class OrderService {
 
 <h2>The rule</h2>
 
-<p><strong>Always use constructor injection.</strong> Never use <code>@Autowired</code> on fields. Use setter injection only for genuinely optional dependencies — and question whether the dependency is truly optional before you write that setter.</p>
+<p><strong>Always use constructor injection.</strong> Never use <code>@Autowired</code> on fields. Use setter injection only for genuinely optional dependencies, and question whether the dependency is truly optional before you write that setter.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html" target="_blank" rel="noopener">Spring: Dependency Injection</a> · <a href="https://martinfowler.com/articles/injection.html" target="_blank" rel="noopener">Fowler: IoC Containers and the DI Pattern</a></p>
 
@@ -133,10 +133,10 @@ public class OrderService {
 <div class="quiz" id="q2">
   <div class="quiz-question">2. Can you unit-test a field-injected class without launching the Spring container?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes — just call the no-arg constructor and set fields directly</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes — Spring automatically injects mocks in test scope</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">No — the private field is null without Spring; you'd need reflection</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No — field injection requires a running servlet container</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes: just call the no-arg constructor and set fields directly</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes: Spring automatically injects mocks in test scope</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">No: the private field is null without Spring; you'd need reflection</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No: field injection requires a running servlet container</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>
@@ -144,8 +144,8 @@ public class OrderService {
 <div class="quiz" id="q3">
   <div class="quiz-question">3. When does Spring require <code>@Autowired</code> on a constructor?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Always — every constructor must be annotated</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Never — Spring detects constructors automatically</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Always: every constructor must be annotated</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Never: Spring detects constructors automatically</li>
     <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">When the class has more than one constructor</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only when injecting prototype-scoped beans</li>
   </ul>
@@ -168,7 +168,7 @@ public class OrderService {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Spring intercepts the call and injects a default bean</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The method returns the default value for the dependency's type</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">A NullPointerException — the field was never assigned</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">A NullPointerException: the field was never assigned</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The test passes with a stub implementation Spring provides</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>

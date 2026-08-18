@@ -1,6 +1,6 @@
 ---
-title: "REST Controllers & HTTP Mappings"
-description: "REST Controllers & HTTP Mappings"
+title: "Lesson 21: REST Controllers & HTTP Mappings"
+description: "Lesson 21: REST Controllers & HTTP Mappings"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0021-rest-controllers.html
 ---
 
@@ -8,9 +8,9 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/002
 
 A REST API maps HTTP requests to Java method calls. Spring MVC makes this nearly declarative: annotate a class, annotate its methods, and the framework wires everything together. This lesson covers `@RestController`, the five HTTP method annotations, and a complete CRUD controller you can use as a starting template.
 
-## `@RestController` — the foundation
+## `@RestController`: the foundation
 
-Spring has two kinds of controllers. `@Controller` returns **view names** (HTML templates via Thymeleaf or JSP). `@RestController` returns **data** — Spring serializes the return value to JSON by default.
+Spring has two kinds of controllers. `@Controller` returns **view names** (HTML templates via Thymeleaf or JSP). `@RestController` returns **data**. Spring serializes the return value to JSON by default.
 
 `@RestController` is not a separate mechanism. It is `@Controller` + `@ResponseBody` applied together. `@ResponseBody` tells Spring: "skip view resolution; write the return object directly to the HTTP response body." Every method in a `@RestController` behaves as though it carries `@ResponseBody`.
 
@@ -89,15 +89,15 @@ public class OrderController {
 
 Key patterns to notice:
 
--   **Constructor injection** — `OrderService` is injected by Spring. No `@Autowired` needed on the constructor (Spring 4.3+).
--   **`@PathVariable`** extracts a value from the URL — `/{id}` becomes method parameter `id`.
+-   **Constructor injection**: `OrderService` is injected by Spring. No `@Autowired` needed on the constructor (Spring 4.3+).
+-   **`@PathVariable`** extracts a value from the URL: `/{id}` becomes method parameter `id`.
 -   **`@RequestBody`** tells Spring to deserialize the JSON request body into a Java object.
 -   **`ResponseEntity`** gives you full control over status codes. `201 Created` for POST, `204 No Content` for DELETE.
--   GET and PUT return the object directly — Spring auto-wraps it with `200 OK`.
+-   GET and PUT return the object directly. Spring auto-wraps it with `200 OK`.
 
 ## PUT vs PATCH
 
-`@PutMapping` replaces the *entire* resource — the client must send every field. `@PatchMapping` updates only the fields the client sends:
+`@PutMapping` replaces the *entire* resource. The client must send every field. `@PatchMapping` updates only the fields the client sends:
 
 ```
 // PUT /api/orders/{id} — full replacement (all fields required)
@@ -117,7 +117,7 @@ public OrderResponse patchOrder(@PathVariable Long id,
 
 In practice, many APIs skip PATCH and use PUT for all updates. But if your resource has optional fields that callers should not be forced to resend, PATCH is the correct semantic.
 
-## Content negotiation — why it's JSON by default
+## Content negotiation: why it's JSON by default
 
 When `spring-boot-starter-web` is on the classpath, Spring Boot auto-configures Jackson. Every `@RestController` method that returns an object is serialized to JSON. If the client sends `Accept: application/xml` and Jackson XML is on the classpath, Spring will produce XML instead. Without explicit configuration, JSON is the default.
 
@@ -132,7 +132,7 @@ When `spring-boot-starter-web` is on the classpath, Spring Boot auto-configures 
 
 <details>
 <summary>2. A class has @Controller and every method has @ResponseBody. Is this equivalent to @RestController?</summary>
-<p><strong>Correct answer:</strong> Yes — @RestController is literally @Controller + @ResponseBody</p>
+<p><strong>Correct answer:</strong> Yes, @RestController is literally @Controller + @ResponseBody</p>
 </details>
 
 <details>

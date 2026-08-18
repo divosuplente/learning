@@ -10,21 +10,21 @@
 
 <h1>DTOs, Domain Exceptions &amp; Application Events</h1>
 
-<p>So far your service layer returns entities straight to the controller. That works — until a client overwrites a server-managed field, or you add a lazy-loaded association that crashes during serialization, or two services need to talk without creating a circular dependency. This lesson covers three patterns that solve all three problems: <strong>Data Transfer Objects</strong> to control what crosses layer boundaries, <strong>domain exceptions</strong> to make errors meaningful, and <strong>application events</strong> to decouple services that need to react to each other.</p>
+<p>So far your service layer returns entities straight to the controller. That works, until a client overwrites a server-managed field, or you add a lazy-loaded association that crashes during serialization, or two services need to talk without creating a circular dependency. This lesson covers three patterns that solve all three problems: <strong>Data Transfer Objects</strong> to control what crosses layer boundaries, <strong>domain exceptions</strong> to make errors meaningful, and <strong>application events</strong> to decouple services that need to react to each other.</p>
 
 <h2>Why Not Return Entities Directly?</h2>
 
-<p>It's tempting — the entity has all the data, so just serialize it as JSON. Three things go wrong:</p>
+<p>It's tempting: the entity has all the data, so just serialize it as JSON. Three things go wrong:</p>
 
 <p><strong>1. Security.</strong> Your <code>OrderEntity</code> has <code>id</code> and <code>createdAt</code> set by the server. If you accept the entity as a request body, a malicious client can set <code>id</code> to overwrite an existing order or fake <code>createdAt</code>. You've just let the client tamper with server-managed fields.</p>
 
-<p><strong>2. Coupling.</strong> Jackson serializes every field it can reach — including lazy-loaded <code>@ManyToOne</code> relationships. Add a field to the entity, and every API consumer sees it. Your database schema becomes your API contract, and you can never change one without breaking the other.</p>
+<p><strong>2. Coupling.</strong> Jackson serializes every field it can reach, including lazy-loaded <code>@ManyToOne</code> relationships. Add a field to the entity, and every API consumer sees it. Your database schema becomes your API contract, and you can never change one without breaking the other.</p>
 
-<p><strong>3. Shape mismatch.</strong> A create request needs <code>customerId</code> and <code>items</code>. A response needs <code>id</code>, <code>status</code>, and <code>totalAmount</code>. They carry different data — one object can't do both jobs well.</p>
+<p><strong>3. Shape mismatch.</strong> A create request needs <code>customerId</code> and <code>items</code>. A response needs <code>id</code>, <code>status</code>, and <code>totalAmount</code>. They carry different data; one object can't do both jobs well.</p>
 
 <h2>Data Transfer Objects</h2>
 
-<p>A <strong>DTO</strong> is a simple object that carries data between layers. Request DTOs define what comes in; response DTOs define what goes out. <strong>Java records</strong> are ideal — they're immutable, compact, and don't need boilerplate getters.</p>
+<p>A <strong>DTO</strong> is a simple object that carries data between layers. Request DTOs define what comes in; response DTOs define what goes out. <strong>Java records</strong> are ideal: they're immutable, compact, and don't need boilerplate getters.</p>
 
 <h3>Request DTO</h3>
 
@@ -40,7 +40,7 @@
         @Min(value = 1, message = "Quantity must be at least 1") Integer quantity
 ) {}</code></pre>
 
-<p>Validation annotations (<code>@NotNull</code>, <code>@Min</code>, <code>@NotEmpty</code>) come from the <strong>Jakarta Bean Validation</strong> API. Spring Boot 3.x uses the <code>jakarta.validation</code> namespace — not the older <code>javax.validation</code>.</p>
+<p>Validation annotations (<code>@NotNull</code>, <code>@Min</code>, <code>@NotEmpty</code>) come from the <strong>Jakarta Bean Validation</strong> API. Spring Boot 3.x uses the <code>jakarta.validation</code> namespace, not the older <code>javax.validation</code>.</p>
 
 <h3>Response DTO</h3>
 
@@ -70,7 +70,7 @@
 
 <h3>The <code>from()</code> Factory Method</h3>
 
-<p>Each response DTO has a <code>static from(Entity)</code> method that maps the entity to the DTO. This keeps the conversion in one place, is easy to test, and avoids needing a separate mapper class. For complex mappings with dozens of fields, <strong>MapStruct</strong> generates mapper code at compile time — but manual <code>from()</code> methods are clearer for learning and sufficient for most services.</p>
+<p>Each response DTO has a <code>static from(Entity)</code> method that maps the entity to the DTO. This keeps the conversion in one place, is easy to test, and avoids needing a separate mapper class. For complex mappings with dozens of fields, <strong>MapStruct</strong> generates mapper code at compile time, but manual <code>from()</code> methods are clearer for learning and sufficient for most services.</p>
 
 <p>The key principle: <strong>entities never leave the service layer.</strong> The controller receives a DTO and returns a DTO. The repository returns an entity. The service converts between them.</p>
 
@@ -131,7 +131,7 @@ public class InsufficientStockException extends OrderManagementException {
 
 <h2>Application Events</h2>
 
-<p>When <code>OrderService</code> needs to notify <code>CustomerService</code> that an order was placed, you <em>could</em> inject <code>CustomerService</code> directly. But if <code>CustomerService</code> also calls <code>OrderService</code>, you get a <strong>circular dependency</strong> — Spring won't start. Application events solve this: the publisher doesn't know who listens.</p>
+<p>When <code>OrderService</code> needs to notify <code>CustomerService</code> that an order was placed, you <em>could</em> inject <code>CustomerService</code> directly. But if <code>CustomerService</code> also calls <code>OrderService</code>, you get a <strong>circular dependency</strong> and Spring won't start. Application events solve this: the publisher doesn't know who listens.</p>
 
 <h3>Define an Event</h3>
 
@@ -142,7 +142,7 @@ public class InsufficientStockException extends OrderManagementException {
         Instant createdAt
 ) {}</code></pre>
 
-<p>A record — immutable, trivial to construct. Events should carry only what the listener needs, not the entire entity.</p>
+<p>A record, immutable and trivial to construct. Events should carry only what the listener needs, not the entire entity.</p>
 
 <h3>Publish from the Service</h3>
 
@@ -196,7 +196,7 @@ public class OrderEventListener {
     }
 }</code></pre>
 
-<p><code>@EventListener</code> fires synchronously when <code>publishEvent()</code> is called — even if the transaction later rolls back. <code>@TransactionalEventListener(phase = AFTER_COMMIT)</code> fires <strong>only after</strong> the transaction commits. Use <code>@EventListener</code> for synchronous side-effects within the same transaction (like updating a cache). Use <code>@TransactionalEventListener</code> for anything that must only happen if the data actually persisted — sending emails, calling external APIs, publishing to Kafka.</p>
+<p><code>@EventListener</code> fires synchronously when <code>publishEvent()</code> is called, even if the transaction later rolls back. <code>@TransactionalEventListener(phase = AFTER_COMMIT)</code> fires <strong>only after</strong> the transaction commits. Use <code>@EventListener</code> for synchronous side-effects within the same transaction (like updating a cache). Use <code>@TransactionalEventListener</code> for anything that must only happen if the data actually persisted: sending emails, calling external APIs, publishing to Kafka.</p>
 
 <h3>Events vs Direct Calls</h3>
 
@@ -205,8 +205,8 @@ public class OrderEventListener {
     <tr><th>Approach</th><th>Coupling</th><th>When to Use</th></tr>
   </thead>
   <tbody>
-    <tr><td>Direct method call</td><td>Tight — caller depends on callee</td><td>You need the result immediately</td></tr>
-    <tr><td>Application event</td><td>Loose — publisher unaware of listeners</td><td>You want to notify without waiting</td></tr>
+    <tr><td>Direct method call</td><td>Tight: caller depends on callee</td><td>You need the result immediately</td></tr>
+    <tr><td>Application event</td><td>Loose: publisher unaware of listeners</td><td>You want to notify without waiting</td></tr>
   </tbody>
 </table>
 

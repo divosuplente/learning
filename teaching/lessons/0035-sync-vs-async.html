@@ -3,30 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 35 — Sync vs Async Communication &amp; What Kafka Solves</title>
+  <title>Lesson 35: Sync vs Async Communication &amp; What Kafka Solves</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Sync vs Async Communication &amp; What Kafka Solves</h1>
 
-<p>When two services need to talk, you have two choices: wait for an answer, or fire and forget. The choice sounds simple, but it shapes your entire system's resilience, scalability, and coupling. This lesson teaches the difference, when each applies, and why Apache Kafka exists as the backbone of async, event-driven architecture.</p>
+<p>When two services need to talk, you have two choices: wait for an answer, or fire and forget. The choice sounds simple, but it shapes your entire system's resilience, scalability, and coupling. This lesson covers the difference, when each applies, and why Apache Kafka exists as the standard message broker for async, event-driven architecture.</p>
 
 <h2>Synchronous Communication</h2>
 
-<p>In <strong>synchronous</strong> communication, the caller sends a request and <strong>blocks until it gets a response</strong>. Think of a phone call — you stay on the line until the other person answers.</p>
+<p>In <strong>synchronous</strong> communication, the caller sends a request and <strong>blocks until it gets a response</strong>. Think of a phone call: you stay on the line until the other person answers.</p>
 
 <pre><code>Order Service ──"create order"──> Payment Service
                 <──"confirmed"──
                 (waiting the entire time)</code></pre>
 
-<p><strong>Pros:</strong> Simple to reason about. You get an immediate answer — success or failure — and can proceed or abort right away.</p>
+<p><strong>Pros:</strong> Simple to reason about. You get an immediate answer (success or failure) and can proceed or abort right away.</p>
 
-<p><strong>Cons:</strong> If the payment service is slow or down, the order service is stuck waiting. A timeout in one service cascades as degraded performance in every caller. The services are <strong>tightly coupled</strong> — the caller's fate is bound to the callee's health.</p>
+<p><strong>Cons:</strong> If the payment service is slow or down, the order service is stuck waiting. A timeout in one service cascades as degraded performance in every caller. The services are <strong>tightly coupled</strong>: the caller's fate is bound to the callee's health.</p>
 
 <h2>Asynchronous Communication</h2>
 
-<p>In <strong>asynchronous</strong> communication, the sender publishes a message and <strong>continues immediately</strong> without waiting. Think of sending an email — you hit send and move on with your day. The recipient reads it when they're ready.</p>
+<p>In <strong>asynchronous</strong> communication, the sender publishes a message and <strong>continues immediately</strong> without waiting. Think of sending an email: you hit send and move on with your day. The recipient reads it when they're ready.</p>
 
 <pre><code>Order Service ──"order created"──> [Message Broker] ──> Payment Service
                                        │
@@ -34,9 +34,9 @@
                                        │
                                        └──> Analytics Service</code></pre>
 
-<p><strong>Pros:</strong> The sender never blocks. The receiver processes at its own pace. Multiple receivers can react to the same event independently. Services are <strong>loosely coupled</strong> — a failure in the notification service doesn't block payments.</p>
+<p><strong>Pros:</strong> The sender never blocks. The receiver processes at its own pace. Multiple receivers can react to the same event independently. Services are <strong>loosely coupled</strong>: a failure in the notification service doesn't block payments.</p>
 
-<p><strong>Cons:</strong> More complex infrastructure (you need a message broker). <strong>Eventual consistency</strong> — things happen eventually, not immediately. Harder to trace and debug because the flow isn't a single call stack.</p>
+<p><strong>Cons:</strong> More complex infrastructure (you need a message broker). <strong>Eventual consistency</strong>: things happen eventually, not immediately. Harder to trace and debug because the flow isn't a single call stack.</p>
 
 <h2>When to Use Which?</h2>
 
@@ -56,13 +56,13 @@
 
 <p>A message broker sits between senders and receivers, storing messages until they're consumed. <strong>Apache Kafka</strong> is the dominant broker for event-driven systems because it was built for scale.</p>
 
-<p>Kafka was created at LinkedIn to handle massive event pipelines — clickstreams, metrics, audit logs — across thousands of services. It is designed to be:</p>
+<p>Kafka was created at LinkedIn to handle massive event pipelines (clickstreams, metrics, audit logs) across thousands of services. It is designed to be:</p>
 
 <ul>
-  <li><strong>Fast</strong> — millions of messages per second via sequential disk writes and zero-copy reads</li>
-  <li><strong>Durable</strong> — messages persist on disk, surviving broker restarts</li>
-  <li><strong>Scalable</strong> — topics split into partitions spread across a cluster</li>
-  <li><strong>Reliable</strong> — replication across brokers so no single machine is a loss point</li>
+  <li><strong>Fast</strong>: millions of messages per second via sequential disk writes and zero-copy reads</li>
+  <li><strong>Durable</strong>: messages persist on disk, surviving broker restarts</li>
+  <li><strong>Scalable</strong>: topics split into partitions spread across a cluster</li>
+  <li><strong>Reliable</strong>: replication across brokers so no single machine is a loss point</li>
 </ul>
 
 <p>The mental model: Kafka is a <strong>post office</strong>. Producers drop off letters. Kafka sorts them by topic. Consumers pick up what they're interested in, at their own pace, without the producer ever knowing or caring who's reading.</p>
@@ -74,7 +74,7 @@
 └──────────┘           └─────────────────┘──event──> │ Analytics│
                                                       └──────────┘</code></pre>
 
-<p>The producer and consumers never talk directly. They only agree on the shape of the message. That contract — not a shared database or a live HTTP call — is the coupling point. This is why Kafka is the backbone of <strong>event-driven architecture</strong>: it lets services evolve independently, scale independently, and fail independently.</p>
+<p>The producer and consumers never talk directly. They only agree on the shape of the message. That contract, not a shared database or a live HTTP call, is the coupling point. This is why Kafka is central to <strong>event-driven architecture</strong>: it lets services evolve independently, scale independently, and fail independently.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://kafka.apache.org/documentation/#design" target="_blank" rel="noopener">Apache Kafka: Design</a> · <a href="https://docs.spring.io/spring-kafka/reference/" target="_blank" rel="noopener">Spring Kafka Reference</a> · <a href="https://martinfowler.com/articles/201701-event-driven.html" target="_blank" rel="noopener">Martin Fowler: Event-Driven Architecture</a></p>
 
@@ -83,10 +83,10 @@
 <div class="quiz" id="q1">
   <div class="quiz-question">1. An order service calls a payment service over REST and waits for the response before confirming the order. What kind of communication is this?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Synchronous — the caller blocks until it gets a response</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Asynchronous — the call happens over HTTP</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Event-driven — the payment service will publish a result</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Hybrid — it depends on the timeout setting</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Synchronous: the caller blocks until it gets a response</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Asynchronous: the call happens over HTTP</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Event-driven: the payment service will publish a result</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Hybrid: it depends on the timeout setting</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
@@ -94,9 +94,9 @@
 <div class="quiz" id="q2">
   <div class="quiz-question">2. A user submits a registration form and the API must verify the email is not already taken before returning success. Should this use asynchronous communication?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes — async always decouples services better</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">No — the caller needs the result to proceed, so synchronous is correct</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes — publish an event and let the user poll for the result</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes: async always decouples services better</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">No: the caller needs the result to proceed, so synchronous is correct</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes: publish an event and let the user poll for the result</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It depends on whether the database is relational or NoSQL</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
@@ -106,7 +106,7 @@
   <div class="quiz-question">3. What happens to the order service if the notification service crashes in an async, Kafka-based architecture?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The order service throws an exception and rolls back</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Nothing — the order service already moved on; Kafka retains the message until the consumer recovers</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Nothing: the order service already moved on; Kafka retains the message until the consumer recovers</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Kafka re-routes the message to the order service as a fallback</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The order service receives a timeout error after a grace period</li>
   </ul>
@@ -117,7 +117,7 @@
   <div class="quiz-question">4. Which is a real downside of asynchronous communication?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Messages are processed in random order within a partition</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Eventual consistency — the system may be in an intermediate state for a while</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Eventual consistency: the system may be in an intermediate state for a while</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Producers must know the address of every consumer</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Async systems cannot scale horizontally</li>
   </ul>
@@ -127,10 +127,10 @@
 <div class="quiz" id="q5">
   <div class="quiz-question">5. Your system sends an <code>OrderCreated</code> event after persisting an order. The payment service processes it two seconds later. During that gap, a customer queries their order status and sees "unpaid." Is this a bug?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — eventual consistency is never acceptable in production</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">No — this is expected with async; the status will converge once the consumer catches up</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — you should always use synchronous calls for payment</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — Kafka should guarantee zero-latency delivery</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes: eventual consistency is never acceptable in production</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">No: this is expected with async; the status will converge once the consumer catches up</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes: you should always use synchronous calls for payment</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes: Kafka should guarantee zero-latency delivery</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
 </div>
@@ -154,7 +154,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite. Review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

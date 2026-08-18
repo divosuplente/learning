@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/001
 
 # Application Config & Spring Profiles
 
-Hardcoded values are fragile. Spring Boot reads configuration from external files — change the database, the port, or the log level without recompiling. The mechanism: `application.yml`, profile-specific overrides, and environment variables for secrets.
+Hardcoded values are fragile. Spring Boot reads configuration from external files, so you can change the database, the port, or the log level without recompiling. The mechanism: `application.yml`, profile-specific overrides, and environment variables for secrets.
 
 ## application.yml
 
@@ -37,7 +37,7 @@ spring:
         format_sql: true
 ```
 
-Every property is a plain key-value pair. Comments start with `#`. Indentation is meaning — two spaces per level, not tabs.
+Every property is a plain key-value pair. Comments start with `#`. Indentation matters: two spaces per level, not tabs.
 
 ## YAML vs .properties
 
@@ -53,7 +53,7 @@ spring.jpa.show-sql=true
 spring.jpa.hibernate.ddl-auto=update
 ```
 
-YAML nests related keys together — easier to read, easier to maintain. We use it throughout. Pick one format per project; mixing causes confusing precedence issues.
+YAML nests related keys together, making it easier to read and maintain. We use it throughout. Pick one format per project; mixing causes confusing precedence issues.
 
 ## Spring Profiles
 
@@ -123,8 +123,8 @@ logging:
 
 Spring Boot loads config in a specific order:
 
-1.  **base first** — `application.yml` is always loaded
-2.  **profile overrides** — `application-{profile}.yml` overrides any matching keys
+1.  **base first**: `application.yml` is always loaded
+2.  **profile overrides**: `application-{profile}.yml` overrides any matching keys
 3.  The result is a single merged configuration
 
 If `application.yml` sets `server.port: 8080` and `application-prod.yml` sets `server.port: 9090`, production uses 9090. Properties *not* overridden carry forward from the base.
@@ -145,7 +145,7 @@ spring:
     active: dev
 ```
 
-## Environment variables — never hardcode secrets
+## Environment variables: never hardcode secrets
 
 In production, passwords must not live in files that get committed to source control. Use the `${VARIABLE_NAME}` syntax to read from the environment:
 
@@ -155,11 +155,11 @@ spring:
     password: ${DATABASE_PASSWORD}
 ```
 
-If `DATABASE_PASSWORD` is not set, Spring Boot fails to start — which is correct. A missing secret is a deployment error, not a silent fallback to a default password. You can supply a default with `${DATABASE_PASSWORD:changeme}`, but for real secrets, omit the default and let it fail fast.
+If `DATABASE_PASSWORD` is not set, Spring Boot fails to start. That is correct. A missing secret is a deployment error, not a silent fallback to a default password. You can supply a default with `${DATABASE_PASSWORD:changeme}`, but for real secrets, omit the default and let it fail fast.
 
 ## DevTools hot reload
 
-Spring Boot DevTools provides a **hot restart**: when you save a Java file, the app restarts in seconds by reloading only changed classes — much faster than a full restart.
+Spring Boot DevTools provides a **hot restart**: when you save a Java file, the app restarts in seconds by reloading only changed classes, much faster than a full restart.
 
 DevTools is declared in `pom.xml` with two important attributes:
 
@@ -172,9 +172,9 @@ DevTools is declared in `pom.xml` with two important attributes:
 </dependency>
 ```
 
--   **`<scope>runtime</scope>`** — only needed while running the app, not at compile time
--   **`<optional>true</optional>`** — not transitively pulled into other projects
--   **Auto-disabled in production** — DevTools is automatically excluded from packaged JARs, so it never runs in prod
+-   **`<scope>runtime</scope>`**: only needed while running the app, not at compile time
+-   **`<optional>true</optional>`**: not transitively pulled into other projects
+-   **Auto-disabled in production**: DevTools is automatically excluded from packaged JARs, so it never runs in prod
 
 DevTools is a development convenience, not a production feature. The runtime scope ensures it never ships.
 

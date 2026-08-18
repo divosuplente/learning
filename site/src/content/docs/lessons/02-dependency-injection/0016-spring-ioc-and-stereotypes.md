@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/001
 
 # Spring IoC Container & Stereotype Annotations
 
-In the last lesson you saw the problem: `new` creates tight coupling. Now meet the solution — the **Spring IoC container**, which discovers your classes, creates them, and wires their dependencies together. All you do is add the right annotation.
+In the last lesson you saw the problem: `new` creates tight coupling. Now meet the solution: the **Spring IoC container**, which discovers your classes, creates them, and wires their dependencies together. All you do is add the right annotation.
 
 ## The Spring IoC Container
 
@@ -15,15 +15,15 @@ The container is the "supplier" from the restaurant analogy: it takes responsibi
 | Term | Meaning |
 | --- | --- |
 | **Bean** | A Java object managed by the Spring container. Any object Spring creates and can inject is a bean. |
-| **Application Context** | The container itself — the registry of every bean in your application. Accessed via `ApplicationContext`. |
+| **Application Context** | The container itself: the registry of every bean in your application. Accessed via `ApplicationContext`. |
 | **Wiring** | The process of connecting beans to their dependencies. Spring does this automatically based on types. |
 
 When Spring starts, it follows a four-step loop:
 
-1.  **Scan** — find every class annotated with a stereotype annotation.
-2.  **Instantiate** — create a bean for each discovered class.
-3.  **Resolve** — figure out which beans depend on which other beans (by reading constructor parameters).
-4.  **Inject** — pass the right beans into the right constructors.
+1.  **Scan**: find every class annotated with a stereotype annotation.
+2.  **Instantiate**: create a bean for each discovered class.
+3.  **Resolve**: figure out which beans depend on which other beans (by reading constructor parameters).
+4.  **Inject**: pass the right beans into the right constructors.
 
 You never call `new` on a Spring-managed class. The container does it for you.
 
@@ -38,7 +38,7 @@ Spring uses **stereotype annotations** to mark classes as beans. When the contai
 | `@Repository` | Data access | Repository classes (e.g., `OrderRepository`) |
 | `@Controller` | Web requests | REST controllers (or `@RestController`) |
 
-Functionally, these annotations are **nearly identical** — they all register the class as a Spring bean. The different names exist for *semantic clarity*: they communicate the role of the class to humans reading the code. Spring does add one small bonus to `@Repository`: automatic exception translation for persistence errors.
+Functionally, these annotations are **nearly identical**: they all register the class as a Spring bean. The different names exist for *semantic clarity*: they communicate the role of the class to humans reading the code. Spring does add one small bonus to `@Repository`: automatic exception translation for persistence errors.
 
 ```
 @Service
@@ -65,7 +65,7 @@ Remember `@SpringBootApplication` from Module 01? It includes `@ComponentScan`. 
 2.  Find every class annotated with `@Component`, `@Service`, `@Repository`, `@Controller`, or `@Configuration`.
 3.  Create a bean for each and wire them together.
 
-If a class sits **outside the scanned package tree**, Spring will never find it — no matter how many annotations you put on it. This is the single most common "why isn't my bean being created?" problem.
+If a class sits **outside the scanned package tree**, Spring will never find it, no matter how many annotations you put on it. This is the single most common "why isn't my bean being created?" problem.
 
 ```
 // com.example.ordermgmt.service.OrderService  ✓ scanned
@@ -81,7 +81,7 @@ To include additional packages, you can override the scan base:
 })
 ```
 
-## `@Autowired` — Optional with Constructor Injection
+## `@Autowired`: Optional with Constructor Injection
 
 The `@Autowired` annotation tells Spring to inject a dependency. But with constructor injection, it's **optional** when the class has exactly one constructor:
 
@@ -100,7 +100,7 @@ public class OrderService {
 
 Spring's rule: **one constructor = automatic wiring**, no annotation needed. You only need `@Autowired` when a class has multiple constructors (which is usually a code smell) or when using setter or field injection (which we avoid).
 
-💡 Adding `@Autowired` on a single-constructor class is harmless — some teams do it for explicitness — but it's not required.
+💡 Adding `@Autowired` on a single-constructor class is harmless (some teams do it for explicitness), but it's not required.
 
 ## Putting It All Together
 
@@ -145,17 +145,17 @@ When `Application.main()` runs, Spring scans `com.example.ordermgmt`, finds `Ord
 
 <details>
 <summary>2. You add @Service to a class in com.example.utils, but your @SpringBootApplication is in com.example.ordermgmt. What happens?</summary>
-<p><strong>Correct answer:</strong> Spring never finds the class — component scanning is package-tree scoped</p>
+<p><strong>Correct answer:</strong> Spring never finds the class: component scanning is package-tree scoped</p>
 </details>
 
 <details>
 <summary>3. Does a class annotated with @Service need @Autowired on its single constructor for Spring to inject dependencies?</summary>
-<p><strong>Correct answer:</strong> No — Spring auto-wires single constructors without @Autowired</p>
+<p><strong>Correct answer:</strong> No: Spring auto-wires single constructors without @Autowired</p>
 </details>
 
 <details>
 <summary>4. What is the functional difference between @Component and @Service?</summary>
-<p><strong>Correct answer:</strong> They are functionally identical — the names exist for semantic clarity</p>
+<p><strong>Correct answer:</strong> They are functionally identical: the names exist for semantic clarity</p>
 </details>
 
 <details>

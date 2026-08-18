@@ -10,9 +10,9 @@
 
 <h1>Spring Data Repositories: JpaRepository &amp; Derived Queries</h1>
 
-<p>You defined your entities in the last lesson. Now comes the surprising part: <strong>you write almost no data-access code</strong>. Spring Data JPA's <code>JpaRepository</code> interface gives you a full CRUD repository just by extending it — and when the built-in methods aren't enough, you name a method and Spring <em>generates the SQL</em>.</p>
+<p>You defined your entities in the last lesson. Now comes the surprising part: <strong>you write almost no data-access code</strong>. Spring Data JPA's <code>JpaRepository</code> interface gives you a full CRUD repository just by extending it, and when the built-in methods aren't enough, you name a method and Spring <em>generates the SQL</em>.</p>
 
-<h2>JpaRepository — the interface that replaces your DAO</h2>
+<h2>JpaRepository: the interface that replaces your DAO</h2>
 
 <p>Declare a repository by extending <code>JpaRepository&lt;Entity, Id&gt;</code>:</p>
 
@@ -32,7 +32,7 @@ public interface CustomerRepository
 <table>
   <tr><th>Method</th><th>What it does</th></tr>
   <tr><td><code>save(entity)</code></td><td>INSERT if new, UPDATE if the entity has an ID</td></tr>
-  <tr><td><code>findById(id)</code></td><td>Returns <code>Optional&lt;T&gt;</code> — empty if not found</td></tr>
+  <tr><td><code>findById(id)</code></td><td>Returns <code>Optional&lt;T&gt;</code>, empty if not found</td></tr>
   <tr><td><code>findAll()</code></td><td>Returns <code>List&lt;T&gt;</code> of every row</td></tr>
   <tr><td><code>findAllById(ids)</code></td><td>All entities matching the given IDs</td></tr>
   <tr><td><code>deleteById(id)</code></td><td>Delete by primary key</td></tr>
@@ -59,9 +59,9 @@ customerRepository.deleteById(1L);
 // Check
 boolean exists = customerRepository.existsById(1L); // false</code></pre>
 
-<h2>Derived query methods — name it, Spring writes it</h2>
+<h2>Derived query methods: name it, Spring writes it</h2>
 
-<p>The free methods handle lookups by ID. For everything else — find by email, find by category, find by status — you add a <strong>derived query method</strong> to your interface. Spring parses the method name at startup and generates the SQL:</p>
+<p>The free methods handle lookups by ID. For everything else (find by email, find by category, find by status), you add a <strong>derived query method</strong> to your interface. Spring parses the method name at startup and generates the SQL:</p>
 
 <pre><code>@Repository
 public interface CustomerRepository
@@ -148,11 +148,11 @@ subj  By  property  And  property+op     sort clause</code></pre>
 //   WHERE c.name = ?
 List&lt;OrderEntity&gt; findByCustomerName(String name);</code></pre>
 
-<p>Spring resolves <code>CustomerName</code> as <code>customer.name</code> — it walks the object graph. This is convenient but generates a JOIN, so be aware of the query cost.</p>
+<p>Spring resolves <code>CustomerName</code> as <code>customer.name</code>: it walks the object graph. This is convenient but generates a JOIN, so be aware of the query cost.</p>
 
 <h2>Using repositories in a service</h2>
 
-<p>Repositories are Spring beans — inject them via constructor injection:</p>
+<p>Repositories are Spring beans. Inject them via constructor injection:</p>
 
 <pre><code>@Service
 public class CustomerService {
@@ -173,7 +173,7 @@ public class CustomerService {
     }
 }</code></pre>
 
-<p>Note that <code>findByEmail</code> is our derived method — the service never writes SQL.</p>
+<p>Note that <code>findByEmail</code> is our derived method. The service never writes SQL.</p>
 
 <p><strong>Primary source:</strong> <a href="https://docs.spring.io/spring-data/jpa/reference/repositories/core-extensions.html" target="_blank" rel="noopener">Spring Data JPA: JpaRepository</a> · <a href="https://docs.spring.io/spring-data/jpa/reference/repositories/query-methods-details.html" target="_blank" rel="noopener">Query Method Details</a> · <a href="https://docs.spring.io/spring-data/jpa/reference/repositories/definition.html" target="_blank" rel="noopener">Repository Definition</a></p>
 
@@ -183,7 +183,7 @@ public class CustomerService {
   <div class="quiz-question">1. What do you have to implement when you extend <code>JpaRepository&lt;CustomerEntity, Long&gt;</code>?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">All CRUD methods (save, findById, findAll, delete)</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Nothing — Spring generates the implementation at runtime</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Nothing; Spring generates the implementation at runtime</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only the derived query methods you declare</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">A no-argument constructor and a factory method</li>
   </ul>
@@ -228,7 +228,7 @@ public class CustomerService {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Finds orders where the customer field name equals <code>n</code></li>
     <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Traverses the relationship and generates a JOIN on the customers table</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Fails at startup — nested property traversal is not supported</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Fails at startup; nested property traversal is not supported</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Calls <code>customer.getName()</code> on every order loaded by <code>findAll()</code></li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>

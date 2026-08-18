@@ -10,49 +10,49 @@
 
 <h1>Migration Strategy &amp; Module Review</h1>
 
-<p>You've seen Kotlin's syntax, data classes, extension functions, and coroutines. The remaining question is practical: <strong>how do you actually move a production Spring Boot codebase from Java to Kotlin?</strong> This lesson covers the J2K converter, the recommended migration order, how Java and Kotlin coexist in the same project, testing Kotlin code with JUnit 5 and MockK, and wraps up the entire course.</p>
+<p>You've seen Kotlin's syntax, data classes, extension functions, and coroutines. Now the practical question: <strong>how do you actually move a production Spring Boot codebase from Java to Kotlin?</strong> This lesson covers the J2K converter, the recommended migration order, how Java and Kotlin coexist in the same project, testing Kotlin code with JUnit 5 and MockK, and wraps up the entire course.</p>
 
-<h2>The J2K Converter — Your Migration Copilot</h2>
+<h2>The J2K Converter: Your Migration Tool</h2>
 
 <p>IntelliJ IDEA (Community or Ultimate) ships with a <strong>Java-to-Kotlin converter</strong> (J2K). Open any Java file, press <kbd>Ctrl/Cmd+Shift+Alt+K</kbd>, and IntelliJ generates equivalent Kotlin code.</p>
 
 <h3>What J2K Handles Well</h3>
 
 <ul>
-  <li><strong>Classes → primary constructors</strong> — fields and constructors collapse into the constructor header</li>
-  <li><strong>Getters/setters → <code>var</code>/<code>val</code> properties</strong> — boilerplate evaporates</li>
-  <li><strong>Static methods → <code>companion object</code></strong> — the idiomatic Kotlin replacement</li>
-  <li><strong><code>if-else</code> chains → <code>when</code> expressions</strong> — sometimes, depending on structure</li>
+  <li><strong>Classes → primary constructors</strong>: fields and constructors collapse into the constructor header</li>
+  <li><strong>Getters/setters → <code>var</code>/<code>val</code> properties</strong>: boilerplate removed</li>
+  <li><strong>Static methods → <code>companion object</code></strong>: the idiomatic Kotlin replacement</li>
+  <li><strong><code>if-else</code> chains → <code>when</code> expressions</strong>: sometimes, depending on structure</li>
 </ul>
 
 <h3>What J2K Does NOT Handle</h3>
 
 <ul>
-  <li><strong>Stream API</strong> — J2K leaves Java-style streams instead of converting to Kotlin collection functions (<code>map</code>, <code>filter</code>, <code>groupBy</code>)</li>
-  <li><strong>Lombok annotations</strong> — remove Lombok <em>before</em> converting, or J2K produces broken code</li>
-  <li><strong>Field injection</strong> — J2K preserves <code>@Autowired</code> on fields instead of converting to constructor injection</li>
-  <li><strong>Java records</strong> — sometimes generates verbose Kotlin classes instead of concise <code>data class</code></li>
-  <li><strong>Builder patterns</strong> — left as Java-style chains instead of using named arguments</li>
+  <li><strong>Stream API</strong>: J2K leaves Java-style streams instead of converting to Kotlin collection functions (<code>map</code>, <code>filter</code>, <code>groupBy</code>)</li>
+  <li><strong>Lombok annotations</strong>: remove Lombok <em>before</em> converting, or J2K produces broken code</li>
+  <li><strong>Field injection</strong>: J2K preserves <code>@Autowired</code> on fields instead of converting to constructor injection</li>
+  <li><strong>Java records</strong>: sometimes generates verbose Kotlin classes instead of concise <code>data class</code></li>
+  <li><strong>Builder patterns</strong>: left as Java-style chains instead of using named arguments</li>
 </ul>
 
-<p>The rule: <strong>J2K gets you 80% there. The remaining 20% — null-safety annotations, collection idioms, Lombok removal — is manual review.</strong> Always read the converted code before committing.</p>
+<p>The rule: <strong>J2K gets you 80% there. The remaining 20% (null-safety annotations, collection idioms, Lombok removal) requires manual review.</strong> Always read the converted code before committing.</p>
 
-<h2>Gradual Migration — Java + Kotlin Side by Side</h2>
+<h2>Gradual Migration: Java + Kotlin Side by Side</h2>
 
-<p>Kotlin's killer feature for migration is <strong>full interoperability</strong>. Java code can call Kotlin code. Kotlin code can call Java code. No wrappers, no adapters, no IDL. The Kotlin compiler compiles both languages together — you can have <code>OrderService.java</code> and <code>CustomerService.kt</code> in the same package and they reference each other directly.</p>
+<p>Kotlin's main advantage for migration is <strong>full interoperability</strong>. Java code can call Kotlin code. Kotlin code can call Java code. No wrappers, no adapters, no IDL. The Kotlin compiler compiles both languages together, so you can have <code>OrderService.java</code> and <code>CustomerService.kt</code> in the same package and they reference each other directly.</p>
 
 <p>This means you migrate <strong>one file at a time</strong>. No big-bang rewrite. No feature freeze. The production system keeps running while you gradually convert modules.</p>
 
 <h3>The Recommended Migration Order</h3>
 
 <ol>
-  <li><strong>DTOs (records → <code>data class</code>)</strong> — Pure data, no behavior. Simplest to convert. Tests pass immediately.</li>
-  <li><strong>Enums</strong> — Trivial: <code>enum</code> becomes <code>enum class</code>, nearly identical syntax.</li>
-  <li><strong>JPA Entities</strong> — Require the <code>jpa</code> compiler plugin for the no-arg constructor. The <code>spring</code> plugin opens the class for CGLIB proxying.</li>
-  <li><strong>Controllers</strong> — Mostly annotation-driven. Replace <code>@RestController</code> classes with Kotlin equivalents.</li>
-  <li><strong>Repositories</strong> — Just interfaces extending <code>JpaRepository</code>. Trivial conversion.</li>
-  <li><strong>Services</strong> — The logic-heavy layer. Convert carefully; this is where bugs hide during migration.</li>
-  <li><strong>Tests — convert last</strong> — Tests should <em>validate</em> the migration, not be part of it. Keep existing Java tests running as a safety net while you convert production code.</li>
+  <li><strong>DTOs (records → <code>data class</code>)</strong>: Pure data, no behavior. Simplest to convert. Tests pass immediately.</li>
+  <li><strong>Enums</strong>: Trivial: <code>enum</code> becomes <code>enum class</code>, nearly identical syntax.</li>
+  <li><strong>JPA Entities</strong>: Require the <code>jpa</code> compiler plugin for the no-arg constructor. The <code>spring</code> plugin opens the class for CGLIB proxying.</li>
+  <li><strong>Controllers</strong>: Mostly annotation-driven. Replace <code>@RestController</code> classes with Kotlin equivalents.</li>
+  <li><strong>Repositories</strong>: Just interfaces extending <code>JpaRepository</code>. Trivial conversion.</li>
+  <li><strong>Services</strong>: The logic-heavy layer. Convert carefully; this is where bugs hide during migration.</li>
+  <li><strong>Tests: convert last</strong>: Tests should <em>validate</em> the migration, not be part of it. Keep existing Java tests running as a safety net while you convert production code.</li>
 </ol>
 
 <p>This order minimizes risk: each step depends only on already-converted layers below it. DTOs have no dependencies. Entities depend on DTOs (already done). Services depend on Entities + Repos (already done). Tests validate everything.</p>
@@ -62,17 +62,17 @@
 <p>When Java calls Kotlin, there are a few wrinkles:</p>
 
 <ul>
-  <li><strong>Null safety is erased at the boundary.</strong> A Kotlin <code>String</code> (non-nullable) is just <code>String</code> to Java — Java can still pass <code>null</code>. Add <code>@NotNull</code> annotations or use platform types defensively.</li>
-  <li><strong>Kotlin <code>val</code> properties look like Java getters</strong> — <code>val name: String</code> becomes <code>getName()</code>. Kotlin <code>var</code> also generates <code>setName()</code>.</li>
-  <li><strong><code>companion object</code> methods</strong> — From Java, you access them via <code>ClassName.Companion.method()</code> or add <code>@JvmStatic</code> to make them look like regular static methods.</li>
-  <li><strong>Checked exceptions</strong> — Kotlin has no checked exceptions. A Kotlin function can throw any exception without declaring it. Java callers won't be forced to catch it.</li>
+  <li><strong>Null safety is erased at the boundary.</strong> A Kotlin <code>String</code> (non-nullable) is just <code>String</code> to Java, so Java can still pass <code>null</code>. Add <code>@NotNull</code> annotations or use platform types defensively.</li>
+  <li><strong>Kotlin <code>val</code> properties look like Java getters</strong>: <code>val name: String</code> becomes <code>getName()</code>. Kotlin <code>var</code> also generates <code>setName()</code>.</li>
+  <li><strong><code>companion object</code> methods</strong>: From Java, you access them via <code>ClassName.Companion.method()</code> or add <code>@JvmStatic</code> to make them look like regular static methods.</li>
+  <li><strong>Checked exceptions</strong>: Kotlin has no checked exceptions. A Kotlin function can throw any exception without declaring it. Java callers won't be forced to catch it.</li>
 </ul>
 
 <h2>Testing Kotlin Code</h2>
 
-<h3>JUnit 5 — Works Out of the Box</h3>
+<h3>JUnit 5: Works Out of the Box</h3>
 
-<p>JUnit 5 runs Kotlin tests with zero configuration. Test method names can be <strong>backtick-enclosed strings</strong> — readable test names without camelCase gymnastics:</p>
+<p>JUnit 5 runs Kotlin tests with zero configuration. Test method names can be <strong>backtick-enclosed strings</strong>: readable test names without camelCase gymnastics.</p>
 
 <pre><code>@ExtendWith(MockitoExtension::class)
 class OrderServiceTest {
@@ -151,9 +151,9 @@ class CoroutineOrderServiceTest {
     }
 }</code></pre>
 
-<p><code>runTest</code> skips delays, advances virtual time automatically, and ensures the coroutine completes before the test returns — no <code>Thread.sleep</code>, no flaky async tests.</p>
+<p><code>runTest</code> skips delays, advances virtual time automatically, and ensures the coroutine completes before the test returns. No <code>Thread.sleep</code>, no flaky async tests.</p>
 
-<h2>Module 11 Review — Kotlin Migration</h2>
+<h2>Module 11 Review: Kotlin Migration</h2>
 
 <table>
   <tr><th>Lesson</th><th>Core Idea</th></tr>
@@ -164,7 +164,7 @@ class CoroutineOrderServiceTest {
   <tr><td>62 — Migration Strategy &amp; Review</td><td>J2K converter (80% auto, 20% review); migrate DTOs → enums → entities → controllers → services → repos → tests last; <code>mockito-kotlin</code> + <code>runTest</code></td></tr>
 </table>
 
-<h2>Course Conclusion — From Java Records to Kotlin Coroutines</h2>
+<h2>Course Conclusion: From Java Records to Kotlin Coroutines</h2>
 
 <p>You started with a single <code>record</code> and ended with a fully reactive, event-driven order management system running on Kotlin coroutines. Here is the full arc:</p>
 
@@ -183,7 +183,7 @@ class CoroutineOrderServiceTest {
   <tr><td>11 — Kotlin Migration</td><td>Why Kotlin, syntax, data classes, extension functions, coroutines, migration strategy</td></tr>
 </table>
 
-<p>The through-line of this course is <strong>progressive complexity with constant return to simplicity</strong>. Every abstraction — DI, JPA, Kafka, Reactor, coroutines — exists to make the code you write <em>simpler</em>, not fancier. If a tool makes your code harder to read, you have the wrong tool. You now have the judgment to tell the difference.</p>
+<p>Every abstraction in this course (DI, JPA, Kafka, Reactor, coroutines) exists to make the code you write <em>simpler</em>, not fancier. If a tool makes your code harder to read, it is the wrong tool. You now have the experience to recognize the difference.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://kotlinlang.org/docs/mixing-java-kotlin-intellij.html" target="_blank" rel="noopener">Kotlin: Mixing Java and Kotlin</a> · <a href="https://kotlinlang.org/docs/jvm-java-to-kotlin-interop.html" target="_blank" rel="noopener">Kotlin-Java Interop Reference</a> · <a href="https://mockk.io/" target="_blank" rel="noopener">MockK</a> · <a href="https://kotlinlang.org/api/kotlinx.coroutines/test/" target="_blank" rel="noopener">kotlinx-coroutines-test</a> · <a href="https://spring.io/guides/tutorials/spring-boot-kotlin/" target="_blank" rel="noopener">Spring Boot with Kotlin Guide</a></p>
 
@@ -216,8 +216,8 @@ class CoroutineOrderServiceTest {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">DTOs generate the most compile errors, so fixing them first clears the way</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Tests must be rewritten from scratch in Kotlin, so converting them last saves effort</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Each layer depends on layers below it — DTOs have no dependencies so convert first; tests validate the migration so they run last as a safety net</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The order is arbitrary — any migration order produces the same result</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Each layer depends on layers below it: DTOs have no dependencies so convert first; tests validate the migration so they run last as a safety net</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The order is arbitrary: any migration order produces the same result</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
 </div>
@@ -225,7 +225,7 @@ class CoroutineOrderServiceTest {
 <div class="quiz" id="q4">
   <div class="quiz-question">4. You need to test a Kotlin <code>suspend</code> function in a JUnit 5 test. Which approach is correct?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Call the suspend function directly — JUnit 5 supports coroutines natively</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Call the suspend function directly; JUnit 5 supports coroutines natively</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Wrap the call in <code>runBlocking { }</code> inside the test method</li>
     <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Use <code>runTest { }</code> from kotlinx-coroutines-test, which provides virtual time control and skips delays</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Convert the suspend function to return <code>Mono</code> and test it with StepVerifier</li>
@@ -236,9 +236,9 @@ class CoroutineOrderServiceTest {
 <div class="quiz" id="q5">
   <div class="quiz-question">5. A Kotlin class has a <code>companion object</code> with a method <code>fun from(entity: OrderEntity): OrderResponse</code>. How does Java code call this method by default?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>OrderResponse.from(entity)</code> — same as a Java static method</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0"><code>OrderResponse.Companion.from(entity)</code> — unless <code>@JvmStatic</code> is added</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>new OrderResponse().from(entity)</code> — through an instance</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>OrderResponse.from(entity)</code>: same as a Java static method</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0"><code>OrderResponse.Companion.from(entity)</code>: unless <code>@JvmStatic</code> is added</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>new OrderResponse().from(entity)</code>: through an instance</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Java cannot call companion object methods at all</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>

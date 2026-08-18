@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 3 — Generics</title>
+  <title>Lesson 3: Generics</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Generics</h1>
 
-<p>Without generics, collections held <code>Object</code> and you cast on retrieval — bugs surfaced at runtime, not compile time. Generics let you write <strong>type-safe, reusable code</strong> where the compiler catches mismatches before the program runs.</p>
+<p>Without generics, collections held <code>Object</code> and you cast on retrieval. Bugs surfaced at runtime, not compile time. Generics let you write <strong>type-safe, reusable code</strong> where the compiler catches mismatches before the program runs.</p>
 
 <h2>A generic class</h2>
 
@@ -68,7 +68,7 @@ public void addIntegers(List&lt;? super Integer&gt; list) {
 }
 </code></pre>
 
-<p><code>? extends Number</code> lets you read <code>Number</code> safely but you <strong>cannot add</strong> — you don't know whether the list holds <code>Integer</code>, <code>Double</code>, or something else. <code>? super Integer</code> lets you add <code>Integer</code> safely but you can only read <code>Object</code>. If you need to read <em>and</em> write, don't use a wildcard — use <code>&lt;T&gt;</code>.</p>
+<p><code>? extends Number</code> lets you read <code>Number</code> safely but you <strong>cannot add</strong>; you don't know whether the list holds <code>Integer</code>, <code>Double</code>, or something else. <code>? super Integer</code> lets you add <code>Integer</code> safely but you can only read <code>Object</code>. If you need to read <em>and</em> write, don't use a wildcard: use <code>&lt;T&gt;</code>.</p>
 
 <h2>Type erasure</h2>
 
@@ -130,10 +130,10 @@ System.out.println(a.getClass() == b.getClass()); // true — both are Box.class
 <div class="quiz" id="q4">
   <div class="quiz-question">4. <code>List&lt;? super Integer&gt;</code> can hold which of these as actual list types?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Only List&lt;Integer&gt; — the super must match exactly</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">List&lt;Integer&gt; and List&lt;Double&gt; — any Number subtype</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">List&lt;Integer&gt;, List&lt;Number&gt;, and List&lt;Object&gt; — Integer or supertypes</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">List&lt;Object&gt; only — super always means Object in practice</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Only List&lt;Integer&gt;: the super must match exactly</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">List&lt;Integer&gt; and List&lt;Double&gt;: any Number subtype</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">List&lt;Integer&gt;, List&lt;Number&gt;, and List&lt;Object&gt;: Integer or supertypes</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">List&lt;Object&gt; only: super always means Object in practice</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>
 </div>
@@ -168,7 +168,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite, review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

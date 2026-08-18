@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 21 — REST Controllers &amp; HTTP Mappings</title>
+  <title>Lesson 21: REST Controllers &amp; HTTP Mappings</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
@@ -12,9 +12,9 @@
 
 <p>A REST API maps HTTP requests to Java method calls. Spring MVC makes this nearly declarative: annotate a class, annotate its methods, and the framework wires everything together. This lesson covers <code>@RestController</code>, the five HTTP method annotations, and a complete CRUD controller you can use as a starting template.</p>
 
-<h2><code>@RestController</code> — the foundation</h2>
+<h2><code>@RestController</code>: the foundation</h2>
 
-<p>Spring has two kinds of controllers. <code>@Controller</code> returns <strong>view names</strong> (HTML templates via Thymeleaf or JSP). <code>@RestController</code> returns <strong>data</strong> — Spring serializes the return value to JSON by default.</p>
+<p>Spring has two kinds of controllers. <code>@Controller</code> returns <strong>view names</strong> (HTML templates via Thymeleaf or JSP). <code>@RestController</code> returns <strong>data</strong>. Spring serializes the return value to JSON by default.</p>
 
 <p><code>@RestController</code> is not a separate mechanism. It is <code>@Controller</code> + <code>@ResponseBody</code> applied together. <code>@ResponseBody</code> tells Spring: "skip view resolution; write the return object directly to the HTTP response body." Every method in a <code>@RestController</code> behaves as though it carries <code>@ResponseBody</code>.</p>
 
@@ -95,16 +95,16 @@ public class OrderController {
 <p>Key patterns to notice:</p>
 
 <ul>
-  <li><strong>Constructor injection</strong> — <code>OrderService</code> is injected by Spring. No <code>@Autowired</code> needed on the constructor (Spring 4.3+).</li>
-  <li><strong><code>@PathVariable</code></strong> extracts a value from the URL — <code>/{id}</code> becomes method parameter <code>id</code>.</li>
+  <li><strong>Constructor injection</strong>: <code>OrderService</code> is injected by Spring. No <code>@Autowired</code> needed on the constructor (Spring 4.3+).</li>
+  <li><strong><code>@PathVariable</code></strong> extracts a value from the URL: <code>/{id}</code> becomes method parameter <code>id</code>.</li>
   <li><strong><code>@RequestBody</code></strong> tells Spring to deserialize the JSON request body into a Java object.</li>
   <li><strong><code>ResponseEntity</code></strong> gives you full control over status codes. <code>201 Created</code> for POST, <code>204 No Content</code> for DELETE.</li>
-  <li>GET and PUT return the object directly — Spring auto-wraps it with <code>200 OK</code>.</li>
+  <li>GET and PUT return the object directly. Spring auto-wraps it with <code>200 OK</code>.</li>
 </ul>
 
 <h2>PUT vs PATCH</h2>
 
-<p><code>@PutMapping</code> replaces the <em>entire</em> resource — the client must send every field. <code>@PatchMapping</code> updates only the fields the client sends:</p>
+<p><code>@PutMapping</code> replaces the <em>entire</em> resource. The client must send every field. <code>@PatchMapping</code> updates only the fields the client sends:</p>
 
 <pre><code>// PUT /api/orders/{id} — full replacement (all fields required)
 @PutMapping("/{id}")
@@ -122,7 +122,7 @@ public OrderResponse patchOrder(@PathVariable Long id,
 
 <p>In practice, many APIs skip PATCH and use PUT for all updates. But if your resource has optional fields that callers should not be forced to resend, PATCH is the correct semantic.</p>
 
-<h2>Content negotiation — why it's JSON by default</h2>
+<h2>Content negotiation: why it's JSON by default</h2>
 
 <p>When <code>spring-boot-starter-web</code> is on the classpath, Spring Boot auto-configures Jackson. Every <code>@RestController</code> method that returns an object is serialized to JSON. If the client sends <code>Accept: application/xml</code> and Jackson XML is on the classpath, Spring will produce XML instead. Without explicit configuration, JSON is the default.</p>
 
@@ -144,10 +144,10 @@ public OrderResponse patchOrder(@PathVariable Long id,
 <div class="quiz" id="q2">
   <div class="quiz-question">2. A class has <code>@Controller</code> and every method has <code>@ResponseBody</code>. Is this equivalent to <code>@RestController</code>?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Yes — <code>@RestController</code> is literally <code>@Controller</code> + <code>@ResponseBody</code></li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No — <code>@RestController</code> also enables auto-configuration</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No — <code>@RestController</code> adds JSON schema validation</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No — <code>@ResponseBody</code> only works with <code>@RestController</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Yes, <code>@RestController</code> is literally <code>@Controller</code> + <code>@ResponseBody</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No, <code>@RestController</code> also enables auto-configuration</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No, <code>@RestController</code> adds JSON schema validation</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No, <code>@ResponseBody</code> only works with <code>@RestController</code></li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>

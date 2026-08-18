@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/002
 
 # JPA Entities
 
-A JPA entity is a Java class that maps to a database table. Each instance of the class represents one row. JPA uses annotations to describe exactly how objects become rows and back again — closing the gap between your object model and your relational schema.
+A JPA entity is a Java class that maps to a database table. Each instance of the class represents one row. JPA uses annotations to describe exactly how objects become rows and back again, closing the gap between your object model and your relational schema.
 
 ## Anatomy of an Entity
 
@@ -60,10 +60,10 @@ Every entity needs three things: `@Entity` on the class, `@Id` on the primary-ke
 
 | Strategy | Behavior |
 | --- | --- |
-| `GenerationType.IDENTITY` | Database auto-increment — the DB assigns the id |
+| `GenerationType.IDENTITY` | Database auto-increment: the DB assigns the id |
 | `GenerationType.SEQUENCE` | Uses a database sequence; portable and efficient for batch inserts |
 | `GenerationType.TABLE` | Uses a separate table as a sequence; rarely needed |
-| `GenerationType.AUTO` | JPA provider picks a strategy; varies by dialect — avoid for production |
+| `GenerationType.AUTO` | JPA provider picks a strategy; varies by dialect, avoid for production |
 
 `IDENTITY` is simplest for PostgreSQL auto-increment columns. `SEQUENCE` is better for batch inserts because IDENTITY forces Hibernate to insert one row at a time to retrieve each generated id.
 
@@ -74,7 +74,7 @@ Every entity needs three things: `@Entity` on the class, `@Id` on the primary-ke
 private String email;
 ```
 
-`name` overrides the column name (defaults to the field name). `nullable = false` adds a NOT NULL constraint. `unique = true` adds a UNIQUE constraint. `length` sets the VARCHAR size. `updatable = false` prevents the column from being changed after insert — useful for timestamps and created-by fields.
+`name` overrides the column name (defaults to the field name). `nullable = false` adds a NOT NULL constraint. `unique = true` adds a UNIQUE constraint. `length` sets the VARCHAR size. `updatable = false` prevents the column from being changed after insert, useful for timestamps and created-by fields.
 
 ## Why Not Records?
 
@@ -137,11 +137,11 @@ private CustomerEntity customer;
 private List<OrderEntity> orders;
 ```
 
-`@JoinColumn` goes on the side that *has* the foreign key column in its table. If you put it on both sides, you get two foreign key columns — almost certainly a bug.
+`@JoinColumn` goes on the side that *has* the foreign key column in its table. If you put it on both sides, you get two foreign key columns, almost certainly a bug.
 
 ### Fetch types
 
-`FetchType.EAGER` loads the related entity immediately. `FetchType.LAZY` loads it only when you access the field. `@ManyToOne` defaults to `EAGER`; `@OneToMany` defaults to `LAZY`. Prefer `LAZY` everywhere — eager fetching is the root cause of N+1 disasters and bloated responses.
+`FetchType.EAGER` loads the related entity immediately. `FetchType.LAZY` loads it only when you access the field. `@ManyToOne` defaults to `EAGER`; `@OneToMany` defaults to `LAZY`. Prefer `LAZY` everywhere: eager fetching is the root cause of N+1 disasters and bloated responses.
 
 ### Cascade and orphan removal
 
@@ -171,7 +171,7 @@ The join table has two foreign key columns. Prefer `Set` over `List` for many-to
 </details>
 
 <details>
-<summary>2. Where should @JoinColumn(name = "customer_id") be placed in a bidirectional Customer–Order relationship?</summary>
+<summary>2. Where should @JoinColumn(name = "customer_id") be placed in a bidirectional Customer/Order relationship?</summary>
 <p><strong>Correct answer:</strong> On the @ManyToOne side (Order entity), which owns the foreign key</p>
 </details>
 
@@ -187,5 +187,5 @@ The join table has two foreign key columns. Prefer `Set` over `List` for many-to
 
 <details>
 <summary>5. What is the default fetch type for @ManyToOne, and what risk does it carry?</summary>
-<p><strong>Correct answer:</strong> EAGER — risk of loading the entire object graph in a single query</p>
+<p><strong>Correct answer:</strong> EAGER: risk of loading the entire object graph in a single query</p>
 </details>

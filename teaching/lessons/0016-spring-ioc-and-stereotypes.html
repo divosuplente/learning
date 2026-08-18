@@ -10,7 +10,7 @@
 
 <h1>Spring IoC Container &amp; Stereotype Annotations</h1>
 
-<p>In the last lesson you saw the problem: <code>new</code> creates tight coupling. Now meet the solution — the <strong>Spring IoC container</strong>, which discovers your classes, creates them, and wires their dependencies together. All you do is add the right annotation.</p>
+<p>In the last lesson you saw the problem: <code>new</code> creates tight coupling. Now meet the solution: the <strong>Spring IoC container</strong>, which discovers your classes, creates them, and wires their dependencies together. All you do is add the right annotation.</p>
 
 <h2>The Spring IoC Container</h2>
 
@@ -19,17 +19,17 @@
 <table>
   <tr><th>Term</th><th>Meaning</th></tr>
   <tr><td><strong>Bean</strong></td><td>A Java object managed by the Spring container. Any object Spring creates and can inject is a bean.</td></tr>
-  <tr><td><strong>Application Context</strong></td><td>The container itself — the registry of every bean in your application. Accessed via <code>ApplicationContext</code>.</td></tr>
+  <tr><td><strong>Application Context</strong></td><td>The container itself: the registry of every bean in your application. Accessed via <code>ApplicationContext</code>.</td></tr>
   <tr><td><strong>Wiring</strong></td><td>The process of connecting beans to their dependencies. Spring does this automatically based on types.</td></tr>
 </table>
 
 <p>When Spring starts, it follows a four-step loop:</p>
 
 <ol>
-  <li><strong>Scan</strong> — find every class annotated with a stereotype annotation.</li>
-  <li><strong>Instantiate</strong> — create a bean for each discovered class.</li>
-  <li><strong>Resolve</strong> — figure out which beans depend on which other beans (by reading constructor parameters).</li>
-  <li><strong>Inject</strong> — pass the right beans into the right constructors.</li>
+  <li><strong>Scan</strong>: find every class annotated with a stereotype annotation.</li>
+  <li><strong>Instantiate</strong>: create a bean for each discovered class.</li>
+  <li><strong>Resolve</strong>: figure out which beans depend on which other beans (by reading constructor parameters).</li>
+  <li><strong>Inject</strong>: pass the right beans into the right constructors.</li>
 </ol>
 
 <p>You never call <code>new</code> on a Spring-managed class. The container does it for you.</p>
@@ -46,7 +46,7 @@
   <tr><td><code>@Controller</code></td><td>Web requests</td><td>REST controllers (or <code>@RestController</code>)</td></tr>
 </table>
 
-<p>Functionally, these annotations are <strong>nearly identical</strong> — they all register the class as a Spring bean. The different names exist for <em>semantic clarity</em>: they communicate the role of the class to humans reading the code. Spring does add one small bonus to <code>@Repository</code>: automatic exception translation for persistence errors.</p>
+<p>Functionally, these annotations are <strong>nearly identical</strong>: they all register the class as a Spring bean. The different names exist for <em>semantic clarity</em>: they communicate the role of the class to humans reading the code. Spring does add one small bonus to <code>@Repository</code>: automatic exception translation for persistence errors.</p>
 
 <pre><code>@Service
 public class OrderService {
@@ -73,7 +73,7 @@ public class OrderService {
   <li>Create a bean for each and wire them together.</li>
 </ol>
 
-<p>If a class sits <strong>outside the scanned package tree</strong>, Spring will never find it — no matter how many annotations you put on it. This is the single most common "why isn't my bean being created?" problem.</p>
+<p>If a class sits <strong>outside the scanned package tree</strong>, Spring will never find it, no matter how many annotations you put on it. This is the single most common "why isn't my bean being created?" problem.</p>
 
 <pre><code>// com.example.ordermgmt.service.OrderService  ✓ scanned
 // com.example.utils.StringHelper              ✗ NOT scanned (different package tree)</code></pre>
@@ -85,7 +85,7 @@ public class OrderService {
     "com.example.utils"
 })</code></pre>
 
-<h2><code>@Autowired</code> — Optional with Constructor Injection</h2>
+<h2><code>@Autowired</code>: Optional with Constructor Injection</h2>
 
 <p>The <code>@Autowired</code> annotation tells Spring to inject a dependency. But with constructor injection, it's <strong>optional</strong> when the class has exactly one constructor:</p>
 
@@ -102,7 +102,7 @@ public class OrderService {
 
 <p>Spring's rule: <strong>one constructor = automatic wiring</strong>, no annotation needed. You only need <code>@Autowired</code> when a class has multiple constructors (which is usually a code smell) or when using setter or field injection (which we avoid).</p>
 
-<aside>💡 Adding <code>@Autowired</code> on a single-constructor class is harmless — some teams do it for explicitness — but it's not required.</aside>
+<aside>💡 Adding <code>@Autowired</code> on a single-constructor class is harmless (some teams do it for explicitness), but it's not required.</aside>
 
 <h2>Putting It All Together</h2>
 
@@ -153,7 +153,7 @@ public class Application {
   <div class="quiz-question">2. You add <code>@Service</code> to a class in <code>com.example.utils</code>, but your <code>@SpringBootApplication</code> is in <code>com.example.ordermgmt</code>. What happens?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Spring creates the bean and registers it normally</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Spring never finds the class — component scanning is package-tree scoped</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Spring never finds the class: component scanning is package-tree scoped</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">@Service works everywhere regardless of package</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Spring throws an exception at startup</li>
   </ul>
@@ -164,9 +164,9 @@ public class Application {
   <div class="quiz-question">3. Does a class annotated with <code>@Service</code> need <code>@Autowired</code> on its single constructor for Spring to inject dependencies?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Yes, every dependency injection requires @Autowired</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Yes, but only for @Service — @Component doesn't need it</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">No — Spring auto-wires single constructors without @Autowired</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">No — @Autowired is only for field injection</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Yes, but only for @Service, @Component doesn't need it</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">No: Spring auto-wires single constructors without @Autowired</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">No: @Autowired is only for field injection</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
 </div>
@@ -176,7 +176,7 @@ public class Application {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">@Service beans are created before @Component beans</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">@Service enables transaction management automatically</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">They are functionally identical — the names exist for semantic clarity</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">They are functionally identical: the names exist for semantic clarity</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">@Component is for web layers; @Service is for data layers</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>

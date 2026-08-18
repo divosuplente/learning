@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 8 — OOP Fundamentals</title>
+  <title>Lesson 8: OOP Fundamentals</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>OOP Fundamentals</h1>
 
-<p>Java is object-oriented at its core. You model your domain with classes, compose behavior through interfaces, and share common structure with abstract classes. The payoff: code that depends on abstractions, not implementations — so you can swap strategies without rewriting callers.</p>
+<p>Java is object-oriented at its core. You model your domain with classes, compose behavior through interfaces, and share common structure with abstract classes. The payoff: code that depends on abstractions, not implementations, so you can swap strategies without rewriting callers.</p>
 
-<h2>Classes — state and behavior</h2>
+<h2>Classes: state and behavior</h2>
 
 <p>A class bundles fields (state) and methods (behavior) into one unit. Access is controlled with <code>private</code>, <code>protected</code>, and <code>public</code>:</p>
 
@@ -48,9 +48,9 @@
     }
 }</code></pre>
 
-<p><code>accountId</code> is <code>final</code> — set once, never changed. <code>balance</code> mutates through controlled methods that enforce invariants. This is encapsulation: the outside world sees <em>what</em> the object does, not <em>how</em> it stores data.</p>
+<p><code>accountId</code> is <code>final</code>: set once, never changed. <code>balance</code> mutates through controlled methods that enforce invariants. This is encapsulation: the outside world sees <em>what</em> the object does, not <em>how</em> it stores data.</p>
 
-<h2>Interfaces — contracts without implementation</h2>
+<h2>Interfaces: contracts without implementation</h2>
 
 <p>An interface defines <strong>what</strong> a class must do, not <strong>how</strong>. Callers code against the interface; any implementation fits:</p>
 
@@ -83,11 +83,11 @@ public class DiscountPriceCalculator implements PriceCalculator {
     }
 }</code></pre>
 
-<p>Any method that accepts a <code>PriceCalculator</code> works with either implementation — the caller never knows or cares which one it gets.</p>
+<p>Any method that accepts a <code>PriceCalculator</code> works with either implementation; the caller never knows or cares which one it gets.</p>
 
-<h2>Abstract classes — shared state + partial implementation</h2>
+<h2>Abstract classes: shared state + partial implementation</h2>
 
-<p>An abstract class can mix concrete methods (with bodies) and abstract methods (without). It can also hold fields — something interfaces cannot do (except <code>static final</code> constants):</p>
+<p>An abstract class can mix concrete methods (with bodies) and abstract methods (without). It can also hold fields: something interfaces cannot do (except <code>static final</code> constants):</p>
 
 <pre><code>public abstract class BaseEntity {
     protected String id;
@@ -122,9 +122,9 @@ public class Customer extends BaseEntity {
     }
 }</code></pre>
 
-<p>Abstract classes are for "is-a" relationships with shared wiring. <code>Customer</code> <em>is</em> a <code>BaseEntity</code> — it gets the ID and timestamp logic for free and fills in its own validation.</p>
+<p>Abstract classes are for "is-a" relationships with shared wiring. <code>Customer</code> <em>is</em> a <code>BaseEntity</code>; it gets the ID and timestamp logic for free and fills in its own validation.</p>
 
-<h2>Polymorphism — code to the interface</h2>
+<h2>Polymorphism: code to the interface</h2>
 
 <p>Polymorphism means one variable, many forms. When your code depends on an interface or abstract type, any subclass or implementation works at runtime:</p>
 
@@ -137,16 +137,16 @@ public String printReceipt(Order order, PriceCalculator calc) {
 printReceipt(order, new StandardPriceCalculator());
 printReceipt(order, new DiscountPriceCalculator(BigDecimal.valueOf(0.10)));</code></pre>
 
-<p>The caller decides <em>which</em> implementation to inject. The method just uses the contract. Swap implementations without changing a line of the caller — that's the power of polymorphism.</p>
+<p>The caller decides <em>which</em> implementation to inject. The method just uses the contract. Swap implementations without changing a line of the caller. That's the power of polymorphism..</p>
 
-<h2>Interface vs abstract class — when to use which</h2>
+<h2>Interface vs abstract class: when to use which</h2>
 
 <ul>
-  <li><strong>Interface</strong> — you need a contract that any class can fulfill. A class can implement <em>multiple</em> interfaces. Prefer interfaces for defining roles or capabilities.</li>
-  <li><strong>Abstract class</strong> — you need shared state (fields) and partial implementation across closely related types. A class can extend only <em>one</em> abstract class. Prefer abstract classes for template patterns with common wiring.</li>
+  <li><strong>Interface</strong>: you need a contract that any class can fulfill. A class can implement <em>multiple</em> interfaces. Prefer interfaces for defining roles or capabilities.</li>
+  <li><strong>Abstract class</strong>: you need shared state (fields) and partial implementation across closely related types. A class can extend only <em>one</em> abstract class. Prefer abstract classes for template patterns with common wiring.</li>
 </ul>
 
-<p>Since Java 8, interfaces can have <code>default</code> methods with bodies — so the line is blurrier. The tiebreaker: if you need instance fields, use an abstract class. Otherwise, prefer an interface for the flexibility of multiple implementation.</p>
+<p>Since Java 8, interfaces can have <code>default</code> methods with bodies, so the line is blurrier. The tiebreaker: if you need instance fields, use an abstract class. Otherwise, prefer an interface for the flexibility of multiple implementation.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://docs.oracle.com/javase/tutorial/java/concepts/" target="_blank" rel="noopener">Oracle: Object-Oriented Programming Concepts</a> · <a href="https://docs.oracle.com/javase/tutorial/java/IandI/createinterface.html" target="_blank" rel="noopener">Oracle: Defining an Interface</a> · <a href="https://docs.oracle.com/javase/tutorial/java/IandI/abstract.html" target="_blank" rel="noopener">Oracle: Abstract Methods and Classes</a></p>
 
@@ -155,8 +155,8 @@ printReceipt(order, new DiscountPriceCalculator(BigDecimal.valueOf(0.10)));</cod
 <div class="quiz" id="q1">
   <div class="quiz-question">1. Can a Java class implement more than one interface?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Yes — a class can implement many interfaces</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">No — a class can implement only one</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Yes: a class can implement many interfaces</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">No: a class can implement only one</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only if the interfaces share no methods</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only if one interface extends the other</li>
   </ul>
@@ -168,7 +168,7 @@ printReceipt(order, new DiscountPriceCalculator(BigDecimal.valueOf(0.10)));</cod
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It creates an instance with null fields</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It calls the default constructor silently</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">A compile-time error — abstract types cannot be instantiated</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">A compile-time error: abstract types cannot be instantiated</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">A runtime <code>AbstractMethodError</code></li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
@@ -199,9 +199,9 @@ printReceipt(order, new DiscountPriceCalculator(BigDecimal.valueOf(0.10)));</cod
 <div class="quiz" id="q5">
   <div class="quiz-question">5. Can an interface in Java 21 contain a method with a body?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">No — interfaces can only have abstract methods</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">No: interfaces can only have abstract methods</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Only if every implementing class agrees</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Yes — a <code>default</code> method provides a body</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Yes: a <code>default</code> method provides a body</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Only <code>private</code> methods can have bodies</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
@@ -226,7 +226,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite, review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

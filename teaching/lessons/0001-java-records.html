@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 1 — Java Records: Boilerplate-Free Data Classes</title>
+  <title>Lesson 1: Java Records: Boilerplate-Free Data Classes</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Java Records: Boilerplate-Free Data Classes</h1>
 
-<p>If you've written data-carrying classes in any language, you know the drill: constructor, getters, <code>equals()</code>, <code>hashCode()</code>, <code>toString()</code> — easily 50 lines of identical structure for something that should be one.</p>
+<p>If you've written data-carrying classes in any language, you know the drill: constructor, getters, <code>equals()</code>, <code>hashCode()</code>, <code>toString()</code>. Easily 50 lines of identical structure for something that should be one.</p>
 
 <p>Java 16 introduced <strong>records</strong> to solve this. A record is an <strong>immutable data carrier</strong>. The compiler generates all that boilerplate for you.</p>
-<p><strong>JDK version:</strong> Spring Boot 4.1 supports Java 17, 21, 25, and 26. Java 21+ is recommended as the practical baseline — it gives you records, sealed types, pattern matching, and virtual threads. If you're starting fresh, install JDK 21.</p>
+<p><strong>JDK version:</strong> Spring Boot 4.1 supports Java 17, 21, 25, and 26. Java 21+ is recommended as the practical baseline. It gives you records, sealed types, pattern matching, and virtual threads. If you're starting fresh, install JDK 21.</p>
 
 <h2>Your first record</h2>
 
@@ -26,13 +26,13 @@
 <p>That's it. You automatically get:</p>
 
 <ul>
-  <li><code>customer.id()</code>, <code>customer.name()</code>, <code>customer.email()</code> — accessor methods</li>
-  <li><code>equals()</code> and <code>hashCode()</code> — correct, field-based implementations</li>
-  <li><code>toString()</code> — readable output like <code>Customer[id=1, name=Alice, email=alice@example.com]</code></li>
-  <li>A constructor — <code>new Customer("1", "Alice", "alice@example.com")</code></li>
+  <li><code>customer.id()</code>, <code>customer.name()</code>, <code>customer.email()</code>: accessor methods</li>
+  <li><code>equals()</code> and <code>hashCode()</code>: correct, field-based implementations</li>
+  <li><code>toString()</code>: readable output like <code>Customer[id=1, name=Alice, email=alice@example.com]</code></li>
+  <li>A constructor: <code>new Customer("1", "Alice", "alice@example.com")</code></li>
 </ul>
 
-<p>Records are <strong>immutable by design</strong>. There are no setters. Once created, a record's state cannot change. This makes them thread-safe and predictable — two qualities you'll rely on constantly in backend systems.</p>
+<p>Records are <strong>immutable by design</strong>. There are no setters. Once created, a record's state cannot change. This makes them thread-safe and predictable: two qualities you'll rely on constantly in backend systems.</p>
 
 <h2>Why this matters for your mission</h2>
 
@@ -42,7 +42,7 @@
 
 <h2>Validating record fields</h2>
 
-<p>By default, records accept <code>null</code> values. In backend systems, <code>null</code> almost always means a bug waiting to happen. Records support a <strong>compact constructor</strong> — a validation block that runs during construction (before field assignment):</p>
+<p>By default, records accept <code>null</code> values. In backend systems, <code>null</code> almost always means a bug waiting to happen. Records support a <strong>compact constructor</strong>, a validation block that runs during construction (before field assignment):</p>
 
 <pre><code>public record Order(
     String id,
@@ -103,7 +103,7 @@
 <div class="quiz" id="q4">
   <div class="quiz-question">4. In a compact constructor, what happens if you reassign a parameter?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Compile-time error — reassignment is forbidden</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Compile-time error: reassignment is forbidden</li>
     <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The reassigned value is used for that field</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The original value is kept, reassignment ignored</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">A runtime exception is always thrown</li>
@@ -142,7 +142,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite, review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

@@ -10,7 +10,7 @@
 
 <h1>Running the App &amp; Maven Commands</h1>
 
-<p>Writing code is half the job. The other half is <strong>building, running, and shipping</strong> it. Maven gives you a small, well-defined set of commands that take you from source to a running application — or a deployable JAR. This lesson covers the commands you'll use every day, the Maven Wrapper that keeps your team consistent, and when Gradle might be the better choice.</p>
+<p>Writing code is half the job. The other half is <strong>building, running, and shipping</strong> it. Maven gives you a small, well-defined set of commands that take you from source to a running application or a deployable JAR. This lesson covers the commands you'll use every day, the Maven Wrapper that keeps your team consistent, and when Gradle might be the better choice.</p>
 
 <h2>Running with Maven</h2>
 
@@ -18,7 +18,7 @@
 
 <pre><code>mvn spring-boot:run</code></pre>
 
-<p>This compiles your code, resolves dependencies, starts the embedded server, and — with DevTools enabled — watches for file changes. Save a file and the app restarts automatically.</p>
+<p>This compiles your code, resolves dependencies, starts the embedded server, and (with DevTools enabled) watches for file changes. Save a file and the app restarts automatically.</p>
 
 <p>To verify it's running, hit the health endpoint:</p>
 
@@ -29,7 +29,7 @@
 
 <h2>Building a JAR</h2>
 
-<p>For deployment, you want a self-contained <strong>fat JAR</strong> — your code plus every dependency bundled into one file:</p>
+<p>For deployment, you want a self-contained <strong>fat JAR</strong>: your code plus every dependency bundled into one file:</p>
 
 <pre><code># Clean old artifacts, then compile + test + package
 mvn clean package
@@ -40,7 +40,7 @@ mvn clean package
 # Run it anywhere with a JDK:
 java -jar target/myapp-0.0.1-SNAPSHOT.jar</code></pre>
 
-<p><code>mvn clean package</code> is the command you run before every deploy. The <code>clean</code> deletes stale files from <code>target/</code>; <code>package</code> compiles, runs tests, and produces the JAR. Skipping <code>clean</code> can leave old class files lying around — subtle bugs in production.</p>
+<p><code>mvn clean package</code> is the command you run before every deploy. The <code>clean</code> deletes stale files from <code>target/</code>; <code>package</code> compiles, runs tests, and produces the JAR. Skipping <code>clean</code> can leave old class files lying around, which causes subtle bugs in production.</p>
 
 <h2>Maven commands cheatsheet</h2>
 
@@ -60,11 +60,11 @@ java -jar target/myapp-0.0.1-SNAPSHOT.jar</code></pre>
   </tbody>
 </table>
 
-<p>Each command triggers all preceding phases in Maven's lifecycle. <code>mvn package</code> already runs <code>compile</code> and <code>test</code> — you never need to type <code>mvn compile test package</code>.</p>
+<p>Each command triggers all preceding phases in Maven's lifecycle. <code>mvn package</code> already runs <code>compile</code> and <code>test</code>, so you never need to type <code>mvn compile test package</code>.</p>
 
 <p>The difference between <code>package</code> and <code>install</code>: <code>install</code> copies the JAR into your local Maven repository (<code>~/.m2/repository</code>), making it available as a dependency for other projects on the same machine. Use <code>package</code> for deployment; <code>install</code> when multi-module projects need each other's artifacts.</p>
 
-<h2>Maven Wrapper — <code>./mvnw</code></h2>
+<h2>Maven Wrapper: <code>./mvnw</code></h2>
 
 <p>Not everyone on your team has Maven installed. Not everyone has the <em>same</em> version. The Maven Wrapper solves both problems:</p>
 
@@ -75,9 +75,9 @@ mvn wrapper:wrapper
 ./mvnw clean package
 ./mvnw spring-boot:run</code></pre>
 
-<p>The wrapper downloads the correct Maven version automatically. The <code>mvnw</code> script, <code>mvnw.cmd</code>, and <code>.mvn/</code> directory <strong>should be committed to git</strong> — this guarantees every contributor and every CI runner uses the same Maven version, eliminating "works on my machine" build differences.</p>
+<p>The wrapper downloads the correct Maven version automatically. The <code>mvnw</code> script, <code>mvnw.cmd</code>, and <code>.mvn/</code> directory <strong>should be committed to git</strong>. This guarantees every contributor and every CI runner uses the same Maven version, eliminating "works on my machine" build differences.</p>
 
-<h2>Gradle — when to choose it over Maven</h2>
+<h2>Gradle: when to choose it over Maven</h2>
 
 <p>Gradle is the other major build tool in the JVM ecosystem. It uses a <strong>Groovy or Kotlin DSL</strong> instead of XML:</p>
 

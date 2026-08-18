@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 4 — Pattern Matching with switch</title>
+  <title>Lesson 4: Pattern Matching with switch</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
 
 <h2>Type patterns and variable binding</h2>
 
-<p>A <strong>type pattern</strong> matches the runtime type and binds a variable in one step — no casting needed:</p>
+<p>A <strong>type pattern</strong> matches the runtime type and binds a variable in one step: no casting needed:</p>
 
 <pre><code>String format(Object value) {
     return switch (value) {
@@ -27,7 +27,7 @@
 }
 </code></pre>
 
-<p><code>case String s</code> does two things: checks <code>value instanceof String</code> and binds <code>s</code> to the cast result. Before Java 21, you wrote <code>if (value instanceof String) { String s = (String) value; ... }</code> — three lines for what is now one case.</p>
+<p><code>case String s</code> does two things: checks <code>value instanceof String</code> and binds <code>s</code> to the cast result. Before Java 21, you wrote <code>if (value instanceof String) { String s = (String) value; ... }</code>. Three lines for what is now one case.</p>
 
 <h2>Record destructuring in switch</h2>
 
@@ -49,7 +49,7 @@ String describe(Object shape) {
 }
 </code></pre>
 
-<p>The pattern <code>Circle(Point c, double r)</code> matches a <code>Circle</code> and extracts its <code>center</code> and <code>radius</code> in one step. Nested records destructure recursively — <code>Point c</code> captures the whole point.</p>
+<p>The pattern <code>Circle(Point c, double r)</code> matches a <code>Circle</code> and extracts its <code>center</code> and <code>radius</code> in one step. Nested records destructure recursively: <code>Point c</code> captures the whole point.</p>
 
 <h2>Guard clauses (<code>when</code>)</h2>
 
@@ -74,7 +74,7 @@ String describe(Object shape) {
 
 <h2>Sealed types and exhaustive switch</h2>
 
-<p>A <code>sealed</code> interface declares exactly which classes can implement it. When every permitted subtype is covered, the switch is <strong>exhaustive</strong> — no <code>default</code> needed:</p>
+<p>A <code>sealed</code> interface declares exactly which classes can implement it. When every permitted subtype is covered, the switch is <strong>exhaustive</strong>: no <code>default</code> needed:</p>
 
 <pre><code>sealed interface Payment permits CashPayment, CardPayment, BankTransfer {}
 record CashPayment(BigDecimal amount, String currency) implements Payment {}
@@ -90,7 +90,7 @@ String describe(Payment p) {
 }
 </code></pre>
 
-<p>Remove one case and the compiler errors — you didn't cover all permitted subtypes. This is the same exhaustiveness check you know from <code>enum</code> switches, but now it works for any sealed hierarchy.</p>
+<p>Remove one case and the compiler errors; you didn't cover all permitted subtypes. This is the same exhaustiveness check you know from <code>enum</code> switches, but now it works for any sealed hierarchy.</p>
 
 <p><strong>Primary source:</strong> <a href="https://docs.oracle.com/en/java/javase/21/language/pattern-matching.html" target="_blank" rel="noopener">Oracle: Pattern Matching for switch (JEP 441)</a></p>
 
@@ -112,7 +112,7 @@ String describe(Payment p) {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The <code>when r == 0</code> case, because guards run first</li>
     <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">The unguarded Circle case, because the guard fails and flow falls through</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Neither — the compiler rejects overlapping patterns</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Neither: the compiler rejects overlapping patterns</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The default case, because no guard matched</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
@@ -121,9 +121,9 @@ String describe(Payment p) {
 <div class="quiz" id="q3">
   <div class="quiz-question">3. A sealed interface <code>Shape</code> permits <code>Circle</code>, <code>Square</code>, <code>Triangle</code>. Your switch covers Circle and Square but omits Triangle. What happens?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Compiles fine — default covers the missing case</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Compiles fine: default covers the missing case</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Runtime IllegalStateException when a Triangle is passed</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Compile error — the switch is not exhaustive</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Compile error: the switch is not exhaustive</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The unmatched case falls through to null handling</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
@@ -134,9 +134,9 @@ String describe(Payment p) {
 <pre style="margin:0.5em 0;padding:0.5em;background:var(--code-bg, #f5f5f5);border-radius:4px;font-size:0.85em"><code>case Rectangle(var tl, var w, var h) -&gt; "Rectangle";
 case Rectangle(var tl, var w, var h) when w == h -&gt; "Square";</code></pre>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Returns "Rectangle" — the first matching case wins</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Returns "Square" — guarded cases take priority</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Compile error — overlapping patterns are forbidden</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Returns "Rectangle": the first matching case wins</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Returns "Square": guarded cases take priority</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Compile error: overlapping patterns are forbidden</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Returns "Rectangle" only at runtime; compiler warns</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>
@@ -173,7 +173,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite, review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

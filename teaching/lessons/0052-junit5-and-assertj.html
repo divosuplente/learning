@@ -18,10 +18,10 @@
   <tr><th>Annotation</th><th>Purpose</th></tr>
   <tr><td><code>@Test</code></td><td>Marks a method as a test</td></tr>
   <tr><td><code>@DisplayName</code></td><td>Human-readable name in test reports</td></tr>
-  <tr><td><code>@BeforeEach</code></td><td>Runs before <em>each</em> test — use for setup</td></tr>
-  <tr><td><code>@AfterEach</code></td><td>Runs after each test — use for cleanup</td></tr>
-  <tr><td><code>@BeforeAll</code></td><td>Runs once before all tests — must be <code>static</code></td></tr>
-  <tr><td><code>@AfterAll</code></td><td>Runs once after all tests — must be <code>static</code></td></tr>
+  <tr><td><code>@BeforeEach</code></td><td>Runs before <em>each</em> test; use for setup</td></tr>
+  <tr><td><code>@AfterEach</code></td><td>Runs after each test; use for cleanup</td></tr>
+  <tr><td><code>@BeforeAll</code></td><td>Runs once before all tests; must be <code>static</code></td></tr>
+  <tr><td><code>@AfterAll</code></td><td>Runs once after all tests; must be <code>static</code></td></tr>
   <tr><td><code>@ParameterizedTest</code></td><td>Runs the same test with different inputs</td></tr>
   <tr><td><code>@Nested</code></td><td>Groups related tests in an inner class</td></tr>
   <tr><td><code>@Disabled</code></td><td>Skips a test</td></tr>
@@ -59,7 +59,7 @@
     }
 }</code></pre>
 
-<p>Every test follows <strong>Arrange-Act-Assert</strong>: set up data, call the method under test, verify the result. The "act" line — where you call the production method — is always visible and unambiguous.</p>
+<p>Every test follows <strong>Arrange-Act-Assert</strong>: set up data, call the method under test, verify the result. The "act" line (where you call the production method) is always visible and unambiguous.</p>
 
 <h2>Parameterized Tests</h2>
 
@@ -81,7 +81,7 @@ void shouldCalculateTotalCorrectly(
     assertThat(total).isEqualByComparingTo(expected);
 }</code></pre>
 
-<p>Each row in <code>@CsvSource</code> is one test execution. If the third row fails, the other three still pass — you get a precise signal about which input broke the logic.</p>
+<p>Each row in <code>@CsvSource</code> is one test execution. If the third row fails, the other three still pass, so you get a precise signal about which input broke the logic.</p>
 
 <h2>Grouping with <code>@Nested</code></h2>
 
@@ -126,9 +126,9 @@ class OrderCalculatorTest {
   > calculateGrandTotal
     > shouldSumAllItemTotals</code></pre>
 
-<p><strong>Key detail:</strong> <code>@BeforeAll</code> and <code>@AfterAll</code> inside a <code>@Nested</code> class <em>cannot</em> be <code>static</code> — they must be instance methods — because nested inner classes cannot have static members. In the outer class, they remain <code>static</code> as usual.</p>
+<p><strong>Key detail:</strong> <code>@BeforeAll</code> and <code>@AfterAll</code> inside a <code>@Nested</code> class <em>cannot</em> be <code>static</code>. They must be instance methods, because nested inner classes cannot have static members. In the outer class, they remain <code>static</code> as usual.</p>
 
-<h2>AssertJ — Fluent Assertions</h2>
+<h2>AssertJ: Fluent Assertions</h2>
 
 <p>JUnit ships with <code>assertEquals</code>, <code>assertTrue</code>, <code>assertNotNull</code>, and friends. AssertJ replaces all of them with a single <code>assertThat</code> entry point that chains fluently:</p>
 
@@ -166,14 +166,14 @@ assertThatThrownBy(() -> orderService.confirmOrder(999L))
 assertThat(total).isEqualByComparingTo("149.97");
 assertThat(total).isGreaterThan(new BigDecimal("100.00"));</code></pre>
 
-<p><strong>Common trap:</strong> <code>assertThat(new BigDecimal("1.0")).isEqualTo(new BigDecimal("1.00"))</code> fails — <code>isEqualTo</code> checks <code>.equals()</code>, which considers scale. Use <code>isEqualByComparingTo</code> for numeric comparison.</p>
+<p><strong>Common trap:</strong> <code>assertThat(new BigDecimal("1.0")).isEqualTo(new BigDecimal("1.00"))</code> fails because <code>isEqualTo</code> checks <code>.equals()</code>, which considers scale. Use <code>isEqualByComparingTo</code> for numeric comparison.</p>
 
 <h2>Writing Testable Code</h2>
 
 <p>Tests are only as good as the code they test. A class that is hard to test is telling you something: it has too many responsibilities, hidden dependencies, or tight coupling. Three rules keep code testable:</p>
 
 <ul>
-  <li><strong>Inject dependencies, don't create them.</strong> A service that <code>new</code>s its own <code>OrderRepository</code> cannot be tested with a fake. Accept it via constructor — the test supplies a mock or stub.</li>
+  <li><strong>Inject dependencies, don't create them.</strong> A service that <code>new</code>s its own <code>OrderRepository</code> cannot be tested with a fake. Accept it via constructor, and the test supplies a mock or stub.</li>
   <li><strong>Avoid static state and singletons.</strong> A static <code>Clock</code> or <code>Database.getInstance()</code> makes every test share mutable global state. Pass time as a parameter; inject the data source.</li>
   <li><strong>Keep methods pure or explicitly side-effecting.</strong> A method that reads the database <em>and</em> writes a file <em>and</em> returns a result is three things to mock. Split the query from the command from the computation.</li>
 </ul>
@@ -204,7 +204,7 @@ class OrderService {
     }
 }</code></pre>
 
-<p>The production code is identical at runtime. The difference is that the testable version lets the test control the inputs — which is the entire point.</p>
+<p>The production code is identical at runtime. The difference is that the testable version lets the test control the inputs, which is the entire point.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://junit.org/junit5/docs/current/user-guide/" target="_blank" rel="noopener">JUnit 5 User Guide</a> · <a href="https://assertj.github.io/doc/" target="_blank" rel="noopener">AssertJ Documentation</a> · <a href="https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests" target="_blank" rel="noopener">JUnit 5 Parameterized Tests</a></p>
 
@@ -213,21 +213,21 @@ class OrderService {
 <div class="quiz" id="q1">
   <div class="quiz-question">1. A <code>@Nested</code> inner class needs a <code>@BeforeAll</code> setup method. Which signature is correct?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>static void beforeAll()</code> — same rule as outer classes</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0"><code>void beforeAll()</code> — non-static, because inner classes cannot have static members</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>static void beforeAll()</code>, same rule as outer classes</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0"><code>void beforeAll()</code>, non-static, because inner classes cannot have static members</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>@BeforeAll</code> is not allowed inside <code>@Nested</code> classes at all</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>default void beforeAll()</code> — interface default method required</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>default void beforeAll()</code>, interface default method required</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
 
 <div class="quiz" id="q2">
-  <div class="quiz-question">2. <code>assertThat(new BigDecimal("1.0")).isEqualTo(new BigDecimal("1.00"))</code> — does this pass or fail?</div>
+  <div class="quiz-question">2. <code>assertThat(new BigDecimal("1.0")).isEqualTo(new BigDecimal("1.00"))</code>: does this pass or fail?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Fails — <code>isEqualTo</code> uses <code>.equals()</code>, and scale differs (1.0 &ne; 1.00)</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Passes — the numeric values are identical</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Fails — <code>isEqualTo</code> is not supported for BigDecimal</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Passes — AssertJ normalizes scale before comparing</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Fails: <code>isEqualTo</code> uses <code>.equals()</code>, and scale differs (1.0 &ne; 1.00)</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Passes: the numeric values are identical</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Fails: <code>isEqualTo</code> is not supported for BigDecimal</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Passes: AssertJ normalizes scale before comparing</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>
@@ -237,7 +237,7 @@ class OrderService {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only the nested <code>@BeforeEach</code> runs</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Only the outer <code>@BeforeEach</code> runs</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Both run — outer first, then nested</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Both run, outer first, then nested</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The outer <code>@BeforeEach</code> runs only if the nested class lacks one</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
@@ -248,7 +248,7 @@ class OrderService {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It is faster because it avoids reflection</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It catches checked exceptions that <code>assertThrows</code> cannot</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">It chains further assertions on the exception — <code>.hasMessageContaining("999")</code> — which <code>assertThrows</code> cannot do fluently</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">It chains further assertions on the exception, like <code>.hasMessageContaining("999")</code>, which <code>assertThrows</code> cannot do fluently</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">There is no difference; both are equivalent in every way</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>
@@ -257,9 +257,9 @@ class OrderService {
 <div class="quiz" id="q5">
   <div class="quiz-question">5. A service method calls <code>new OrderRepository()</code> internally instead of accepting it via constructor. What is the testability consequence?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">None — the test can still call the method and verify the result</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The test cannot substitute a mock or fake repository, so it must use the real database — making the test slow, fragile, and coupled to infrastructure</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The test can use reflection to replace the field — no real consequence</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">None: the test can still call the method and verify the result</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The test cannot substitute a mock or fake repository, so it must use the real database, making the test slow, fragile, and coupled to infrastructure</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The test can use reflection to replace the field; no real consequence</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The service is fine; repository creation is an implementation detail</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>

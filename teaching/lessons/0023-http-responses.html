@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 23 — HTTP Responses with ResponseEntity &amp; Status Codes</title>
+  <title>Lesson 23: HTTP Responses with ResponseEntity &amp; Status Codes</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>HTTP Responses with <code>ResponseEntity</code> &amp; Status Codes</h1>
 
-<p>A controller method that returns a plain object always sends <strong>200 OK</strong>. That's fine for reading data, but REST APIs need richer responses — <strong>201 Created</strong> when a resource is born, <strong>204 No Content</strong> after a deletion, <strong>404 Not Found</strong> when something doesn't exist. Spring's <code>ResponseEntity&lt;T&gt;</code> gives you full control over the status code, headers, and body in one return value.</p>
+<p>A controller method that returns a plain object always sends <strong>200 OK</strong>. That's fine for reading data, but REST APIs need richer responses: <strong>201 Created</strong> when a resource is born, <strong>204 No Content</strong> after a deletion, <strong>404 Not Found</strong> when something doesn't exist. Spring's <code>ResponseEntity&lt;T&gt;</code> gives you full control over the status code, headers, and body in one return value.</p>
 
 <h2>Why <code>ResponseEntity</code>?</h2>
 
@@ -22,7 +22,7 @@ public OrderResponse getOrder(@PathVariable Long id) {
     return orderService.getOrderById(id);
 }</code></pre>
 
-<p>If the order doesn't exist, this throws an exception or returns <code>null</code> (which becomes 404 or 200-with-null — neither ideal). <code>ResponseEntity</code> lets you <strong>explicitly choose</strong> the status and, optionally, add headers:</p>
+<p>If the order doesn't exist, this throws an exception or returns <code>null</code> (which becomes 404 or 200-with-null, neither ideal). <code>ResponseEntity</code> lets you <strong>explicitly choose</strong> the status and, optionally, add headers:</p>
 
 <pre><code>@GetMapping("/{id}")
 public ResponseEntity&lt;OrderResponse&gt; getOrder(@PathVariable Long id) {
@@ -55,7 +55,7 @@ return ResponseEntity.status(HttpStatus.CONFLICT)
     .header("X-Conflict-Reason", "insufficient stock")
     .body(error);</code></pre>
 
-<p>Notice the pattern: methods like <code>.ok()</code> and <code>.noContent()</code> return a <strong>builder</strong>. You finish with <code>.body(…)</code> when you have a payload, or <code>.build()</code> when you don't. Calling <code>.build()</code> on a builder that expects a body compiles — but sends an empty response, which is almost certainly a bug.</p>
+<p>Notice the pattern: methods like <code>.ok()</code> and <code>.noContent()</code> return a <strong>builder</strong>. You finish with <code>.body(…)</code> when you have a payload, or <code>.build()</code> when you don't. Calling <code>.build()</code> on a builder that expects a body compiles, but sends an empty response, which is almost certainly a bug.</p>
 
 <h2>Status codes: when to use each</h2>
 
@@ -65,22 +65,22 @@ return ResponseEntity.status(HttpStatus.CONFLICT)
   </thead>
   <tbody>
     <tr><td><strong>200</strong></td><td>OK</td><td>Successful GET or PUT that returns data</td><td>Yes</td></tr>
-    <tr><td><strong>201</strong></td><td>Created</td><td>POST that creates a new resource</td><td>Yes — the created resource</td></tr>
+    <tr><td><strong>201</strong></td><td>Created</td><td>POST that creates a new resource</td><td>Yes, the created resource</td></tr>
     <tr><td><strong>204</strong></td><td>No Content</td><td>DELETE, or PUT that returns nothing</td><td>No</td></tr>
-    <tr><td><strong>400</strong></td><td>Bad Request</td><td>Client sent invalid input</td><td>Usually — error details</td></tr>
-    <tr><td><strong>404</strong></td><td>Not Found</td><td>Requested resource doesn't exist</td><td>Optional — error details</td></tr>
-    <tr><td><strong>409</strong></td><td>Conflict</td><td>Action conflicts with current state</td><td>Usually — reason</td></tr>
-    <tr><td><strong>500</strong></td><td>Internal Server Error</td><td>Unexpected server failure</td><td>Rarely — don't leak stack traces</td></tr>
+    <tr><td><strong>400</strong></td><td>Bad Request</td><td>Client sent invalid input</td><td>Usually, error details</td></tr>
+    <tr><td><strong>404</strong></td><td>Not Found</td><td>Requested resource doesn't exist</td><td>Optional, error details</td></tr>
+    <tr><td><strong>409</strong></td><td>Conflict</td><td>Action conflicts with current state</td><td>Usually, reason</td></tr>
+    <tr><td><strong>500</strong></td><td>Internal Server Error</td><td>Unexpected server failure</td><td>Rarely, don't leak stack traces</td></tr>
   </tbody>
 </table>
 
-<h2>201 vs 204 — the tricky pair</h2>
+<h2>201 vs 204: the tricky pair</h2>
 
 <p>Both indicate success, but they mean different things:</p>
 
 <ul>
-  <li><strong>201 Created</strong> — a new resource was born. The response body should contain it (so the client gets the server-assigned ID, timestamps, etc.). Also convention: include a <code>Location</code> header pointing to the new resource.</li>
-  <li><strong>204 No Content</strong> — the action succeeded, but there's nothing to return. Classic case: <code>DELETE /api/orders/42</code>. The resource is gone; there's nothing to show.</li>
+  <li><strong>201 Created</strong>: a new resource was born. The response body should contain it (so the client gets the server-assigned ID, timestamps, etc.). Also convention: include a <code>Location</code> header pointing to the new resource.</li>
+  <li><strong>204 No Content</strong>: the action succeeded, but there's nothing to return. Classic case: <code>DELETE /api/orders/42</code>. The resource is gone; there's nothing to show.</li>
 </ul>
 
 <pre><code>// POST — creates something, so 201 + body + Location header
@@ -99,9 +99,9 @@ public ResponseEntity&lt;Void&gt; deleteOrder(@PathVariable Long id) {
     return ResponseEntity.noContent().build();
 }</code></pre>
 
-<p><code>ResponseEntity.created(location)</code> is a convenience — it sets both the 201 status <em>and</em> the <code>Location</code> header in one call.</p>
+<p><code>ResponseEntity.created(location)</code> is a convenience: it sets both the 201 status <em>and</em> the <code>Location</code> header in one call.</p>
 
-<h2>409 Conflict — when to reach for it</h2>
+<h2>409 Conflict: when to reach for it</h2>
 
 <p>Use 409 when the request is <em>valid</em> but can't be satisfied because of the <em>current state</em> of the system:</p>
 
@@ -125,7 +125,7 @@ return ResponseEntity.ok()               // HeadersBuilder
     .header("X-Total-Count", "42")
     .body(orders);                       // ResponseEntity&lt;List&lt;Order&gt;&gt;</code></pre>
 
-<p>The first form returns the final <code>ResponseEntity</code> immediately — you can't chain <code>.header()</code> after it. If you need headers, use the no-arg <code>.ok()</code> builder form.</p>
+<p>The first form returns the final <code>ResponseEntity</code> immediately. You can't chain <code>.header()</code> after it. If you need headers, use the no-arg <code>.ok()</code> builder form.</p>
 
 <h2>Full CRUD example</h2>
 
@@ -194,10 +194,10 @@ public class OrderController {
 <div class="quiz" id="q3">
   <div class="quiz-question">3. A user tries to register with an email that's already taken. The input format is valid. Which status code fits best?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">400 Bad Request — the input is invalid</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">409 Conflict — valid input, but current state prevents it</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">404 Not Found — the new user doesn't exist yet</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">500 Internal Server Error — something went wrong</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">400 Bad Request, the input is invalid</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">409 Conflict, valid input, but current state prevents it</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">404 Not Found, the new user doesn't exist yet</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">500 Internal Server Error, something went wrong</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
 </div>
@@ -208,7 +208,7 @@ public class OrderController {
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">They produce different HTTP status codes (200 vs 201)</li>
     <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The latter lets you chain <code>.header()</code> before <code>.body()</code>; the former does not</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The former returns a builder; the latter returns the final entity</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">There is no difference — they are interchangeable in every case</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">There is no difference; they are interchangeable in every case</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>
 </div>

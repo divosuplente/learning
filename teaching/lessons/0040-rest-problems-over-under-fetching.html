@@ -10,7 +10,7 @@
 
 <h1>REST Problems: Over-fetching &amp; Under-fetching</h1>
 
-<p>REST works well for simple CRUD. But when your clients have different data needs, <strong>the fixed response shape becomes a bottleneck</strong>. This lesson identifies two fundamental problems — over-fetching and under-fetching — and shows why GraphQL was created to solve them.</p>
+<p>REST works well for simple CRUD. But when your clients have different data needs, <strong>the fixed response shape becomes a bottleneck</strong>. This lesson identifies two fundamental problems, over-fetching and under-fetching, and shows why GraphQL was created to solve them.</p>
 
 <h2>The Recap: How REST Returns Data</h2>
 
@@ -30,13 +30,13 @@
   ]
 }</code></pre>
 
-<p>The endpoint always returns every field — whether the caller needs it or not. That's the root cause of both problems.</p>
+<p>The endpoint always returns every field, whether the caller needs it or not. That's the root cause of both problems.</p>
 
 <h2>Problem 1: Over-Fetching</h2>
 
 <p><strong>Over-fetching</strong> is when the API returns more data than the client needs.</p>
 
-<p>A mobile app shows a list of orders. It only needs <code>id</code> and <code>status</code> for each row — but the REST endpoint returns the full object including items, timestamps, customer details, and the total. The extra data wastes bandwidth and slows the response, especially on mobile networks.</p>
+<p>A mobile app shows a list of orders. It only needs <code>id</code> and <code>status</code> for each row, but the REST endpoint returns the full object including items, timestamps, customer details, and the total. The extra data wastes bandwidth and slows the response, especially on mobile networks.</p>
 
 <pre><code>Client needs:  { "id": 42, "status": "CONFIRMED" }
 REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice",
@@ -44,7 +44,7 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice",
                  "createdAt": "...", "items": [...] }
                                               ↑ wasted data</code></pre>
 
-<p>You could create a separate <code>/api/orders/summary</code> endpoint, but now you're maintaining two endpoints for the same resource — and the next client will want a slightly different subset.</p>
+<p>You could create a separate <code>/api/orders/summary</code> endpoint, but now you're maintaining two endpoints for the same resource, and the next client will want a slightly different subset.</p>
 
 <h2>Problem 2: Under-Fetching</h2>
 
@@ -53,39 +53,39 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice",
 <p>A dashboard shows orders with customer names and product details. With REST, you might need:</p>
 
 <ol>
-  <li><code>GET /api/orders</code> — returns orders, but only <code>customerId</code>, not the name</li>
-  <li><code>GET /api/customers/7</code> — get customer details for order 1</li>
-  <li><code>GET /api/customers/12</code> — get customer details for order 2</li>
-  <li><code>GET /api/products/100</code> — get product details for the first item</li>
+  <li><code>GET /api/orders</code>: returns orders, but only <code>customerId</code>, not the name</li>
+  <li><code>GET /api/customers/7</code>: get customer details for order 1</li>
+  <li><code>GET /api/customers/12</code>: get customer details for order 2</li>
+  <li><code>GET /api/products/100</code>: get product details for the first item</li>
 </ol>
 
-<p>That's 4+ round trips. Each network hop adds 50–200 ms of latency. On a slow connection, the dashboard is unusable.</p>
+<p>That's 4+ round trips. Each network hop adds 50 to 200 ms of latency. On a slow connection, the dashboard is unusable.</p>
 
-<p>Again, you could build a dedicated <code>/api/dashboard/orders</code> endpoint — but every new view needs its own endpoint, and they all return differently shaped data from the same underlying resources.</p>
+<p>Again, you could build a dedicated <code>/api/dashboard/orders</code> endpoint, but every new view needs its own endpoint, and they all return differently shaped data from the same underlying resources.</p>
 
 <h2>The Root Cause: Fixed Response Shape</h2>
 
-<p>Both problems share the same cause. <strong>REST endpoints return a fixed shape defined by the server.</strong> Different clients — web app, mobile app, analytics dashboard — have different needs, but they all get the same response.</p>
+<p>Both problems share the same cause. <strong>REST endpoints return a fixed shape defined by the server.</strong> Different clients (web app, mobile app, analytics dashboard) have different needs, but they all get the same response.</p>
 
 <p>Workarounds exist, but each has a cost:</p>
 
 <ul>
-  <li><strong>Field-filtering parameters</strong> (<code>GET /api/orders?fields=id,status</code>) — custom parsing on the server, easy to get wrong</li>
-  <li><strong>Multiple endpoints per shape</strong> — maintenance burden, endpoint sprawl</li>
-  <li><strong>Embedding related data</strong> (<code>GET /api/orders?expand=customer</code>) — still fixed choices defined by the server</li>
+  <li><strong>Field-filtering parameters</strong> (<code>GET /api/orders?fields=id,status</code>): custom parsing on the server, easy to get wrong</li>
+  <li><strong>Multiple endpoints per shape</strong>: maintenance burden, endpoint sprawl</li>
+  <li><strong>Embedding related data</strong> (<code>GET /api/orders?expand=customer</code>): still fixed choices defined by the server</li>
 </ul>
 
 <p>None of these give the <em>client</em> full control over the data shape. That's what GraphQL fixes.</p>
 
 <h2>How GraphQL Solves Both Problems</h2>
 
-<p><strong>GraphQL</strong> is a query language for your API. Instead of the server deciding the response shape, the <strong>client specifies exactly what it wants</strong> in the request body, and the server returns exactly that — nothing more, nothing less.</p>
+<p><strong>GraphQL</strong> is a query language for your API. Instead of the server deciding the response shape, the <strong>client specifies exactly what it wants</strong> in the request body, and the server returns exactly that, nothing more.</p>
 
 <p>Think of it like a restaurant:</p>
 
 <ul>
-  <li><strong>REST</strong> is a set menu — you get whatever the chef decided. You may not want the salad, but it's on the plate.</li>
-  <li><strong>GraphQL</strong> is à la carte — you pick exactly the dishes you want.</li>
+  <li><strong>REST</strong> is a set menu: you get whatever the chef decided. You may not want the salad, but it's on the plate.</li>
+  <li><strong>GraphQL</strong> is à la carte: you pick exactly the dishes you want.</li>
 </ul>
 
 <h3>Solving Over-Fetching</h3>
@@ -111,7 +111,7 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice",
 
 <h3>Solving Under-Fetching</h3>
 
-<p>The client can request related data in a single query — no extra round trips:</p>
+<p>The client can request related data in a single query, with no extra round trips:</p>
 
 <pre><code>{
   order(id: 42) {
@@ -139,9 +139,9 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice",
 <p>GraphQL isn't always better. REST remains the right choice when:</p>
 
 <ul>
-  <li>Your API is <strong>machine-to-machine</strong> — over-fetching doesn't matter when both sides are servers</li>
-  <li>You need <strong>HTTP-level caching</strong> — browsers and CDNs cache <code>GET</code> responses automatically; GraphQL needs custom caching</li>
-  <li>Your API is <strong>simple CRUD</strong> with few relationships — GraphQL's query language adds complexity for no gain</li>
+  <li>Your API is <strong>machine-to-machine</strong>: over-fetching doesn't matter when both sides are servers</li>
+  <li>You need <strong>HTTP-level caching</strong>: browsers and CDNs cache <code>GET</code> responses automatically; GraphQL needs custom caching</li>
+  <li>Your API is <strong>simple CRUD</strong> with few relationships: GraphQL's query language adds complexity for no gain</li>
 </ul>
 
 <p>You can also use both. Spring Boot supports REST and GraphQL endpoints in the same application.</p>
@@ -153,10 +153,10 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice",
 <div class="quiz" id="q1">
   <div class="quiz-question">1. A mobile app needs only <code>id</code> and <code>status</code> from the orders endpoint, but the server always returns all twelve fields. Which problem is this?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Over-fetching — the response contains more data than the client needs</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Under-fetching — the client needs to make additional requests</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">N+1 problem — the server issues one query per order</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Schema drift — the response fields have changed between versions</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Over-fetching: the response contains more data than the client needs</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Under-fetching: the client needs to make additional requests</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">N+1 problem: the server issues one query per order</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Schema drift: the response fields have changed between versions</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
@@ -164,10 +164,10 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice",
 <div class="quiz" id="q2">
   <div class="quiz-question">2. A dashboard calls <code>GET /api/orders</code>, then loops over each order's <code>customerId</code> to call <code>GET /api/customers/{id}</code>. Which problem is this?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Over-fetching — each customer response has too many fields</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Under-fetching — the client needs multiple round trips to assemble the data</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Schema mismatch — the order endpoint should include customer names</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Race condition — the requests might return out of order</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Over-fetching: each customer response has too many fields</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Under-fetching: the client needs multiple round trips to assemble the data</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Schema mismatch: the order endpoint should include customer names</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Race condition: the requests might return out of order</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>
@@ -188,7 +188,7 @@ REST returns:  { "id": 42, "customerId": 7, "customerName": "Alice",
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The summary endpoint will break the existing <code>/api/orders</code> endpoint</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">REST does not allow more than two endpoints per resource</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Each new client subset requires a new endpoint — endpoint sprawl with fixed shapes that never match every client's needs</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Each new client subset requires a new endpoint, causing endpoint sprawl with fixed shapes that never match every client's needs</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The mobile app should use the full endpoint and ignore unwanted fields client-side</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>
@@ -224,7 +224,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite: review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

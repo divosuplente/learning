@@ -10,7 +10,7 @@
 
 <h1>Mockito for Mocking Dependencies</h1>
 
-<p>Unit tests should prove one class works in isolation. But real classes have dependencies — repositories, HTTP clients, message producers. If you call the real database in a unit test, you're testing the database too, and your test is slow and fragile. <strong>Mockito</strong> creates fake versions of those dependencies that you control completely.</p>
+<p>Unit tests should prove one class works in isolation. But real classes have dependencies: repositories, HTTP clients, message producers. If you call the real database in a unit test, you're testing the database too, and your test is slow and fragile. <strong>Mockito</strong> creates fake versions of those dependencies that you control completely.</p>
 
 <h2>The Core Annotations</h2>
 
@@ -34,11 +34,11 @@ class OrderServiceTest {
     private OrderService orderService;
 }</code></pre>
 
-<p>What happens: Mockito creates a fake <code>OrderRepository</code> and a fake <code>CustomerRepository</code>, then builds a real <code>OrderService</code> and passes the fakes into its constructor. The <code>OrderService</code> thinks it's talking to real repositories — but every response is under your control.</p>
+<p>What happens: Mockito creates a fake <code>OrderRepository</code> and a fake <code>CustomerRepository</code>, then builds a real <code>OrderService</code> and passes the fakes into its constructor. The <code>OrderService</code> thinks it's talking to real repositories, but every response is under your control.</p>
 
 <h2>Stubbing with <code>when().thenReturn()</code></h2>
 
-<p>A mock with no instructions returns defaults — <code>null</code> for objects, <code>0</code> for numbers, <code>false</code> for booleans, <code>Optional.empty()</code> for <code>Optional</code>. Stubbing tells the mock what to return:</p>
+<p>A mock with no instructions returns defaults: <code>null</code> for objects, <code>0</code> for numbers, <code>false</code> for booleans, <code>Optional.empty()</code> for <code>Optional</code>. Stubbing tells the mock what to return:</p>
 
 <pre><code>@Test
 @DisplayName("Should throw when customer not found")
@@ -59,9 +59,9 @@ void shouldThrowWhenCustomerNotFound() {
     .thenReturn(Optional.of(customer))
     .thenReturn(Optional.empty()); // second call returns empty</code></pre>
 
-<h2>Stubbing Void Methods — <code>doThrow</code> / <code>doNothing</code></h2>
+<h2>Stubbing Void Methods: <code>doThrow</code> / <code>doNothing</code></h2>
 
-<p>You cannot call <code>when(mock.voidMethod()).thenReturn()</code> — the inner call returns <code>void</code>, breaking the DSL. Instead, use the <code>do*(...).when()</code> family:</p>
+<p>You cannot call <code>when(mock.voidMethod()).thenReturn()</code> because the inner call returns <code>void</code>, breaking the DSL. Instead, use the <code>do*(...).when()</code> family:</p>
 
 <pre><code>// Throw on void method
 doThrow(new IllegalStateException("Order locked"))
@@ -127,7 +127,7 @@ verify(orderRepo).findByCustomerAndStatus(eq(1L), any());</code></pre>
 
 <h2><code>thenAnswer</code> for Dynamic Responses</h2>
 
-<p>When <code>thenReturn</code> is too rigid — you need the mock to compute something based on its input:</p>
+<p>When <code>thenReturn</code> is too rigid, you need the mock to compute something based on its input:</p>
 
 <pre><code>// Return whatever was passed in (useful for save() stubs)
 when(orderRepository.save(any())).thenAnswer(inv -> {
@@ -175,7 +175,7 @@ class OrderServiceTest {
     }
 }</code></pre>
 
-<p>Notice the pattern: <strong>Arrange</strong> (stub), <strong>Act</strong> (call the method), <strong>Assert</strong> (check state + verify interactions). The mock gives you a wall between your service and the database — you test the logic, not the infrastructure.</p>
+<p>Notice the pattern: <strong>Arrange</strong> (stub), <strong>Act</strong> (call the method), <strong>Assert</strong> (check state + verify interactions). The mock gives you a wall between your service and the database. You test the logic, not the infrastructure.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html" target="_blank" rel="noopener">Mockito Javadoc</a> · <a href="https://site.mockito.org/" target="_blank" rel="noopener">Mockito Official Site</a> · <a href="https://junit.org/junit5/docs/current/user-guide/#extensions" target="_blank" rel="noopener">JUnit 5 Extensions</a></p>
 
@@ -184,8 +184,8 @@ class OrderServiceTest {
 <div class="quiz" id="q1">
   <div class="quiz-question">1. A mock created with <code>@Mock</code> returns <code>null</code> for an unstubbed method that returns <code>Optional&lt;Customer&gt;</code>. What does it actually return?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>null</code> — Mockito always returns null for unstubbed object returns</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0"><code>Optional.empty()</code> — Mockito returns a smart default for Optional</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>null</code>: Mockito always returns null for unstubbed object returns</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0"><code>Optional.empty()</code>: Mockito returns a smart default for Optional</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It throws <code>StubbingNotCalledException</code> at runtime</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">A new <code>Customer</code> object with all fields set to null</li>
   </ul>
@@ -215,7 +215,7 @@ class OrderServiceTest {
 </div>
 
 <div class="quiz" id="q4">
-  <div class="quiz-question">4. Your test stubs <code>when(repo.save(any()))</code>, calls the service, and asserts the returned DTO. The test passes — but <code>save()</code> was never actually called. What went wrong?</div>
+  <div class="quiz-question">4. Your test stubs <code>when(repo.save(any()))</code>, calls the service, and asserts the returned DTO. The test passes, but <code>save()</code> was never actually called. What went wrong?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The stub prevented <code>save()</code> from executing</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Mockito silently ignores unstubbed calls</li>
@@ -229,8 +229,8 @@ class OrderServiceTest {
   <div class="quiz-question">5. <code>@InjectMocks</code> creates a real <code>OrderService</code> and injects mocks. The <code>OrderService</code> constructor also requires a <code>Clock</code>. You forgot to add <code>@Mock Clock clock</code>. What happens?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Mockito creates a mock <code>Clock</code> automatically</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The field is set to <code>null</code> — you get a <code>NullPointerException</code> when the test calls a method that uses <code>Clock</code></li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Mockito throws an exception at test startup — constructor injection fails</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The field is set to <code>null</code>: you get a <code>NullPointerException</code> when the test calls a method that uses <code>Clock</code></li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Mockito throws an exception at test startup; constructor injection fails</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Spring Boot intercepts and injects the real system <code>Clock</code> bean</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>

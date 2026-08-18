@@ -1,16 +1,16 @@
 ---
-title: "var & Switch Expressions"
-description: "var & Switch Expressions"
+title: "Lesson 6: var & Switch Expressions"
+description: "Lesson 6: var & Switch Expressions"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0006-var-and-switch-expressions.html
 ---
 
 # var & Switch Expressions
 
-Two modern Java features that reduce boilerplate without changing runtime behavior: `var` lets the compiler infer local variable types, and switch expressions turn `switch` into something that returns a value. Both are purely compile-time conveniences — the JVM sees the same bytecode either way.
+Two modern Java features that reduce boilerplate without changing runtime behavior: `var` lets the compiler infer local variable types, and switch expressions turn `switch` into something that returns a value. Both are purely compile-time conveniences, the JVM sees the same bytecode either way.
 
 ## The `var` keyword
 
-`var` tells the compiler to figure out the type from the initializer. It works only for local variables with an initializer — not fields, not parameters, not return types.
+`var` tells the compiler to figure out the type from the initializer. It works only for local variables with an initializer: not fields, not parameters, not return types.
 
 ```
 // Without var
@@ -20,13 +20,13 @@ Map<String, List<Customer>> customersByCity = new HashMap<>();
 var customersByCity = new HashMap<String, List<Customer>>();
 ```
 
-The inferred type is exactly what you'd write by hand. `var` is not `dynamic` — the variable is still statically typed.
+The inferred type is exactly what you'd write by hand. `var` is not `dynamic`; the variable is still statically typed.
 
 ## When `var` helps
 
 -   **Long generic types** where the type is obvious from the right side.
--   **try-with-resources** — `try (var conn = ds.getConnection()) { ... }`
--   **for-each loops** — `for (var entry : map.entrySet()) { ... }`
+-   **try-with-resources**: `try (var conn = ds.getConnection()) { ... }`
+-   **for-each loops**: `for (var entry : map.entrySet()) { ... }`
 
 ```
 var name = "Alice";                   // String
@@ -38,9 +38,9 @@ var stream = orders.stream()           // Stream<Order>
 
 ## When `var` hurts
 
--   **Unclear types** — `var result = process(data)` tells you nothing about the type.
--   **Interface vs implementation leak** — `var list = new ArrayList<String>()` infers `ArrayList`, not `List`. You lose the interface abstraction.
--   **Primitive surprises** — `var x = 0` is `int`, `var y = 0.0` is `double`, `var z = 0L` is `long`. These are all different.
+-   **Unclear types**: `var result = process(data)` tells you nothing about the type.
+-   **Interface vs implementation leak**: `var list = new ArrayList<String>()` infers `ArrayList`, not `List`. You lose the interface abstraction.
+-   **Primitive surprises**: `var x = 0` is `int`, `var y = 0.0` is `double`, `var z = 0L` is `long`. These are all different.
 
 ```
 var list = new ArrayList<String>();  // infers ArrayList, not List
@@ -50,11 +50,11 @@ var z = 0L;    // long
 var flag = true; // boolean
 ```
 
-> **Rule of thumb:** Use `var` when the type is obvious from the initializer — a constructor call or a factory method where the right side makes the type clear. Don't use it when a reader needs to look up the method signature to understand the type.
+> **Rule of thumb:** Use `var` when the type is obvious from the initializer, a constructor call or a factory method where the right side makes the type clear. Don't use it when a reader needs to look up the method signature to understand the type.
 
 ## Switch expressions
 
-Java 14 made `switch` an expression — it returns a value. Combined with pattern matching, this replaces the old fall-through `switch` with a clean form.
+Java 14 made `switch` an expression; it returns a value. Combined with pattern matching, this replaces the old fall-through `switch` with a clean form.
 
 ```
 // Old style — verbose, fall-through, error-prone
@@ -85,8 +85,8 @@ String dayType = switch (day) {
 
 ## Arrow vs colon labels
 
--   **Arrow labels** (`->`) — no fall-through. The expression or block on the right is the result.
--   **Colon labels** (`:`) — fall-through. You must `break` or `yield` explicitly.
+-   **Arrow labels** (`->`): no fall-through. The expression or block on the right is the result.
+-   **Colon labels** (`:`): fall-through. You must `break` or `yield` explicitly.
 
 You can mix them, but you shouldn't. Arrow labels are strictly better: no fall-through bugs, less code, clearer intent.
 
@@ -128,17 +128,17 @@ String label = switch (status) {
 
 <details>
 <summary>1. What type does var x = 0; infer?</summary>
-<p><strong>Correct answer:</strong> int — the default integer literal type</p>
+<p><strong>Correct answer:</strong> int: the default integer literal type</p>
 </details>
 
 <details>
 <summary>2. What does var list = new ArrayList(); infer?</summary>
-<p><strong>Correct answer:</strong> ArrayList<string> — the concrete type</string></p>
+<p><strong>Correct answer:</strong> ArrayList<string>: the concrete type</string></p>
 </details>
 
 <details>
 <summary>3. Inside a switch expression block body, which keyword returns the switch's value?</summary>
-<p><strong>Correct answer:</strong> yield — returns from the switch only</p>
+<p><strong>Correct answer:</strong> yield: returns from the switch only</p>
 </details>
 
 <details>
@@ -148,5 +148,5 @@ String label = switch (status) {
 
 <details>
 <summary>5. What type does var x = 0.0; infer?</summary>
-<p><strong>Correct answer:</strong> double — the default floating-point literal</p>
+<p><strong>Correct answer:</strong> double: the default floating-point literal</p>
 </details>

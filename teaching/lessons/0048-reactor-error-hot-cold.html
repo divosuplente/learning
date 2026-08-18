@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 48 — Error Handling, Hot vs Cold Publishers</title>
+  <title>Lesson 48: Error Handling, Hot vs Cold Publishers</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Error Handling, Hot vs Cold Publishers</h1>
 
-<p>A reactive pipeline without error handling is a pipeline that will one day fail silently. Reactor treats errors as <strong>first-class signals</strong> — just like <code>onNext</code> and <code>onComplete</code> — and gives you operators to recover, retry, or gracefully degrade. This lesson also covers the distinction between <strong>cold</strong> publishers (lazy, per-subscriber) and <strong>hot</strong> publishers (eager, shared), and why <em>nothing happens until you subscribe</em>.</p>
+<p>A reactive pipeline without error handling fails silently when errors hit. Reactor treats errors as <strong>first-class signals</strong>, just like <code>onNext</code> and <code>onComplete</code>, and gives you operators to recover, retry, or gracefully degrade. This lesson also covers the distinction between <strong>cold</strong> publishers (lazy, per-subscriber) and <strong>hot</strong> publishers (eager, shared), and why <em>nothing happens until you subscribe</em>.</p>
 
 <h2>The Error Signal in the Reactive Contract</h2>
 
-<p>Every <code>Mono</code> and <code>Flux</code> follows a strict lifecycle: <code>onNext</code> emits data, <code>onComplete</code> signals success, and <code>onError</code> signals failure. Once <code>onError</code> fires, the stream is <strong>done</strong> — no more <code>onNext</code> calls, no <code>onComplete</code>. If you don't handle the error, it propagates to the subscriber and may terminate the entire pipeline.</p>
+<p>Every <code>Mono</code> and <code>Flux</code> follows a strict lifecycle: <code>onNext</code> emits data, <code>onComplete</code> signals success, and <code>onError</code> signals failure. Once <code>onError</code> fires, the stream is <strong>done</strong>. No more <code>onNext</code> calls, no <code>onComplete</code>. If you don't handle the error, it propagates to the subscriber and may terminate the entire pipeline.</p>
 
 <pre><code>Flux&lt;String&gt; orders = Flux.just("ORD-1", "ORD-2")
     .map(id -> {
@@ -24,9 +24,9 @@
 // Subscribing without error handling → onComplete never fires,
 // the error propagates as an unhandled signal</code></pre>
 
-<p>The fix isn't a try-catch around the pipeline (the pipeline is a <em>declaration</em>, not an execution) — it's an operator.</p>
+<p>The fix isn't a try-catch around the pipeline. The pipeline is a <em>declaration</em>, not an execution. The fix is an operator.</p>
 
-<h2>onErrorReturn — Static Fallback</h2>
+<h2>onErrorReturn: Static Fallback</h2>
 
 <p><code>onErrorReturn(T)</code> replaces an error with a single fallback value, then completes the stream normally. Use it when the error is recoverable and the fallback is a sensible default.</p>
 
@@ -35,13 +35,13 @@
 
 // If fetchStatus errors, the subscriber receives "UNKNOWN" and onComplete fires</code></pre>
 
-<p><strong>Trap:</strong> <code>onErrorReturn</code> swallows the error — you lose the exception details. If you need to log it, chain <code>doOnError()</code> <em>before</em> <code>onErrorReturn</code>.</p>
+<p><strong>Trap:</strong> <code>onErrorReturn</code> swallows the error, so you lose the exception details. If you need to log it, chain <code>doOnError()</code> <em>before</em> <code>onErrorReturn</code>.</p>
 
 <pre><code>Mono&lt;String&gt; orderStatus = fetchStatus(orderId)
     .doOnError(e -> log.warn("Status fetch failed for {}", orderId, e))
     .onErrorReturn("UNKNOWN");</code></pre>
 
-<h2>onErrorResume — Dynamic Fallback</h2>
+<h2>onErrorResume: Dynamic Fallback</h2>
 
 <p><code>onErrorResume(Function&lt;Throwable, Publisher&gt;)</code> replaces the error with an entirely new <code>Mono</code> or <code>Flux</code>. Use it when the fallback depends on the error type, or when you need to switch to an alternative data source.</p>
 
@@ -55,11 +55,11 @@
         Mono.just(new OrderResponse(id, "SERVICE_UNAVAILABLE", null))
     );</code></pre>
 
-<p>Notice the two <code>onErrorResume</code> calls: the first catches a specific exception type, the second catches everything else. Reactor tries them in order — the first matching handler wins.</p>
+<p>Notice the two <code>onErrorResume</code> calls: the first catches a specific exception type, the second catches everything else. Reactor tries them in order. The first matching handler wins.</p>
 
-<h2>retry and retryWhen — Try Again</h2>
+<h2>retry and retryWhen: Try Again</h2>
 
-<p><code>retry(long n)</code> re-subscribes to the source up to <em>n</em> times. Each retry creates a fresh subscription — the entire pipeline re-executes from scratch. Use <code>retry</code> for transient failures (network blips, temporary timeouts).</p>
+<p><code>retry(long n)</code> re-subscribes to the source up to <em>n</em> times. Each retry creates a fresh subscription, and the entire pipeline re-executes from scratch. Use <code>retry</code> for transient failures (network blips, temporary timeouts).</p>
 
 <pre><code>Mono&lt;String&gt; result = webClient.get()
     .uri("/api/pricing")
@@ -67,7 +67,7 @@
     .bodyToMono(String.class)
     .retry(3);  // up to 3 attempts after the initial failure</code></pre>
 
-<p><strong>Trap:</strong> <code>retry(3)</code> retries immediately — no delay. For external services, this hammers a struggling server. Use <code>retryWhen</code> with <code>Retry.backoff()</code> instead:</p>
+<p><strong>Trap:</strong> <code>retry(3)</code> retries immediately, with no delay. For external services, this hammers a struggling server. Use <code>retryWhen</code> with <code>Retry.backoff()</code> instead:</p>
 
 <pre><code>Mono&lt;String&gt; result = webClient.get()
     .uri("/api/pricing")
@@ -78,7 +78,7 @@
         .filter(e -> e instanceof WebApiClientException))
     .onErrorResume(e -> Mono.just("cached-price"));</code></pre>
 
-<p><code>Retry.backoff(3, Duration.ofSeconds(1))</code> retries with exponential delay: 1s, 2s, 4s. The <code>.filter()</code> limits retries to specific exception types. If all retries fail, the error still propagates — hence the <code>onErrorResume</code> as a final safety net.</p>
+<p><code>Retry.backoff(3, Duration.ofSeconds(1))</code> retries with exponential delay: 1s, 2s, 4s. The <code>.filter()</code> limits retries to specific exception types. If all retries fail, the error still propagates, hence the <code>onErrorResume</code> as a final safety net.</p>
 
 <h2>Error Operator Quick Reference</h2>
 
@@ -88,13 +88,13 @@
   <tr><td><code>onErrorResume(fn)</code></td><td>Replace error with a fallback Publisher</td><td>Dynamic fallback; error-type-dependent recovery</td></tr>
   <tr><td><code>retry(n)</code></td><td>Re-subscribe up to n times, no delay</td><td>Transient failures; idempotent operations</td></tr>
   <tr><td><code>retryWhen(Retry)</code></td><td>Re-subscribe with custom strategy</td><td>Exponential backoff; filtered retries</td></tr>
-  <tr><td><code>doOnError(fn)</code></td><td>Side effect (logging); error still propagates</td><td>Observability — never for recovery</td></tr>
+  <tr><td><code>doOnError(fn)</code></td><td>Side effect (logging); error still propagates</td><td>Observability, never for recovery</td></tr>
   <tr><td><code>onErrorMap(fn)</code></td><td>Transform one exception into another</td><td>Translate infrastructure errors to domain errors</td></tr>
 </table>
 
-<h2>Cold Publishers — Lazy and Per-Subscriber</h2>
+<h2>Cold Publishers: Lazy and Per-Subscriber</h2>
 
-<p>A <strong>cold</strong> publisher generates data <em>fresh for each subscriber</em>. Nothing executes until someone calls <code>.subscribe()</code> — the pipeline is a blueprint, not a running process. Each subscriber triggers an independent execution from the beginning.</p>
+<p>A <strong>cold</strong> publisher generates data <em>fresh for each subscriber</em>. Nothing executes until someone calls <code>.subscribe()</code>. The pipeline is a blueprint, not a running process. Each subscriber triggers an independent execution from the beginning.</p>
 
 <pre><code>Flux&lt;Integer&gt; cold = Flux.range(1, 3)
     .doOnNext(n -> System.out.println("Produced: " + n));
@@ -105,16 +105,16 @@ cold.subscribe(n -> System.out.println("Sub A: " + n));
 cold.subscribe(n -> System.out.println("Sub B: " + n));
 // Produces 1, 2, 3 AGAIN → Sub B receives 1, 2, 3</code></pre>
 
-<p>Most Reactor factories create cold publishers: <code>Flux.just()</code>, <code>Flux.range()</code>, <code>Flux.fromIterable()</code>, <code>Mono.fromCallable()</code>. This is the default behavior — and it's what you want most of the time. Cold means predictable: every subscriber sees the same complete sequence.</p>
+<p>Most Reactor factories create cold publishers: <code>Flux.just()</code>, <code>Flux.range()</code>, <code>Flux.fromIterable()</code>, <code>Mono.fromCallable()</code>. This is the default behavior, and it's what you want most of the time. Cold means predictable: every subscriber sees the same complete sequence.</p>
 
-<h2>Hot Publishers — Eager and Shared</h2>
+<h2>Hot Publishers: Eager and Shared</h2>
 
-<p>A <strong>hot</strong> publisher emits data regardless of whether anyone is listening. Late subscribers only receive items emitted <em>after</em> they subscribe — earlier items are gone. Think of a radio broadcast: if you tune in late, you miss the opening.</p>
+<p>A <strong>hot</strong> publisher emits data regardless of whether anyone is listening. Late subscribers only receive items emitted <em>after</em> they subscribe. Earlier items are gone. Think of a radio broadcast: if you tune in late, you miss the opening.</p>
 
 <pre><code>Sinks.Many&lt;String&gt; sink = Sinks.many().multicast().onBackpressureBuffer();
 Flux&lt;String&gt; hot = sink.asFlux();
 
-sink.tryEmitNext("event-1");  // no subscribers yet — item buffered
+sink.tryEmitNext("event-1");  // no subscribers yet, item buffered
 
 hot.subscribe(s -> System.out.println("Sub A: " + s));
 sink.tryEmitNext("event-2");  // Sub A prints "event-2"
@@ -123,21 +123,21 @@ hot.subscribe(s -> System.out.println("Sub B: " + s));
 sink.tryEmitNext("event-3");  // Sub A and Sub B both print "event-3"
 // Sub B never sees "event-1" or "event-2"</code></pre>
 
-<p>Hot publishers are the right choice when the data source is genuinely live — stock prices, sensor readings, Kafka topic consumption, server-sent events. Wasting resources re-running the source for each subscriber would be incorrect.</p>
+<p>Hot publishers are the right choice when the data source is genuinely live: stock prices, sensor readings, Kafka topic consumption, server-sent events. Wasting resources re-running the source for each subscriber would be incorrect.</p>
 
 <h2>Converting Cold to Hot</h2>
 
 <p>Sometimes you need to share a single cold-source execution across multiple subscribers. Reactor provides <code>.share()</code> and <code>.replay()</code> for this:</p>
 
-<pre><code>// Cold source wrapped as hot — one execution, shared by all subscribers
+<pre><code>// Cold source wrapped as hot: one execution, shared by all subscribers
 Flux&lt;OrderStatus&gt; shared = orderEvents.share();
 
-// Hot with replay — new subscribers get the last 5 items, then live data
+// Hot with replay: new subscribers get the last 5 items, then live data
 Flux&lt;OrderStatus&gt; replayed = orderEvents.replay(5).refCount();</code></pre>
 
-<p><code>.share()</code> turns a cold Flux into a hot one: the first subscriber triggers the source, subsequent subscribers ride along. When the last subscriber disconnects, the source subscription is cancelled. <code>.replay(N).refCount()</code> does the same but replays the last N items to late arrivals — bridging the gap between cold and hot.</p>
+<p><code>.share()</code> turns a cold Flux into a hot one: the first subscriber triggers the source, subsequent subscribers ride along. When the last subscriber disconnects, the source subscription is cancelled. <code>.replay(N).refCount()</code> does the same but replays the last N items to late arrivals, bridging the gap between cold and hot.</p>
 
-<h2>Sinks — Pushing Data Manually</h2>
+<h2>Sinks: Pushing Data Manually</h2>
 
 <p>When you need full control over what gets emitted and when, <code>Sinks</code> replaces the deprecated <code>Processor</code> types. A <code>Sinks.Many&lt;T&gt;</code> lets you call <code>tryEmitNext()</code> from anywhere in your code:</p>
 
@@ -157,7 +157,7 @@ Flux&lt;OrderStatus&gt; replayed = orderEvents.replay(5).refCount();</code></pre
     }
 }</code></pre>
 
-<p><code>tryEmitNext()</code> is non-blocking and returns a result you must check — unlike the deprecated <code>Processor</code>, which could silently drop items or throw.</p>
+<p><code>tryEmitNext()</code> is non-blocking and returns a result you must check. Unlike the deprecated <code>Processor</code>, which could silently drop items or throw, <code>Sinks</code> makes the outcome explicit.</p>
 
 <h2>Nothing Happens Until Subscribe</h2>
 
@@ -170,9 +170,9 @@ Flux&lt;OrderStatus&gt; replayed = orderEvents.replay(5).refCount();</code></pre
     .doOnNext(body -> log.info("Got: {}", body));
 // No HTTP request is made. No log line is printed. Nothing happens.</code></pre>
 
-<p>The variable <code>unused</code> holds a <em>description</em> of what to do — not the result of doing it. Only when something calls <code>.subscribe()</code>, <code>.block()</code>, or the pipeline is returned from a Spring WebFlux controller does execution begin. This is not a bug; it's the core design. It lets you compose, transform, and pass around pipelines without triggering side effects.</p>
+<p>The variable <code>unused</code> holds a <em>description</em> of what to do, not the result of doing it. Only when something calls <code>.subscribe()</code>, <code>.block()</code>, or the pipeline is returned from a Spring WebFlux controller does execution begin. This is the core design of Reactor. It lets you compose, transform, and pass around pipelines without triggering side effects.</p>
 
-<p><strong>Common mistake:</strong> building a pipeline in a method and forgetting to subscribe or return it. The compiler won't warn you — the <code>Mono</code>/<code>Flux</code> is a valid object. The only symptom is that nothing happens at runtime.</p>
+<p><strong>Common mistake:</strong> building a pipeline in a method and forgetting to subscribe or return it. The compiler won't warn you. The <code>Mono</code>/<code>Flux</code> is a valid object. The only symptom is that nothing happens at runtime.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://projectreactor.io/docs/core/release/reference/" target="_blank" rel="noopener">Project Reactor Reference</a> · <a href="https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html" target="_blank" rel="noopener">Flux Javadoc</a> · <a href="https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html" target="_blank" rel="noopener">Mono Javadoc</a> · <a href="https://www.reactive-streams.org/" target="_blank" rel="noopener">Reactive Streams Specification</a></p>
 
@@ -181,10 +181,10 @@ Flux&lt;OrderStatus&gt; replayed = orderEvents.replay(5).refCount();</code></pre
 <div class="quiz" id="q1">
   <div class="quiz-question">1. A <code>Flux.range(1, 5)</code> is subscribed to by two separate subscribers. How many total items does the source produce?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">5 — items are shared between subscribers</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">10 — each subscriber triggers an independent execution producing 5 items</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">5 — the second subscriber reuses results from the first</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">0 — <code>Flux.range</code> only emits when explicitly requested via <code>request(n)</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">5, items are shared between subscribers</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">10, each subscriber triggers an independent execution producing 5 items</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">5, the second subscriber reuses results from the first</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">0, <code>Flux.range</code> only emits when explicitly requested via <code>request(n)</code></li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
@@ -203,10 +203,10 @@ Flux&lt;OrderStatus&gt; replayed = orderEvents.replay(5).refCount();</code></pre
 <div class="quiz" id="q3">
   <div class="quiz-question">3. A hot publisher emits items A, B, C. A subscriber connects after B is emitted. What does it receive?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A, B, C — hot publishers replay for late subscribers</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">C only — late subscribers miss items emitted before they connected</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">B and C — the most recent buffered item plus all subsequent items</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Nothing — the stream already completed before the subscriber connected</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A, B, C, hot publishers replay for late subscribers</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">C only, late subscribers miss items emitted before they connected</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">B and C, the most recent buffered item plus all subsequent items</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Nothing, the stream already completed before the subscriber connected</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
 </div>
@@ -215,7 +215,7 @@ Flux&lt;OrderStatus&gt; replayed = orderEvents.replay(5).refCount();</code></pre
   <div class="quiz-question">4. You build a <code>Mono</code> pipeline with <code>.map()</code> and <code>.doOnNext()</code> but never call <code>.subscribe()</code> or return it from a controller. What happens at runtime?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The pipeline executes but the result is discarded</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Nothing — the pipeline is a declaration; without subscription, no code runs</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Nothing, the pipeline is a declaration; without subscription, no code runs</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Reactor throws an <code>IllegalStateException</code> for an un-subscribed Mono</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The <code>.map()</code> runs eagerly at construction time</li>
   </ul>
@@ -227,7 +227,7 @@ Flux&lt;OrderStatus&gt; replayed = orderEvents.replay(5).refCount();</code></pre
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It only retries on <code>RuntimeException</code>, not checked exceptions</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It retries after the stream completes, not after an error</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">It retries immediately with no delay — potentially hammering a struggling service</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">It retries immediately with no delay, potentially hammering a struggling service</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It cancels the original subscription before retrying, losing in-flight data</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
@@ -252,7 +252,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite. Review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

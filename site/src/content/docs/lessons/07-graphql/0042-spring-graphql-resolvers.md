@@ -76,14 +76,14 @@ public class OrderQueryResolver {
 
 Key points:
 
--   `@Controller` marks the class — like `@RestController` but for GraphQL (no `@ResponseBody` needed).
+-   `@Controller` marks the class, like `@RestController` but for GraphQL (no `@ResponseBody` needed).
 -   `@Argument` extracts a query argument. The parameter name must match the schema argument name.
--   `@Argument(required = false)` marks nullable arguments — the schema says `customerId: ID` (no `!`), so the Java parameter is optional.
+-   `@Argument(required = false)` marks nullable arguments. The schema says `customerId: ID` (no `!`), so the Java parameter is optional.
 -   The return type is serialized to JSON, but **only the fields the client asked for** are returned.
 
 ## Mutation Resolvers
 
-A `@MutationMapping` method resolves a field in the `Mutation` type — for creating, updating, or deleting data.
+A `@MutationMapping` method resolves a field in the `Mutation` type, for creating, updating, or deleting data.
 
 ```
 @Controller
@@ -134,7 +134,7 @@ public record CreateOrderItemInput(
 ) {}
 ```
 
-Spring auto-maps the GraphQL input object to the record — no manual parsing needed.
+Spring auto-maps the GraphQL input object to the record, with no manual parsing needed.
 
 ## Field Resolvers with @SchemaMapping
 
@@ -157,7 +157,7 @@ public class OrderFieldResolver {
 }
 ```
 
-`@SchemaMapping` tells Spring: "when a client queries the `customer` field on an `Order`, call this method." Spring passes the parent object (`OrderResponse`) as the first argument automatically. The method is **only called if the client actually requests the `customer` field** — if the query omits it, this resolver never runs.
+`@SchemaMapping` tells Spring: "when a client queries the `customer` field on an `Order`, call this method." Spring passes the parent object (`OrderResponse`) as the first argument automatically. The method is **only called if the client actually requests the `customer` field**. If the query omits it, this resolver never runs.
 
 This is what makes GraphQL's selective fetching work at the server level: you don't pay the cost of resolving fields nobody asked for.
 
@@ -195,7 +195,7 @@ The resolver method name is the default mapping. You can override it with `@Quer
 
 ## Resolver → Service Wiring
 
-Resolvers should **delegate to services**, not contain business logic — the same thin-controller pattern from REST. The resolver receives input, converts it, calls the service, and returns the result:
+Resolvers should **delegate to services**, not contain business logic: the same thin-controller pattern from REST. The resolver receives input, converts it, calls the service, and returns the result:
 
 ```
 @Controller
@@ -235,11 +235,11 @@ This keeps resolvers stateless, testable, and focused on input/output mapping. T
 </details>
 
 <details>
-<summary>4. A client queries { order(id: 1) { id status } } — omitting the customer field. A @SchemaMapping method for Order.customer exists. What happens?</summary>
-<p><strong>Correct answer:</strong> The method is never called — Spring only invokes it when the field is requested</p>
+<summary>4. A client queries { order(id: 1) { id status } }, omitting the customer field. A @SchemaMapping method for Order.customer exists. What happens?</summary>
+<p><strong>Correct answer:</strong> The method is never called: Spring only invokes it when the field is requested</p>
 </details>
 
 <details>
 <summary>5. Your @MutationMapping method for createOrder contains 40 lines of stock validation, price calculation, and order persistence. What should you do?</summary>
-<p><strong>Correct answer:</strong> Move the logic into OrderService — resolvers should delegate, not implement</p>
+<p><strong>Correct answer:</strong> Move the logic into OrderService: resolvers should delegate, not implement</p>
 </details>

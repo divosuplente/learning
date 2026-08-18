@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 37 — Spring Boot Kafka Producers &amp; Consumers</title>
+  <title>Lesson 37: Spring Boot Kafka Producers &amp; Consumers</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
 
 <h2>Docker Compose for Local Kafka</h2>
 
-<p>Modern Kafka (3.7+) runs in <strong>KRaft mode</strong> — no Zookeeper needed. A single-container <code>docker-compose.yml</code> is enough for development:</p>
+<p>Modern Kafka (3.7+) runs in <strong>KRaft mode</strong>: no Zookeeper needed. A single-container <code>docker-compose.yml</code> is enough for development:</p>
 
 <pre><code># docker-compose.yml
 services:
@@ -40,7 +40,7 @@ services:
 docker-compose down        # stop and remove containers
 docker logs kafka          # verify startup</code></pre>
 
-<p>The <code>KAFKA_ADVERTISED_LISTENERS</code> line is the one that matters most — it tells clients to connect at <code>localhost:9092</code>. Wrong value here is the #1 reason Kafka connections fail from the host.</p>
+<p>The <code>KAFKA_ADVERTISED_LISTENERS</code> line is the one that matters most: it tells clients to connect at <code>localhost:9092</code>. Wrong value here is the #1 reason Kafka connections fail from the host.</p>
 
 <h2>Adding the Spring Kafka Dependency</h2>
 
@@ -78,16 +78,16 @@ docker logs kafka          # verify startup</code></pre>
 
 <table>
   <tr><th>Property</th><th>Why</th></tr>
-  <tr><td><code>bootstrap-servers</code></td><td>Address of the Kafka broker — matches Docker's published port</td></tr>
+  <tr><td><code>bootstrap-servers</code></td><td>Address of the Kafka broker, matches Docker's published port</td></tr>
   <tr><td><code>StringSerializer</code> / <code>StringDeserializer</code> for keys</td><td>Keys are simple strings (e.g., <code>"42"</code> for an order ID)</td></tr>
   <tr><td><code>JsonSerializer</code> / <code>JsonDeserializer</code> for values</td><td>Converts Java records ↔ JSON bytes; adds a <code>__TypeId__</code> header so the consumer knows which class to deserialize to</td></tr>
-  <tr><td><code>auto-offset-reset: earliest</code></td><td>If no stored offset exists (new consumer group), start reading from the beginning of the topic — don't miss historical messages during development</td></tr>
-  <tr><td><code>spring.json.trusted.packages</code></td><td>Security allowlist — the deserializer refuses to instantiate classes from untrusted packages</td></tr>
+  <tr><td><code>auto-offset-reset: earliest</code></td><td>If no stored offset exists (new consumer group), start reading from the beginning of the topic so you don't miss historical messages during development</td></tr>
+  <tr><td><code>spring.json.trusted.packages</code></td><td>Security allowlist: the deserializer refuses to instantiate classes from untrusted packages</td></tr>
 </table>
 
 <h2>Defining the Event</h2>
 
-<p>Events are simple records. They travel through Kafka as JSON, so include everything the consumer needs — no round-trips to query the database:</p>
+<p>Events are simple records. They travel through Kafka as JSON, so include everything the consumer needs. No round-trips to query the database:</p>
 
 <pre><code>package com.example.ordermgmt.kafka.event;
 
@@ -141,8 +141,8 @@ public class OrderEventProducer {
 
 <ol>
   <li><strong>The key is the order ID.</strong> Kafka hashes the key to pick a partition. Same key → same partition → messages for the same order are always in order. Without a key, Kafka distributes round-robin and ordering is lost.</li>
-  <li><strong><code>send()</code> is async.</strong> It returns a <code>CompletableFuture</code>. Use <code>whenComplete</code> to log success or failure — don't block the calling thread with <code>.get()</code>.</li>
-  <li><strong><code>KafkaTemplate&lt;String, Object&gt;</code></strong> — <code>Object</code> because we send different event types to the same topic. The <code>JsonSerializer</code> adds a <code>__TypeId__</code> header so the consumer knows the concrete type.</li>
+  <li><strong><code>send()</code> is async.</strong> It returns a <code>CompletableFuture</code>. Use <code>whenComplete</code> to log success or failure; don't block the calling thread with <code>.get()</code>.</li>
+  <li><strong><code>KafkaTemplate&lt;String, Object&gt;</code></strong>: <code>Object</code> because we send different event types to the same topic. The <code>JsonSerializer</code> adds a <code>__TypeId__</code> header so the consumer knows the concrete type.</li>
 </ol>
 
 <h2>Integrating the Producer with the Service</h2>
@@ -208,7 +208,7 @@ public class OrderEventConsumer {
 <ul>
   <li>Deserializes the JSON bytes into an <code>OrderCreatedEvent</code> using the <code>__TypeId__</code> header</li>
   <li>Commits the offset automatically after the method returns successfully</li>
-  <li>If the method throws, the offset is not committed — the message will be redelivered</li>
+  <li>If the method throws, the offset is not committed: the message will be redelivered</li>
 </ul>
 
 <h2>Multiple Consumer Groups</h2>
@@ -228,11 +228,11 @@ public class AnalyticsConsumer {
     }
 }</code></pre>
 
-<p>The notification group and the analytics group maintain <strong>separate offsets</strong>. If the notification consumer goes down for an hour, it resumes where it left off — the analytics consumer is unaffected.</p>
+<p>The notification group and the analytics group maintain <strong>separate offsets</strong>. If the notification consumer goes down for an hour, it resumes where it left off. The analytics consumer is unaffected.</p>
 
 <h2>Consumer Group Rebalancing</h2>
 
-<p>When a consumer joins or leaves a group, Kafka <strong>rebalances</strong> — it reassigns partitions among the current members. This is automatic, but has consequences:</p>
+<p>When a consumer joins or leaves a group, Kafka <strong>rebalances</strong>: it reassigns partitions among the current members. This is automatic, but has consequences:</p>
 
 <ul>
   <li><strong>Consumer added:</strong> partitions are redistributed. Some messages in-flight during the swap may be redelivered (at-least-once).</li>
@@ -240,7 +240,7 @@ public class AnalyticsConsumer {
   <li><strong>Key ordering preserved:</strong> a given partition always goes to exactly one consumer in the group. Same key → same partition → same consumer → order maintained.</li>
 </ul>
 
-<p>This is why your consumers <strong>must be idempotent</strong> — rebalancing will occasionally cause redelivery. The next lesson covers this in detail.</p>
+<p>This is why your consumers <strong>must be idempotent</strong>: rebalancing will occasionally cause redelivery. The next lesson covers this in detail.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-kafka/reference/" target="_blank" rel="noopener">Spring Kafka Reference</a> · <a href="https://kafka.apache.org/documentation/#producerconfigs" target="_blank" rel="noopener">Kafka Producer Configs</a> · <a href="https://kafka.apache.org/documentation/#consumerconfigs" target="_blank" rel="noopener">Kafka Consumer Configs</a> · <a href="https://docs.docker.com/compose/" target="_blank" rel="noopener">Docker Compose Docs</a></p>
 
@@ -261,7 +261,7 @@ public class AnalyticsConsumer {
   <div class="quiz-question">2. You call <code>kafkaTemplate.send(topic, value)</code> without a key. What happens to message ordering?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Messages are always delivered in send order across all partitions</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Messages are distributed round-robin across partitions — ordering is lost</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Messages are distributed round-robin across partitions: ordering is lost</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Kafka refuses messages without keys and throws an exception</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">All messages without keys go to partition 0, preserving order</li>
   </ul>
@@ -271,9 +271,9 @@ public class AnalyticsConsumer {
 <div class="quiz" id="q3">
   <div class="quiz-question">3. A <code>@KafkaListener</code> method throws a <code>RuntimeException</code>. What does Spring Kafka do?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Commits the offset anyway — the message won't be redelivered</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Commits the offset anyway: the message won't be redelivered</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Logs the error and skips to the next message permanently</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Does not commit the offset — the message will be redelivered on the next poll</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Does not commit the offset: the message will be redelivered on the next poll</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Automatically sends the message to a dead letter topic after one failure</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
@@ -296,7 +296,7 @@ public class AnalyticsConsumer {
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">All 4 consumers now share the 2 partitions equally via round-robin</li>
     <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Kafka rebalances the 2 partitions among the 3 consumers that can hold one; the 4th consumer stays idle</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Kafka automatically creates a 3rd partition so every consumer gets one</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The new consumer is rejected — a group cannot have more consumers than partitions</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The new consumer is rejected: a group cannot have more consumers than partitions</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
 </div>
@@ -320,7 +320,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite. Review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

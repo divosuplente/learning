@@ -10,7 +10,7 @@
 
 <h1>Spring Initializr &amp; Project Structure</h1>
 
-<p>Instead of creating every file by hand, <strong>Spring Initializr</strong> generates a complete Spring Boot project skeleton from a web form. Fill it in, download the zip, and open it in your IDE — you have a running project in under a minute.</p>
+<p>Instead of creating every file by hand, <strong>Spring Initializr</strong> generates a complete Spring Boot project skeleton from a web form. Fill it in, download the zip, and open it in your IDE. You have a running project in under a minute.</p>
 
 <h2>Using Spring Initializr</h2>
 
@@ -29,19 +29,19 @@
 <p>Then click <strong>Add Dependencies</strong> and select:</p>
 
 <ul>
-  <li><strong>Spring Web</strong> — REST APIs</li>
-  <li><strong>Spring Data JPA</strong> — database access</li>
-  <li><strong>PostgreSQL Driver</strong> — PostgreSQL connectivity</li>
-  <li><strong>Spring for GraphQL</strong> — GraphQL API support</li>
-  <li><strong>Spring for Apache Kafka</strong> — Kafka messaging</li>
-  <li><strong>Spring Boot DevTools</strong> — hot reload during development</li>
+  <li><strong>Spring Web</strong>: REST APIs</li>
+  <li><strong>Spring Data JPA</strong>: database access</li>
+  <li><strong>PostgreSQL Driver</strong>: PostgreSQL connectivity</li>
+  <li><strong>Spring for GraphQL</strong>: GraphQL API support</li>
+  <li><strong>Spring for Apache Kafka</strong>: Kafka messaging</li>
+  <li><strong>Spring Boot DevTools</strong>: hot reload during development</li>
 </ul>
 
-<p class="marginnote">Skip <strong>Lombok</strong>. We use Java records instead — no annotation processor, no IDE plugin, no hidden getters.</p>
+<p class="marginnote">Skip <strong>Lombok</strong>. We use Java records instead: no annotation processor, no IDE plugin, no hidden getters.</p>
 
 <p>Click <strong>Generate</strong>, download the zip, and unzip it. That's your project.</p>
 
-<h2>The main class — <code>@SpringBootApplication</code></h2>
+<h2>The main class: <code>@SpringBootApplication</code></h2>
 
 <p>Initializr creates one Java class with a <code>main</code> method:</p>
 
@@ -61,12 +61,12 @@ public class OrderManagementApplication {
 <p><code>@SpringBootApplication</code> is a <strong>compound annotation</strong> that combines three:</p>
 
 <ol>
-  <li><strong><code>@Configuration</code></strong> — marks this class as a source of bean definitions</li>
-  <li><strong><code>@EnableAutoConfiguration</code></strong> — tells Spring Boot to auto-configure beans based on the classpath (e.g., if Spring Web is present, set up an embedded server)</li>
-  <li><strong><code>@ComponentScan</code></strong> — scans the package <code>com.example.ordermgmt</code> and all sub-packages for <code>@Component</code>, <code>@Service</code>, <code>@Repository</code>, <code>@Controller</code> classes</li>
+  <li><strong><code>@Configuration</code></strong>: marks this class as a source of bean definitions</li>
+  <li><strong><code>@EnableAutoConfiguration</code></strong>: tells Spring Boot to auto-configure beans based on the classpath (e.g., if Spring Web is present, set up an embedded server)</li>
+  <li><strong><code>@ComponentScan</code></strong>: scans the package <code>com.example.ordermgmt</code> and all sub-packages for <code>@Component</code>, <code>@Service</code>, <code>@Repository</code>, <code>@Controller</code> classes</li>
 </ol>
 
-<p>That's why the main class must live in the <strong>root package</strong> — <code>@ComponentScan</code> starts from there and scans downward.</p>
+<p>That's why the main class must live in the <strong>root package</strong>: <code>@ComponentScan</code> starts from there and scans downward.</p>
 
 <h2>Project directory layout</h2>
 
@@ -106,21 +106,21 @@ public class OrderManagementApplication {
   <tbody>
     <tr><td><code>src/main/java</code></td><td>All production Java source code</td></tr>
     <tr><td><code>src/main/resources</code></td><td>Configuration files, schemas, static assets</td></tr>
-    <tr><td><code>src/test/java</code></td><td>Test code — mirrors the main structure</td></tr>
+    <tr><td><code>src/test/java</code></td><td>Test code, mirrors the main structure</td></tr>
   </tbody>
 </table>
 
 <h2>Key rules</h2>
 
 <ul>
-  <li><strong>One public class per file.</strong> The file name must match the public class name — <code>OrderController.java</code> contains <code>public class OrderController</code>.</li>
-  <li><strong>Non-code files go in resources.</strong> YAML configs, GraphQL schemas, static web files — never in <code>src/main/java</code>.</li>
+  <li><strong>One public class per file.</strong> The file name must match the public class name: <code>OrderController.java</code> contains <code>public class OrderController</code>.</li>
+  <li><strong>Non-code files go in resources.</strong> YAML configs, GraphQL schemas, static web files: never in <code>src/main/java</code>.</li>
   <li><strong>Package naming follows the group + artifact.</strong> Group <code>com.example</code> + artifact <code>ordermgmt</code> = base package <code>com.example.ordermgmt</code>.</li>
   <li><strong>Test packages mirror production packages.</strong> A test for <code>com.example.ordermgmt.service.OrderService</code> lives in <code>com.example.ordermgmt.service.OrderServiceTest</code>.</li>
   <li><strong>The main class sits in the root package.</strong> This ensures <code>@ComponentScan</code> picks up every sub-package.</li>
 </ul>
 
-<p><strong>Primary source:</strong> <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/getting-started.html#getting-started.first-application" target="_blank" rel="noopener">Spring Boot Reference — Developing Your First Application</a></p>
+<p><strong>Primary source:</strong> <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/getting-started.html#getting-started.first-application" target="_blank" rel="noopener">Spring Boot Reference: Developing Your First Application</a></p>
 
 <h2>Check your understanding</h2>
 

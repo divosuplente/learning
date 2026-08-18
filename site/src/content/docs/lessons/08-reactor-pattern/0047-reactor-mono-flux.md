@@ -1,14 +1,14 @@
 ---
-title: "Project Reactor: Mono & Flux Basics"
-description: "Project Reactor: Mono & Flux Basics"
+title: "Lesson 47: Project Reactor: Mono & Flux Basics"
+description: "Lesson 47: Project Reactor: Mono & Flux Basics"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0047-reactor-mono-flux.html
 ---
 
 # Project Reactor: Mono & Flux Basics
 
-Project Reactor is the Reactive Streams implementation that powers Spring WebFlux. It gives you two publisher types — `Mono` for zero-or-one results, `Flux` for zero-to-many — and a toolkit of static factories to create them. This lesson covers what each type models and how to build publishers from scratch.
+Project Reactor is the Reactive Streams implementation that powers Spring WebFlux. It gives you two publisher types (`Mono` for zero-or-one results, `Flux` for zero-to-many) and a toolkit of static factories to create them. This lesson covers what each type models and how to build publishers from scratch.
 
-## Mono <T> — Zero or One Item
+## Mono <T>: Zero or One Item
 
 A `Mono<T>` emits **at most one item**, then completes. It also may emit nothing (complete empty) or signal an error. Think of it as the reactive equivalent of a `Optional<T>` that can also fail.
 
@@ -20,7 +20,7 @@ Mono<String> nothing = Mono.empty();
 Mono<String> failed = Mono.error(new RuntimeException("boom"));
 ```
 
-## Flux <T> — Zero to N Items
+## Flux <T>: Zero to N Items
 
 A `Flux<T>` emits **zero or more items**, then completes or errors. It can be finite (a list of 10 orders) or infinite (a stream of Kafka messages that never ends).
 
@@ -32,16 +32,16 @@ Flux<Integer> range = Flux.range(1, 10);
 Flux<Long> ticks = Flux.interval(Duration.ofSeconds(1));
 ```
 
-Both `Mono` and `Flux` implement the `Publisher` interface from the Reactive Streams spec. The difference is cardinality — and that cardinality shapes how you compose operators downstream.
+Both `Mono` and `Flux` implement the `Publisher` interface from the Reactive Streams spec. The difference is cardinality, and that cardinality shapes how you compose operators downstream.
 
-## Mono vs Flux — When to Use Each
+## Mono vs Flux: When to Use Each
 
 | Type | Cardinality | Analogy | Use When |
 | --- | --- | --- | --- |
-| `Mono` | 0 or 1 | A ticket booth — one ticket or "sold out" | Single-record lookup, save, HTTP response |
-| `Flux` | 0 to N | A train line — trains keep arriving | Collections, streams, events, infinite sources |
+| `Mono` | 0 or 1 | A ticket booth: one ticket or "sold out" | Single-record lookup, save, HTTP response |
+| `Flux` | 0 to N | A train line: trains keep arriving | Collections, streams, events, infinite sources |
 
-A `Flux` that emits one item is legal but semantically misleading. If the domain models a single result, use `Mono` — it communicates intent and gives you type-specific operators like `.defaultIfEmpty()`.
+A `Flux` that emits one item is legal but semantically misleading. If the domain models a single result, use `Mono`. It communicates intent and gives you type-specific operators like `.defaultIfEmpty()`.
 
 ## Static Factory Methods
 
@@ -50,11 +50,11 @@ A `Flux` that emits one item is legal but semantically misleading. If the domain
 | Factory | Emits | When to Use |
 | --- | --- | --- |
 | `Mono.just(value)` | One item immediately | You already have the value |
-| `Mono.empty()` | Nothing — completes immediately | No result (e.g., `Mono<Void>`) |
-| `Mono.error(Throwable)` | Nothing — signals an error | Immediately fail the pipeline |
+| `Mono.empty()` | Nothing; completes immediately | No result (e.g., `Mono<Void>`) |
+| `Mono.error(Throwable)` | Nothing; signals an error | Immediately fail the pipeline |
 | `Mono.fromCallable(Callable)` | Result of a blocking/synchronous call | Wrap blocking I/O so it runs on a scheduler |
 | `Mono.fromSupplier(Supplier)` | Result of a lazy computation | Same as `fromCallable` without checked exceptions |
-| `Mono.fromRunnable(Runnable)` | Nothing — runs side effect, then completes | Fire-and-forget actions, then `.then()` |
+| `Mono.fromRunnable(Runnable)` | Nothing; runs side effect, then completes | Fire-and-forget actions, then `.then()` |
 
 ### Flux Factories
 
@@ -64,10 +64,10 @@ A `Flux` that emits one item is legal but semantically misleading. If the domain
 | `Flux.fromIterable(Iterable)` | Each element of the collection | Convert an existing list/set |
 | `Flux.range(start, count)` | `start`, `start+1`, … `start+count-1` | Numeric sequences, loop replacements |
 | `Flux.interval(Duration)` | 0L, 1L, 2L, … at fixed intervals (infinite) | Ticking clock, polling, scheduled emissions |
-| `Flux.empty()` | Nothing — completes immediately | Conditional empty stream |
-| `Flux.error(Throwable)` | Nothing — signals an error | Immediately fail the pipeline |
+| `Flux.empty()` | Nothing; completes immediately | Conditional empty stream |
+| `Flux.error(Throwable)` | Nothing; signals an error | Immediately fail the pipeline |
 
-## Code Example — Creating Publishers
+## Code Example: Creating Publishers
 
 ```
 package com.example.ordermgmt.reactive;
@@ -120,23 +120,23 @@ public class PublisherDemo {
 
 ## Key Pitfall: `Mono.just(null)` vs `Mono.empty()`
 
-This is the most common beginner mistake. `Mono.just(null)` **emits a `null` value downstream** — it does *not* produce an empty publisher. Downstream operators like `.map()` will receive `null` and likely throw a `NullPointerException`. If you mean "no value," use `Mono.empty()`.
+This is the most common beginner mistake. `Mono.just(null)` **emits a `null` value downstream**. It does *not* produce an empty publisher. Downstream operators like `.map()` will receive `null` and likely throw a `NullPointerException`. If you mean "no value," use `Mono.empty()`.
 
 ```
-// WRONG — emits null, likely causes NPE downstream
+// WRONG: emits null, likely causes NPE downstream
 Mono<String> bad = Mono.just(null);
 
-// RIGHT — completes with no value
+// RIGHT: completes with no value
 Mono<String> good = Mono.empty();
 ```
 
 `Mono.just()` is **eager**: the value is captured at construction time. If you need lazy evaluation (the value is computed only when someone subscribes), use `Mono.fromSupplier()` instead.
 
 ```
-// Eager — UUID captured immediately when this line runs
+// Eager: UUID captured immediately when this line runs
 Mono<String> eager = Mono.just(UUID.randomUUID().toString());
 
-// Lazy — UUID generated only on subscription
+// Lazy: UUID generated only on subscription
 Mono<String> lazy = Mono.fromSupplier(() ->
         UUID.randomUUID().toString());
 ```

@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/003
 
 # Architecture Patterns: Monolith vs Microservices vs SOA
 
-When you build a house, you don't start placing bricks randomly — you follow a blueprint. Software is no different. An **architecture pattern** is that blueprint: it defines which parts of the code talk to which other parts, what each part is responsible for, and how data flows through the system. Without one, code becomes a tangled mess where everything depends on everything else. Changing one thing breaks five others. This is **spaghetti code**, and it is a nightmare to maintain.
+When you build a house, you don't start placing bricks randomly. You follow a blueprint. Software is no different. An **architecture pattern** is that blueprint: it defines which parts of the code talk to which other parts, what each part is responsible for, and how data flows through the system. Without one, code becomes a tangled mess where everything depends on everything else. Changing one thing breaks five others. This is **spaghetti code**, and it is a nightmare to maintain.
 
 ## Monolithic Architecture
 
@@ -22,7 +22,7 @@ A **monolith** is a single application where all the code lives in one codebase 
 └─────────────────────────────────┘
 ```
 
-**Pros:** Simple to develop, deploy, and test. One codebase, one deployment. No network calls between modules — everything runs in the same JVM.
+**Pros:** Simple to develop, deploy, and test. One codebase, one deployment. No network calls between modules; everything runs in the same JVM.
 
 **Cons:** As the application grows, it becomes hard to understand and change. One bug can bring down the entire system. A memory leak in the billing module takes the order module with it.
 
@@ -40,11 +40,11 @@ A **monolith** is a single application where all the code lives in one codebase 
 
 **Pros:** Each service is small and focused. Teams can work independently. Services can be deployed, scaled, and restarted separately.
 
-**Cons:** Complexity. Distributed systems are hard — network failures, data consistency across databases, debugging across service boundaries, and deployment orchestration all become significant challenges. A simple feature that touches two services now requires coordinating two deployments and handling eventual consistency.
+**Cons:** Complexity. Distributed systems are hard: network failures, data consistency across databases, debugging across service boundaries, and deployment orchestration all become significant challenges. A simple feature that touches two services now requires coordinating two deployments and handling eventual consistency.
 
-## Service-Oriented Architecture (SOA) — the middle ground
+## Service-Oriented Architecture (SOA): the middle ground
 
-**SOA** as we use it in this course is a **modular monolith**: the application is a single deployable (one Spring Boot JAR), but the code is organized into logical **services** — groupings of business functionality. Each service has its own layered structure (controller, service, repository), but they share a database and run in the same process.
+**SOA** as we use it in this course is a **modular monolith**: the application is a single deployable (one Spring Boot JAR), but the code is organized into logical **services**, groupings of business functionality. Each service has its own layered structure (controller, service, repository), but they share a database and run in the same process.
 
 ```
 ┌─────────────────────────────────────────┐
@@ -63,11 +63,11 @@ A **monolith** is a single application where all the code lives in one codebase 
 └─────────────────────────────────────────┘
 ```
 
-This gives you clean separation of concerns without the complexity of distributed systems. When the day comes that Order Service truly needs to scale independently, you can split it out into a real microservice — but only then, not before.
+This gives you clean separation of concerns without the complexity of distributed systems. When the day comes that Order Service truly needs to scale independently, you can split it out into a real microservice, but only then, not before.
 
 ## When microservices are overkill
 
-Microservices solve **organizational scaling** problems — hundreds of engineers working on the same product. If you are a team of five, the operational overhead of container orchestration, distributed tracing, service discovery, and inter-service network calls will consume more time than the features you're trying to ship. Start with a modular monolith. Extract services when you have a concrete reason: a module that needs different scaling, a different release cadence, or a different team.
+Microservices solve **organizational scaling** problems, not technical ones. If you are a team of five, the operational overhead of container orchestration, distributed tracing, service discovery, and inter-service network calls will consume more time than the features you're trying to ship. Start with a modular monolith. Extract services when you have a concrete reason: a module that needs different scaling, a different release cadence, or a different team.
 
 **Primary sources:** [Oracle: Object-Oriented Programming Concepts](https://docs.oracle.com/javase/tutorial/java/concepts/) · [Spring: Building REST Services](https://spring.io/guides/gs/rest-service/) · [Fowler: Microservices](https://martinfowler.com/articles/microservices.html)
 

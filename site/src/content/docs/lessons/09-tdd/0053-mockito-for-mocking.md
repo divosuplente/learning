@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/005
 
 # Mockito for Mocking Dependencies
 
-Unit tests should prove one class works in isolation. But real classes have dependencies — repositories, HTTP clients, message producers. If you call the real database in a unit test, you're testing the database too, and your test is slow and fragile. **Mockito** creates fake versions of those dependencies that you control completely.
+Unit tests should prove one class works in isolation. But real classes have dependencies: repositories, HTTP clients, message producers. If you call the real database in a unit test, you're testing the database too, and your test is slow and fragile. **Mockito** creates fake versions of those dependencies that you control completely.
 
 ## The Core Annotations
 
@@ -31,11 +31,11 @@ class OrderServiceTest {
 }
 ```
 
-What happens: Mockito creates a fake `OrderRepository` and a fake `CustomerRepository`, then builds a real `OrderService` and passes the fakes into its constructor. The `OrderService` thinks it's talking to real repositories — but every response is under your control.
+What happens: Mockito creates a fake `OrderRepository` and a fake `CustomerRepository`, then builds a real `OrderService` and passes the fakes into its constructor. The `OrderService` thinks it's talking to real repositories, but every response is under your control.
 
 ## Stubbing with `when().thenReturn()`
 
-A mock with no instructions returns defaults — `null` for objects, `0` for numbers, `false` for booleans, `Optional.empty()` for `Optional`. Stubbing tells the mock what to return:
+A mock with no instructions returns defaults: `null` for objects, `0` for numbers, `false` for booleans, `Optional.empty()` for `Optional`. Stubbing tells the mock what to return:
 
 ```
 @Test
@@ -60,9 +60,9 @@ when(customerRepository.findById(1L))
     .thenReturn(Optional.empty()); // second call returns empty
 ```
 
-## Stubbing Void Methods — `doThrow` / `doNothing`
+## Stubbing Void Methods: `doThrow` / `doNothing`
 
-You cannot call `when(mock.voidMethod()).thenReturn()` — the inner call returns `void`, breaking the DSL. Instead, use the `do*(...).when()` family:
+You cannot call `when(mock.voidMethod()).thenReturn()` because the inner call returns `void`, breaking the DSL. Instead, use the `do*(...).when()` family:
 
 ```
 // Throw on void method
@@ -133,7 +133,7 @@ verify(orderRepo).findByCustomerAndStatus(eq(1L), any());
 
 ## `thenAnswer` for Dynamic Responses
 
-When `thenReturn` is too rigid — you need the mock to compute something based on its input:
+When `thenReturn` is too rigid, you need the mock to compute something based on its input:
 
 ```
 // Return whatever was passed in (useful for save() stubs)
@@ -185,7 +185,7 @@ class OrderServiceTest {
 }
 ```
 
-Notice the pattern: **Arrange** (stub), **Act** (call the method), **Assert** (check state + verify interactions). The mock gives you a wall between your service and the database — you test the logic, not the infrastructure.
+Notice the pattern: **Arrange** (stub), **Act** (call the method), **Assert** (check state + verify interactions). The mock gives you a wall between your service and the database. You test the logic, not the infrastructure.
 
 **Primary sources:** [Mockito Javadoc](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html) · [Mockito Official Site](https://site.mockito.org/) · [JUnit 5 Extensions](https://junit.org/junit5/docs/current/user-guide/#extensions)
 
@@ -193,7 +193,7 @@ Notice the pattern: **Arrange** (stub), **Act** (call the method), **Assert** (c
 
 <details>
 <summary>1. A mock created with @Mock returns null for an unstubbed method that returns Optional. What does it actually return?</summary>
-<p><strong>Correct answer:</strong> Optional.empty() — Mockito returns a smart default for Optional</p>
+<p><strong>Correct answer:</strong> Optional.empty(): Mockito returns a smart default for Optional</p>
 </details>
 
 <details>
@@ -207,11 +207,11 @@ Notice the pattern: **Arrange** (stub), **Act** (call the method), **Assert** (c
 </details>
 
 <details>
-<summary>4. Your test stubs when(repo.save(any())), calls the service, and asserts the returned DTO. The test passes — but save() was never actually called. What went wrong?</summary>
+<summary>4. Your test stubs when(repo.save(any())), calls the service, and asserts the returned DTO. The test passes, but save() was never actually called. What went wrong?</summary>
 <p><strong>Correct answer:</strong> The stub only defines what happens if save() is called; without verify(), the call is never checked</p>
 </details>
 
 <details>
 <summary>5. @InjectMocks creates a real OrderService and injects mocks. The OrderService constructor also requires a Clock. You forgot to add @Mock Clock clock. What happens?</summary>
-<p><strong>Correct answer:</strong> The field is set to null — you get a NullPointerException when the test calls a method that uses Clock</p>
+<p><strong>Correct answer:</strong> The field is set to null: you get a NullPointerException when the test calls a method that uses Clock</p>
 </details>

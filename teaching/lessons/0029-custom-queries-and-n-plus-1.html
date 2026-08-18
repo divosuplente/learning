@@ -10,7 +10,7 @@
 
 <h1>Custom Queries, Pagination &amp; the N+1 Problem</h1>
 
-<p>Derived query methods take you far — but not everywhere. When you need aggregates, complex joins, or database-specific functions, you write the query yourself. This lesson covers <code>@Query</code> with JPQL and native SQL, pagination with <code>Pageable</code>, and the N+1 problem: a silent performance killer that turns one database round-trip into hundreds.</p>
+<p>Derived query methods take you far, but not everywhere. When you need aggregates, complex joins, or database-specific functions, you write the query yourself. This lesson covers <code>@Query</code> with JPQL and native SQL, pagination with <code>Pageable</code>, and the N+1 problem: a silent performance killer that turns one database round-trip into hundreds.</p>
 
 <h2>@Query with JPQL</h2>
 
@@ -37,7 +37,7 @@ public interface OrderRepository extends JpaRepository&lt;OrderEntity, Long&gt; 
 
 <h2>@Query with Native SQL</h2>
 
-<p>When JPQL can't express what you need — database-specific functions, complex subqueries, window functions — switch to native SQL with <code>nativeQuery = true</code>:</p>
+<p>When JPQL can't express what you need (database-specific functions, complex subqueries, window functions), switch to native SQL with <code>nativeQuery = true</code>:</p>
 
 <pre><code>// Native SQL uses table/column names, not entity/field names
 @Query(value = "SELECT * FROM orders WHERE EXTRACT(MONTH FROM created_at) = :month",
@@ -63,7 +63,7 @@ Page&lt;OrderEntity&gt; findByStatusNative(@Param("status") String status, Pagea
 
 <h2>Pagination &amp; Sorting</h2>
 
-<p>Returning thousands of rows at once kills performance and memory. Spring Data gives you <code>Pageable</code> — pass it to any repository method and Spring generates <code>LIMIT</code>/<code>OFFSET</code> SQL automatically:</p>
+<p>Returning thousands of rows at once kills performance and memory. Spring Data gives you <code>Pageable</code>: pass it to any repository method and Spring generates <code>LIMIT</code>/<code>OFFSET</code> SQL automatically.</p>
 
 <pre><code>// In the repository — just add Pageable as the last parameter
 Page&lt;OrderEntity&gt; findByStatus(OrderStatus status, Pageable pageable);
@@ -81,7 +81,7 @@ page.getNumber();         // Current page number (0-based)
 page.hasNext();           // Is there a next page?
 page.hasPrevious();       // Is there a previous page?</code></pre>
 
-<p><code>PageRequest.of(page, size)</code> gives you unsorted results. Add a <code>Sort</code> for ordering. For derived query methods, you can also return <code>Slice&lt;T&gt;</code> — same API but skips the <code>COUNT</code> query, making it faster when you only need "is there more?"</p>
+<p><code>PageRequest.of(page, size)</code> gives you unsorted results. Add a <code>Sort</code> for ordering. For derived query methods, you can also return <code>Slice&lt;T&gt;</code>: same API but skips the <code>COUNT</code> query, making it faster when you only need "is there more?"</p>
 
 <h2>The N+1 Problem</h2>
 
@@ -97,9 +97,9 @@ for (OrderEntity order : orders) {
     // SELECT * FROM customers WHERE id = ?
 }</code></pre>
 
-<p><strong>1 query for orders + 10 queries for customers = 11 queries.</strong> With a hundred orders you fire a hundred and one. The caller never sees the extra queries — they happen silently inside the loop. The symptom: the endpoint is slow and gets slower as data grows.</p>
+<p><strong>1 query for orders + 10 queries for customers = 11 queries.</strong> With a hundred orders you fire a hundred and one. The caller never sees the extra queries because they happen silently inside the loop. The symptom: the endpoint is slow and gets slower as data grows.</p>
 
-<p>The root cause: the <code>OrderEntity</code> uses <code>@ManyToOne(fetch = FetchType.LAZY)</code>. Each <code>.getCustomer()</code> inside the loop triggers a separate <code>SELECT</code>. The N+1 problem: 1 query for <code>findAll()</code> + N queries for lazy association access. Eager loading would also fire per-entity queries — the fundamental issue is accessing an association inside a loop without a JOIN FETCH or @EntityGraph.</p>
+<p>The root cause: the <code>OrderEntity</code> uses <code>@ManyToOne(fetch = FetchType.LAZY)</code>. Each <code>.getCustomer()</code> inside the loop triggers a separate <code>SELECT</code>. The N+1 problem: 1 query for <code>findAll()</code> + N queries for lazy association access. Eager loading would also fire per-entity queries. The fundamental issue is accessing an association inside a loop without a JOIN FETCH or @EntityGraph.</p>
 
 <h3>Fix 1: JOIN FETCH</h3>
 
@@ -127,13 +127,13 @@ List&lt;OrderEntity&gt; findAllWithItems();</code></pre>
 @Query("SELECT o FROM OrderEntity o WHERE o.status = :status")
 List&lt;OrderEntity&gt; findByStatusWithAllRelations(@Param("status") OrderStatus status);</code></pre>
 
-<p><code>@EntityGraph</code> is ideal when the same JPQL should sometimes fetch relations and sometimes not — you keep one query, add different graphs at call sites. It does <em>not</em> change the entity's default fetch strategy; it only overrides it for this specific call.</p>
+<p><code>@EntityGraph</code> is ideal when the same JPQL should sometimes fetch relations and sometimes not: you keep one query, add different graphs at call sites. It does <em>not</em> change the entity's default fetch strategy; it only overrides it for this specific call.</p>
 
 <table>
   <tr><th></th><th>JOIN FETCH</th><th>@EntityGraph</th></tr>
   <tr><td>Where specified</td><td>In the JPQL string</td><td>Annotation on the method</td></tr>
   <tr><td>Multiple levels</td><td>Manual <code>JOIN FETCH</code> per level</td><td><code>attributePaths = {"a", "a.b"}</code></td></tr>
-  <tr><td>Reuse query text</td><td>No — different JPQL</td><td>Yes — same JPQL, different graph</td></tr>
+  <tr><td>Reuse query text</td><td>No: different JPQL</td><td>Yes: same JPQL, different graph</td></tr>
   <tr><td>Collection dedup</td><td>Need <code>DISTINCT</code></td><td>Need <code>DISTINCT</code></td></tr>
 </table>
 
@@ -142,12 +142,12 @@ List&lt;OrderEntity&gt; findByStatusWithAllRelations(@Param("status") OrderStatu
 <h2>Check your understanding</h2>
 
 <div class="quiz" id="q1">
-  <div class="quiz-question">1. In a JPQL query, what do you reference — table and column names, or entity and field names?</div>
+  <div class="quiz-question">1. In a JPQL query, what do you reference: table and column names, or entity and field names?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Table and column names — JPQL is translated directly to SQL</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Entity and field names — JPQL operates on the object model</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Either — JPQL accepts both interchangeably</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only table names — JPQL infers the columns automatically</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Table and column names; JPQL is translated directly to SQL</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Entity and field names; JPQL operates on the object model</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Either; JPQL accepts both interchangeably</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Only table names; JPQL infers the columns automatically</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
@@ -166,10 +166,10 @@ List&lt;OrderEntity&gt; findByStatusWithAllRelations(@Param("status") OrderStatu
 <div class="quiz" id="q3">
   <div class="quiz-question">3. You call <code>findAll()</code> on orders, then loop and call <code>order.getCustomer().getName()</code> for each. With 50 orders, how many SQL queries execute?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">1 — JPA batches lazy loads into one query</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">50 — one per order; the initial findAll is cached</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">51 — one for findAll plus one per order for the lazy customer</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">2 — one for orders, one batched query for all customers</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">1; JPA batches lazy loads into one query</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">50; one per order; the initial findAll is cached</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">51; one for findAll plus one per order for the lazy customer</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">2; one for orders, one batched query for all customers</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
 </div>

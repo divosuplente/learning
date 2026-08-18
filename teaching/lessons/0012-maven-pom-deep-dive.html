@@ -10,9 +10,9 @@
 
 <h1>Maven POM Deep Dive</h1>
 
-<p>The <code>pom.xml</code> is your project's contract with Maven. Three coordinates identify your artifact, a parent POM eliminates version sprawl, scopes control when dependencies are available, and the fat JAR packages everything into one deployable file. Understanding these pieces means understanding how your build actually works.</p>
+<p>The <code>pom.xml</code> is your project's contract with Maven. Three coordinates identify your artifact, a parent POM eliminates version sprawl, scopes control when dependencies are available, and the fat JAR packages everything into one deployable file. If you understand these pieces, you understand how your build works.</p>
 
-<h2>Maven coordinates — the address of every artifact</h2>
+<h2>Maven coordinates: the address of every artifact</h2>
 
 <p>Every library in the Maven ecosystem is identified by three coordinates:</p>
 
@@ -23,11 +23,11 @@
   <tr><td><code>version</code></td><td>Which release</td><td><code>0.0.1-SNAPSHOT</code></td></tr>
 </table>
 
-<p>Think of it as a postal address: <strong>groupId</strong> is the street, <strong>artifactId</strong> is the house number, <strong>version</strong> is which renovation. Together they uniquely identify any JAR on Maven Central — no two artifacts share all three.</p>
+<p>Think of it as a postal address: <strong>groupId</strong> is the street, <strong>artifactId</strong> is the house number, <strong>version</strong> is which renovation. Together they uniquely identify any JAR on Maven Central. No two artifacts share all three.</p>
 
 <p>The <code>SNAPSHOT</code> suffix marks a development version. Maven treats snapshot dependencies as mutable: it checks for updates on every build. Release versions (no suffix) are immutable once published.</p>
 
-<h2>Parent POM — why you rarely write versions yourself</h2>
+<h2>Parent POM: why you rarely write versions yourself</h2>
 
 <pre><code>&lt;parent&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
@@ -36,11 +36,11 @@
     &lt;relativePath/&gt;
 &lt;/parent&gt;</code></pre>
 
-<p>The parent POM provides <strong>dependency management</strong>: it pre-selects compatible versions for 200+ common libraries. When you declare a starter without a <code>&lt;version&gt;</code> tag, Maven inherits the version from the parent. This prevents the most insidious Maven bug — mismatched library versions that compile but fail at runtime.</p>
+<p>The parent POM provides <strong>dependency management</strong>: it pre-selects compatible versions for 200+ common libraries. When you declare a starter without a <code>&lt;version&gt;</code> tag, Maven inherits the version from the parent. This prevents the most common Maven bug: mismatched library versions that compile but fail at runtime.</p>
 
 <p>The parent also configures default plugin versions, encoding, and compiler settings. The <code>&lt;relativePath/&gt;</code> empty tag tells Maven to look in the repository, not the local filesystem.</p>
 
-<h2>Dependency scopes — when is a library available?</h2>
+<h2>Dependency scopes: when is a library available?</h2>
 
 <p>Every <code>&lt;dependency&gt;</code> can specify a <code>&lt;scope&gt;</code> that controls which classpaths it joins:</p>
 
@@ -54,24 +54,24 @@
 
 <p>Common patterns:</p>
 <ul>
-  <li><strong>Database drivers</strong> use <code>runtime</code> — your code calls JDBC interfaces (compile-time), the driver implements them at runtime.</li>
-  <li><strong>JUnit / Mockito</strong> use <code>test</code> — never shipped in production.</li>
-  <li><strong>Servlet API</strong> uses <code>provided</code> — the app server already has it; bundling it would cause classpath conflicts.</li>
+  <li><strong>Database drivers</strong> use <code>runtime</code>: your code calls JDBC interfaces (compile-time), the driver implements them at runtime.</li>
+  <li><strong>JUnit / Mockito</strong> use <code>test</code>: never shipped in production.</li>
+  <li><strong>Servlet API</strong> uses <code>provided</code>: the app server already has it; bundling it would cause classpath conflicts.</li>
 </ul>
 
-<p>Omitting <code>&lt;scope&gt;</code> means <code>compile</code> — the dependency is available everywhere and packaged in the final JAR.</p>
+<p>Omitting <code>&lt;scope&gt;</code> means <code>compile</code>: the dependency is available everywhere and packaged in the final JAR.</p>
 
-<h2>Transitive dependencies — the graph Maven walks for you</h2>
+<h2>Transitive dependencies: the graph Maven walks for you</h2>
 
-<p>When your project depends on <code>spring-boot-starter-web</code>, that starter depends on Spring MVC, which depends on Jackson, which depends on <code>jackson-core</code>. Maven pulls in <strong>the entire chain</strong> automatically — that's transitive resolution.</p>
+<p>When your project depends on <code>spring-boot-starter-web</code>, that starter depends on Spring MVC, which depends on Jackson, which depends on <code>jackson-core</code>. Maven pulls in <strong>the entire chain</strong> automatically. That is transitive resolution.</p>
 
 <p>Version conflicts arise when two paths request different versions of the same artifact. Maven uses <strong>nearest-wins</strong>: the dependency closer to the root of your POM wins. If <code>spring-boot-starter-web</code> pulls in Jackson 2.17 and a custom library pulls in Jackson 2.15, the version declared directly in your POM (or the nearer one in the tree) takes precedence.</p>
 
-<p>To force a specific version regardless of distance, use <code>&lt;dependencyManagement&gt;</code> — it overrides nearest-wins for the declared artifact.</p>
+<p>To force a specific version regardless of distance, use <code>&lt;dependencyManagement&gt;</code>. It overrides nearest-wins for the declared artifact.</p>
 
 <p>To cut an unwanted transitive dependency entirely, use <code>&lt;exclusions&gt;</code> on the declaring dependency.</p>
 
-<h2>Fat JAR — one file, zero classpath headaches</h2>
+<h2>Fat JAR: one file, zero classpath headaches</h2>
 
 <pre><code>&lt;build&gt;
     &lt;plugins&gt;
@@ -86,7 +86,7 @@
 
 <pre><code>java -jar ordermgmt-0.0.1-SNAPSHOT.jar</code></pre>
 
-<p>No Maven on the server. No classpath to configure. No missing JAR errors at midnight. The plugin also writes a classpath index and layers the JAR so container runtimes like Docker can cache unchanged dependency layers.</p>
+<p>No Maven on the server. No classpath to configure. No missing JARs. The plugin also writes a classpath index and layers the JAR so container runtimes like Docker can cache unchanged dependency layers.</p>
 
 <p><strong>Primary source:</strong> <a href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html" target="_blank" rel="noopener">Maven: Introduction to the POM</a> · <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" target="_blank" rel="noopener">Maven: Dependency Mechanism</a></p>
 
@@ -95,10 +95,10 @@
 <div class="quiz" id="q1">
   <div class="quiz-question">1. Two artifacts on Maven Central share the same <code>groupId</code> and <code>artifactId</code> but differ in <code>version</code>. Are they the same artifact?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Yes — version is just a label, the artifact is identical</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">No — all three coordinates must match for identity</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Yes — Maven replaces the older version automatically</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">No — only the <code>groupId</code> determines uniqueness</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Yes: version is just a label, the artifact is identical</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">No: all three coordinates must match for identity</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Yes: Maven replaces the older version automatically</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">No: only the <code>groupId</code> determines uniqueness</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
@@ -141,8 +141,8 @@
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">All four scopes: compile, test, runtime, and provided</li>
     <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Only compile-scope and runtime-scope dependencies</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Only compile-scope dependencies — runtime is loaded separately</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">All except test-scope — provided is also bundled as a fallback</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Only compile-scope dependencies: runtime is loaded separately</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">All except test-scope: provided is also bundled as a fallback</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
 </div>

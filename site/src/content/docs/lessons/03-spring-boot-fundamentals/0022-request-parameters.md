@@ -1,14 +1,14 @@
 ---
-title: "Request Parameters"
-description: "Request Parameters"
+title: "Lesson 22: Request Parameters"
+description: "Lesson 22: Request Parameters"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0022-request-parameters.html
 ---
 
 # Request Parameters
 
-Every HTTP request carries data in different places — the URL path, the query string, the body, the headers. Spring gives you one annotation per location. Pick the right one and the framework does the parsing for you. Pick the wrong one and you're fighting the framework instead of using it.
+Every HTTP request carries data in different places: the URL path, the query string, the body, the headers. Spring gives you one annotation per location. Pick the right one and the framework does the parsing for you. Pick the wrong one and you're fighting the framework instead of using it.
 
-## `@PathVariable` — data in the URL
+## `@PathVariable`: data in the URL
 
 When the identifier is part of the URL itself, use `@PathVariable`. It extracts a named segment from the path template:
 
@@ -22,9 +22,9 @@ public ResponseEntity<OrderResponse> getOrder(@PathVariable Long id) {
 
 The variable name in the annotation path (`{id}`) must match the method parameter name. If they differ, specify it explicitly: `@PathVariable("orderId") Long id`.
 
-Path variables are **always required** by default — there is no `required = false`. If the segment is missing, Spring returns 404 because the route doesn't match at all, not because a parameter is null.
+Path variables are **always required** by default. There is no `required = false`. If the segment is missing, Spring returns 404 because the route doesn't match at all, not because a parameter is null.
 
-## `@RequestParam` — data in the query string
+## `@RequestParam`: data in the query string
 
 Query parameters sit after the `?` in a URL: `/api/orders?status=PENDING&page=2`. Use `@RequestParam` to pull them out:
 
@@ -38,7 +38,7 @@ public ResponseEntity<List<OrderResponse>> listOrders(
 }
 ```
 
-By default, `@RequestParam` is **required**. Omit a required parameter and Spring returns **400 Bad Request** — not null, not an empty string. Setting `required = false` makes it optional; the value will be `null` when absent. For a safer default, use `defaultValue`:
+By default, `@RequestParam` is **required**. Omit a required parameter and Spring returns **400 Bad Request**, not null, not an empty string. Setting `required = false` makes it optional; the value will be `null` when absent. For a safer default, use `defaultValue`:
 
 ```
 @RequestParam(defaultValue = "0") int page,
@@ -47,7 +47,7 @@ By default, `@RequestParam` is **required**. Omit a required parameter and Sprin
 
 With `defaultValue`, the parameter is never null and `required` is implicitly false. This avoids `null` checks and `NumberFormatException` on primitive types.
 
-## `@RequestBody` — data in the request body
+## `@RequestBody`: data in the request body
 
 POST and PUT requests send structured data (usually JSON) in the body. `@RequestBody` tells Jackson to deserialize it into a Java object:
 
@@ -60,11 +60,11 @@ public ResponseEntity<OrderResponse> createOrder(
 }
 ```
 
-Without `@RequestBody`, Spring tries to bind body fields to method parameters individually (form-encoded style) — which almost never works with JSON. If you're sending JSON, you need this annotation.
+Without `@RequestBody`, Spring tries to bind body fields to method parameters individually (form-encoded style), which almost never works with JSON. If you're sending JSON, you need this annotation.
 
 `@RequestBody` is required by default. Send an empty body and you get **400 Bad Request**. Pair it with `@Valid` to trigger Bean Validation on the incoming object before it reaches your logic.
 
-## `@RequestHeader` — data in HTTP headers
+## `@RequestHeader`: data in HTTP headers
 
 Headers carry metadata: authentication tokens, content types, tracing IDs. Pull them out with `@RequestHeader`:
 
@@ -77,7 +77,7 @@ public ResponseEntity<List<OrderResponse>> listOrders(
 }
 ```
 
-Like `@RequestParam`, headers are required by default. Set `required = false` for optional headers. For common headers, Spring provides `HttpHeaders` as a type-safe alternative — inject the whole object and read what you need.
+Like `@RequestParam`, headers are required by default. Set `required = false` for optional headers. For common headers, Spring provides `HttpHeaders` as a type-safe alternative: inject the whole object and read what you need.
 
 ## When to use each
 
@@ -95,8 +95,8 @@ Rule of thumb: if it *identifies* the resource, it's a path variable. If it *fil
 ## Check your understanding
 
 <details>
-<summary>1. A request to GET /api/orders/7 returns 404 — the route is @GetMapping("/{id}") with @PathVariable Long id. What happens if the path variable is missing?</summary>
-<p><strong>Correct answer:</strong> The route doesn't match at all — no controller method is invoked</p>
+<summary>1. A request to GET /api/orders/7 returns 404. The route is @GetMapping("/{id}") with @PathVariable Long id. What happens if the path variable is missing?</summary>
+<p><strong>Correct answer:</strong> The route doesn't match at all; no controller method is invoked</p>
 </details>
 
 <details>

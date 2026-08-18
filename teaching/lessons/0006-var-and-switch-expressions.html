@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 6 — var &amp; Switch Expressions</title>
+  <title>Lesson 6: var &amp; Switch Expressions</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>var &amp; Switch Expressions</h1>
 
-<p>Two modern Java features that reduce boilerplate without changing runtime behavior: <code>var</code> lets the compiler infer local variable types, and switch expressions turn <code>switch</code> into something that returns a value. Both are purely compile-time conveniences — the JVM sees the same bytecode either way.</p>
+<p>Two modern Java features that reduce boilerplate without changing runtime behavior: <code>var</code> lets the compiler infer local variable types, and switch expressions turn <code>switch</code> into something that returns a value. Both are purely compile-time conveniences, the JVM sees the same bytecode either way.</p>
 
 <h2>The <code>var</code> keyword</h2>
 
-<p><code>var</code> tells the compiler to figure out the type from the initializer. It works only for local variables with an initializer — not fields, not parameters, not return types.</p>
+<p><code>var</code> tells the compiler to figure out the type from the initializer. It works only for local variables with an initializer: not fields, not parameters, not return types.</p>
 
 <pre><code>// Without var
 Map&lt;String, List&lt;Customer&gt;&gt; customersByCity = new HashMap&lt;&gt;();
@@ -23,14 +23,14 @@ Map&lt;String, List&lt;Customer&gt;&gt; customersByCity = new HashMap&lt;&gt;();
 var customersByCity = new HashMap&lt;String, List&lt;Customer&gt;&gt;();
 </code></pre>
 
-<p>The inferred type is exactly what you'd write by hand. <code>var</code> is not <code>dynamic</code> — the variable is still statically typed.</p>
+<p>The inferred type is exactly what you'd write by hand. <code>var</code> is not <code>dynamic</code>; the variable is still statically typed.</p>
 
 <h2>When <code>var</code> helps</h2>
 
 <ul>
   <li><strong>Long generic types</strong> where the type is obvious from the right side.</li>
-  <li><strong>try-with-resources</strong> — <code>try (var conn = ds.getConnection()) { ... }</code></li>
-  <li><strong>for-each loops</strong> — <code>for (var entry : map.entrySet()) { ... }</code></li>
+  <li><strong>try-with-resources</strong>: <code>try (var conn = ds.getConnection()) { ... }</code></li>
+  <li><strong>for-each loops</strong>: <code>for (var entry : map.entrySet()) { ... }</code></li>
 </ul>
 
 <pre><code>var name = "Alice";                   // String
@@ -43,9 +43,9 @@ var stream = orders.stream()           // Stream&lt;Order&gt;
 <h2>When <code>var</code> hurts</h2>
 
 <ul>
-  <li><strong>Unclear types</strong> — <code>var result = process(data)</code> tells you nothing about the type.</li>
-  <li><strong>Interface vs implementation leak</strong> — <code>var list = new ArrayList&lt;String&gt;()</code> infers <code>ArrayList</code>, not <code>List</code>. You lose the interface abstraction.</li>
-  <li><strong>Primitive surprises</strong> — <code>var x = 0</code> is <code>int</code>, <code>var y = 0.0</code> is <code>double</code>, <code>var z = 0L</code> is <code>long</code>. These are all different.</li>
+  <li><strong>Unclear types</strong>: <code>var result = process(data)</code> tells you nothing about the type.</li>
+  <li><strong>Interface vs implementation leak</strong>: <code>var list = new ArrayList&lt;String&gt;()</code> infers <code>ArrayList</code>, not <code>List</code>. You lose the interface abstraction.</li>
+  <li><strong>Primitive surprises</strong>: <code>var x = 0</code> is <code>int</code>, <code>var y = 0.0</code> is <code>double</code>, <code>var z = 0L</code> is <code>long</code>. These are all different.</li>
 </ul>
 
 <pre><code>var list = new ArrayList&lt;String&gt;();  // infers ArrayList, not List
@@ -55,11 +55,11 @@ var z = 0L;    // long
 var flag = true; // boolean
 </code></pre>
 
-<blockquote><strong>Rule of thumb:</strong> Use <code>var</code> when the type is obvious from the initializer — a constructor call or a factory method where the right side makes the type clear. Don't use it when a reader needs to look up the method signature to understand the type.</blockquote>
+<blockquote><strong>Rule of thumb:</strong> Use <code>var</code> when the type is obvious from the initializer, a constructor call or a factory method where the right side makes the type clear. Don't use it when a reader needs to look up the method signature to understand the type.</blockquote>
 
 <h2>Switch expressions</h2>
 
-<p>Java 14 made <code>switch</code> an expression — it returns a value. Combined with pattern matching, this replaces the old fall-through <code>switch</code> with a clean form.</p>
+<p>Java 14 made <code>switch</code> an expression; it returns a value. Combined with pattern matching, this replaces the old fall-through <code>switch</code> with a clean form.</p>
 
 <pre><code>// Old style — verbose, fall-through, error-prone
 String dayType;
@@ -90,8 +90,8 @@ String dayType = switch (day) {
 <h2>Arrow vs colon labels</h2>
 
 <ul>
-  <li><strong>Arrow labels</strong> (<code>-&gt;</code>) — no fall-through. The expression or block on the right is the result.</li>
-  <li><strong>Colon labels</strong> (<code>:</code>) — fall-through. You must <code>break</code> or <code>yield</code> explicitly.</li>
+  <li><strong>Arrow labels</strong> (<code>-&gt;</code>): no fall-through. The expression or block on the right is the result.</li>
+  <li><strong>Colon labels</strong> (<code>:</code>): fall-through. You must <code>break</code> or <code>yield</code> explicitly.</li>
 </ul>
 
 <p>You can mix them, but you shouldn't. Arrow labels are strictly better: no fall-through bugs, less code, clearer intent.</p>
@@ -133,10 +133,10 @@ String label = switch (status) {
 <div class="quiz" id="q1">
   <div class="quiz-question">1. What type does <code>var x = 0;</code> infer?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>short</code> — the smallest integer type</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0"><code>int</code> — the default integer literal type</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>long</code> — wider than needed for safety</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>Integer</code> — auto-boxed wrapper type</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>short</code>: the smallest integer type</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0"><code>int</code>: the default integer literal type</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>long</code>: wider than needed for safety</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>Integer</code>: auto-boxed wrapper type</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
@@ -144,10 +144,10 @@ String label = switch (status) {
 <div class="quiz" id="q2">
   <div class="quiz-question">2. What does <code>var list = new ArrayList&lt;String&gt;();</code> infer?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0"><code>ArrayList&lt;String&gt;</code> — the concrete type</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>List&lt;String&gt;</code> — the interface type</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>Collection&lt;String&gt;</code> — the supertype</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>Object</code> — erases to root type</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0"><code>ArrayList&lt;String&gt;</code>: the concrete type</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>List&lt;String&gt;</code>: the interface type</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>Collection&lt;String&gt;</code>: the supertype</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>Object</code>: erases to root type</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>
@@ -155,10 +155,10 @@ String label = switch (status) {
 <div class="quiz" id="q3">
   <div class="quiz-question">3. Inside a switch expression block body, which keyword returns the switch's value?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>return</code> — standard exit keyword</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0"><code>yield</code> — returns from the switch only</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>break</code> — exits the case block</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>emit</code> — produces the result value</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>return</code>: standard exit keyword</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0"><code>yield</code>: returns from the switch only</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>break</code>: exits the case block</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>emit</code>: produces the result value</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
 </div>
@@ -177,10 +177,10 @@ String label = switch (status) {
 <div class="quiz" id="q5">
   <div class="quiz-question">5. What type does <code>var x = 0.0;</code> infer?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>float</code> — narrower floating-point type</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0"><code>double</code> — the default floating-point literal</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>Double</code> — auto-boxed wrapper type</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>BigDecimal</code> — precise decimal type</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>float</code>: narrower floating-point type</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0"><code>double</code>: the default floating-point literal</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>Double</code>: auto-boxed wrapper type</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>BigDecimal</code>: precise decimal type</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
 </div>
@@ -204,7 +204,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite, review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

@@ -10,7 +10,7 @@ Two beans that need each other. A service that must open a connection *after* it
 
 ## The Circular Dependency Problem
 
-A **circular dependency** occurs when Bean A depends on Bean B, and Bean B depends on Bean A. Spring cannot construct either one first — it needs B to build A, and A to build B — so it throws an error at startup.
+A **circular dependency** occurs when Bean A depends on Bean B, and Bean B depends on Bean A. Spring cannot construct either one first: it needs B to build A, and A to build B, so it throws an error at startup.
 
 ```
 @Service
@@ -33,7 +33,7 @@ public class CustomerService {
 // Spring fails: "The dependencies of some of the beans form a cycle"
 ```
 
-With constructor injection and `final` fields, this is a hard failure. Spring can't create a half-constructed object. This is a *feature*, not a bug — it forces you to fix the design.
+With constructor injection and `final` fields, this is a hard failure. Spring can't create a half-constructed object. This is a *feature*, not a bug: it forces you to fix the design.
 
 ## Solution 1: Extract a Third Service (Preferred)
 
@@ -58,7 +58,7 @@ public class CustomerService {
 }
 ```
 
-The dependency graph goes from `A ↔ B` to `A → C ← B`. No cycle. This is almost always the right fix — if two services need each other, a concept is missing from your model.
+The dependency graph goes from `A &harr; B` to `A &rarr; C &larr; B`. No cycle. This is almost always the right fix: if two services need each other, a concept is missing from your model.
 
 ## Solution 2: Use Application Events
 
@@ -130,11 +130,11 @@ public class OrderService {
 }
 ```
 
-Why not just put this in the constructor? You could for `ConnectionPool`, but if your initialization calls methods *on injected beans*, those beans must already be fully wired. The constructor runs before Spring finishes injection on *other* beans in the same cycle — `@PostConstruct` guarantees everything is ready.
+Why not just put this in the constructor? You could for `ConnectionPool`, but if your initialization calls methods *on injected beans*, those beans must already be fully wired. The constructor runs before Spring finishes injection on *other* beans in the same cycle. `@PostConstruct` guarantees everything is ready.
 
 ## @PreDestroy
 
-`@PreDestroy` runs before the application context shuts down. Use it to release resources — close connections, flush buffers, stop threads:
+`@PreDestroy` runs before the application context shuts down. Use it to release resources: close connections, flush buffers, stop threads.
 
 ```
 import jakarta.annotation.PreDestroy;
@@ -152,7 +152,7 @@ public class OrderService {
 
 **Important:** both annotations come from `jakarta.annotation` (not `javax.annotation`). Spring Boot 3+ uses the Jakarta namespace.
 
-## Constructor vs @PostConstruct — When to Use Each
+## Constructor vs @PostConstruct: When to Use Each
 
 | Use the constructor when | Use @PostConstruct when |
 | --- | --- |
@@ -188,5 +188,5 @@ Prefer the constructor. Reach for `@PostConstruct` only when the constructor can
 
 <details>
 <summary>5. OrderService publishes an OrderCreatedEvent and CustomerService handles it with @EventListener. Does OrderService depend on CustomerService?</summary>
-<p><strong>Correct answer:</strong> No — the publisher only knows about the event, not the listener</p>
+<p><strong>Correct answer:</strong> No: the publisher only knows about the event, not the listener</p>
 </details>

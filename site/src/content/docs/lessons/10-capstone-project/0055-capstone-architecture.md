@@ -6,11 +6,11 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/005
 
 # Capstone Architecture: Assembling All Technologies
 
-Modules 00–09 each taught one technology in isolation. A real application uses them **all at once**. This lesson shows you how REST, GraphQL, Kafka, JPA, and WebFlux coexist in a single Spring Boot application — and why layered architecture keeps the resulting codebase navigable.
+Modules 00-09 each taught one technology in isolation. A real application uses them **all at once**. This lesson shows you how REST, GraphQL, Kafka, JPA, and WebFlux coexist in a single Spring Boot application, and why layered architecture keeps the resulting codebase navigable.
 
 ## The Domain: Order Management System
 
-The capstone is an **Order Management System (OMS)** for an e-commerce platform. It manages customers, products, and orders — each order containing multiple line items with quantity and unit price. When an order is created or its status changes, a Kafka event is published. Clients query the system via REST or GraphQL, and a reactive endpoint streams order-status updates in real time.
+The capstone is an **Order Management System (OMS)** for an e-commerce platform. It manages customers, products, and orders, each order containing multiple line items with quantity and unit price. When an order is created or its status changes, a Kafka event is published. Clients query the system via REST or GraphQL, and a reactive endpoint streams order-status updates in real time.
 
 ## Architecture Diagram
 
@@ -52,17 +52,17 @@ The capstone is an **Order Management System (OMS)** for an e-commerce platform.
                        └───────────────┘
 ```
 
-Three API styles — REST, GraphQL, and reactive streaming — all delegate to the **same service layer**. The service layer talks to JPA repositories and a Kafka producer. The database stores the source of truth; Kafka broadcasts what changed.
+Three API styles (REST, GraphQL, and reactive streaming) all delegate to the **same service layer**. The service layer talks to JPA repositories and a Kafka producer. The database stores the source of truth; Kafka broadcasts what changed.
 
 ## Why REST and GraphQL Coexist
 
-Spring Boot lets you run **both** a REST controller and a GraphQL resolver in the same application. They are not competing — they serve different clients:
+Spring Boot lets you run **both** a REST controller and a GraphQL resolver in the same application. They are not competing. They serve different clients:
 
 -   **REST** for simple CRUD operations and integrations that expect standard HTTP verbs.
--   **GraphQL** for clients that need to fetch exactly the fields they want — no over-fetching, no under-fetching.
+-   **GraphQL** for clients that need to fetch exactly the fields they want: no over-fetching, no under-fetching.
 -   **WebFlux SSE** for real-time dashboards that need a live stream of status changes.
 
-The key insight: **all three share the same `OrderService`.** Spring MVC handles REST; Spring for GraphQL handles queries and mutations; WebFlux handles the streaming endpoint. Spring Boot auto-configures all three simultaneously — there is no conflict because each framework maps to a different URL path.
+The key insight: **all three share the same `OrderService`.** Spring MVC handles REST; Spring for GraphQL handles queries and mutations; WebFlux handles the streaming endpoint. Spring Boot auto-configures all three simultaneously. There is no conflict because each framework maps to a different URL path.
 
 ## Project Structure
 
@@ -119,9 +119,9 @@ Each package maps to an architectural layer:
 
 | Package | Layer | Responsibility |
 | --- | --- | --- |
-| `domain/` | Persistence | JPA entities — database rows as Java objects |
-| `repository/` | Persistence | Spring Data JPA interfaces — query methods |
-| `dto/` | Transfer | Java records — immutable API payloads |
+| `domain/` | Persistence | JPA entities: database rows as Java objects |
+| `repository/` | Persistence | Spring Data JPA interfaces: query methods |
+| `dto/` | Transfer | Java records: immutable API payloads |
 | `service/` | Business | Domain logic, `@Transactional`, Kafka publishing |
 | `controller/` | API (REST) | HTTP verbs, request/response mapping |
 | `graphql/` | API (GraphQL) | Query and mutation resolvers |
@@ -130,7 +130,7 @@ Each package maps to an architectural layer:
 
 ## Layered Architecture in Practice
 
-The dependency rule is simple: **an outer layer may depend on an inner layer, but never the reverse.** The service layer depends on repositories and Kafka producers. Controllers depend on the service layer. The service layer never imports `controller` or `graphql` — it has no idea how its results are exposed.
+The dependency rule is simple: **an outer layer may depend on an inner layer, but never the reverse.** The service layer depends on repositories and Kafka producers. Controllers depend on the service layer. The service layer never imports `controller` or `graphql`. It has no idea how its results are exposed.
 
 ```
 // Controller calls service — REST layer
@@ -167,11 +167,11 @@ public class OrderQueryResolver {
 }
 ```
 
-Both the REST controller and the GraphQL resolver inject `OrderService` and call the same methods. If a new business rule is added — say, a minimum order amount — you change it **once** in the service layer. Both APIs pick it up automatically.
+Both the REST controller and the GraphQL resolver inject `OrderService` and call the same methods. If a new business rule is added (say, a minimum order amount), you change it **once** in the service layer. Both APIs pick it up automatically.
 
 ## Domain Entities — JPA, Not Records
 
-JPA entities use explicit getters and setters. JPA requires a no-arg constructor and mutable fields — so `record` won't work. DTOs, by contrast, are records: immutable, concise, perfect for API responses.
+JPA entities use explicit getters and setters. JPA requires a no-arg constructor and mutable fields, so `record` won't work. DTOs, by contrast, are records: immutable, concise, perfect for API responses.
 
 ```
 // Entity — mutable, JPA-managed
@@ -223,11 +223,11 @@ public record OrderResponse(
 }
 ```
 
-The `from()` factory method converts an entity to a DTO — this is where you eagerly access lazy-loaded relationships while still inside a transaction, **before** the data leaves the service layer.
+The `from()` factory method converts an entity to a DTO. This is where you eagerly access lazy-loaded relationships while still inside a transaction, **before** the data leaves the service layer.
 
 ## Where WebFlux Fits
 
-The streaming endpoint is a single controller method that returns a `Flux` — it does not replace the REST and GraphQL endpoints. Spring Boot can serve reactive and blocking endpoints side by side:
+The streaming endpoint is a single controller method that returns a `Flux`. It does not replace the REST and GraphQL endpoints. Spring Boot can serve reactive and blocking endpoints side by side:
 
 ```
 @RestController
@@ -244,14 +244,14 @@ public class OrderController {
 }
 ```
 
-The capstone runs on Tomcat (Spring MVC with virtual threads). Blocking JPA endpoints execute on the virtual thread pool, which can scale to thousands of concurrent requests without exhausting platform threads. The reactive SSE streaming endpoint runs on the same server — Spring dispatches it through the WebFlux adapter while Tomcat handles the HTTP connection. The service layer's `streamStatusUpdates` method bridges the blocking repository world to the reactive streaming world using a `Sinks.Many` — a hot publisher that Kafka consumers push events into.
+The capstone runs on Tomcat (Spring MVC with virtual threads). Blocking JPA endpoints execute on the virtual thread pool, which can scale to thousands of concurrent requests without exhausting platform threads. The reactive SSE streaming endpoint runs on the same server. Spring dispatches it through the WebFlux adapter while Tomcat handles the HTTP connection. The service layer's `streamStatusUpdates` method bridges the blocking repository world to the reactive streaming world using a `Sinks.Many`, a hot publisher that Kafka consumers push events into.
 
 ## Key Takeaways
 
--   **One service layer, multiple API styles.** REST, GraphQL, and WebFlux are presentation concerns — they adapt the same business logic to different client needs.
+-   **One service layer, multiple API styles.** REST, GraphQL, and WebFlux are presentation concerns. They adapt the same business logic to different client needs.
 -   **Layered architecture prevents coupling.** Controllers, resolvers, and Kafka consumers all depend on the service layer. The service depends on repositories and producers. Dependencies flow inward only.
 -   **Entities vs DTOs.** JPA entities are mutable and tied to the database. Java records are immutable and safe for API responses. Convert between them at the service boundary with `from()` factory methods.
--   **Kafka decouples producers from consumers.** The service publishes events. The consumer can notify users, update search indexes, or trigger downstream workflows — all without the service knowing.
+-   **Kafka decouples producers from consumers.** The service publishes events. The consumer can notify users, update search indexes, or trigger downstream workflows, all without the service knowing.
 -   **WebFlux is additive, not a replacement.** A single reactive streaming endpoint does not require rewriting the entire application in Reactor. Use it where real-time streaming is needed; keep blocking JPA everywhere else.
 
 **Primary sources:** [Spring Boot Web (Servlet)](https://docs.spring.io/spring-boot/reference/web/servlet.html) · [Spring for GraphQL Reference](https://docs.spring.io/spring-graphql/reference/) · [Spring Kafka Reference](https://docs.spring.io/spring-kafka/reference/) · [Spring Data JPA Reference](https://docs.spring.io/spring-data/jpa/reference/) · [Spring WebFlux Reference](https://docs.spring.io/spring-framework/reference/web/webflux.html)

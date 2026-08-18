@@ -1,14 +1,14 @@
 ---
-title: "OOP Fundamentals"
-description: "OOP Fundamentals"
+title: "Lesson 8: OOP Fundamentals"
+description: "Lesson 8: OOP Fundamentals"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0008-oop-fundamentals.html
 ---
 
 # OOP Fundamentals
 
-Java is object-oriented at its core. You model your domain with classes, compose behavior through interfaces, and share common structure with abstract classes. The payoff: code that depends on abstractions, not implementations — so you can swap strategies without rewriting callers.
+Java is object-oriented at its core. You model your domain with classes, compose behavior through interfaces, and share common structure with abstract classes. The payoff: code that depends on abstractions, not implementations, so you can swap strategies without rewriting callers.
 
-## Classes — state and behavior
+## Classes: state and behavior
 
 A class bundles fields (state) and methods (behavior) into one unit. Access is controlled with `private`, `protected`, and `public`:
 
@@ -46,9 +46,9 @@ public class BankAccount {
 }
 ```
 
-`accountId` is `final` — set once, never changed. `balance` mutates through controlled methods that enforce invariants. This is encapsulation: the outside world sees *what* the object does, not *how* it stores data.
+`accountId` is `final`: set once, never changed. `balance` mutates through controlled methods that enforce invariants. This is encapsulation: the outside world sees *what* the object does, not *how* it stores data.
 
-## Interfaces — contracts without implementation
+## Interfaces: contracts without implementation
 
 An interface defines **what** a class must do, not **how**. Callers code against the interface; any implementation fits:
 
@@ -83,11 +83,11 @@ public class DiscountPriceCalculator implements PriceCalculator {
 }
 ```
 
-Any method that accepts a `PriceCalculator` works with either implementation — the caller never knows or cares which one it gets.
+Any method that accepts a `PriceCalculator` works with either implementation; the caller never knows or cares which one it gets.
 
-## Abstract classes — shared state + partial implementation
+## Abstract classes: shared state + partial implementation
 
-An abstract class can mix concrete methods (with bodies) and abstract methods (without). It can also hold fields — something interfaces cannot do (except `static final` constants):
+An abstract class can mix concrete methods (with bodies) and abstract methods (without). It can also hold fields: something interfaces cannot do (except `static final` constants):
 
 ```
 public abstract class BaseEntity {
@@ -124,9 +124,9 @@ public class Customer extends BaseEntity {
 }
 ```
 
-Abstract classes are for "is-a" relationships with shared wiring. `Customer` *is* a `BaseEntity` — it gets the ID and timestamp logic for free and fills in its own validation.
+Abstract classes are for "is-a" relationships with shared wiring. `Customer` *is* a `BaseEntity`; it gets the ID and timestamp logic for free and fills in its own validation.
 
-## Polymorphism — code to the interface
+## Polymorphism: code to the interface
 
 Polymorphism means one variable, many forms. When your code depends on an interface or abstract type, any subclass or implementation works at runtime:
 
@@ -141,14 +141,14 @@ printReceipt(order, new StandardPriceCalculator());
 printReceipt(order, new DiscountPriceCalculator(BigDecimal.valueOf(0.10)));
 ```
 
-The caller decides *which* implementation to inject. The method just uses the contract. Swap implementations without changing a line of the caller — that's the power of polymorphism.
+The caller decides *which* implementation to inject. The method just uses the contract. Swap implementations without changing a line of the caller. That's the power of polymorphism..
 
-## Interface vs abstract class — when to use which
+## Interface vs abstract class: when to use which
 
--   **Interface** — you need a contract that any class can fulfill. A class can implement *multiple* interfaces. Prefer interfaces for defining roles or capabilities.
--   **Abstract class** — you need shared state (fields) and partial implementation across closely related types. A class can extend only *one* abstract class. Prefer abstract classes for template patterns with common wiring.
+-   **Interface**: you need a contract that any class can fulfill. A class can implement *multiple* interfaces. Prefer interfaces for defining roles or capabilities.
+-   **Abstract class**: you need shared state (fields) and partial implementation across closely related types. A class can extend only *one* abstract class. Prefer abstract classes for template patterns with common wiring.
 
-Since Java 8, interfaces can have `default` methods with bodies — so the line is blurrier. The tiebreaker: if you need instance fields, use an abstract class. Otherwise, prefer an interface for the flexibility of multiple implementation.
+Since Java 8, interfaces can have `default` methods with bodies, so the line is blurrier. The tiebreaker: if you need instance fields, use an abstract class. Otherwise, prefer an interface for the flexibility of multiple implementation.
 
 **Primary sources:** [Oracle: Object-Oriented Programming Concepts](https://docs.oracle.com/javase/tutorial/java/concepts/) · [Oracle: Defining an Interface](https://docs.oracle.com/javase/tutorial/java/IandI/createinterface.html) · [Oracle: Abstract Methods and Classes](https://docs.oracle.com/javase/tutorial/java/IandI/abstract.html)
 
@@ -156,12 +156,12 @@ Since Java 8, interfaces can have `default` methods with bodies — so the line 
 
 <details>
 <summary>1. Can a Java class implement more than one interface?</summary>
-<p><strong>Correct answer:</strong> Yes — a class can implement many interfaces</p>
+<p><strong>Correct answer:</strong> Yes: a class can implement many interfaces</p>
 </details>
 
 <details>
 <summary>2. What happens if you try to instantiate an abstract class with new?</summary>
-<p><strong>Correct answer:</strong> A compile-time error — abstract types cannot be instantiated</p>
+<p><strong>Correct answer:</strong> A compile-time error: abstract types cannot be instantiated</p>
 </details>
 
 <details>
@@ -176,5 +176,5 @@ Since Java 8, interfaces can have `default` methods with bodies — so the line 
 
 <details>
 <summary>5. Can an interface in Java 21 contain a method with a body?</summary>
-<p><strong>Correct answer:</strong> Yes — a default method provides a body</p>
+<p><strong>Correct answer:</strong> Yes: a default method provides a body</p>
 </details>

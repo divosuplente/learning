@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 9 — Enums, Sealed Types &amp; Packages</title>
+  <title>Lesson 9: Enums, Sealed Types &amp; Packages</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Enums, Sealed Types &amp; Packages</h1>
 
-<p>Real domains have <strong>fixed sets of variants</strong> — shipping methods, order statuses, payment types. Java enums make these type-safe at compile time, sealed types let you guarantee <em>no other variant exists</em>, and packages organize who can see what. Together they close the gap between your domain model and the type system.</p>
+<p>Real domains have <strong>fixed sets of variants</strong>: shipping methods, order statuses, payment types. Java enums make these type-safe at compile time, sealed types let you guarantee <em>no other variant exists</em>, and packages organize who can see what. Together they close the gap between your domain model and the type system.</p>
 
-<h2>Enums — type-safe constants with behavior</h2>
+<h2>Enums: type-safe constants with behavior</h2>
 
 <p>Each enum constant is a singleton instance. Enums can carry fields, implement interfaces, and override methods per constant:</p>
 
@@ -41,7 +41,7 @@
 }
 </code></pre>
 
-<p>Because <code>cost</code> is <code>abstract</code>, every constant <strong>must</strong> implement it. Callers just write <code>method.cost(weight)</code> — no <code>if</code> chain, no missing case.</p>
+<p>Because <code>cost</code> is <code>abstract</code>, every constant <strong>must</strong> implement it. Callers just write <code>method.cost(weight)</code>: no <code>if</code> chain, no missing case.</p>
 
 <p>Enums can also carry shared fields and constructors:</p>
 
@@ -61,7 +61,7 @@
 }
 </code></pre>
 
-<h2>Sealed interfaces — controlling the type hierarchy</h2>
+<h2>Sealed interfaces: controlling the type hierarchy</h2>
 
 <p>A <code>sealed</code> type declares <em>exactly</em> which classes can implement or extend it. No one else can add a subtype:</p>
 
@@ -76,13 +76,13 @@ public record Triangle(double base, double height) implements Shape {}
 <p>The compiler enforces three rules:</p>
 <ul>
   <li>Every permitted subtype must be in the <strong>same package</strong> (or same compilation unit).</li>
-  <li>Each subtype must be <code>final</code>, <code>sealed</code>, or <code>non-sealed</code> — you must choose.</li>
+  <li>Each subtype must be <code>final</code>, <code>sealed</code>, or <code>non-sealed</code>: you must choose.</li>
   <li><code>non-sealed</code> re-opens the hierarchy; anyone can extend that subtype.</li>
 </ul>
 
-<p>Sealed types unlock <strong>exhaustive pattern matching</strong>. When you switch over a sealed type and cover every permitted subtype, no <code>default</code> is needed — the compiler checks completeness.</p>
+<p>Sealed types unlock <strong>exhaustive pattern matching</strong>. When you switch over a sealed type and cover every permitted subtype, no <code>default</code> is needed; the compiler checks completeness.</p>
 
-<h2>Package organization — one-way dependency flow</h2>
+<h2>Package organization: one-way dependency flow</h2>
 
 <p>Packages are namespaces. A clean structure makes dependencies flow one way:</p>
 
@@ -95,9 +95,9 @@ public record Triangle(double base, double height) implements Shape {}
 └── config/         # Configuration classes
 </code></pre>
 
-<p>The rule: <code>controller → service → repository → domain</code>. No layer depends on a layer above it. The <code>domain</code> package has zero dependencies on other layers — it defines the core types that everything else builds on.</p>
+<p>The rule: <code>controller → service → repository → domain</code>. No layer depends on a layer above it. The <code>domain</code> package has zero dependencies on other layers; it defines the core types that everything else builds on.</p>
 
-<h2>Visibility modifiers — who can see what</h2>
+<h2>Visibility modifiers: who can see what</h2>
 
 <p>Java has four visibility levels. Use the most restrictive one that works:</p>
 
@@ -114,10 +114,10 @@ public record Triangle(double base, double height) implements Shape {}
 </table>
 
 <ul>
-  <li><strong><code>private</code></strong> — fields and internal helpers. The default for most things.</li>
-  <li><strong>Package-private</strong> — classes only used within the same package. The implicit default when you write nothing.</li>
-  <li><strong><code>protected</code></strong> — for methods a subclass must override but outsiders shouldn't call.</li>
-  <li><strong><code>public</code></strong> — API surface: domain records, service interfaces, controller endpoints.</li>
+  <li><strong><code>private</code></strong>: fields and internal helpers. The default for most things.</li>
+  <li><strong>Package-private</strong>: classes only used within the same package. The implicit default when you write nothing.</li>
+  <li><strong><code>protected</code></strong>: for methods a subclass must override but outsiders shouldn't call.</li>
+  <li><strong><code>public</code></strong>: API surface: domain records, service interfaces, controller endpoints.</li>
 </ul>
 
 <p><strong>Primary sources:</strong> <a href="https://docs.oracle.com/javase/21/docs/api/java.base/java/lang/Enum.html" target="_blank" rel="noopener">Oracle: Enum</a> · <a href="https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html#jls-8.1.1.2" target="_blank" rel="noopener">Oracle: Sealed Classes (JLS)</a> · <a href="https://docs.oracle.com/javase/tutorial/java/package/index.html" target="_blank" rel="noopener">Oracle: Packages</a></p>
@@ -129,7 +129,7 @@ public record Triangle(double base, double height) implements Shape {}
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It returns <code>null</code> at runtime</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It inherits the first constant's implementation</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">It fails to compile — abstract method unimplemented</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">It fails to compile: abstract method unimplemented</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It throws <code>AbstractMethodError</code> at runtime</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
@@ -139,7 +139,7 @@ public record Triangle(double base, double height) implements Shape {}
   <div class="quiz-question">2. A sealed interface <code>permits A, B</code>. Class <code>C</code> in the same package tries <code>implements</code> on it. What happens?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It compiles if <code>C</code> is marked <code>final</code></li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">It fails to compile — not in the permits list</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">It fails to compile: not in the permits list</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It compiles with a compiler warning only</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It compiles if <code>C</code> is marked <code>non-sealed</code></li>
   </ul>
@@ -171,8 +171,8 @@ public record Triangle(double base, double height) implements Shape {}
 <div class="quiz" id="q5">
   <div class="quiz-question">5. A <code>switch</code> expression over a sealed interface <code>Payment permits Cash, Card</code> covers both cases. What happens if you add a <code>default</code> branch anyway?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The compiler rejects it — default is forbidden</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">It compiles — default is allowed but unreachable</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The compiler rejects it: default is forbidden</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">It compiles: default is allowed but unreachable</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It crashes at runtime with an ambiguity error</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The compiler removes the default automatically</li>
   </ul>
@@ -198,7 +198,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite, review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

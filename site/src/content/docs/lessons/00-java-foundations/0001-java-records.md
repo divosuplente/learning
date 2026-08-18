@@ -1,16 +1,16 @@
 ---
-title: "Java Records: Boilerplate-Free Data Classes"
-description: "Java Records: Boilerplate-Free Data Classes"
+title: "Lesson 1: Java Records: Boilerplate-Free Data Classes"
+description: "Lesson 1: Java Records: Boilerplate-Free Data Classes"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0001-java-records.html
 ---
 
 # Java Records: Boilerplate-Free Data Classes
 
-If you've written data-carrying classes in any language, you know the drill: constructor, getters, `equals()`, `hashCode()`, `toString()` — easily 50 lines of identical structure for something that should be one.
+If you've written data-carrying classes in any language, you know the drill: constructor, getters, `equals()`, `hashCode()`, `toString()`. Easily 50 lines of identical structure for something that should be one.
 
 Java 16 introduced **records** to solve this. A record is an **immutable data carrier**. The compiler generates all that boilerplate for you.
 
-**JDK version:** Spring Boot 4.1 supports Java 17, 21, 25, and 26. Java 21+ is recommended as the practical baseline — it gives you records, sealed types, pattern matching, and virtual threads. If you're starting fresh, install JDK 21.
+**JDK version:** Spring Boot 4.1 supports Java 17, 21, 25, and 26. Java 21+ is recommended as the practical baseline. It gives you records, sealed types, pattern matching, and virtual threads. If you're starting fresh, install JDK 21.
 
 ## Your first record
 
@@ -23,12 +23,12 @@ public record Customer(
 
 That's it. You automatically get:
 
--   `customer.id()`, `customer.name()`, `customer.email()` — accessor methods
--   `equals()` and `hashCode()` — correct, field-based implementations
--   `toString()` — readable output like `Customer[id=1, name=Alice, email=alice@example.com]`
--   A constructor — `new Customer("1", "Alice", "alice@example.com")`
+-   `customer.id()`, `customer.name()`, `customer.email()`: accessor methods
+-   `equals()` and `hashCode()`: correct, field-based implementations
+-   `toString()`: readable output like `Customer[id=1, name=Alice, email=alice@example.com]`
+-   A constructor: `new Customer("1", "Alice", "alice@example.com")`
 
-Records are **immutable by design**. There are no setters. Once created, a record's state cannot change. This makes them thread-safe and predictable — two qualities you'll rely on constantly in backend systems.
+Records are **immutable by design**. There are no setters. Once created, a record's state cannot change. This makes them thread-safe and predictable: two qualities you'll rely on constantly in backend systems.
 
 ## Why this matters for your mission
 
@@ -38,7 +38,7 @@ Records appear everywhere in the courses ahead: as DTOs (data transfer objects) 
 
 ## Validating record fields
 
-By default, records accept `null` values. In backend systems, `null` almost always means a bug waiting to happen. Records support a **compact constructor** — a validation block that runs during construction (before field assignment):
+By default, records accept `null` values. In backend systems, `null` almost always means a bug waiting to happen. Records support a **compact constructor**, a validation block that runs during construction (before field assignment):
 
 ```
 public record Order(

@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 47 — Project Reactor: Mono &amp; Flux Basics</title>
+  <title>Lesson 47: Project Reactor: Mono &amp; Flux Basics</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Project Reactor: Mono &amp; Flux Basics</h1>
 
-<p>Project Reactor is the Reactive Streams implementation that powers Spring WebFlux. It gives you two publisher types — <code>Mono</code> for zero-or-one results, <code>Flux</code> for zero-to-many — and a toolkit of static factories to create them. This lesson covers what each type models and how to build publishers from scratch.</p>
+<p>Project Reactor is the Reactive Streams implementation that powers Spring WebFlux. It gives you two publisher types (<code>Mono</code> for zero-or-one results, <code>Flux</code> for zero-to-many) and a toolkit of static factories to create them. This lesson covers what each type models and how to build publishers from scratch.</p>
 
-<h2>Mono &lt;T&gt; — Zero or One Item</h2>
+<h2>Mono &lt;T&gt;: Zero or One Item</h2>
 
 <p>A <code>Mono&lt;T&gt;</code> emits <strong>at most one item</strong>, then completes. It also may emit nothing (complete empty) or signal an error. Think of it as the reactive equivalent of a <code>Optional&lt;T&gt;</code> that can also fail.</p>
 
@@ -22,7 +22,7 @@
 Mono&lt;String&gt; nothing = Mono.empty();
 Mono&lt;String&gt; failed = Mono.error(new RuntimeException("boom"));</code></pre>
 
-<h2>Flux &lt;T&gt; — Zero to N Items</h2>
+<h2>Flux &lt;T&gt;: Zero to N Items</h2>
 
 <p>A <code>Flux&lt;T&gt;</code> emits <strong>zero or more items</strong>, then completes or errors. It can be finite (a list of 10 orders) or infinite (a stream of Kafka messages that never ends).</p>
 
@@ -32,17 +32,17 @@ Mono&lt;String&gt; failed = Mono.error(new RuntimeException("boom"));</code></pr
 Flux&lt;Integer&gt; range = Flux.range(1, 10);
 Flux&lt;Long&gt; ticks = Flux.interval(Duration.ofSeconds(1));</code></pre>
 
-<p>Both <code>Mono</code> and <code>Flux</code> implement the <code>Publisher</code> interface from the Reactive Streams spec. The difference is cardinality — and that cardinality shapes how you compose operators downstream.</p>
+<p>Both <code>Mono</code> and <code>Flux</code> implement the <code>Publisher</code> interface from the Reactive Streams spec. The difference is cardinality, and that cardinality shapes how you compose operators downstream.</p>
 
-<h2>Mono vs Flux — When to Use Each</h2>
+<h2>Mono vs Flux: When to Use Each</h2>
 
 <table>
   <tr><th>Type</th><th>Cardinality</th><th>Analogy</th><th>Use When</th></tr>
-  <tr><td><code>Mono</code></td><td>0 or 1</td><td>A ticket booth — one ticket or "sold out"</td><td>Single-record lookup, save, HTTP response</td></tr>
-  <tr><td><code>Flux</code></td><td>0 to N</td><td>A train line — trains keep arriving</td><td>Collections, streams, events, infinite sources</td></tr>
+  <tr><td><code>Mono</code></td><td>0 or 1</td><td>A ticket booth: one ticket or "sold out"</td><td>Single-record lookup, save, HTTP response</td></tr>
+  <tr><td><code>Flux</code></td><td>0 to N</td><td>A train line: trains keep arriving</td><td>Collections, streams, events, infinite sources</td></tr>
 </table>
 
-<p>A <code>Flux</code> that emits one item is legal but semantically misleading. If the domain models a single result, use <code>Mono</code> — it communicates intent and gives you type-specific operators like <code>.defaultIfEmpty()</code>.</p>
+<p>A <code>Flux</code> that emits one item is legal but semantically misleading. If the domain models a single result, use <code>Mono</code>. It communicates intent and gives you type-specific operators like <code>.defaultIfEmpty()</code>.</p>
 
 <h2>Static Factory Methods</h2>
 
@@ -51,11 +51,11 @@ Flux&lt;Long&gt; ticks = Flux.interval(Duration.ofSeconds(1));</code></pre>
 <table>
   <tr><th>Factory</th><th>Emits</th><th>When to Use</th></tr>
   <tr><td><code>Mono.just(value)</code></td><td>One item immediately</td><td>You already have the value</td></tr>
-  <tr><td><code>Mono.empty()</code></td><td>Nothing — completes immediately</td><td>No result (e.g., <code>Mono&lt;Void&gt;</code>)</td></tr>
-  <tr><td><code>Mono.error(Throwable)</code></td><td>Nothing — signals an error</td><td>Immediately fail the pipeline</td></tr>
+  <tr><td><code>Mono.empty()</code></td><td>Nothing; completes immediately</td><td>No result (e.g., <code>Mono&lt;Void&gt;</code>)</td></tr>
+  <tr><td><code>Mono.error(Throwable)</code></td><td>Nothing; signals an error</td><td>Immediately fail the pipeline</td></tr>
   <tr><td><code>Mono.fromCallable(Callable)</code></td><td>Result of a blocking/synchronous call</td><td>Wrap blocking I/O so it runs on a scheduler</td></tr>
   <tr><td><code>Mono.fromSupplier(Supplier)</code></td><td>Result of a lazy computation</td><td>Same as <code>fromCallable</code> without checked exceptions</td></tr>
-  <tr><td><code>Mono.fromRunnable(Runnable)</code></td><td>Nothing — runs side effect, then completes</td><td>Fire-and-forget actions, then <code>.then()</code></td></tr>
+  <tr><td><code>Mono.fromRunnable(Runnable)</code></td><td>Nothing; runs side effect, then completes</td><td>Fire-and-forget actions, then <code>.then()</code></td></tr>
 </table>
 
 <h3>Flux Factories</h3>
@@ -66,11 +66,11 @@ Flux&lt;Long&gt; ticks = Flux.interval(Duration.ofSeconds(1));</code></pre>
   <tr><td><code>Flux.fromIterable(Iterable)</code></td><td>Each element of the collection</td><td>Convert an existing list/set</td></tr>
   <tr><td><code>Flux.range(start, count)</code></td><td><code>start</code>, <code>start+1</code>, … <code>start+count-1</code></td><td>Numeric sequences, loop replacements</td></tr>
   <tr><td><code>Flux.interval(Duration)</code></td><td>0L, 1L, 2L, … at fixed intervals (infinite)</td><td>Ticking clock, polling, scheduled emissions</td></tr>
-  <tr><td><code>Flux.empty()</code></td><td>Nothing — completes immediately</td><td>Conditional empty stream</td></tr>
-  <tr><td><code>Flux.error(Throwable)</code></td><td>Nothing — signals an error</td><td>Immediately fail the pipeline</td></tr>
+  <tr><td><code>Flux.empty()</code></td><td>Nothing; completes immediately</td><td>Conditional empty stream</td></tr>
+  <tr><td><code>Flux.error(Throwable)</code></td><td>Nothing; signals an error</td><td>Immediately fail the pipeline</td></tr>
 </table>
 
-<h2>Code Example — Creating Publishers</h2>
+<h2>Code Example: Creating Publishers</h2>
 
 <pre><code>package com.example.ordermgmt.reactive;
 
@@ -121,20 +121,20 @@ public class PublisherDemo {
 
 <h2>Key Pitfall: <code>Mono.just(null)</code> vs <code>Mono.empty()</code></h2>
 
-<p>This is the most common beginner mistake. <code>Mono.just(null)</code> <strong>emits a <code>null</code> value downstream</strong> — it does <em>not</em> produce an empty publisher. Downstream operators like <code>.map()</code> will receive <code>null</code> and likely throw a <code>NullPointerException</code>. If you mean "no value," use <code>Mono.empty()</code>.</p>
+<p>This is the most common beginner mistake. <code>Mono.just(null)</code> <strong>emits a <code>null</code> value downstream</strong>. It does <em>not</em> produce an empty publisher. Downstream operators like <code>.map()</code> will receive <code>null</code> and likely throw a <code>NullPointerException</code>. If you mean "no value," use <code>Mono.empty()</code>.</p>
 
-<pre><code>// WRONG — emits null, likely causes NPE downstream
+<pre><code>// WRONG: emits null, likely causes NPE downstream
 Mono&lt;String&gt; bad = Mono.just(null);
 
-// RIGHT — completes with no value
+// RIGHT: completes with no value
 Mono&lt;String&gt; good = Mono.empty();</code></pre>
 
 <p><code>Mono.just()</code> is <strong>eager</strong>: the value is captured at construction time. If you need lazy evaluation (the value is computed only when someone subscribes), use <code>Mono.fromSupplier()</code> instead.</p>
 
-<pre><code>// Eager — UUID captured immediately when this line runs
+<pre><code>// Eager: UUID captured immediately when this line runs
 Mono&lt;String&gt; eager = Mono.just(UUID.randomUUID().toString());
 
-// Lazy — UUID generated only on subscription
+// Lazy: UUID generated only on subscription
 Mono&lt;String&gt; lazy = Mono.fromSupplier(() ->
         UUID.randomUUID().toString());</code></pre>
 
@@ -230,7 +230,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite. Review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

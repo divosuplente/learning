@@ -6,9 +6,9 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/001
 
 # Maven POM Deep Dive
 
-The `pom.xml` is your project's contract with Maven. Three coordinates identify your artifact, a parent POM eliminates version sprawl, scopes control when dependencies are available, and the fat JAR packages everything into one deployable file. Understanding these pieces means understanding how your build actually works.
+The `pom.xml` is your project's contract with Maven. Three coordinates identify your artifact, a parent POM eliminates version sprawl, scopes control when dependencies are available, and the fat JAR packages everything into one deployable file. If you understand these pieces, you understand how your build works.
 
-## Maven coordinates — the address of every artifact
+## Maven coordinates: the address of every artifact
 
 Every library in the Maven ecosystem is identified by three coordinates:
 
@@ -18,11 +18,11 @@ Every library in the Maven ecosystem is identified by three coordinates:
 | `artifactId` | Specific project name | `ordermgmt` |
 | `version` | Which release | `0.0.1-SNAPSHOT` |
 
-Think of it as a postal address: **groupId** is the street, **artifactId** is the house number, **version** is which renovation. Together they uniquely identify any JAR on Maven Central — no two artifacts share all three.
+Think of it as a postal address: **groupId** is the street, **artifactId** is the house number, **version** is which renovation. Together they uniquely identify any JAR on Maven Central. No two artifacts share all three.
 
 The `SNAPSHOT` suffix marks a development version. Maven treats snapshot dependencies as mutable: it checks for updates on every build. Release versions (no suffix) are immutable once published.
 
-## Parent POM — why you rarely write versions yourself
+## Parent POM: why you rarely write versions yourself
 
 ```
 <parent>
@@ -33,11 +33,11 @@ The `SNAPSHOT` suffix marks a development version. Maven treats snapshot depende
 </parent>
 ```
 
-The parent POM provides **dependency management**: it pre-selects compatible versions for 200+ common libraries. When you declare a starter without a `<version>` tag, Maven inherits the version from the parent. This prevents the most insidious Maven bug — mismatched library versions that compile but fail at runtime.
+The parent POM provides **dependency management**: it pre-selects compatible versions for 200+ common libraries. When you declare a starter without a `<version>` tag, Maven inherits the version from the parent. This prevents the most common Maven bug: mismatched library versions that compile but fail at runtime.
 
 The parent also configures default plugin versions, encoding, and compiler settings. The `<relativePath/>` empty tag tells Maven to look in the repository, not the local filesystem.
 
-## Dependency scopes — when is a library available?
+## Dependency scopes: when is a library available?
 
 Every `<dependency>` can specify a `<scope>` that controls which classpaths it joins:
 
@@ -50,23 +50,23 @@ Every `<dependency>` can specify a `<scope>` that controls which classpaths it j
 
 Common patterns:
 
--   **Database drivers** use `runtime` — your code calls JDBC interfaces (compile-time), the driver implements them at runtime.
--   **JUnit / Mockito** use `test` — never shipped in production.
--   **Servlet API** uses `provided` — the app server already has it; bundling it would cause classpath conflicts.
+-   **Database drivers** use `runtime`: your code calls JDBC interfaces (compile-time), the driver implements them at runtime.
+-   **JUnit / Mockito** use `test`: never shipped in production.
+-   **Servlet API** uses `provided`: the app server already has it; bundling it would cause classpath conflicts.
 
-Omitting `<scope>` means `compile` — the dependency is available everywhere and packaged in the final JAR.
+Omitting `<scope>` means `compile`: the dependency is available everywhere and packaged in the final JAR.
 
-## Transitive dependencies — the graph Maven walks for you
+## Transitive dependencies: the graph Maven walks for you
 
-When your project depends on `spring-boot-starter-web`, that starter depends on Spring MVC, which depends on Jackson, which depends on `jackson-core`. Maven pulls in **the entire chain** automatically — that's transitive resolution.
+When your project depends on `spring-boot-starter-web`, that starter depends on Spring MVC, which depends on Jackson, which depends on `jackson-core`. Maven pulls in **the entire chain** automatically. That is transitive resolution.
 
 Version conflicts arise when two paths request different versions of the same artifact. Maven uses **nearest-wins**: the dependency closer to the root of your POM wins. If `spring-boot-starter-web` pulls in Jackson 2.17 and a custom library pulls in Jackson 2.15, the version declared directly in your POM (or the nearer one in the tree) takes precedence.
 
-To force a specific version regardless of distance, use `<dependencyManagement>` — it overrides nearest-wins for the declared artifact.
+To force a specific version regardless of distance, use `<dependencyManagement>`. It overrides nearest-wins for the declared artifact.
 
 To cut an unwanted transitive dependency entirely, use `<exclusions>` on the declaring dependency.
 
-## Fat JAR — one file, zero classpath headaches
+## Fat JAR: one file, zero classpath headaches
 
 ```
 <build>
@@ -85,7 +85,7 @@ The `spring-boot-maven-plugin` repackages your compiled code and all `compile`\-
 java -jar ordermgmt-0.0.1-SNAPSHOT.jar
 ```
 
-No Maven on the server. No classpath to configure. No missing JAR errors at midnight. The plugin also writes a classpath index and layers the JAR so container runtimes like Docker can cache unchanged dependency layers.
+No Maven on the server. No classpath to configure. No missing JARs. The plugin also writes a classpath index and layers the JAR so container runtimes like Docker can cache unchanged dependency layers.
 
 **Primary source:** [Maven: Introduction to the POM](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html) · [Maven: Dependency Mechanism](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html)
 
@@ -93,7 +93,7 @@ No Maven on the server. No classpath to configure. No missing JAR errors at midn
 
 <details>
 <summary>1. Two artifacts on Maven Central share the same groupId and artifactId but differ in version. Are they the same artifact?</summary>
-<p><strong>Correct answer:</strong> No — all three coordinates must match for identity</p>
+<p><strong>Correct answer:</strong> No: all three coordinates must match for identity</p>
 </details>
 
 <details>

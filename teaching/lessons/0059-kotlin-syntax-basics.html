@@ -10,7 +10,7 @@
 
 <h1>Kotlin Syntax: Variables, Null Safety &amp; String Interpolation</h1>
 
-<p>Kotlin's syntax eliminates entire categories of Java boilerplate. This lesson covers the first things you encounter when writing Kotlin: how to declare variables (<code>val</code>/<code>var</code>), how the type system makes <code>NullPointerException</code> a compile-time error, how to interpolate values into strings, how smart casts remove redundant type checks, and how <code>when</code> replaces the switch statement.</p>
+<p>Kotlin's syntax removes large swaths of Java boilerplate. This lesson covers the first things you encounter when writing Kotlin: how to declare variables (<code>val</code>/<code>var</code>), how the type system makes <code>NullPointerException</code> a compile-time error, how to interpolate values into strings, how smart casts remove redundant type checks, and how <code>when</code> replaces the switch statement.</p>
 
 <h2>Variables: val and var</h2>
 
@@ -26,12 +26,12 @@ val age: Int = 30                // immutable (preferred)
 val city = "NYC"                 // type inferred — String</code></pre>
 
 <ul>
-  <li><strong><code>val</code></strong> — read-only (like Java's <code>final</code>). <strong>Prefer this by default.</strong></li>
-  <li><strong><code>var</code></strong> — mutable. Use only when you must reassign.</li>
-  <li><strong>Type inference</strong> — omit the type when the initializer makes it obvious. The compiler knows <code>city</code> is a <code>String</code>.</li>
+  <li><strong><code>val</code></strong>: read-only (like Java's <code>final</code>). <strong>Prefer this by default.</strong></li>
+  <li><strong><code>var</code></strong>: mutable. Use only when you must reassign.</li>
+  <li><strong>Type inference</strong>: omit the type when the initializer makes it obvious. The compiler knows <code>city</code> is a <code>String</code>.</li>
 </ul>
 
-<p>Assigning <code>null</code> to a <code>val</code> or <code>var</code> declared as non-nullable is a <em>compile-time error</em> — that's the null safety system, covered next.</p>
+<p>Assigning <code>null</code> to a <code>val</code> or <code>var</code> declared as non-nullable is a <em>compile-time error</em>. That is the null safety system, covered next.</p>
 
 <h2>Null Safety</h2>
 
@@ -45,27 +45,27 @@ nickname = null   // ← fine</code></pre>
 
 <p>Once you have a nullable reference, Kotlin forces you to handle the null case before using it. Four tools:</p>
 
-<h3>1. Safe call — <code>?.</code></h3>
+<h3>1. Safe call: <code>?.</code></h3>
 
 <p>Returns the result if non-null, <code>null</code> otherwise. Chains naturally.</p>
 
 <pre><code>val length: Int? = nickname?.length     // null if nickname is null</code></pre>
 
-<h3>2. Elvis operator — <code>?:</code></h3>
+<h3>2. Elvis operator: <code>?:</code></h3>
 
 <p>Provides a default when the left side is null. Named because it looks like Elvis's hair.</p>
 
 <pre><code>val safeLength: Int = nickname?.length ?: 0   // 0 if nickname is null</code></pre>
 
-<h3>3. Not-null assertion — <code>!!</code></h3>
+<h3>3. Not-null assertion: <code>!!</code></h3>
 
-<p>Forces a non-null conversion. <strong>Throws <code>NullPointerException</code></strong> if the value is actually null. Use sparingly — it re-introduces the exact runtime crash Kotlin's type system is designed to prevent.</p>
+<p>Forces a non-null conversion. <strong>Throws <code>NullPointerException</code></strong> if the value is actually null. Use sparingly: it re-introduces the exact runtime crash Kotlin's type system is designed to prevent.</p>
 
 <pre><code>val forced: Int = nickname!!.length    // NPE if nickname is null!</code></pre>
 
 <h3>4. Smart cast</h3>
 
-<p>After a null check, Kotlin automatically treats the variable as non-nullable — no manual cast needed.</p>
+<p>After a null check, Kotlin automatically treats the variable as non-nullable. No manual cast needed.</p>
 
 <pre><code>if (nickname != null) {
     val len: Int = nickname.length     // no ? needed — compiler knows it's non-null
@@ -86,13 +86,13 @@ val detail = "Name length: ${name.length}"            // expression
 val nested = "Result: ${if (x > 0) "positive" else "non-positive"}"</code></pre>
 
 <ul>
-  <li><code>$variable</code> — insert a variable's <code>toString()</code>.</li>
-  <li><code>${expression}</code> — insert any Kotlin expression.</li>
+  <li><code>$variable</code>: insert a variable's <code>toString()</code>.</li>
+  <li><code>${expression}</code>: insert any Kotlin expression.</li>
 </ul>
 
 <h2>Smart Casting</h2>
 
-<p>In Java, after an <code>instanceof</code> check, you still cast explicitly. Kotlin's compiler performs <strong>smart casts</strong> — after a type check, the variable is automatically treated as that type.</p>
+<p>In Java, after an <code>instanceof</code> check, you still cast explicitly. Kotlin's compiler performs <strong>smart casts</strong>: after a type check, the variable is automatically treated as that type.</p>
 
 <pre><code>// Java
 if (obj instanceof String) {
@@ -111,7 +111,7 @@ when (value) {
     else -> println("Unknown type")
 }</code></pre>
 
-<p>Smart casts are <strong>not</strong> available on <code>var</code> properties that could be mutated between the check and the use — the compiler is conservative and will require an explicit cast in that case.</p>
+<p>Smart casts are <strong>not</strong> available on <code>var</code> properties that could be mutated between the check and the use. The compiler is conservative and will require an explicit cast in that case.</p>
 
 <h2>When Expression</h2>
 
@@ -149,9 +149,9 @@ val msg = when {
 }</code></pre>
 
 <ul>
-  <li><strong>No <code>break</code></strong> — branches don't fall through.</li>
-  <li><strong>It's an expression</strong> — it returns a value, just like Java's switch expression.</li>
-  <li><strong>Exhaustiveness</strong> — for sealed classes and enums, the compiler errors if you miss a branch.</li>
+  <li><strong>No <code>break</code></strong>: branches don't fall through.</li>
+  <li><strong>It's an expression</strong>: it returns a value, just like Java's switch expression.</li>
+  <li><strong>Exhaustiveness</strong>: for sealed classes and enums, the compiler errors if you miss a branch.</li>
 </ul>
 
 <p><strong>Primary sources:</strong> <a href="https://kotlinlang.org/docs/null-safety.html" target="_blank" rel="noopener">Kotlin Null Safety</a> · <a href="https://kotlinlang.org/docs/control-flow.html#when-expression" target="_blank" rel="noopener">Kotlin <code>when</code> Expression</a> · <a href="https://kotlinlang.org/docs/typecasts.html#smart-casts" target="_blank" rel="noopener">Kotlin Smart Casts</a> · <a href="https://kotlinlang.org/docs/strings.html#string-templates" target="_blank" rel="noopener">Kotlin String Templates</a></p>
@@ -162,7 +162,7 @@ val msg = when {
   <div class="quiz-question">1. What happens when you compile <code>val name: String = null</code> in Kotlin?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It compiles and <code>name</code> is assigned <code>null</code> at runtime</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">It is a compile-time error — <code>String</code> is non-nullable</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">It is a compile-time error: <code>String</code> is non-nullable</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">It compiles but throws <code>NullPointerException</code> at runtime</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The compiler converts it to <code>String?</code> automatically</li>
   </ul>
@@ -175,7 +175,7 @@ val msg = when {
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It returns <code>null</code> safely, like the safe-call operator</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It uses the elvis operator fallback to return zero</li>
     <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">It throws a <code>KotlinNullPointerException</code> at runtime</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It is a compile-time error — <code>!!</code> requires a non-null type</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It is a compile-time error: <code>!!</code> requires a non-null type</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>
@@ -194,8 +194,8 @@ val msg = when {
 <div class="quiz" id="q4">
   <div class="quiz-question">4. After <code>if (obj is String)</code> passes in Kotlin, you write <code>obj.length</code> without casting. What enables this?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Implicit upcasting — all objects extend <code>Any</code></li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Smart cast — the compiler narrows the type after the <code>is</code> check</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Implicit upcasting: all objects extend <code>Any</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Smart cast: the compiler narrows the type after the <code>is</code> check</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Auto-unboxing of the String reference</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The <code>is</code> keyword performs the cast and reassignment simultaneously</li>
   </ul>
@@ -208,7 +208,7 @@ val msg = when {
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Both require explicit <code>break</code> to prevent fall-through</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>when</code> can only match constant values, like <code>switch</code></li>
     <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0"><code>when</code> has no fall-through, can match ranges and types, and is exhaustive for sealed types</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>when</code> is a statement only — it cannot return a value</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>when</code> is a statement only; it cannot return a value</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
 </div>

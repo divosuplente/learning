@@ -10,13 +10,13 @@
 
 <h1>TDD: The Red-Green-Refactor Cycle</h1>
 
-<p>In the last lesson you saw <em>what</em> testing is and <em>why</em> it matters. This lesson flips the sequence: instead of writing code and testing it afterward, you write the test <strong>first</strong>. That Discipline is Test-Driven Development, and it follows one three-step loop — Red, Green, Refactor — for every feature you ever build.</p>
+<p>In the last lesson you saw <em>what</em> testing is and <em>why</em> it matters. This lesson flips the sequence: instead of writing code and testing it afterward, you write the test <strong>first</strong>. That discipline is Test-Driven Development, and it follows one three-step loop, Red, Green, Refactor, for every feature you ever build.</p>
 
 <h2>What Is TDD?</h2>
 
 <p><strong>Test-Driven Development</strong> is a practice where you write a failing test that describes the behavior you want, then write the minimum production code to make that test pass, then clean up. The test is the spec; the code is the implementation.</p>
 
-<p>This sounds backwards. Most developers write code, then retro-fit tests. TDD inverts that habit — and the inversion is the point. When the test comes first, three properties emerge automatically: <em>testability by design</em>, <em>living documentation</em>, and <em>instant feedback</em>.</p>
+<p>This sounds backwards. Most developers write code, then retro-fit tests. TDD inverts that habit, and the inversion is the point. When the test comes first, three properties emerge automatically: <em>testability by design</em>, <em>living documentation</em>, and <em>instant feedback</em>.</p>
 
 <h2>The Red-Green-Refactor Cycle</h2>
 
@@ -34,9 +34,9 @@
          │
     └────>──── (repeat)</code></pre>
 
-<h3>Red — Write a Failing Test</h3>
+<h3>Red: Write a Failing Test</h3>
 
-<p>You write a test that calls code which does not exist yet. You run it. It fails — the test runner shows <span style="color:red">red</span>. This failure is <em>meaningful</em>: it proves the test is actually checking something, and it pins down exactly the behavior you intend to build.</p>
+<p>You write a test that calls code which does not exist yet. You run it. It fails, and the test runner shows <span style="color:red">red</span>. This failure is <em>meaningful</em>: it proves the test is actually checking something, and it pins down exactly the behavior you intend to build.</p>
 
 <pre><code>// Red: this won't compile — OrderCalculator doesn't exist yet
 @Test
@@ -46,11 +46,11 @@ void shouldCalculateTotalForSingleItem() {
     assertThat(calc.total()).isEqualTo(19.98);
 }</code></pre>
 
-<p>A red that compiles but fails at runtime is valid. A red that doesn't compile is fine too — you just created the compile error that <em>precisely</em> describes what's missing.</p>
+<p>A red that compiles but fails at runtime is valid. A red that doesn't compile is fine too: you just created the compile error that <em>precisely</em> describes what's missing.</p>
 
-<h3>Green — Make It Pass, Nothing More</h3>
+<h3>Green: Make It Pass, Nothing More</h3>
 
-<p>Write the <strong>minimum</strong> code that makes the test turn <span style="color:green">green</span>. This is not the moment for elegant design. Hard-coded values, brute-force logic, even <code>return 19.98</code> — if it passes the test, it's correct <em>for this cycle</em>.</p>
+<p>Write the <strong>minimum</strong> code that makes the test turn <span style="color:green">green</span>. This is not the moment for elegant design. Hard-coded values, brute-force logic, even <code>return 19.98</code>: if it passes the test, it's correct <em>for this cycle</em>.</p>
 
 <pre><code>// Green: the simplest thing that works
 public class OrderCalculator {
@@ -67,9 +67,9 @@ public class OrderCalculator {
 
 <p>The key discipline: <strong>do not add code the test doesn't require</strong>. If the test doesn't mention discounts, there is no discount field. If the test doesn't mention tax, there is no tax calculation. YAGNI (You Aren't Gonna Need It) is enforced by the test.</p>
 
-<h3>Refactor — Clean Up While Staying Green</h3>
+<h3>Refactor: Clean Up While Staying Green</h3>
 
-<p>Now that the test passes, improve the code. Rename variables. Extract methods. Remove duplication. After <em>every</em> small change, run the test again. It stays green — proving you didn't alter observable behavior.</p>
+<p>Now that the test passes, improve the code. Rename variables. Extract methods. Remove duplication. After <em>every</em> small change, run the test again. It stays green, proving you didn't alter observable behavior.</p>
 
 <pre><code>// Refactor: extract a method for clarity
 public class OrderCalculator {
@@ -88,38 +88,36 @@ public class OrderCalculator {
     }
 }</code></pre>
 
-<p>The test still passes. The behavior is identical. But the code is cleaner — and you <em>know</em> it's identical because the test proves it.</p>
+<p>The test still passes. The behavior is identical. But the code is cleaner, and you <em>know</em> it's identical because the test proves it.</p>
 
 <h2>Why TDD Works</h2>
 
 <table>
   <tr><th>Benefit</th><th>Without TDD</th><th>With TDD</th></tr>
-  <tr><td>Test coverage</td><td>Tests are an afterthought — often skipped</td><td>Every feature has a test by construction</td></tr>
-  <tr><td>Testability</td><td>Code is designed first, then retro-fitted for testing</td><td>Code is testable by design — you wrote the test first</td></tr>
+  <tr><td>Test coverage</td><td>Tests are an afterthought, often skipped</td><td>Every feature has a test by construction</td></tr>
+  <tr><td>Testability</td><td>Code is designed first, then retro-fitted for testing</td><td>Code is testable by design: you wrote the test first</td></tr>
   <tr><td>Over-engineering</td><td>Easy to add "might need this later" code</td><td>Only code demanded by a test exists</td></tr>
   <tr><td>Feedback speed</td><td>Find out days later that something broke</td><td>Know within seconds whether your code works</td></tr>
-  <tr><td>Documentation</td><td>Docs drift, go stale, lie</td><td>Tests are executable documentation — they can't lie</td></tr>
+  <tr><td>Documentation</td><td>Docs drift, go stale, lie</td><td>Tests are executable documentation; they can't lie</td></tr>
 </table>
 
 <h3>Testable by Design</h3>
 
-<p>When the test comes first, you are forced to think about the interface before the implementation. You ask: "How would I call this? What does it return? What dependencies does it need?" That forces you toward small, focused methods with clear inputs and outputs — the hallmarks of testable code.</p>
-
-<p>If a method is hard to test, TDD catches that <em>immediately</em>, before you've invested in the implementation. Refactoring a design you haven't built yet is cheap; refactoring a design you spent a day building is expensive.</p>
+<p>When the test comes first, you are forced to think about the interface before the implementation. You ask: "How would I call this? What does it return? What dependencies does it need?" That forces you toward small, focused methods with clear inputs and outputs, the hallmarks of testable code.</p>
 
 <h3>Living Documentation</h3>
 
-<p>Tests describe <em>what</em> the code does, in executable form. That documentation can never go stale — if the code changes without the test changing, the test fails and alerts you immediately. A new developer can read the test suite and understand the system's intended behavior.</p>
+<p>Tests describe <em>what</em> the code does, in executable form. That documentation can never go stale: if the code changes without the test changing, the test fails and alerts you immediately. A new developer can read the test suite and understand the system's intended behavior.</p>
 
 <h3>Instant Feedback</h3>
 
-<p>Each Red-Green-Refactor cycle takes seconds to minutes. You know right now whether your code works — not after a week-long QA cycle. That feedback loop is the same one that makes REPL-driven development and hot-reload powerful: the shorter the gap between change and verification, the faster you learn.</p>
+<p>Each Red-Green-Refactor cycle takes seconds to minutes. You know right now whether your code works, not after a week-long QA cycle. That feedback loop is the same one that makes REPL-driven development and hot-reload powerful: the shorter the gap between change and verification, the faster you learn.</p>
 
 <h2>Common Misconceptions</h2>
 
 <ul>
   <li><strong>"TDD means writing all tests upfront."</strong> No. You write <em>one</em> failing test, make it pass, then write the next one. Incremental, not batch.</li>
-  <li><strong>"The Green step should produce production-quality code."</strong> No. Green is about speed — the simplest code that passes. Quality comes in Refactor.</li>
+  <li><strong>"The Green step should produce production-quality code."</strong> No. Green is about speed: the simplest code that passes. Quality comes in Refactor.</li>
   <li><strong>"Refactor means changing behavior."</strong> No. Refactor means changing structure while preserving behavior. The green tests are your safety net.</li>
   <li><strong>"TDD replaces all other testing."</strong> No. TDD drives unit tests. You still need integration and E2E tests for cross-component correctness.</li>
 </ul>
@@ -155,7 +153,7 @@ public class OrderCalculator {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Run the full integration test suite before and after each rename</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Ask a teammate to review the diff for correctness</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Run the existing unit test — it stays green, meaning behavior is unchanged</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Run the existing unit test; it stays green, meaning behavior is unchanged</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Compare the method's bytecode before and after the change</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
@@ -164,10 +162,10 @@ public class OrderCalculator {
 <div class="quiz" id="q4">
   <div class="quiz-question">4. A developer says: "I wrote the test, made it green, then added error-handling and logging that no test requires." Which TDD principle did they violate?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The Refactor principle — code must be cleaned up before extending</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The Green principle — only write code the test demands; write a new test first</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The Red principle — the test should have included error handling from the start</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">No principle was violated — adding defensive code is always good practice</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The Refactor principle: code must be cleaned up before extending</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The Green principle: only write code the test demands; write a new test first</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The Red principle: the test should have included error handling from the start</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">No principle was violated; adding defensive code is always good practice</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>
 </div>
@@ -176,7 +174,7 @@ public class OrderCalculator {
   <div class="quiz-question">5. How does TDD provide "living documentation"?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It auto-generates Javadoc from test method names</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Tests describe intended behavior in executable form — if the code drifts, the test fails</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Tests describe intended behavior in executable form; if the code drifts, the test fails</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It enforces a 1:1 mapping between test classes and production classes</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It generates HTML test reports that serve as developer documentation</li>
   </ul>

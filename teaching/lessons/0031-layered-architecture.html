@@ -10,7 +10,7 @@
 
 <h1>Layered Architecture</h1>
 
-<p>Inside every well-structured Spring Boot application, code is organized into <strong>layers</strong> — each with one job, each talking only to the layer directly below it. This lesson introduces the four layers you'll see in almost every Spring project: Controller, Service, Repository, and Database.</p>
+<p>Inside every well-structured Spring Boot application, code is organized into <strong>layers</strong>, each with one job, each talking only to the layer directly below it. This lesson introduces the four layers you'll see in almost every Spring project: Controller, Service, Repository, and Database.</p>
 
 <h2>The four layers</h2>
 
@@ -67,7 +67,7 @@
 
 <h2>Why not skip layers?</h2>
 
-<p>You might think: <em>"The controller just needs to list orders — why not call the repository directly?"</em></p>
+<p>You might think: <em>"The controller just needs to list orders, so why not call the repository directly?"</em></p>
 
 <p>Because someday you'll need to add logic between the request and the database:</p>
 
@@ -110,11 +110,11 @@
 
 <h2>What happens when you break the rule</h2>
 
-<p>A controller calling a repository directly <em>works</em> — the code compiles and runs. But it creates two real problems:</p>
+<p>A controller calling a repository directly <em>works</em>: the code compiles and runs. But it creates two real problems:</p>
 
 <p><strong>1. Logic leaks into the wrong place.</strong> Authorization checks, data transformation, and validation all merge into the controller. Now the controller depends on HTTP details <em>and</em> database details.</p>
 
-<p><strong>2. Duplication.</strong> When a second entry point (a scheduled job, a message listener) needs the same data, you must duplicate the logic that was baked into the controller — or refactor the controller into a service anyway.</p>
+<p><strong>2. Duplication.</strong> When a second entry point (a scheduled job, a message listener) needs the same data, you must duplicate the logic that was baked into the controller, or refactor the controller into a service anyway.</p>
 
 <pre><code>// Bad: controller bypasses the service layer
 @RestController

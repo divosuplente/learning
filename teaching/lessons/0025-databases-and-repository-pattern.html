@@ -14,7 +14,7 @@
 
 <h2>Relational Databases</h2>
 
-<p>The most common kind of database is a <strong>relational database</strong> (RDBMS). It stores data in <strong>tables</strong> — think of each table as a spreadsheet with strict rules:</p>
+<p>The most common kind of database is a <strong>relational database</strong> (RDBMS). It stores data in <strong>tables</strong>: think of each table as a spreadsheet with strict rules.</p>
 
 <p><strong>customers</strong></p>
 <table>
@@ -34,10 +34,10 @@
 
 <table>
   <tr><th>Concept</th><th>What it means</th></tr>
-  <tr><td><strong>Table</strong></td><td>A named, structured collection of data — rows and columns</td></tr>
+  <tr><td><strong>Table</strong></td><td>A named, structured collection of data, rows and columns</td></tr>
   <tr><td><strong>Row</strong></td><td>A single record (one customer, one product)</td></tr>
   <tr><td><strong>Column</strong></td><td>A named attribute across all rows (name, email, price)</td></tr>
-  <tr><td><strong>Primary Key</strong></td><td>A column (or columns) that <em>uniquely</em> identifies each row — usually an <code>id</code></td></tr>
+  <tr><td><strong>Primary Key</strong></td><td>A column (or columns) that <em>uniquely</em> identifies each row, usually an <code>id</code></td></tr>
   <tr><td><strong>Foreign Key</strong></td><td>A column that references a primary key in <em>another</em> table, creating a relationship</td></tr>
 </table>
 
@@ -55,13 +55,13 @@
 <pre><code>Customer 1 ────&lt; Order 1 ────&lt; OrderItem &gt;──── 1 Product
                                        &gt;──── 1 Product</code></pre>
 
-<p>The <code>&lt;</code> means "one to many" — one customer, many orders. The foreign key lives on the "many" side: <code>orders.customer_id</code> points back to <code>customers.id</code>.</p>
+<p>The <code>&lt;</code> means "one to many": one customer, many orders. The foreign key lives on the "many" side: <code>orders.customer_id</code> points back to <code>customers.id</code>.</p>
 
 <h2>SQL Crash Course</h2>
 
-<p><strong>SQL</strong> (Structured Query Language) is how you read and mutate data in a relational database. You won't write much raw SQL in Spring — JPA generates it — but understanding the four fundamental operations helps you reason about what your repository calls actually do.</p>
+<p><strong>SQL</strong> (Structured Query Language) is how you read and mutate data in a relational database. You won't write much raw SQL in Spring (JPA generates it), but understanding the four fundamental operations helps you reason about what your repository calls actually do.</p>
 
-<h3>SELECT — read data</h3>
+<h3>SELECT: read data</h3>
 
 <pre><code>-- All rows and columns
 SELECT * FROM customers;
@@ -72,24 +72,24 @@ SELECT * FROM customers WHERE id = 1;
 -- Specific columns only
 SELECT name, email FROM customers WHERE id = 1;</code></pre>
 
-<h3>INSERT — create data</h3>
+<h3>INSERT: create data</h3>
 
 <pre><code>INSERT INTO customers (name, email, address)
 VALUES ('Charlie', 'charlie@example.com', '789 Pine St');</code></pre>
 
-<h3>UPDATE — modify data</h3>
+<h3>UPDATE: modify data</h3>
 
 <pre><code>UPDATE customers SET address = '999 New St' WHERE id = 1;</code></pre>
 
 <p>Forgetting the <code>WHERE</code> clause updates <em>every</em> row. Always include it.</p>
 
-<h3>DELETE — remove data</h3>
+<h3>DELETE: remove data</h3>
 
 <pre><code>DELETE FROM customers WHERE id = 1;</code></pre>
 
 <p>Same rule: omit <code>WHERE</code> and you delete everything in the table.</p>
 
-<h3>JOIN — combine data across tables</h3>
+<h3>JOIN: combine data across tables</h3>
 
 <pre><code>SELECT o.id, o.status, c.name
 FROM orders o
@@ -103,7 +103,7 @@ JOIN customers c ON o.customer_id = c.id;</code></pre>
 
 <h2>The Repository Pattern</h2>
 
-<p>Without a repository, data-access code <strong>infects every layer</strong>. Your service opens connections, writes SQL strings, and maps result sets — all tangled with business logic:</p>
+<p>Without a repository, data-access code <strong>infects every layer</strong>. Your service opens connections, writes SQL strings, and maps result sets, all tangled with business logic:</p>
 
 <pre><code>// BAD — SQL scattered throughout the service
 public class OrderService {
@@ -118,7 +118,7 @@ public class OrderService {
     }
 }</code></pre>
 
-<p>The <strong>Repository Pattern</strong> puts all data access in one place. The service tells the repository <em>what</em> it needs — never <em>how</em> to get it:</p>
+<p>The <strong>Repository Pattern</strong> puts all data access in one place. The service tells the repository <em>what</em> it needs, never <em>how</em> to get it:</p>
 
 <pre><code>// GOOD — service knows nothing about SQL
 public class OrderService {
@@ -137,7 +137,7 @@ public class OrderService {
 
 <ul>
   <li><strong>Single responsibility.</strong> The service handles business rules; the repository handles persistence. Change your database? Modify the repository, not the service.</li>
-  <li><strong>Testability.</strong> Swap the repository for a fake in tests — no database needed.</li>
+  <li><strong>Testability.</strong> Swap the repository for a fake in tests: no database needed.</li>
   <li><strong>No duplicated queries.</strong> "Find by email" is written once in the repository, not copy-pasted across five services.</li>
 </ul>
 
@@ -184,7 +184,7 @@ public class OrderService {
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The service layer, because it knows the business rules</li>
     <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The repository, so the service layer stays unaware of persistence details</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The controller, because it receives the HTTP request</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">No one — SQL is never needed when using Spring Boot</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">No one; SQL is never needed when using Spring Boot</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>
 </div>

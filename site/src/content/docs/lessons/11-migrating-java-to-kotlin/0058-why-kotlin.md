@@ -6,15 +6,15 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/005
 
 # Why Kotlin & Setting Up Kotlin in Spring Boot
 
-Every Java Spring Boot project can run Kotlin instead — same JVM, same libraries, same deployment pipeline. This lesson explains what Kotlin fixes in Java, when a migration makes sense, and how to wire the Kotlin compiler into an existing Maven project so both languages coexist during the transition.
+Every Java Spring Boot project can run Kotlin instead: same JVM, same libraries, same deployment pipeline. This lesson explains what Kotlin fixes in Java, when a migration makes sense, and how to wire the Kotlin compiler into an existing Maven project so both languages coexist during the transition.
 
 ## What Is Kotlin?
 
-**Kotlin** is a statically-typed language for the JVM, created by JetBrains and first released in 2011. It is fully **interoperable** with Java: call Java from Kotlin, call Kotlin from Java — no wrappers, no adapters, no IDL. Google made it the preferred Android language in 2019; Spring Framework has had first-class Kotlin support since 5.0 (2017).
+**Kotlin** is a statically-typed language for the JVM, created by JetBrains and first released in 2011. It is fully **interoperable** with Java: call Java from Kotlin, call Kotlin from Java. No wrappers, no adapters, no IDL. Google made it the preferred Android language in 2019; Spring Framework has had first-class Kotlin support since 5.0 (2017).
 
-The key promise: **write less code with fewer bugs**. Kotlin's type system catches null-pointer errors at compile time, its data classes eliminate getter/setter boilerplate, and its coroutine model replaces callback chains with sequential-looking code.
+Kotlin's pitch: **write less code with fewer bugs**. Kotlin's type system catches null-pointer errors at compile time, its data classes eliminate getter/setter boilerplate, and its coroutine model replaces callback chains with sequential-looking code.
 
-## Java vs Kotlin — Comparison
+## Java vs Kotlin: Comparison
 
 | Feature | Java 21 | Kotlin |
 | --- | --- | --- |
@@ -25,15 +25,15 @@ The key promise: **write less code with fewer bugs**. Kotlin's type system catch
 | Extension functions | Not available | Built-in |
 | Coroutines | Virtual threads (blocking I/O scaling) | `suspend` functions, structured concurrency |
 | Pattern matching | Switch expressions (Java 21) | `when` expression |
-| Properties | Getters/setters boilerplate | `val`/`var` — auto-generated |
+| Properties | Getters/setters boilerplate | `val`/`var`: auto-generated |
 | Default arguments | Not available | Built-in |
 | Named arguments | Not available | Built-in |
 | Sealed classes | Sealed interfaces (Java 17+) | `sealed class` (since 1.0) |
 | Class mutability | Open by default | Final by default |
 
-The last row matters most for Spring Boot. Kotlin classes are `final` by default — the opposite of Java. Spring's CGLIB proxies need open classes, so Kotlin requires compiler plugins to opt in. More on that below.
+The last row matters most for Spring Boot. Kotlin classes are `final` by default, the opposite of Java. Spring's CGLIB proxies need open classes, so Kotlin requires compiler plugins to opt in. More on that below.
 
-## When to Migrate — and When Not To
+## When to Migrate, and When Not To
 
 **Migrate when:**
 
@@ -46,7 +46,7 @@ The last row matters most for Spring Boot. Kotlin classes are `final` by default
 
 -   Your team has **no Kotlin experience** and ramp-up time is not acceptable
 -   You rely heavily on **annotation processing tools** that don't support Kotlin well
--   Your codebase is **stable and low-churn** — migration effort outweighs benefits
+-   Your codebase is **stable and low-churn**: migration effort outweighs benefits
 
 Kotlin and Java can coexist in the same Maven module. The safest migration is **file-by-file**: convert one class at a time using IntelliJ's Java-to-Kotlin converter, run the tests, commit. You never need a "big bang" rewrite.
 
@@ -82,9 +82,9 @@ The fastest path is Spring Initializr: pick **Kotlin** as the language, and ever
 
 Three libraries:
 
--   **`kotlin-stdlib`** — the runtime (collections, built-in functions, coroutines primitives)
--   **`kotlin-reflect`** — reflection support (required by Spring's classpath scanning)
--   **`jackson-module-kotlin`** — serializes/deserializes Kotlin data classes without a no-arg constructor
+-   **`kotlin-stdlib`**: the runtime (collections, built-in functions, coroutines primitives)
+-   **`kotlin-reflect`**: reflection support (required by Spring's classpath scanning)
+-   **`jackson-module-kotlin`**: serializes/deserializes Kotlin data classes without a no-arg constructor
 
 ### The kotlin-maven-plugin
 
@@ -171,11 +171,11 @@ Setting `<phase>none</phase>` on the default compilations prevents javac from ru
 
 ## The Three Compiler Plugins
 
-These are not optional — without them, Spring Boot **fails to start** with Kotlin:
+These are not optional. Without them, Spring Boot **fails to start** with Kotlin:
 
-1.  **`spring`** (allopen) — Kotlin classes are `final` by default. Spring's CGLIB creates subclass proxies for `@Service`, `@Configuration`, `@RestController` — but it cannot subclass a `final` class. The `spring` plugin opens any class annotated with Spring stereotypes.
-2.  **`jpa`** (noarg) — JPA requires a no-argument constructor on `@Entity` classes. Kotlin data classes have only the all-args constructor. The `jpa` plugin synthesizes a no-arg constructor at compile time.
-3.  **`all-open`** — A general escape hatch. Opens classes annotated with any annotation you specify (e.g., a custom `@MyOpen`), used alongside `spring` for non-Spring frameworks that also need proxying.
+1.  **`spring`** (allopen): Kotlin classes are `final` by default. Spring's CGLIB creates subclass proxies for `@Service`, `@Configuration`, `@RestController`, but it cannot subclass a `final` class. The `spring` plugin opens any class annotated with Spring stereotypes.
+2.  **`jpa`** (noarg): JPA requires a no-argument constructor on `@Entity` classes. Kotlin data classes have only the all-args constructor. The `jpa` plugin synthesizes a no-arg constructor at compile time.
+3.  **`all-open`**: A general escape hatch. Opens classes annotated with any annotation you specify (e.g., a custom `@MyOpen`), used alongside `spring` for non-Spring frameworks that also need proxying.
 
 The `kotlin-maven-allopen` artifact provides the runtime for the `spring` and `all-open` plugins. The `kotlin-maven-noarg` artifact provides the runtime for the `jpa` plugin. Both are declared as **dependencies of the kotlin-maven-plugin**, not of the project itself.
 
@@ -195,7 +195,7 @@ The `kotlin-maven-allopen` artifact provides the runtime for the `spring` and `a
 
 <details>
 <summary>3. In a mixed Java/Kotlin Maven project, why does the Kotlin compiler's sourceDirs include src/main/java?</summary>
-<p><strong>Correct answer:</strong> Kotlin can parse Java sources to resolve types, but javac cannot parse Kotlin — so Kotlin must compile first</p>
+<p><strong>Correct answer:</strong> Kotlin can parse Java sources to resolve types, but javac cannot parse Kotlin, so Kotlin must compile first</p>
 </details>
 
 <details>
@@ -205,5 +205,5 @@ The `kotlin-maven-allopen` artifact provides the runtime for the `spring` and `a
 
 <details>
 <summary>5. Your team has a stable, low-churn Java Spring Boot service with heavy use of Lombok and MapStruct annotation processors. Should you migrate it to Kotlin?</summary>
-<p><strong>Correct answer:</strong> No — annotation processor compatibility is uncertain and the stable codebase doesn't benefit enough to justify the risk</p>
+<p><strong>Correct answer:</strong> No, annotation processor compatibility is uncertain and the stable codebase doesn't benefit enough to justify the risk</p>
 </details>

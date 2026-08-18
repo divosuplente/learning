@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 46 — Reactive Streams Spec: Publisher, Subscriber, Backpressure</title>
+  <title>Lesson 46: Reactive Streams Spec: Publisher, Subscriber, Backpressure</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Reactive Streams Spec: Publisher, Subscriber, Backpressure</h1>
 
-<p>Before learning any specific library (Reactor, RxJava, Mutiny), you need the <strong>Reactive Streams specification</strong> — a contract that defines how asynchronous stream processing must work. Every compliant library implements the same four interfaces. Understand the spec once, and the concepts transfer everywhere.</p>
+<p>Before learning any specific library (Reactor, RxJava, Mutiny), you need the <strong>Reactive Streams specification</strong>: a contract that defines how asynchronous stream processing must work. Every compliant library implements the same four interfaces. Understand the spec once, and the concepts transfer everywhere.</p>
 
 <h2>The Four Interfaces</h2>
 
@@ -39,7 +39,7 @@ public interface Subscription {
 public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt;R&gt; {
 }</code></pre>
 
-<p><code>Publisher</code> produces data. <code>Subscriber</code> consumes it. <code>Subscription</code> is the control channel between them — it carries demand signals. <code>Processor</code> is a transformation stage that sits in the middle, subscribing upstream and publishing downstream.</p>
+<p><code>Publisher</code> produces data. <code>Subscriber</code> consumes it. <code>Subscription</code> is the control channel between them: it carries demand signals. <code>Processor</code> is a transformation stage that sits in the middle, subscribing upstream and publishing downstream.</p>
 
 <h2>The Lifecycle Contract</h2>
 
@@ -60,15 +60,15 @@ public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt
   <li><strong><code>onSubscribe</code> is called exactly once</strong> before any other signal.</li>
   <li><strong><code>onNext</code> is never called after <code>onComplete</code> or <code>onError</code>.</strong> Terminal signals are final.</li>
   <li><strong>A <code>Subscription</code> must be cancelled</strong> if the <code>Subscriber</code> no longer wants items.</li>
-  <li><strong>Calls are non-interfering</strong> — <code>onNext</code> on subscriber A does not block subscriber B.</li>
-  <li><strong><code>request(n)</code> controls demand</strong> — the Publisher <em>must not</em> send more items than requested.</li>
+  <li><strong>Calls are non-interfering</strong>: <code>onNext</code> on subscriber A does not block subscriber B.</li>
+  <li><strong><code>request(n)</code> controls demand</strong>: the Publisher <em>must not</em> send more items than requested.</li>
 </ol>
 
 <p>Notice the asymmetry: the <code>Subscriber</code> initiates <em>both</em> the subscription and the demand. The <code>Publisher</code> never pushes unsolicited data. This is the foundation of backpressure.</p>
 
-<h2>Backpressure — The Push-Pull Model</h2>
+<h2>Backpressure: The Push-Pull Model</h2>
 
-<p><strong>Backpressure</strong> is the mechanism by which a <code>Subscriber</code> tells a <code>Publisher</code>: <em>"I can only handle N items at a time — don't send more than that."</em></p>
+<p><strong>Backpressure</strong> is the mechanism by which a <code>Subscriber</code> tells a <code>Publisher</code>: <em>"I can only handle N items at a time, don't send more than that."</em></p>
 
 <p>Without backpressure:</p>
 
@@ -82,9 +82,9 @@ public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt
               [item3] [item4] → Slow Consumer
                (waits...)</code></pre>
 
-<p>This is a <strong>push-pull</strong> model. The Publisher <em>pushes</em> items, but the Subscriber <em>pulls</em> by requesting a specific quantity. The Publisher must respect the demand signal — it cannot send more items than the total requested minus the already delivered.</p>
+<p>This is a <strong>push-pull</strong> model. The Publisher <em>pushes</em> items, but the Subscriber <em>pulls</em> by requesting a specific quantity. The Publisher must respect the demand signal. It cannot send more items than the total requested minus the already delivered.</p>
 
-<p>A common mistake: calling <code>request(Long.MAX_VALUE)</code> effectively disables backpressure, turning the stream into an unbounded push model. Fine for testing, dangerous in production — it defeats the entire purpose of reactive streams.</p>
+<p>A common mistake: calling <code>request(Long.MAX_VALUE)</code> effectively disables backpressure, turning the stream into an unbounded push model. Fine for testing, dangerous in production. It defeats the entire purpose of reactive streams.</p>
 
 <h2>Backpressure Strategies</h2>
 
@@ -99,7 +99,7 @@ public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt
   <tr><td><strong>Block</strong></td><td>Block the producer thread</td><td>Legacy integration (anti-pattern in reactive)</td></tr>
 </table>
 
-<p>These strategies are library-specific, but the demand-driven contract — <code>request(n)</code> — is universal, guaranteed by the spec.</p>
+<p>These strategies are library-specific, but the demand-driven contract (<code>request(n)</code>) is universal, guaranteed by the spec.</p>
 
 <h2>Implementations of the Spec</h2>
 
@@ -123,10 +123,10 @@ public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt
 <div class="quiz" id="q1">
   <div class="quiz-question">1. A Publisher emits 10 items to a Subscriber that has called <code>request(3)</code>. How many items does the spec require the Publisher to send?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">All 10 — the Publisher decides when to emit</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">At most 3 — the Publisher must not exceed the requested demand</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Exactly 3 — the Publisher must always fill the full request</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">0 — request() only informs the Publisher, it can ignore it</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">All 10, the Publisher decides when to emit</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">At most 3, the Publisher must not exceed the requested demand</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Exactly 3, the Publisher must always fill the full request</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">0, request() only informs the Publisher, it can ignore it</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
@@ -136,7 +136,7 @@ public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes, if the Subscriber calls <code>request()</code> again</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Yes, but only if the Subscription has not been cancelled</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">No — <code>onComplete</code> is a terminal signal; no <code>onNext</code> may follow</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">No: <code>onComplete</code> is a terminal signal; no <code>onNext</code> may follow</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only if the Publisher still has buffered items remaining</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
@@ -146,7 +146,7 @@ public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt
   <div class="quiz-question">3. A fast Kafka consumer pushes 1,000 events/second into a reactive pipeline, but the downstream database Subscriber can only persist 100/second. What does backpressure prevent?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The Kafka consumer from reading messages</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Buffer overflow — the Subscriber signals demand, the Publisher holds excess</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Buffer overflow: the Subscriber signals demand, the Publisher holds excess</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Network latency between the consumer and the database</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The database from applying writes out of order</li>
   </ul>
@@ -158,7 +158,7 @@ public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The Publisher will wait for <code>Long.MAX_VALUE</code> items before emitting</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The Subscription is immediately cancelled as a safety measure</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Backpressure is effectively disabled — the Publisher pushes without restraint</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Backpressure is effectively disabled: the Publisher pushes without restraint</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The Subscriber will only receive <code>Integer.MAX_VALUE</code> items due to overflow</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>
@@ -168,8 +168,8 @@ public interface Processor&lt;T, R&gt; extends Subscriber&lt;T&gt;, Publisher&lt
   <div class="quiz-question">5. The <code>Processor&lt;T, R&gt;</code> interface extends both <code>Subscriber&lt;T&gt;</code> and <code>Publisher&lt;R&gt;</code>. What is its role in a reactive pipeline?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It replaces the need for a Subscription entirely</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It is the only way to transform data — operators like <code>map</code> use it internally</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">It acts as a transformation stage — subscribing upstream, publishing transformed data downstream</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It is the only way to transform data, operators like <code>map</code> use it internally</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">It acts as a transformation stage: subscribing upstream, publishing transformed data downstream</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">It is used only for error handling, not data transformation</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
@@ -194,7 +194,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite. Review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

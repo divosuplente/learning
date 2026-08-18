@@ -10,7 +10,7 @@
 
 <h1>Testing, Deployment &amp; Running the Full Application</h1>
 
-<p>You have an Order Management System with REST endpoints, GraphQL queries, Kafka events, and JPA repositories. The final question: how do you <strong>prove it works</strong> — at every level — and ship it? This lesson walks through the full test suite, Docker Compose for local infrastructure, and hands-on verification with curl and GraphQL.</p>
+<p>You have an Order Management System with REST endpoints, GraphQL queries, Kafka events, and JPA repositories. The final question: how do you <strong>prove it works</strong> at every level and ship it? This lesson walks through the full test suite, Docker Compose for local infrastructure, and hands-on verification with curl and GraphQL.</p>
 
 <h2>Test Suite Overview</h2>
 
@@ -83,7 +83,7 @@ class OrderServiceTest {
     }
 }</code></pre>
 
-<p>Notice the pattern: <strong>stub the happy path, then assert business outcomes and side effects.</strong> The <code>verify(eventProducer)</code> call proves the Kafka event is published — without running a broker.</p>
+<p>The pattern: <strong>stub the happy path, then assert business outcomes and side effects.</strong> The <code>verify(eventProducer)</code> call proves the Kafka event is published without running a broker.</p>
 
 <h2>Controller Integration Test — <code>@WebMvcTest</code></h2>
 
@@ -121,7 +121,7 @@ class OrderControllerTest {
     }
 }</code></pre>
 
-<p>The second test catches a subtle real bug: missing required fields must produce 400, not 500. <code>@WebMvcTest</code> validates the full deserialization + validation pipeline — something a unit test alone cannot verify.</p>
+<p>The second test catches a subtle real bug: missing required fields must produce 400, not 500. <code>@WebMvcTest</code> validates the full deserialization + validation pipeline, something a unit test alone cannot verify.</p>
 
 <h2>Repository Integration Test — Testcontainers + PostgreSQL</h2>
 
@@ -161,7 +161,7 @@ class OrderRepositoryTest {
     }
 }</code></pre>
 
-<p><code>@AutoConfigureTestDatabase(replace = NONE)</code> prevents Spring from substituting H2. <code>@ServiceConnection</code> reads the container's host/port and injects it into <code>spring.datasource.url</code> — no manual configuration.</p>
+<p><code>@AutoConfigureTestDatabase(replace = NONE)</code> prevents Spring from substituting H2. <code>@ServiceConnection</code> reads the container's host/port and injects it into <code>spring.datasource.url</code> with no manual configuration.</p>
 
 <h2>Kafka Integration Test — Testcontainers with Embedded Kafka</h2>
 
@@ -202,7 +202,7 @@ class OrderEventProducerTest {
     }
 }</code></pre>
 
-<p>The test is asynchronous — the listener runs on a background thread. <code>Awaitility</code> polls until the assertion passes or the timeout expires. This is the reliable pattern for testing any message-driven system.</p>
+<p>The test is asynchronous: the listener runs on a background thread. <code>Awaitility</code> polls until the assertion passes or the timeout expires. This is the standard pattern for testing any message-driven system.</p>
 
 <h2>Reactive Stream Test — StepVerifier</h2>
 
@@ -223,7 +223,7 @@ void publish_thenSubscriberReceivesEvent() {
         .verify();
 }</code></pre>
 
-<p>The <code>.then(() -> publish)</code> step fires <em>after</em> subscription is active but <em>before</em> the verifier checks for emissions — guaranteeing the event is not missed.</p>
+<p>The <code>.then(() -> publish)</code> step fires <em>after</em> subscription is active but <em>before</em> the verifier checks for emissions, guaranteeing the event is not missed.</p>
 
 <h2>Docker Compose — Kafka + PostgreSQL</h2>
 
@@ -348,7 +348,7 @@ HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
 EXPOSE 8080
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]</code></pre>
 
-<p>Critical production practices: <strong>non-root user</strong> prevents privilege escalation; <code>MaxRAMPercentage</code> makes the JVM respect container memory limits; <code>HEALTHCHECK</code> lets Kubernetes know when the app is ready; and the multi-stage build keeps the image small.</p>
+<p>Production practices: <strong>non-root user</strong> prevents privilege escalation; <code>MaxRAMPercentage</code> makes the JVM respect container memory limits; <code>HEALTHCHECK</code> lets Kubernetes know when the app is ready; and the multi-stage build keeps the image small.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing" target="_blank" rel="noopener">Spring Boot Testing</a> · <a href="https://java.testcontainers.org/" target="_blank" rel="noopener">Testcontainers</a> · <a href="https://docs.docker.com/compose/" target="_blank" rel="noopener">Docker Compose Reference</a> · <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html" target="_blank" rel="noopener">Spring Boot Actuator</a></p>
 

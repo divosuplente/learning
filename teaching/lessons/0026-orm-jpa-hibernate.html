@@ -8,9 +8,9 @@
 </head>
 <body>
 
-<h1>ORM, JPA, Hibernate — The Stack Explained</h1>
+<h1>ORM, JPA, Hibernate: The Stack Explained</h1>
 
-<p>Java thinks in objects. Databases think in tables and rows. Something has to translate between these two worlds — and that something is the ORM layer. This lesson untangles the four pieces you'll see in every Spring Data project: the concept (ORM), the spec (JPA), the engine (Hibernate), and the convenience layer (Spring Data JPA). Understanding which piece does what saves you from debugging the wrong abstraction.</p>
+<p>Java thinks in objects. Databases think in tables and rows. Something has to translate between these two worlds, and the ORM layer fills that role. This lesson untangles the four pieces you'll see in every Spring Data project: the concept (ORM), the spec (JPA), the engine (Hibernate), and the convenience layer (Spring Data JPA). Understanding which piece does what saves you from debugging the wrong abstraction.</p>
 
 <h2>The Impedance Mismatch</h2>
 
@@ -39,9 +39,9 @@ CREATE TABLE orders (
     customer_id BIGINT REFERENCES customers(id)  -- just a number
 );</code></pre>
 
-<p>When you call <code>order.getCustomer()</code>, the database doesn't have an object — it has a <code>customer_id</code> column. Something must turn that number into a <code>Customer</code> object. <strong>ORM does this automatically.</strong></p>
+<p>When you call <code>order.getCustomer()</code>, the database doesn't have an object. It has a <code>customer_id</code> column. Something must turn that number into a <code>Customer</code> object. <strong>ORM does this automatically.</strong></p>
 
-<h2>ORM — Object-Relational Mapping</h2>
+<h2>ORM: Object-Relational Mapping</h2>
 
 <p><strong>ORM</strong> is the concept, not a library. It describes any technique that maps between object graphs and relational tables. In Java, the ORM layer:</p>
 
@@ -49,15 +49,15 @@ CREATE TABLE orders (
   <li>Reads annotations on your classes (<code>@Entity</code>, <code>@Column</code>) to learn the mapping</li>
   <li>Generates SQL from method calls (<code>repository.save()</code> → <code>INSERT</code>)</li>
   <li>Converts <code>ResultSet</code> rows back into Java objects</li>
-  <li>Manages dirty checking — tracks which fields changed and only updates those</li>
-  <li>Handles lazy loading — fetches related data only when you access it</li>
+  <li>Manages dirty checking: tracks which fields changed and only updates those</li>
+  <li>Handles lazy loading: fetches related data only when you access it</li>
 </ul>
 
 <p>You <em>could</em> write JDBC code by hand. After the third <code>PreparedStatement</code> and <code>ResultSet.getString("email")</code>, you'll want ORM.</p>
 
-<h2>JPA — the Specification</h2>
+<h2>JPA: the Specification</h2>
 
-<p><strong>JPA (Jakarta Persistence API)</strong> is a <em>specification</em> — a set of interfaces and annotations that define how ORM should work in Java. Defines annotations like <code>@Entity</code>, <code>@Id</code>, <code>@OneToMany</code> and the <code>EntityManager</code> API. JPA itself <strong>does nothing</strong>. It is a contract, not an engine:</p>
+<p><strong>JPA (Jakarta Persistence API)</strong> is a <em>specification</em>, a set of interfaces and annotations that define how ORM should work in Java. Defines annotations like <code>@Entity</code>, <code>@Id</code>, <code>@OneToMany</code> and the <code>EntityManager</code> API. JPA itself <strong>does nothing</strong>. It is a contract, not an engine:</p>
 
 <pre><code>// JPA is just interfaces — no implementation code here
 public interface EntityManager {
@@ -66,9 +66,9 @@ public interface EntityManager {
     void remove(Object entity);
 }</code></pre>
 
-<p>Anyone can write a JPA <em>provider</em> — an implementation that fulfills this contract. The specification lives in the <code>jakarta.persistence</code> package (moved from <code>javax.persistence</code> in Jakarta EE 9+).</p>
+<p>Anyone can write a JPA <em>provider</em>, an implementation that fulfills this contract. The specification lives in the <code>jakarta.persistence</code> package (moved from <code>javax.persistence</code> in Jakarta EE 9+).</p>
 
-<h2>Hibernate — the Implementation</h2>
+<h2>Hibernate: the Implementation</h2>
 
 <p><strong>Hibernate</strong> is the most popular JPA provider. It's the actual runtime engine that:</p>
 
@@ -80,9 +80,9 @@ public interface EntityManager {
   <li>Provides features beyond the JPA spec: <code>@Cache</code>, natural IDs, multi-tenancy, envers auditing</li>
 </ul>
 
-<p>When Spring Boot detects Hibernate on the classpath, it configures it as the JPA provider automatically. You rarely configure Hibernate directly — you configure JPA, and Hibernate does the work.</p>
+<p>When Spring Boot detects Hibernate on the classpath, it configures it as the JPA provider automatically. You rarely configure Hibernate directly. You configure JPA, and Hibernate does the work.</p>
 
-<h2>Spring Data JPA — the Abstraction Layer</h2>
+<h2>Spring Data JPA: the Abstraction Layer</h2>
 
 <p><strong>Spring Data JPA</strong> sits on top of JPA/Hibernate and eliminates boilerplate. You define an interface and Spring Data generates the implementation at runtime:</p>
 
@@ -110,9 +110,9 @@ PostgreSQL</code></pre>
 
 <h2>Why Java Records Can't Be JPA Entities</h2>
 
-<p>Java 16 introduced <strong>records</strong> — concise, immutable data carriers. They look like natural fits for entities, but JPA <strong>cannot use records as entities</strong>. Three reasons:</p>
+<p>Java 16 introduced <strong>records</strong>: concise, immutable data carriers. They look like natural fits for entities, but JPA <strong>cannot use records as entities</strong>. Three reasons:</p>
 
-<p><strong>1. No no-argument constructor.</strong> JPA creates entity instances by calling a no-arg constructor, then populating fields. Records require all components in the constructor — there's no way to create a blank instance:</p>
+<p><strong>1. No no-argument constructor.</strong> JPA creates entity instances by calling a no-arg constructor, then populating fields. Records require all components in the constructor. There's no way to create a blank instance:</p>
 
 <pre><code>// Record — every field is a constructor parameter, no default constructor
 public record CustomerRecord(String name, String email) {}
@@ -120,9 +120,9 @@ public record CustomerRecord(String name, String email) {}
 // JPA needs this (which records cannot provide):
 // protected CustomerRecord() {}</code></pre>
 
-<p><strong>2. Immutability.</strong> JPA populates fields <em>after</em> construction. With setters on regular classes, that's straightforward. Records are immutable — no setters, no way to change a field after creation. JPA's dirty-checking mechanism also requires the ability to detect and apply changes.</p>
+<p><strong>2. Immutability.</strong> JPA populates fields <em>after</em> construction. With setters on regular classes, that's straightforward. Records are immutable: no setters, no way to change a field after creation. JPA's dirty-checking mechanism also requires the ability to detect and apply changes.</p>
 
-<p><strong>3. Can't be subclassed.</strong> Records are implicitly <code>final</code>. Hibernate uses <strong>proxies</strong> (runtime-generated subclasses) for lazy loading — when you call <code>order.getCustomer()</code>, Hibernate may return a proxy that loads the <code>Customer</code> from the database only when you first access it. If the entity class is <code>final</code>, Hibernate cannot create that proxy.</p>
+<p><strong>3. Can't be subclassed.</strong> Records are implicitly <code>final</code>. Hibernate uses <strong>proxies</strong> (runtime-generated subclasses) for lazy loading. When you call <code>order.getCustomer()</code>, Hibernate may return a proxy that loads the <code>Customer</code> from the database only when you first access it. If the entity class is <code>final</code>, Hibernate cannot create that proxy.</p>
 
 <p><strong>The rule: entities are mutable classes with a no-arg constructor; records are for DTOs and value objects that don't need persistence.</strong></p>
 
@@ -175,7 +175,7 @@ public record CustomerRecord(String name, String email) {}
 </div>
 
 <div class="quiz" id="q5">
-  <div class="quiz-question">5. Hibernate uses runtime-generated proxies for lazy loading. What property of JPA entities makes this possible — and what breaks if it's missing?</div>
+  <div class="quiz-question">5. Hibernate uses runtime-generated proxies for lazy loading. What property of JPA entities makes this possible, and what breaks if it's missing?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Entities must implement Serializable; lazy loading breaks without it</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Entities must have public constructors; private constructors break it</li>

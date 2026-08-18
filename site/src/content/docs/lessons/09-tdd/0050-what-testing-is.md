@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/005
 
 # What Testing Is & The Test Pyramid
 
-**Testing** is the deliberate execution of your code to verify it does what you intend. You write code, then you write *another* piece of code that calls the first and checks whether the result is correct. If that sounds circular — good. The test defines what "correct" means, and the production code satisfies it.
+**Testing** is the deliberate execution of your code to verify it does what you intend. You write code, then you write *another* piece of code that calls the first and checks whether the result is correct. If that sounds circular, good. The test defines what "correct" means, and the production code satisfies it.
 
 ## Why We Test
 
@@ -15,7 +15,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/005
 | **Catch bugs early** | A bug found during development costs minutes. The same bug found in production costs hours or days. |
 | **Prevent regressions** | When you change code, old tests verify you didn't break existing behavior. |
 | **Living documentation** | Tests show how code is supposed to be used. A new developer can read tests to understand the system. |
-| **Design feedback** | Code that's hard to test is usually badly designed — too many dependencies, too much coupling. |
+| **Design feedback** | Code that's hard to test is usually badly designed: too many dependencies, too much coupling. |
 | **Confidence to refactor** | With good tests, you can restructure code without fear of breaking things. |
 | **Faster debugging** | A failing test points you to exactly which code is broken. |
 
@@ -34,9 +34,9 @@ Tests prevent steps 3 through 7.
 
 ### Unit Tests
 
-A **unit test** tests a single method or class in isolation. All external dependencies are replaced with **mocks** — fake versions that return predetermined values.
+A **unit test** tests a single method or class in isolation. All external dependencies are replaced with **mocks**, fake versions that return predetermined values.
 
-*Analogy:* Testing a single car part on a workbench — you test whether the alternator produces electricity, without needing the entire car.
+*Analogy:* Testing a single car part on a workbench. You test whether the alternator produces electricity, without needing the entire car.
 
 **Speed:** milliseconds. You can run hundreds per second.
 
@@ -117,11 +117,11 @@ The **test pyramid** is a guideline for how many of each test type you should ha
 | Integration tests | ~15% of tests | Verify components work together |
 | E2E tests | ~5% of tests | Slow, fragile, but verify the whole system |
 
-**Why more unit tests?** They're fast (milliseconds), reliable (no external dependencies to fail), and precise (when one fails, you know exactly which code is broken). Integration and E2E tests are slower, and when they fail, the cause could be *anywhere* in the stack — the database, the network, the configuration, the code itself.
+**Why more unit tests?** They're fast (milliseconds), reliable (no external dependencies to fail), and precise (when one fails, you know exactly which code is broken). Integration and E2E tests are slower, and when they fail, the cause could be *anywhere* in the stack: the database, the network, the configuration, the code itself.
 
-The pyramid is not a rigid formula — it's a heuristic. If your codebase breaks the ratio and has more E2E tests than unit tests, you'll feel it: slow CI, flakes that are hard to diagnose, and long feedback loops. Push tests *down* the pyramid whenever you can. A bug caught by a unit test is fixed in seconds; the same bug caught by an E2E test is fixed in minutes or hours because you have to locate it first.
+The pyramid is not a rigid formula; it's a heuristic. If your codebase breaks the ratio and has more E2E tests than unit tests, you'll feel it: slow CI, flakes that are hard to diagnose, and long feedback loops. Push tests *down* the pyramid whenever you can. A bug caught by a unit test is fixed in seconds; the same bug caught by an E2E test is fixed in minutes or hours because you have to locate it first.
 
-**Primary sources:** [Martin Fowler — The Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) · [JUnit 5 User Guide](https://junit.org/junit5/docs/current/user-guide/) · [Spring Boot Testing Reference](https://docs.spring.io/spring-boot/reference/testing/index.html)
+**Primary sources:** [Martin Fowler: The Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) · [JUnit 5 User Guide](https://junit.org/junit5/docs/current/user-guide/) · [Spring Boot Testing Reference](https://docs.spring.io/spring-boot/reference/testing/index.html)
 
 ## Check your understanding
 
@@ -132,17 +132,17 @@ The pyramid is not a rigid formula — it's a heuristic. If your codebase breaks
 
 <details>
 <summary>2. According to the test pyramid, you have 100 integration tests and 50 E2E tests. Approximately how many unit tests should you aim for?</summary>
-<p><strong>Correct answer:</strong> About 800 — unit tests should be ~80% of the total</p>
+<p><strong>Correct answer:</strong> About 800, unit tests should be ~80% of the total</p>
 </details>
 
 <details>
 <summary>3. An E2E test fails. Why is it harder to locate the bug than when a unit test fails?</summary>
-<p><strong>Correct answer:</strong> The failure could be in any layer — code, database, network, config — so you must narrow it down first</p>
+<p><strong>Correct answer:</strong> The failure could be in any layer (code, database, network, config), so you must narrow it down first</p>
 </details>
 
 <details>
 <summary>4. Your team has 200 E2E tests, 300 integration tests, and 100 unit tests. The CI pipeline takes 45 minutes. What is the most effective way to speed it up?</summary>
-<p><strong>Correct answer:</strong> Push tests down the pyramid — replace E2E scenarios with unit and integration tests</p>
+<p><strong>Correct answer:</strong> Push tests down the pyramid: replace E2E scenarios with unit and integration tests</p>
 </details>
 
 <details>

@@ -1,12 +1,12 @@
 ---
-title: "Serialization, Error Handling & Dead Letter Queues"
-description: "Serialization, Error Handling & Dead Letter Queues"
+title: "Lesson 38: Serialization, Error Handling & Dead Letter Queues"
+description: "Lesson 38: Serialization, Error Handling & Dead Letter Queues"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0038-kafka-serialization-and-error-handling.html
 ---
 
 # Serialization, Error Handling & Dead Letter Queues
 
-Kafka stores bytes — not Java objects. Getting your events safely across that boundary requires serialization on the way in and deserialization on the way out. When deserialization fails or a consumer throws, you need a strategy beyond "crash and loop." This lesson covers the JSON type-header mechanism, the trusted-packages security gate, error handling with `@RetryableTopic`, and Dead Letter Queues.
+Kafka stores bytes, not Java objects. Getting your events safely across that boundary requires serialization on the way in and deserialization on the way out. When deserialization fails or a consumer throws, you need a strategy beyond "crash and loop." This lesson covers the JSON type-header mechanism, the trusted-packages security gate, error handling with `@RetryableTopic`, and Dead Letter Queues.
 
 ## Serialization: Java Object → JSON Bytes
 
@@ -19,7 +19,7 @@ Java Object (OrderCreatedEvent)
   → Kafka stores: [headers + JSON bytes]
 ```
 
-The `__TypeId__` header is the class name of the original object. The consumer needs it — without it, the deserializer only sees raw JSON and cannot know whether to build an `OrderCreatedEvent` or an `OrderStatusChangedEvent`.
+The `__TypeId__` header is the class name of the original object. The consumer needs it: without it, the deserializer only sees raw JSON and cannot know whether to build an `OrderCreatedEvent` or an `OrderStatusChangedEvent`.
 
 ## Deserialization: JSON Bytes → Java Object
 
@@ -33,9 +33,9 @@ Kafka stored bytes
   → Your @KafkaListener receives a typed object
 ```
 
-This is why your consumer method's parameter type must match the producer's event type — Spring uses the header, not the method signature, to decide which class to instantiate.
+This is why your consumer method's parameter type must match the producer's event type: Spring uses the header, not the method signature, to decide which class to instantiate.
 
-## Trusted Packages — The Security Gate
+## Trusted Packages: The Security Gate
 
 Deserializing JSON into an arbitrary class is dangerous: a malicious producer could set `__TypeId__` to something like `java.lang.ProcessBuilder` and trigger code execution on the consumer. Spring blocks this by requiring you to explicitly list which packages are safe to deserialize from:
 
@@ -47,7 +47,7 @@ spring:
         spring.json.trusted.packages: "com.example.ordermgmt.kafka.event"
 ```
 
-You can use `"*"` to trust everything — convenient for development, dangerous for production. The default (no config) trusts *nothing*, and every deserialization will fail with an exception like:
+You can use `"*"` to trust everything, convenient for development but dangerous for production. The default (no config) trusts *nothing*, and every deserialization will fail with an exception like:
 
 ```
 org.springframework.kafka.support.serializer.JsonDeserializer:
@@ -62,11 +62,11 @@ Without error handling, a consumer that throws an exception creates a **poison p
 
 Spring Kafka provides three layers of defense:
 
-1.  **Retry topics** — automatically move the message to a retry topic with a delay, so the main consumer continues.
-2.  **Exponential backoff** — wait longer between each retry (1 s, 2 s, 4 s) to give transient issues time to resolve.
-3.  **Dead Letter Queue** — after all retries are exhausted, send the message to a DLT for manual inspection.
+1.  **Retry topics**: automatically move the message to a retry topic with a delay, so the main consumer continues.
+2.  **Exponential backoff**: wait longer between each retry (1 s, 2 s, 4 s) to give transient issues time to resolve.
+3.  **Dead Letter Queue**: after all retries are exhausted, send the message to a DLT for manual inspection.
 
-## @RetryableTopic — Automatic Retries and DLQ
+## @RetryableTopic: Automatic Retries and DLQ
 
 The `@RetryableTopic` annotation creates the retry topics and the dead letter topic automatically:
 
@@ -100,7 +100,7 @@ order-events-dlt           ← dead letter (after all retries exhausted)
 
 ## Handling the Dead Letter Queue
 
-Messages that fail all retries land in the DLT. You need a listener for them — even if that listener only logs:
+Messages that fail all retries land in the DLT. You need a listener for them, even if that listener only logs:
 
 ```
 @KafkaListener(topics = "order-events-dlt", groupId = "ordermgmt-dlt-group")
@@ -111,7 +111,7 @@ public void handleDlt(OrderCreatedEvent failedEvent) {
 }
 ```
 
-In production, the DLT handler typically persists the failed message, sends an alert, and provides a manual re-publish path. The point is that the main consumer **never blocks** — a bad message is quarantined, not retried infinitely.
+In production, the DLT handler typically persists the failed message, sends an alert, and provides a manual re-publish path. The point is that the main consumer **never blocks**: a bad message is quarantined, not retried infinitely.
 
 ## The Full Error-Handling Flow
 
@@ -141,12 +141,12 @@ Message arrives at order-events
 
 <details>
 <summary>2. You add a new event class in com.example.ordermgmt.billing.event but forget to update spring.json.trusted.packages. What happens to those messages?</summary>
-<p><strong>Correct answer:</strong> They are rejected — the deserializer throws a "package is not trusted" exception</p>
+<p><strong>Correct answer:</strong> They are rejected: the deserializer throws a "package is not trusted" exception</p>
 </details>
 
 <details>
 <summary>3. A consumer throws an exception on every message and has no error handling configured. What is the result?</summary>
-<p><strong>Correct answer:</strong> The consumer keeps retrying the same message indefinitely — a poison pill</p>
+<p><strong>Correct answer:</strong> The consumer keeps retrying the same message indefinitely: a poison pill</p>
 </details>
 
 <details>

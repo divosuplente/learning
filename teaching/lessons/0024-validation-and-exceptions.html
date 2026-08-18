@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 24 — Input Validation &amp; Exception Handling</title>
+  <title>Lesson 24: Input Validation &amp; Exception Handling</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Input Validation &amp; Exception Handling</h1>
 
-<p>Every API receives bad input eventually — missing fields, negative quantities, malformed email addresses. Without validation, garbage slips into your database. Without structured error handling, clients get ugly stack traces. This lesson covers <strong>Jakarta Bean Validation</strong> for declaring constraints on input, and <strong>@RestControllerAdvice</strong> for turning exceptions into clean HTTP responses.</p>
+<p>Every API receives bad input eventually: missing fields, negative quantities, malformed email addresses. Without validation, garbage slips into your database. Without structured error handling, clients get ugly stack traces. This lesson covers <strong>Jakarta Bean Validation</strong> for declaring constraints on input, and <strong>@RestControllerAdvice</strong> for turning exceptions into clean HTTP responses.</p>
 
-<h2>Jakarta Bean Validation — <code>jakarta.validation</code>, not <code>javax.validation</code></h2>
+<h2>Jakarta Bean Validation: <code>jakarta.validation</code>, not <code>javax.validation</code></h2>
 
-<p>Bean Validation (JSR 380) is a Java standard. Spring Boot integrates it via the <code>@Valid</code> annotation. The first thing to get right is the import — <strong>Spring Boot 3.x uses Jakarta EE</strong>, the renamed Java EE. Everything moved from <code>javax.validation</code> to <code>jakarta.validation</code>:</p>
+<p>Bean Validation (JSR 380) is a Java standard. Spring Boot integrates it via the <code>@Valid</code> annotation. The first thing to get right is the import: <strong>Spring Boot 3.x uses Jakarta EE</strong>, the renamed Java EE. Everything moved from <code>javax.validation</code> to <code>jakarta.validation</code>:</p>
 
 <pre><code>// CORRECT — Spring Boot 3.x (Jakarta)
 import jakarta.validation.Valid;
@@ -25,7 +25,7 @@ import jakarta.validation.constraints.NotNull;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;</code></pre>
 
-<p>If you import from <code>javax.validation</code> on Boot 3, the annotations silently fail — they're different classes that Spring's validator doesn't recognize. This is the single most common validation bug when migrating from Boot 2.</p>
+<p>If you import from <code>javax.validation</code> on Boot 3, the annotations silently fail. They're different classes that Spring's validator doesn't recognize. This is the single most common validation bug when migrating from Boot 2.</p>
 
 <h2>Validation annotations</h2>
 
@@ -48,7 +48,7 @@ import javax.validation.constraints.NotBlank;</code></pre>
 
 <h2>DTOs with validation</h2>
 
-<p>Validation annotations live on your DTOs (request records), not on your entities. The DTO is the trust boundary — it's the first thing your code sees after deserialization:</p>
+<p>Validation annotations live on your DTOs (request records), not on your entities. The DTO is the trust boundary: it's the first thing your code sees after deserialization:</p>
 
 <pre><code>public record CreateOrderRequest(
         @NotNull(message = "Customer ID is required")
@@ -67,7 +67,7 @@ public record CreateOrderItemRequest(
         Integer quantity
 ) {}</code></pre>
 
-<p>The <code>message</code> attribute is optional — Jakarta provides default messages — but explicit messages are clearer for API consumers.</p>
+<p>The <code>message</code> attribute is optional. Jakarta provides default messages, but explicit messages are clearer for API consumers.</p>
 
 <h2>Triggering validation with <code>@Valid</code></h2>
 
@@ -82,11 +82,11 @@ public ResponseEntity&lt;OrderResponse&gt; createOrder(
             .body(orderService.createOrder(request));
 }</code></pre>
 
-<p>When <code>@Valid</code> is present, Spring Boot: (1) deserializes JSON into the record, (2) runs every constraint annotation, (3) if any fail, returns 400 Bad Request — the controller method body never executes, (4) if all pass, the method runs normally.</p>
+<p>When <code>@Valid</code> is present, Spring Boot: (1) deserializes JSON into the record, (2) runs every constraint annotation, (3) if any fail, returns 400 Bad Request (the controller method body never executes), (4) if all pass, the method runs normally.</p>
 
 <h2>Global exception handling with <code>@RestControllerAdvice</code></h2>
 
-<p>Without a handler, unhandled exceptions produce a 500 with an HTML stack trace — useless and leaking internals. <code>@RestControllerAdvice</code> lets you intercept exceptions from <em>any</em> controller and return structured JSON instead:</p>
+<p>Without a handler, unhandled exceptions produce a 500 with an HTML stack trace, useless and leaking internals. <code>@RestControllerAdvice</code> lets you intercept exceptions from <em>any</em> controller and return structured JSON instead:</p>
 
 <pre><code>@RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -113,9 +113,9 @@ public class GlobalExceptionHandler {
     }
 }</code></pre>
 
-<p><code>MethodArgumentNotValidException</code> is what Spring throws when <code>@Valid</code> fails. The <code>BindingResult</code> inside it carries every field error with the field name and message. The catch-all <code>Exception.class</code> handler ensures you never leak a stack trace — but log the exception internally so you can debug it.</p>
+<p><code>MethodArgumentNotValidException</code> is what Spring throws when <code>@Valid</code> fails. The <code>BindingResult</code> inside it carries every field error with the field name and message. The catch-all <code>Exception.class</code> handler ensures you never leak a stack trace, but log the exception internally so you can debug it.</p>
 
-<h2><code>ProblemDetail</code> — the RFC 7807 standard</h2>
+<h2><code>ProblemDetail</code>: the RFC 7807 standard</h2>
 
 <p>Spring Framework 6 introduced <code>ProblemDetail</code>, a built-in class matching <a href="https://datatracker.ietf.org/doc/html/rfc7807" target="_blank" rel="noopener">RFC 7807 (Problem Details for HTTP APIs)</a>. It gives you a standard error shape without writing a custom record:</p>
 
@@ -130,7 +130,7 @@ public ProblemDetail handleNotFound(OrderNotFoundException ex) {
     return pd;
 }</code></pre>
 
-<p><code>ProblemDetail</code> serializes to JSON with the standard fields <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, and <code>instance</code>. You can add custom properties with <code>setProperty</code>. The response <code>Content-Type</code> is <code>application/problem+json</code>. This is the preferred approach for new Spring Boot 3 projects — it's less code than a custom error record and follows a web standard.</p>
+<p><code>ProblemDetail</code> serializes to JSON with the standard fields <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, and <code>instance</code>. You can add custom properties with <code>setProperty</code>. The response <code>Content-Type</code> is <code>application/problem+json</code>. This is the preferred approach for new Spring Boot 3 projects: it's less code than a custom error record and follows a web standard.</p>
 
 <p>Enable it globally by setting <code>spring.mvc.problemdetails.enabled=true</code> in <code>application.yml</code>, which makes Spring return <code>ProblemDetail</code> automatically for built-in errors (like 404s) too.</p>
 

@@ -10,7 +10,7 @@
 
 <h1>Application Config &amp; Spring Profiles</h1>
 
-<p>Hardcoded values are fragile. Spring Boot reads configuration from external files — change the database, the port, or the log level without recompiling. The mechanism: <code>application.yml</code>, profile-specific overrides, and environment variables for secrets.</p>
+<p>Hardcoded values are fragile. Spring Boot reads configuration from external files, so you can change the database, the port, or the log level without recompiling. The mechanism: <code>application.yml</code>, profile-specific overrides, and environment variables for secrets.</p>
 
 <h2>application.yml</h2>
 
@@ -39,7 +39,7 @@ spring:
       hibernate:
         format_sql: true</code></pre>
 
-<p>Every property is a plain key-value pair. Comments start with <code>#</code>. Indentation is meaning — two spaces per level, not tabs.</p>
+<p>Every property is a plain key-value pair. Comments start with <code>#</code>. Indentation matters: two spaces per level, not tabs.</p>
 
 <h2>YAML vs .properties</h2>
 
@@ -53,7 +53,7 @@ spring.datasource.password=postgres
 spring.jpa.show-sql=true
 spring.jpa.hibernate.ddl-auto=update</code></pre>
 
-<p>YAML nests related keys together — easier to read, easier to maintain. We use it throughout. Pick one format per project; mixing causes confusing precedence issues.</p>
+<p>YAML nests related keys together, making it easier to read and maintain. We use it throughout. Pick one format per project; mixing causes confusing precedence issues.</p>
 
 <h2>Spring Profiles</h2>
 
@@ -116,8 +116,8 @@ logging:
 <p>Spring Boot loads config in a specific order:</p>
 
 <ol>
-  <li><strong>base first</strong> — <code>application.yml</code> is always loaded</li>
-  <li><strong>profile overrides</strong> — <code>application-{profile}.yml</code> overrides any matching keys</li>
+  <li><strong>base first</strong>: <code>application.yml</code> is always loaded</li>
+  <li><strong>profile overrides</strong>: <code>application-{profile}.yml</code> overrides any matching keys</li>
   <li>The result is a single merged configuration</li>
 </ol>
 
@@ -137,7 +137,7 @@ spring:
   profiles:
     active: dev</code></pre>
 
-<h2>Environment variables — never hardcode secrets</h2>
+<h2>Environment variables: never hardcode secrets</h2>
 
 <p>In production, passwords must not live in files that get committed to source control. Use the <code>${VARIABLE_NAME}</code> syntax to read from the environment:</p>
 
@@ -145,11 +145,11 @@ spring:
   datasource:
     password: ${DATABASE_PASSWORD}</code></pre>
 
-<p>If <code>DATABASE_PASSWORD</code> is not set, Spring Boot fails to start — which is correct. A missing secret is a deployment error, not a silent fallback to a default password. You can supply a default with <code>${DATABASE_PASSWORD:changeme}</code>, but for real secrets, omit the default and let it fail fast.</p>
+<p>If <code>DATABASE_PASSWORD</code> is not set, Spring Boot fails to start. That is correct. A missing secret is a deployment error, not a silent fallback to a default password. You can supply a default with <code>${DATABASE_PASSWORD:changeme}</code>, but for real secrets, omit the default and let it fail fast.</p>
 
 <h2>DevTools hot reload</h2>
 
-<p>Spring Boot DevTools provides a <strong>hot restart</strong>: when you save a Java file, the app restarts in seconds by reloading only changed classes — much faster than a full restart.</p>
+<p>Spring Boot DevTools provides a <strong>hot restart</strong>: when you save a Java file, the app restarts in seconds by reloading only changed classes, much faster than a full restart.</p>
 
 <p>DevTools is declared in <code>pom.xml</code> with two important attributes:</p>
 
@@ -161,9 +161,9 @@ spring:
 &lt;/dependency&gt;</code></pre>
 
 <ul>
-  <li><strong><code>&lt;scope&gt;runtime&lt;/scope&gt;</code></strong> — only needed while running the app, not at compile time</li>
-  <li><strong><code>&lt;optional&gt;true&lt;/optional&gt;</code></strong> — not transitively pulled into other projects</li>
-  <li><strong>Auto-disabled in production</strong> — DevTools is automatically excluded from packaged JARs, so it never runs in prod</li>
+  <li><strong><code>&lt;scope&gt;runtime&lt;/scope&gt;</code></strong>: only needed while running the app, not at compile time</li>
+  <li><strong><code>&lt;optional&gt;true&lt;/optional&gt;</code></strong>: not transitively pulled into other projects</li>
+  <li><strong>Auto-disabled in production</strong>: DevTools is automatically excluded from packaged JARs, so it never runs in prod</li>
 </ul>
 
 <p>DevTools is a development convenience, not a production feature. The runtime scope ensures it never ships.</p>

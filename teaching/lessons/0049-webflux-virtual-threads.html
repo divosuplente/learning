@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 49 — Spring WebFlux, Virtual Threads vs Reactive &amp; Module Review</title>
+  <title>Lesson 49: Spring WebFlux, Virtual Threads vs Reactive &amp; Module Review</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Spring WebFlux, Virtual Threads vs Reactive &amp; Module Review</h1>
 
-<p>Reactive pipelines are powerful — but they live inside a web framework, connected to a database and a message broker. This lesson shows you how Spring WebFlux wires Mono and Flux into HTTP endpoints, how reactive Kafka and R2DBC complete the non-blocking stack, and when you should <strong>skip reactive entirely</strong> — Spring Boot 4 defaults to virtual threads for MVC, making it the right choice for most applications without any reactive code.</p>
+<p>Reactive pipelines live inside a web framework, connected to a database and a message broker. This lesson shows you how Spring WebFlux wires Mono and Flux into HTTP endpoints, how reactive Kafka and R2DBC complete the non-blocking stack, and when you should <strong>skip reactive entirely</strong>. Spring Boot 4 defaults to virtual threads for MVC, making it the right choice for most applications without any reactive code.</p>
 
-<h2>Spring WebFlux — Reactive Controllers</h2>
+<h2>Spring WebFlux: Reactive Controllers</h2>
 
-<p>Spring WebFlux replaces Spring MVC's thread-per-request model with a small pool of non-blocking event-loop threads (Netty by default). The controller looks almost identical — you just return <code>Mono</code> or <code>Flux</code> instead of plain objects.</p>
+<p>Spring WebFlux replaces Spring MVC's thread-per-request model with a small pool of non-blocking event-loop threads (Netty by default). The controller looks almost identical. You just return <code>Mono</code> or <code>Flux</code> instead of plain objects.</p>
 
 <pre><code>@RestController
 @RequestMapping("/api/reactive/orders")
@@ -51,8 +51,8 @@ public class ReactiveOrderController {
 <p>Three things to notice:</p>
 
 <ul>
-  <li><strong>The framework subscribes for you.</strong> You never call <code>.subscribe()</code> in a controller — WebFlux does it when the HTTP connection arrives.</li>
-  <li><strong>Flux + <code>text/event-stream</code> = Server-Sent Events.</strong> The browser receives each <code>onNext</code> as an SSE event — no WebSocket needed.</li>
+  <li><strong>The framework subscribes for you.</strong> You never call <code>.subscribe()</code> in a controller. WebFlux does it when the HTTP connection arrives.</li>
+  <li><strong>Flux + <code>text/event-stream</code> = Server-Sent Events.</strong> The browser receives each <code>onNext</code> as an SSE event, no WebSocket needed.</li>
   <li><strong><code>switchIfEmpty</code> replaces empty with an error</strong>, which Spring maps to a 404 response.</li>
 </ul>
 
@@ -73,7 +73,7 @@ public class ReactiveRouter {
 
 <h2>Connecting Reactive to Kafka</h2>
 
-<p>The <code>spring-kafka</code> reactive module provides <code>ReactiveKafkaProducerTemplate</code> and <code>ReactiveKafkaConsumerTemplate</code> that return <code>Mono</code> and <code>Flux</code> — no blocking, no thread-handoff.</p>
+<p>The <code>spring-kafka</code> reactive module provides <code>ReactiveKafkaProducerTemplate</code> and <code>ReactiveKafkaConsumerTemplate</code> that return <code>Mono</code> and <code>Flux</code>, with no blocking and no thread-handoff.</p>
 
 <pre><code>// Producer: returns Mono, not void
 @Component
@@ -105,11 +105,11 @@ public class ReactiveOrderConsumer {
     }
 }</code></pre>
 
-<p>The consumer's <code>receiveAutoAck()</code> returns a <code>Flux</code> of batches — each batch is auto-committed after downstream processing. Because everything is a <code>Flux</code>, you can compose backpressure, retry, and error-handling operators directly on the Kafka stream.</p>
+<p>The consumer's <code>receiveAutoAck()</code> returns a <code>Flux</code> of batches. Each batch is auto-committed after downstream processing. Because everything is a <code>Flux</code>, you can compose backpressure, retry, and error-handling operators directly on the Kafka stream.</p>
 
-<h2>Connecting Reactive to the Database — R2DBC</h2>
+<h2>Connecting Reactive to the Database: R2DBC</h2>
 
-<p>JPA and Hibernate are <strong>inherently blocking</strong> — every <code>findById</code> blocks a thread waiting for the JDBC driver. Spring Data R2DBC provides a reactive alternative. Instead of <code>JpaRepository</code>, you extend <code>ReactiveCrudRepository</code>:</p>
+<p>JPA and Hibernate are <strong>inherently blocking</strong>. Every <code>findById</code> blocks a thread waiting for the JDBC driver. Spring Data R2DBC provides a reactive alternative. Instead of <code>JpaRepository</code>, you extend <code>ReactiveCrudRepository</code>:</p>
 
 <pre><code>@Repository
 public interface ReactiveOrderRepository
@@ -117,9 +117,9 @@ public interface ReactiveOrderRepository
     Flux&lt;OrderEntity&gt; findByStatus(OrderStatus status);
 }</code></pre>
 
-<p>The methods return <code>Mono</code> and <code>Flux</code> directly — no wrapping, no <code>boundedElastic</code> workarounds. Under the hood, R2DBC uses a non-blocking database driver (PostgreSQL's <code>r2dbc-postgresql</code>, for example) that multiplexes queries over a single TCP connection.</p>
+<p>The methods return <code>Mono</code> and <code>Flux</code> directly, with no wrapping and no <code>boundedElastic</code> workarounds. Under the hood, R2DBC uses a non-blocking database driver (PostgreSQL's <code>r2dbc-postgresql</code>, for example) that multiplexes queries over a single TCP connection.</p>
 
-<p><strong>Important:</strong> R2DBC is <em>not</em> JPA. There is no lazy loading, no first-level cache, no dirty checking. It is closer to <code>JdbcTemplate</code> with reactive types — simple, explicit, and non-blocking.</p>
+<p><strong>Important:</strong> R2DBC is <em>not</em> JPA. There is no lazy loading, no first-level cache, no dirty checking. It is closer to <code>JdbcTemplate</code> with reactive types: simple, explicit, and non-blocking.</p>
 
 <h2>The Full Reactive Stack</h2>
 
@@ -133,11 +133,11 @@ public interface ReactiveOrderRepository
       → ReactiveKafka (non-blocking broker client)
         → Kafka</code></pre>
 
-<p>A single Netty thread can handle thousands of in-flight requests — it initiates I/O, moves on, and picks up the callback when the response arrives. That is the C10K solution in practice.</p>
+<p>A single Netty thread can handle thousands of in-flight requests. It initiates I/O, moves on, and picks up the callback when the response arrives. That is the C10K solution in practice.</p>
 
-<p>Mix one blocking layer into this stack — a JPA <code>findById</code>, a <code>Thread.sleep</code>, a blocking HTTP client — and you defeat the entire model. The event-loop thread stalls, every other request on that thread stalls, and throughput collapses.</p>
+<p>Mix one blocking layer into this stack (a JPA <code>findById</code>, a <code>Thread.sleep</code>, a blocking HTTP client) and you defeat the entire model. The event-loop thread stalls, every other request on that thread stalls, and throughput collapses.</p>
 
-<h2>Virtual Threads — Blocking, But Cheap</h2>
+<h2>Virtual Threads: Blocking, But Cheap</h2>
 
 <p>Java 21 introduced <strong>virtual threads</strong> (Project Loom): lightweight threads managed by the JVM, not the OS. A virtual thread costs ~1KB instead of ~1MB. You can create millions of them.</p>
 
@@ -149,12 +149,12 @@ public class OrderApplication {
     }
 }
 
-// No configuration needed — Boot 4 uses virtual threads
+// No configuration needed. Boot 4 uses virtual threads
 // for MVC request handling out of the box.</code></pre>
 
-<p>Spring Boot 4 enables virtual threads by default for Spring MVC. Every incoming request gets a virtual thread automatically. Your controller code looks <strong>completely normal</strong> — blocking JPA, blocking Kafka, blocking everything — but the threads are so cheap that blocking is fine.</p>
+<p>Spring Boot 4 enables virtual threads by default for Spring MVC. Every incoming request gets a virtual thread automatically. Your controller code looks <strong>completely normal</strong>, with blocking JPA, blocking Kafka, blocking everything, but the threads are so cheap that blocking is fine.</p>
 
-<p>Virtual threads <strong>are still blocking</strong>. When <code>orderRepo.findById()</code> calls JDBC, the virtual thread <em>blocks</em> — but instead of pinning an OS thread, the JVM unmounts it and gives the carrier thread to another virtual thread. From the OS perspective, the carrier thread is always doing useful work. From your code's perspective, nothing changed — it's still imperative, synchronous Java.</p>
+<p>Virtual threads <strong>are still blocking</strong>. When <code>orderRepo.findById()</code> calls JDBC, the virtual thread <em>blocks</em>, but instead of pinning an OS thread, the JVM unmounts it and gives the carrier thread to another virtual thread. From the OS perspective, the carrier thread is always doing useful work. From your code's perspective, nothing changed. It's still imperative, synchronous Java.</p>
 
 <h2>When to Use Which</h2>
 
@@ -166,19 +166,19 @@ public class OrderApplication {
   <tr><td>Pipeline composition</td><td>Manual orchestration</td><td>Rich operator library (<code>map</code>, <code>flatMap</code>, <code>zip</code>, <code>retryWhen</code>)</td></tr>
   <tr><td>Debugging</td><td>Normal stack traces</td><td>Assembling traces, <code>checkpoint</code>, <code>log</code></td></tr>
   <tr><td>Thread model</td><td>Millions of cheap virtual threads (default)</td><td>~8 event-loop threads</td></tr>
-  <tr><td>Non-blocking I/O stack</td><td>Blocking APIs (JDBC, JPA) — fine because VTs are cheap</td><td>End-to-end non-blocking (R2DBC, reactive Kafka)</td></tr>
+  <tr><td>Non-blocking I/O stack</td><td>Blocking APIs (JDBC, JPA), fine because VTs are cheap</td><td>End-to-end non-blocking (R2DBC, reactive Kafka)</td></tr>
 </table>
 
-<p><strong>Rule of thumb:</strong> Spring Boot 4 defaults to virtual threads for MVC — this is the right choice for <strong>most applications</strong>. Use WebFlux when you specifically need true non-blocking I/O: R2DBC for fully async database access, backpressure-aware streaming, high-throughput event sourcing, or when your entire stack must be non-blocking. They are complementary — you can even use reactive Kafka in a virtual-thread MVC app.</p>
+<p><strong>Rule of thumb:</strong> Spring Boot 4 defaults to virtual threads for MVC, and this is the right choice for <strong>most applications</strong>. Use WebFlux when you specifically need true non-blocking I/O: R2DBC for fully async database access, backpressure-aware streaming, high-throughput event sourcing, or when your entire stack must be non-blocking. They work well together. You can even use reactive Kafka in a virtual-thread MVC app.</p>
 
 <h2>When NOT to Use Reactive</h2>
 
 <ul>
-  <li><strong>CPU-bound work</strong> (crypto, image processing, heavy algorithms) — reactive adds thread-pool overhead; tight loops are faster on plain threads.</li>
-  <li><strong>Simple batch jobs</strong> with no I/O — the operator boilerplate outweighs the benefit.</li>
-  <li><strong>Team unfamiliar with reactive</strong> — debugging async pipelines has a steep learning curve; a bug in a <code>flatMap</code> chain can take hours to trace.</li>
-  <li><strong>Mostly blocking JDBC</strong> — wrapping <code>JpaRepository</code> in <code>Mono.fromCallable().subscribeOn(boundedElastic)</code> works, but it negates the scalability benefit and is confusing for future maintainers.</li>
-  <li><strong>Existing JPA codebase</strong> — JPA is inherently blocking. Mixing reactive and blocking in the same codebase creates a cognitive load that outweighs the throughput gain.</li>
+  <li><strong>CPU-bound work</strong> (crypto, image processing, heavy algorithms): reactive adds thread-pool overhead; tight loops are faster on plain threads.</li>
+  <li><strong>Simple batch jobs</strong> with no I/O: the operator boilerplate outweighs the benefit.</li>
+  <li><strong>Team unfamiliar with reactive:</strong> debugging async pipelines has a steep learning curve. A bug in a <code>flatMap</code> chain can take hours to trace.</li>
+  <li><strong>Mostly blocking JDBC:</strong> wrapping <code>JpaRepository</code> in <code>Mono.fromCallable().subscribeOn(boundedElastic)</code> works, but it negates the scalability benefit and is confusing for future maintainers.</li>
+  <li><strong>Existing JPA codebase:</strong> JPA is inherently blocking. Mixing reactive and blocking in the same codebase creates a cognitive load that outweighs the throughput gain.</li>
 </ul>
 
 <h2>Module 08 Review</h2>
@@ -187,11 +187,11 @@ public class OrderApplication {
 
 <table>
   <tr><th>Lesson</th><th>Core Idea</th></tr>
-  <tr><td>45 — Reactive Paradigm &amp; C10K</td><td>Why blocking doesn't scale; async data streams as the answer</td></tr>
-  <tr><td>46 — Reactive Streams Spec</td><td><code>Publisher</code>, <code>Subscriber</code>, <code>Subscription</code>, backpressure as a first-class contract</td></tr>
-  <tr><td>47 — Mono &amp; Flux Basics</td><td>Project Reactor's two types; factories, operators, schedulers</td></tr>
-  <tr><td>48 — Error Handling &amp; Hot vs Cold</td><td><code>onErrorResume</code>, <code>retryWhen</code>; cold (per-subscriber) vs hot (shared) publishers</td></tr>
-  <tr><td>49 — WebFlux, Virtual Threads &amp; Review</td><td>Reactive endpoints, R2DBC, reactive Kafka, and when to skip reactive entirely</td></tr>
+  <tr><td>45: Reactive Paradigm &amp; C10K</td><td>Why blocking doesn't scale; async data streams as the answer</td></tr>
+  <tr><td>46: Reactive Streams Spec</td><td><code>Publisher</code>, <code>Subscriber</code>, <code>Subscription</code>, backpressure as a first-class contract</td></tr>
+  <tr><td>47: Mono &amp; Flux Basics</td><td>Project Reactor's two types; factories, operators, schedulers</td></tr>
+  <tr><td>48: Error Handling &amp; Hot vs Cold</td><td><code>onErrorResume</code>, <code>retryWhen</code>; cold (per-subscriber) vs hot (shared) publishers</td></tr>
+  <tr><td>49: WebFlux, Virtual Threads &amp; Review</td><td>Reactive endpoints, R2DBC, reactive Kafka, and when to skip reactive entirely</td></tr>
 </table>
 
 <p>The through-line: <strong>reactive is an I/O scalability strategy for truly non-blocking stacks, not a universal architecture.</strong> Spring Boot 4 defaults to virtual threads for MVC, which solves the threading problem for most applications without any reactive code. Use WebFlux when you need end-to-end non-blocking I/O with R2DBC, backpressure-aware streaming, or event-driven pipelines. Use Spring MVC with virtual threads for everything else.</p>
@@ -215,7 +215,7 @@ public class OrderApplication {
   <div class="quiz-question">2. In a Spring Boot 4 MVC app using JPA, a virtual thread calls <code>orderRepo.findById()</code>, which blocks on JDBC. What happens to the carrier thread?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">The JVM unmounts the virtual thread and the carrier thread runs another virtual thread</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The carrier thread blocks along with the virtual thread — same as a platform thread</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The carrier thread blocks along with the virtual thread, same as a platform thread</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The JDBC call is automatically converted to a non-blocking R2DBC query</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Spring throws an exception because JPA is not compatible with virtual threads</li>
   </ul>
@@ -247,10 +247,10 @@ public class OrderApplication {
 <div class="quiz" id="q5">
   <div class="quiz-question">5. Your team has a mature Spring MVC + JPA codebase, runs Java 21, and handles 200 concurrent users. Should you migrate to WebFlux?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — WebFlux is always more performant than MVC</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — migrating JPA to R2DBC is straightforward and low-risk</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">No — 200 users is well within MVC capacity; virtual threads are already enabled by default in Boot 4, so keep JPA</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">No — but you should still rewrite the service layer in Reactor for future-proofing</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes, WebFlux is always more performant than MVC</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes, migrating JPA to R2DBC is straightforward and low-risk</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">No, 200 users is well within MVC capacity. Virtual threads are already enabled by default in Boot 4, so keep JPA</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">No, but you should still rewrite the service layer in Reactor for future-proofing</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
 </div>
@@ -274,7 +274,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite. Review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

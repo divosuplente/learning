@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/005
 
 # Testing, Deployment & Running the Full Application
 
-You have an Order Management System with REST endpoints, GraphQL queries, Kafka events, and JPA repositories. The final question: how do you **prove it works** — at every level — and ship it? This lesson walks through the full test suite, Docker Compose for local infrastructure, and hands-on verification with curl and GraphQL.
+You have an Order Management System with REST endpoints, GraphQL queries, Kafka events, and JPA repositories. The final question: how do you **prove it works** at every level and ship it? This lesson walks through the full test suite, Docker Compose for local infrastructure, and hands-on verification with curl and GraphQL.
 
 ## Test Suite Overview
 
@@ -80,7 +80,7 @@ class OrderServiceTest {
 }
 ```
 
-Notice the pattern: **stub the happy path, then assert business outcomes and side effects.** The `verify(eventProducer)` call proves the Kafka event is published — without running a broker.
+The pattern: **stub the happy path, then assert business outcomes and side effects.** The `verify(eventProducer)` call proves the Kafka event is published without running a broker.
 
 ## Controller Integration Test — `@WebMvcTest`
 
@@ -120,7 +120,7 @@ class OrderControllerTest {
 }
 ```
 
-The second test catches a subtle real bug: missing required fields must produce 400, not 500. `@WebMvcTest` validates the full deserialization + validation pipeline — something a unit test alone cannot verify.
+The second test catches a subtle real bug: missing required fields must produce 400, not 500. `@WebMvcTest` validates the full deserialization + validation pipeline, something a unit test alone cannot verify.
 
 ## Repository Integration Test — Testcontainers + PostgreSQL
 
@@ -162,7 +162,7 @@ class OrderRepositoryTest {
 }
 ```
 
-`@AutoConfigureTestDatabase(replace = NONE)` prevents Spring from substituting H2. `@ServiceConnection` reads the container's host/port and injects it into `spring.datasource.url` — no manual configuration.
+`@AutoConfigureTestDatabase(replace = NONE)` prevents Spring from substituting H2. `@ServiceConnection` reads the container's host/port and injects it into `spring.datasource.url` with no manual configuration.
 
 ## Kafka Integration Test — Testcontainers with Embedded Kafka
 
@@ -205,7 +205,7 @@ class OrderEventProducerTest {
 }
 ```
 
-The test is asynchronous — the listener runs on a background thread. `Awaitility` polls until the assertion passes or the timeout expires. This is the reliable pattern for testing any message-driven system.
+The test is asynchronous: the listener runs on a background thread. `Awaitility` polls until the assertion passes or the timeout expires. This is the standard pattern for testing any message-driven system.
 
 ## Reactive Stream Test — StepVerifier
 
@@ -228,7 +228,7 @@ void publish_thenSubscriberReceivesEvent() {
 }
 ```
 
-The `.then(() -> publish)` step fires *after* subscription is active but *before* the verifier checks for emissions — guaranteeing the event is not missed.
+The `.then(() -> publish)` step fires *after* subscription is active but *before* the verifier checks for emissions, guaranteeing the event is not missed.
 
 ## Docker Compose — Kafka + PostgreSQL
 
@@ -365,7 +365,7 @@ EXPOSE 8080
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 ```
 
-Critical production practices: **non-root user** prevents privilege escalation; `MaxRAMPercentage` makes the JVM respect container memory limits; `HEALTHCHECK` lets Kubernetes know when the app is ready; and the multi-stage build keeps the image small.
+Production practices: **non-root user** prevents privilege escalation; `MaxRAMPercentage` makes the JVM respect container memory limits; `HEALTHCHECK` lets Kubernetes know when the app is ready; and the multi-stage build keeps the image small.
 
 **Primary sources:** [Spring Boot Testing](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing) · [Testcontainers](https://java.testcontainers.org/) · [Docker Compose Reference](https://docs.docker.com/compose/) · [Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html)
 

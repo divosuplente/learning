@@ -10,11 +10,11 @@
 
 <h1>Common Anti-Patterns &amp; Module Review</h1>
 
-<p>Knowing the right architecture is half the battle. The other half is <strong>recognizing when you've drifted</strong>. This lesson covers four anti-patterns that creep into Spring Boot codebases, explains when pragmatism beats purity, and ties together everything from Modules 02–05.</p>
+<p>Knowing the right architecture is half the battle. The other half is <strong>recognizing when you've drifted</strong>. This lesson covers four anti-patterns that creep into Spring Boot codebases, explains when pragmatism beats purity, and ties together everything from Modules 02 through 05.</p>
 
 <h2>Anti-Pattern 1: Fat Controller</h2>
 
-<p>A <strong>fat controller</strong> stuffs business logic — validation, calculations, data access — into the controller instead of delegating to the service layer. The controller inflates from 5 lines per method to 50.</p>
+<p>A <strong>fat controller</strong> stuffs business logic (validation, calculations, data access) into the controller instead of delegating to the service layer. The controller inflates from 5 lines per method to 50.</p>
 
 <pre><code>// BAD — controller doing business logic
 @PostMapping("/orders")
@@ -35,9 +35,9 @@ public ResponseEntity&lt;OrderResponse&gt; createOrder(
     return ResponseEntity.ok(OrderResponse.from(order));
 }</code></pre>
 
-<p>The controller now <em>depends on</em> <code>CustomerRepository</code>, <code>ProductRepository</code>, and <code>OrderRepository</code> — three dependencies it should never know about. It also bypasses <code>@Transactional</code>, so a partial failure leaves the database in an inconsistent state.</p>
+<p>The controller now <em>depends on</em> <code>CustomerRepository</code>, <code>ProductRepository</code>, and <code>OrderRepository</code>, three dependencies it should never know about. It also bypasses <code>@Transactional</code>, so a partial failure leaves the database in an inconsistent state.</p>
 
-<p><strong>Fix:</strong> Move every business rule into the service. A controller method should be receive → delegate → return — three lines.</p>
+<p><strong>Fix:</strong> Move every business rule into the service. A controller method should be receive, delegate, return: three lines.</p>
 
 <pre><code>// GOOD — thin controller
 @PostMapping("/orders")
@@ -49,7 +49,7 @@ public ResponseEntity&lt;OrderResponse&gt; createOrder(
 
 <h2>Anti-Pattern 2: Anemic Domain Model</h2>
 
-<p>An <strong>anemic domain model</strong> has entities that are just bags of getters and setters — no behavior. All logic lives in the service, which becomes a procedural script draped over objects.</p>
+<p>An <strong>anemic domain model</strong> has entities that are just bags of getters and setters with no behavior. All logic lives in the service, which becomes a procedural script draped over objects.</p>
 
 <pre><code>// BAD — entity with no behavior
 order.setStatus(OrderStatus.CONFIRMED);
@@ -63,11 +63,11 @@ OrderEntity order = new OrderEntity(customer);
 order.addItem(product, 3);   // entity calculates line total
 order.confirm();              // entity enforces state transitions</code></pre>
 
-<p>When the entity owns its rules, the service orchestrates <em>workflow</em> (find customer, reserve stock, save) without micromanaging state. If the rule for "confirmed" changes, you change it in one place — the entity — not across twelve service methods.</p>
+<p>When the entity owns its rules, the service orchestrates <em>workflow</em> (find customer, reserve stock, save) without micromanaging state. If the rule for "confirmed" changes, you change it in one place (the entity), not across twelve service methods.</p>
 
 <h2>Anti-Pattern 3: Transaction Manager Anti-Pattern</h2>
 
-<p>This is the subtlest anti-pattern. It happens when a <strong>service method manages transactions manually</strong> or when transaction boundaries are placed at the wrong layer. The classic form: a service calls multiple repository methods without <code>@Transactional</code>, relying on each save to commit independently — or slapping <code>@Transactional</code> on the controller instead of the service.</p>
+<p>This is the subtlest anti-pattern. It happens when a <strong>service method manages transactions manually</strong> or when transaction boundaries are placed at the wrong layer. The classic form: a service calls multiple repository methods without <code>@Transactional</code>, relying on each save to commit independently, or slapping <code>@Transactional</code> on the controller instead of the service.</p>
 
 <pre><code>// BAD — no transaction boundary; partial writes on failure
 public OrderResponse createOrder(CreateOrderRequest request) {
@@ -79,7 +79,7 @@ public OrderResponse createOrder(CreateOrderRequest request) {
     return OrderResponse.from(order);
 }</code></pre>
 
-<p>The order is committed before stock is reserved. If <code>reserveStock</code> throws, you have an order with unavailable products — an inconsistent database.</p>
+<p>The order is committed before stock is reserved. If <code>reserveStock</code> throws, you have an order with unavailable products: an inconsistent database.</p>
 
 <p>The mirror mistake: putting <code>@Transactional</code> on the controller. Now the transaction boundary depends on the HTTP layer, making the service untestable in isolation and tying database semantics to web requests.</p>
 
@@ -98,11 +98,11 @@ public class OrderService {
     }
 }</code></pre>
 
-<p>Another variant: <strong>self-invocation</strong> bypassing the proxy. Calling a <code>@Transactional(propagation = REQUIRES_NEW)</code> method via <code>this.processOne(id)</code> skips the Spring proxy entirely — the annotation has no effect. Extract the method into a separate bean or inject a self-reference.</p>
+<p>Another variant: <strong>self-invocation</strong> bypassing the proxy. Calling a <code>@Transactional(propagation = REQUIRES_NEW)</code> method via <code>this.processOne(id)</code> skips the Spring proxy entirely, so the annotation has no effect. Extract the method into a separate bean or inject a self-reference.</p>
 
 <h2>Anti-Pattern 4: God Object</h2>
 
-<p>A <strong>god object</strong> is one class that does everything — orders, payments, shipping, notifications, inventory. Its constructor takes ten dependencies. Its methods stretch to hundreds of lines. Changing anything requires understanding everything.</p>
+<p>A <strong>god object</strong> is one class that does everything: orders, payments, shipping, notifications, inventory. Its constructor takes ten dependencies. Its methods stretch to hundreds of lines. Changing anything requires understanding everything.</p>
 
 <pre><code>// BAD — one service to rule them all
 @Service
@@ -127,7 +127,7 @@ public class OrderManagementService {
 
 <p>The layered rule (controller → service → repository) is a guideline, not a law. Pragmatic violations are fine when the alternative is worse. A few justified cases:</p>
 
-<p><strong>Read-only passthrough.</strong> If a controller needs a simple list and the service would just call <code>repo.findAll()</code> and return it, a thin service method is still preferred — but a <em>dedicated</em> service method, not a direct repository injection in the controller. The cost is one trivial method; the payoff is that when authorization, caching, or filtering get added later, there's already a place for them.</p>
+<p><strong>Read-only passthrough.</strong> If a controller needs a simple list and the service would just call <code>repo.findAll()</code> and return it, a thin service method is still preferred, but a <em>dedicated</em> service method, not a direct repository injection in the controller. The cost is one trivial method; the payoff is that when authorization, caching, or filtering get added later, there's already a place for them.</p>
 
 <p><strong>Reporting queries.</strong> A dashboard that joins five tables and aggregates results may need a dedicated <code>ReportRepository</code> with a native query. The service layer can still own the method call, keeping the boundary clean even when the SQL is complex.</p>
 
@@ -137,14 +137,14 @@ public class OrderManagementService {
 
 <h2>Module Review: Tying It All Together</h2>
 
-<p>Modules 02–05 built a complete, layered Spring Boot application one concept at a time. Here is how each module connects:</p>
+<p>Modules 02 through 05 built a complete, layered Spring Boot application one concept at a time. Here is how each module connects:</p>
 
 <table>
   <tr><th>Module</th><th>Core Idea</th><th>Key Annotation / Pattern</th></tr>
-  <tr><td>02 — Dependency Injection</td><td>Spring creates and wires objects; you declare what you need</td><td><code>@Component</code>, <code>@Service</code>, <code>@Autowired</code>, constructor injection</td></tr>
-  <tr><td>03 — Spring Boot Fundamentals</td><td>Auto-configuration and REST endpoints</td><td><code>@SpringBootApplication</code>, <code>@RestController</code>, <code>@Valid</code>, <code>ResponseEntity</code></td></tr>
-  <tr><td>04 — Repository Pattern</td><td>Database access through interfaces, not SQL strings</td><td><code>@Entity</code>, <code>JpaRepository</code>, derived queries, <code>@Query</code></td></tr>
-  <tr><td>05 — Service-Oriented Architecture</td><td>Business logic in the service layer, thin controllers, events for decoupling</td><td><code>@Transactional</code>, DTOs, domain exceptions, <code>@EventListener</code></td></tr>
+  <tr><td>02: Dependency Injection</td><td>Spring creates and wires objects; you declare what you need</td><td><code>@Component</code>, <code>@Service</code>, <code>@Autowired</code>, constructor injection</td></tr>
+  <tr><td>03: Spring Boot Fundamentals</td><td>Auto-configuration and REST endpoints</td><td><code>@SpringBootApplication</code>, <code>@RestController</code>, <code>@Valid</code>, <code>ResponseEntity</code></td></tr>
+  <tr><td>04: Repository Pattern</td><td>Database access through interfaces, not SQL strings</td><td><code>@Entity</code>, <code>JpaRepository</code>, derived queries, <code>@Query</code></td></tr>
+  <tr><td>05: Service-Oriented Architecture</td><td>Business logic in the service layer, thin controllers, events for decoupling</td><td><code>@Transactional</code>, DTOs, domain exceptions, <code>@EventListener</code></td></tr>
 </table>
 
 <p>The data flows in one direction:</p>

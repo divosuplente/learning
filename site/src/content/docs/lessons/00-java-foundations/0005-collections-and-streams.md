@@ -1,14 +1,14 @@
 ---
-title: "Collections & Streams"
-description: "Collections & Streams"
+title: "Lesson 5: Collections & Streams"
+description: "Lesson 5: Collections & Streams"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0005-collections-and-streams.html
 ---
 
 # Collections & Streams
 
-Every backend system moves data through structures: ordered lists, unique sets, key-value lookups. Java's Collections Framework gives you the building blocks, and the Stream API lets you transform them declaratively — **what** you want, not **how** to loop.
+Every backend system moves data through structures: ordered lists, unique sets, key-value lookups. Java's Collections Framework gives you the building blocks, and the Stream API lets you transform them declaratively: **what** you want, not **how** to loop.
 
-## List — ordered, allows duplicates
+## List: ordered, allows duplicates
 
 ```
 List<String> names = new ArrayList<>();
@@ -23,7 +23,7 @@ List<Integer> nums = List.of(1, 2, 3, 4, 5);
 
 Use `ArrayList` for fast random access. Use `LinkedList` when you frequently insert at the head. In practice, `ArrayList` is almost always the right choice.
 
-## Set — unique elements only
+## Set: unique elements only
 
 ```
 Set<String> unique = new HashSet<>();
@@ -38,7 +38,7 @@ Set<String> colors = Set.of("red", "green", "blue");
 
 `HashSet` gives O(1) contains/add but no iteration order. `LinkedHashSet` preserves insertion order. `TreeSet` keeps elements sorted.
 
-## Map — key-value pairs
+## Map: key-value pairs
 
 ```
 Map<String, BigDecimal> pricing = new HashMap<>();
@@ -51,7 +51,7 @@ BigDecimal price = pricing.getOrDefault("unknown", BigDecimal.ZERO);
 
 A `Map` maps keys to values. Duplicate keys overwrite; duplicate values are fine. `HashMap` is the default. `TreeMap` keeps keys sorted.
 
-## Streams — declarative data processing
+## Streams: declarative data processing
 
 Streams turn "loop and mutate" into a pipeline of operations. Each step transforms data; the pipeline only executes when a **terminal operation** pulls results.
 
@@ -75,9 +75,9 @@ BigDecimal totalConfirmed = orders.stream()
 
 The most common stream pattern:
 
--   **filter** — keep elements matching a predicate
--   **map** — transform each element to a new value
--   **reduce** — combine all values into one result
+-   **filter**: keep elements matching a predicate
+-   **map**: transform each element to a new value
+-   **reduce**: combine all values into one result
 
 ```
 // Average price of items over $20
@@ -90,11 +90,11 @@ double avg = products.stream()
 
 ## Intermediate vs terminal operations
 
-This distinction is crucial:
+This distinction matters:
 
--   **Intermediate** (`filter`, `map`, `sorted`, `distinct`, `limit`) — lazy, return a new stream, do *nothing* until a terminal fires.
--   **Terminal** (`collect`, `reduce`, `forEach`, `count`, `toList`) — trigger processing, produce a result.
--   **Short-circuiting** (`findFirst`, `anyMatch`, `limit`) — stop as soon as the answer is known, even if elements remain.
+-   **Intermediate** (`filter`, `map`, `sorted`, `distinct`, `limit`): lazy, return a new stream, do *nothing* until a terminal fires.
+-   **Terminal** (`collect`, `reduce`, `forEach`, `count`, `toList`): trigger processing, produce a result.
+-   **Short-circuiting** (`findFirst`, `anyMatch`, `limit`): stop as soon as the answer is known, even if elements remain.
 
 ```
 // No processing happens here — filter and map are lazy
@@ -140,7 +140,7 @@ Map<Status, Long> counts = orders.stream()
 
 <details>
 <summary>3. Which of the following is a short-circuiting terminal operation?</summary>
-<p><strong>Correct answer:</strong> findFirst — stops after first match</p>
+<p><strong>Correct answer:</strong> findFirst: stops after first match</p>
 </details>
 
 <details>

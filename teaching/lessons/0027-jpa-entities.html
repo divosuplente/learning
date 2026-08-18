@@ -10,7 +10,7 @@
 
 <h1>JPA Entities</h1>
 
-<p>A JPA entity is a Java class that maps to a database table. Each instance of the class represents one row. JPA uses annotations to describe exactly how objects become rows and back again — closing the gap between your object model and your relational schema.</p>
+<p>A JPA entity is a Java class that maps to a database table. Each instance of the class represents one row. JPA uses annotations to describe exactly how objects become rows and back again, closing the gap between your object model and your relational schema.</p>
 
 <h2>Anatomy of an Entity</h2>
 
@@ -63,10 +63,10 @@ public class CustomerEntity {
 
 <table>
   <tr><th>Strategy</th><th>Behavior</th></tr>
-  <tr><td><code>GenerationType.IDENTITY</code></td><td>Database auto-increment — the DB assigns the id</td></tr>
+  <tr><td><code>GenerationType.IDENTITY</code></td><td>Database auto-increment: the DB assigns the id</td></tr>
   <tr><td><code>GenerationType.SEQUENCE</code></td><td>Uses a database sequence; portable and efficient for batch inserts</td></tr>
   <tr><td><code>GenerationType.TABLE</code></td><td>Uses a separate table as a sequence; rarely needed</td></tr>
-  <tr><td><code>GenerationType.AUTO</code></td><td>JPA provider picks a strategy; varies by dialect — avoid for production</td></tr>
+  <tr><td><code>GenerationType.AUTO</code></td><td>JPA provider picks a strategy; varies by dialect, avoid for production</td></tr>
 </table>
 
 <p><code>IDENTITY</code> is simplest for PostgreSQL auto-increment columns. <code>SEQUENCE</code> is better for batch inserts because IDENTITY forces Hibernate to insert one row at a time to retrieve each generated id.</p>
@@ -76,7 +76,7 @@ public class CustomerEntity {
 <pre><code>@Column(name = "email", nullable = false, unique = true, length = 200)
 private String email;</code></pre>
 
-<p><code>name</code> overrides the column name (defaults to the field name). <code>nullable = false</code> adds a NOT NULL constraint. <code>unique = true</code> adds a UNIQUE constraint. <code>length</code> sets the VARCHAR size. <code>updatable = false</code> prevents the column from being changed after insert — useful for timestamps and created-by fields.</p>
+<p><code>name</code> overrides the column name (defaults to the field name). <code>nullable = false</code> adds a NOT NULL constraint. <code>unique = true</code> adds a UNIQUE constraint. <code>length</code> sets the VARCHAR size. <code>updatable = false</code> prevents the column from being changed after insert, useful for timestamps and created-by fields.</p>
 
 <h2>Why Not Records?</h2>
 
@@ -136,11 +136,11 @@ private CustomerEntity customer;
 @OneToMany(mappedBy = "customer")
 private List&lt;OrderEntity&gt; orders;</code></pre>
 
-<p><code>@JoinColumn</code> goes on the side that <em>has</em> the foreign key column in its table. If you put it on both sides, you get two foreign key columns — almost certainly a bug.</p>
+<p><code>@JoinColumn</code> goes on the side that <em>has</em> the foreign key column in its table. If you put it on both sides, you get two foreign key columns, almost certainly a bug.</p>
 
 <h3>Fetch types</h3>
 
-<p><code>FetchType.EAGER</code> loads the related entity immediately. <code>FetchType.LAZY</code> loads it only when you access the field. <code>@ManyToOne</code> defaults to <code>EAGER</code>; <code>@OneToMany</code> defaults to <code>LAZY</code>. Prefer <code>LAZY</code> everywhere — eager fetching is the root cause of N+1 disasters and bloated responses.</p>
+<p><code>FetchType.EAGER</code> loads the related entity immediately. <code>FetchType.LAZY</code> loads it only when you access the field. <code>@ManyToOne</code> defaults to <code>EAGER</code>; <code>@OneToMany</code> defaults to <code>LAZY</code>. Prefer <code>LAZY</code> everywhere: eager fetching is the root cause of N+1 disasters and bloated responses.</p>
 
 <h3>Cascade and orphan removal</h3>
 
@@ -174,12 +174,12 @@ private Set&lt;CourseEntity&gt; courses = new HashSet&lt;&gt;();</code></pre>
 </div>
 
 <div class="quiz" id="q2">
-  <div class="quiz-question">2. Where should <code>@JoinColumn(name = "customer_id")</code> be placed in a bidirectional Customer–Order relationship?</div>
+  <div class="quiz-question">2. Where should <code>@JoinColumn(name = "customer_id")</code> be placed in a bidirectional Customer/Order relationship?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">On the <code>@OneToMany</code> side (Customer entity)</li>
     <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">On the <code>@ManyToOne</code> side (Order entity), which owns the foreign key</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">On both sides for redundancy and safety</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">On neither side — JPA infers the column from field names</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">On neither side; JPA infers the column from field names</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>
@@ -209,10 +209,10 @@ private Set&lt;CourseEntity&gt; courses = new HashSet&lt;&gt;();</code></pre>
 <div class="quiz" id="q5">
   <div class="quiz-question">5. What is the default fetch type for <code>@ManyToOne</code>, and what risk does it carry?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>LAZY</code> — risk of <code>LazyInitializationException</code> outside a transaction</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0"><code>EAGER</code> — risk of loading the entire object graph in a single query</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>EAGER</code> — risk of data loss when the related entity is deleted</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>LAZY</code> — risk of duplicate rows in the result set</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>LAZY</code>: risk of <code>LazyInitializationException</code> outside a transaction</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0"><code>EAGER</code>: risk of loading the entire object graph in a single query</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>EAGER</code>: risk of data loss when the related entity is deleted</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0"><code>LAZY</code>: risk of duplicate rows in the result set</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
 </div>

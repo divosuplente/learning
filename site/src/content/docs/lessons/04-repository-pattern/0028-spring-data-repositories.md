@@ -6,9 +6,9 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/002
 
 # Spring Data Repositories: JpaRepository & Derived Queries
 
-You defined your entities in the last lesson. Now comes the surprising part: **you write almost no data-access code**. Spring Data JPA's `JpaRepository` interface gives you a full CRUD repository just by extending it — and when the built-in methods aren't enough, you name a method and Spring *generates the SQL*.
+You defined your entities in the last lesson. Now comes the surprising part: **you write almost no data-access code**. Spring Data JPA's `JpaRepository` interface gives you a full CRUD repository just by extending it, and when the built-in methods aren't enough, you name a method and Spring *generates the SQL*.
 
-## JpaRepository — the interface that replaces your DAO
+## JpaRepository: the interface that replaces your DAO
 
 Declare a repository by extending `JpaRepository<Entity, Id>`:
 
@@ -30,7 +30,7 @@ The two type parameters tell Spring everything: `CustomerEntity` is the domain t
 | Method | What it does |
 | --- | --- |
 | `save(entity)` | INSERT if new, UPDATE if the entity has an ID |
-| `findById(id)` | Returns `Optional<T>` — empty if not found |
+| `findById(id)` | Returns `Optional<T>`, empty if not found |
 | `findAll()` | Returns `List<T>` of every row |
 | `findAllById(ids)` | All entities matching the given IDs |
 | `deleteById(id)` | Delete by primary key |
@@ -58,9 +58,9 @@ customerRepository.deleteById(1L);
 boolean exists = customerRepository.existsById(1L); // false
 ```
 
-## Derived query methods — name it, Spring writes it
+## Derived query methods: name it, Spring writes it
 
-The free methods handle lookups by ID. For everything else — find by email, find by category, find by status — you add a **derived query method** to your interface. Spring parses the method name at startup and generates the SQL:
+The free methods handle lookups by ID. For everything else (find by email, find by category, find by status), you add a **derived query method** to your interface. Spring parses the method name at startup and generates the SQL:
 
 ```
 @Repository
@@ -155,11 +155,11 @@ You can traverse relationships in the method name. Given `OrderEntity` has a `cu
 List<OrderEntity> findByCustomerName(String name);
 ```
 
-Spring resolves `CustomerName` as `customer.name` — it walks the object graph. This is convenient but generates a JOIN, so be aware of the query cost.
+Spring resolves `CustomerName` as `customer.name`: it walks the object graph. This is convenient but generates a JOIN, so be aware of the query cost.
 
 ## Using repositories in a service
 
-Repositories are Spring beans — inject them via constructor injection:
+Repositories are Spring beans. Inject them via constructor injection:
 
 ```
 @Service
@@ -182,7 +182,7 @@ public class CustomerService {
 }
 ```
 
-Note that `findByEmail` is our derived method — the service never writes SQL.
+Note that `findByEmail` is our derived method. The service never writes SQL.
 
 **Primary source:** [Spring Data JPA: JpaRepository](https://docs.spring.io/spring-data/jpa/reference/repositories/core-extensions.html) · [Query Method Details](https://docs.spring.io/spring-data/jpa/reference/repositories/query-methods-details.html) · [Repository Definition](https://docs.spring.io/spring-data/jpa/reference/repositories/definition.html)
 
@@ -190,7 +190,7 @@ Note that `findByEmail` is our derived method — the service never writes SQL.
 
 <details>
 <summary>1. What do you have to implement when you extend JpaRepository?</summary>
-<p><strong>Correct answer:</strong> Nothing — Spring generates the implementation at runtime</p>
+<p><strong>Correct answer:</strong> Nothing; Spring generates the implementation at runtime</p>
 </details>
 
 <details>

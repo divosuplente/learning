@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/005
 
 # Kotlin Syntax: Variables, Null Safety & String Interpolation
 
-Kotlin's syntax eliminates entire categories of Java boilerplate. This lesson covers the first things you encounter when writing Kotlin: how to declare variables (`val`/`var`), how the type system makes `NullPointerException` a compile-time error, how to interpolate values into strings, how smart casts remove redundant type checks, and how `when` replaces the switch statement.
+Kotlin's syntax removes large swaths of Java boilerplate. This lesson covers the first things you encounter when writing Kotlin: how to declare variables (`val`/`var`), how the type system makes `NullPointerException` a compile-time error, how to interpolate values into strings, how smart casts remove redundant type checks, and how `when` replaces the switch statement.
 
 ## Variables: val and var
 
@@ -23,11 +23,11 @@ val age: Int = 30                // immutable (preferred)
 val city = "NYC"                 // type inferred — String
 ```
 
--   **`val`** — read-only (like Java's `final`). **Prefer this by default.**
--   **`var`** — mutable. Use only when you must reassign.
--   **Type inference** — omit the type when the initializer makes it obvious. The compiler knows `city` is a `String`.
+-   **`val`**: read-only (like Java's `final`). **Prefer this by default.**
+-   **`var`**: mutable. Use only when you must reassign.
+-   **Type inference**: omit the type when the initializer makes it obvious. The compiler knows `city` is a `String`.
 
-Assigning `null` to a `val` or `var` declared as non-nullable is a *compile-time error* — that's the null safety system, covered next.
+Assigning `null` to a `val` or `var` declared as non-nullable is a *compile-time error*. That is the null safety system, covered next.
 
 ## Null Safety
 
@@ -43,7 +43,7 @@ nickname = null   // ← fine
 
 Once you have a nullable reference, Kotlin forces you to handle the null case before using it. Four tools:
 
-### 1\. Safe call — `?.`
+### 1\. Safe call: `?.`
 
 Returns the result if non-null, `null` otherwise. Chains naturally.
 
@@ -51,7 +51,7 @@ Returns the result if non-null, `null` otherwise. Chains naturally.
 val length: Int? = nickname?.length     // null if nickname is null
 ```
 
-### 2\. Elvis operator — `?:`
+### 2\. Elvis operator: `?:`
 
 Provides a default when the left side is null. Named because it looks like Elvis's hair.
 
@@ -59,9 +59,9 @@ Provides a default when the left side is null. Named because it looks like Elvis
 val safeLength: Int = nickname?.length ?: 0   // 0 if nickname is null
 ```
 
-### 3\. Not-null assertion — `!!`
+### 3\. Not-null assertion: `!!`
 
-Forces a non-null conversion. **Throws `NullPointerException`** if the value is actually null. Use sparingly — it re-introduces the exact runtime crash Kotlin's type system is designed to prevent.
+Forces a non-null conversion. **Throws `NullPointerException`** if the value is actually null. Use sparingly: it re-introduces the exact runtime crash Kotlin's type system is designed to prevent.
 
 ```
 val forced: Int = nickname!!.length    // NPE if nickname is null!
@@ -69,7 +69,7 @@ val forced: Int = nickname!!.length    // NPE if nickname is null!
 
 ### 4\. Smart cast
 
-After a null check, Kotlin automatically treats the variable as non-nullable — no manual cast needed.
+After a null check, Kotlin automatically treats the variable as non-nullable. No manual cast needed.
 
 ```
 if (nickname != null) {
@@ -93,12 +93,12 @@ val detail = "Name length: ${name.length}"            // expression
 val nested = "Result: ${if (x > 0) "positive" else "non-positive"}"
 ```
 
--   `$variable` — insert a variable's `toString()`.
--   `${expression}` — insert any Kotlin expression.
+-   `$variable`: insert a variable's `toString()`.
+-   `${expression}`: insert any Kotlin expression.
 
 ## Smart Casting
 
-In Java, after an `instanceof` check, you still cast explicitly. Kotlin's compiler performs **smart casts** — after a type check, the variable is automatically treated as that type.
+In Java, after an `instanceof` check, you still cast explicitly. Kotlin's compiler performs **smart casts**: after a type check, the variable is automatically treated as that type.
 
 ```
 // Java
@@ -119,7 +119,7 @@ when (value) {
 }
 ```
 
-Smart casts are **not** available on `var` properties that could be mutated between the check and the use — the compiler is conservative and will require an explicit cast in that case.
+Smart casts are **not** available on `var` properties that could be mutated between the check and the use. The compiler is conservative and will require an explicit cast in that case.
 
 ## When Expression
 
@@ -158,9 +158,9 @@ val msg = when {
 }
 ```
 
--   **No `break`** — branches don't fall through.
--   **It's an expression** — it returns a value, just like Java's switch expression.
--   **Exhaustiveness** — for sealed classes and enums, the compiler errors if you miss a branch.
+-   **No `break`**: branches don't fall through.
+-   **It's an expression**: it returns a value, just like Java's switch expression.
+-   **Exhaustiveness**: for sealed classes and enums, the compiler errors if you miss a branch.
 
 **Primary sources:** [Kotlin Null Safety](https://kotlinlang.org/docs/null-safety.html) · [Kotlin `when` Expression](https://kotlinlang.org/docs/control-flow.html#when-expression) · [Kotlin Smart Casts](https://kotlinlang.org/docs/typecasts.html#smart-casts) · [Kotlin String Templates](https://kotlinlang.org/docs/strings.html#string-templates)
 
@@ -168,7 +168,7 @@ val msg = when {
 
 <details>
 <summary>1. What happens when you compile val name: String = null in Kotlin?</summary>
-<p><strong>Correct answer:</strong> It is a compile-time error — String is non-nullable</p>
+<p><strong>Correct answer:</strong> It is a compile-time error: String is non-nullable</p>
 </details>
 
 <details>
@@ -183,7 +183,7 @@ val msg = when {
 
 <details>
 <summary>4. After if (obj is String) passes in Kotlin, you write obj.length without casting. What enables this?</summary>
-<p><strong>Correct answer:</strong> Smart cast — the compiler narrows the type after the is check</p>
+<p><strong>Correct answer:</strong> Smart cast: the compiler narrows the type after the is check</p>
 </details>
 
 <details>

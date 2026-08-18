@@ -1,12 +1,12 @@
 ---
-title: "Generics"
-description: "Generics"
+title: "Lesson 3: Generics"
+description: "Lesson 3: Generics"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0003-generics.html
 ---
 
 # Generics
 
-Without generics, collections held `Object` and you cast on retrieval — bugs surfaced at runtime, not compile time. Generics let you write **type-safe, reusable code** where the compiler catches mismatches before the program runs.
+Without generics, collections held `Object` and you cast on retrieval. Bugs surfaced at runtime, not compile time. Generics let you write **type-safe, reusable code** where the compiler catches mismatches before the program runs.
 
 ## A generic class
 
@@ -68,7 +68,7 @@ public void addIntegers(List<? super Integer> list) {
 }
 ```
 
-`? extends Number` lets you read `Number` safely but you **cannot add** — you don't know whether the list holds `Integer`, `Double`, or something else. `? super Integer` lets you add `Integer` safely but you can only read `Object`. If you need to read *and* write, don't use a wildcard — use `<T>`.
+`? extends Number` lets you read `Number` safely but you **cannot add**; you don't know whether the list holds `Integer`, `Double`, or something else. `? super Integer` lets you add `Integer` safely but you can only read `Object`. If you need to read *and* write, don't use a wildcard: use `<T>`.
 
 ## Type erasure
 
@@ -113,7 +113,7 @@ public <T> List<T> filterByType(List<?> items, Class<T> type) {
 
 <details>
 <summary>4. List can hold which of these as actual list types?</summary>
-<p><strong>Correct answer:</strong> List<integer>, List<number>, and List<object> — Integer or supertypes<p></p></object></number></integer></p>
+<p><strong>Correct answer:</strong> List<integer>, List<number>, and List<object>: Integer or supertypes<p></p></object></number></integer></p>
 </details>
 
 <details>

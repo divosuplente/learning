@@ -6,7 +6,7 @@ editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/001
 
 # Bean Scopes, `@Configuration`/`@Bean`, `@Qualifier`/`@Primary`
 
-So far every bean you've written has been a singleton — one object shared across the entire application. That's the right default most of the time, but not always. This lesson covers the four bean scopes Spring supports, how to create beans when you can't annotate the class yourself, and how to untangle the mess when multiple beans implement the same interface.
+So far every bean you've written has been a singleton: one object shared across the entire application. That's the right default most of the time, but not always. This lesson covers the four bean scopes Spring supports, how to create beans when you can't annotate the class yourself, and how to untangle the mess when multiple beans implement the same interface.
 
 ## Bean Scopes
 
@@ -29,7 +29,7 @@ public class OrderCalculator {
 }
 ```
 
-Without `@Scope`, the default is **singleton**. This is correct for nearly all services and repositories — but it comes with a rule.
+Without `@Scope`, the default is **singleton**. This is correct for nearly all services and repositories, but it comes with a rule.
 
 ### The singleton + mutable state trap
 
@@ -48,7 +48,7 @@ public class OrderService {
 }
 ```
 
-**Rule: singletons must be stateless.** Store data in method-local variables, not instance fields. Injected dependencies (which are also singletons) and constants are fine — they're either shared safely or never change.
+**Rule: singletons must be stateless.** Store data in method-local variables, not instance fields. Injected dependencies (which are also singletons) and constants are fine: they're either shared safely or never change.
 
 ## Manual Beans: `@Configuration` + `@Bean`
 
@@ -67,7 +67,7 @@ public class AppConfig {
 }
 ```
 
-Spring calls the method, registers the returned object as a bean, and injects it wherever needed. The method parameter `DiscountService` is resolved from the container just like constructor injection — Spring passes it in automatically.
+Spring calls the method, registers the returned object as a bean, and injects it wherever needed. The method parameter `DiscountService` is resolved from the container just like constructor injection: Spring passes it in automatically.
 
 ### When to use which
 
@@ -89,7 +89,7 @@ single bean, but 2 were found:
     - inMemoryCustomerRepository
 ```
 
-### `@Primary` — the default choice
+### `@Primary`: the default choice
 
 Mark one bean as the **default** when multiple candidates exist:
 
@@ -112,7 +112,7 @@ public class AppConfig {
 
 Now any injection point that asks for `CustomerRepository` gets the PostgreSQL version automatically.
 
-### `@Qualifier` — the explicit choice
+### `@Qualifier`: the explicit choice
 
 When you want a *specific* bean, not the primary one, name it explicitly:
 
@@ -128,7 +128,7 @@ public class TestOrderService {
 }
 ```
 
-The qualifier string matches the bean name — which for `@Bean` methods is the method name, and for `@Component` classes is the decapitalized class name.
+The qualifier string matches the bean name, which for `@Bean` methods is the method name, and for `@Component` classes is the decapitalized class name.
 
 ### `@Primary` vs `@Qualifier`
 
@@ -137,7 +137,7 @@ They solve the same problem from different angles:
 -   **`@Primary`** sets a global default. Good when one implementation is "normal" and others are special-case (e.g., prod vs test).
 -   **`@Qualifier`** selects a specific bean at the injection point. Good when different classes need different implementations.
 
-When both appear on the same injection point, `@Qualifier` wins — it overrides `@Primary`.
+When both appear on the same injection point, `@Qualifier` wins: it overrides `@Primary`.
 
 **Primary sources:** [Spring: Bean Scopes](https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html) · [Spring: @Configuration Classes](https://docs.spring.io/spring-framework/reference/core/beans/java/configuration-classes.html) · [Spring: @Qualifier and @Primary](https://docs.spring.io/spring-framework/reference/core/beans/annotation-config/autowired.html#beans-qualifier-annotation)
 
@@ -155,7 +155,7 @@ When both appear on the same injection point, `@Qualifier` wins — it overrides
 
 <details>
 <summary>3. A class injects an interface that has two beans: one marked @Primary and the other referenced by @Qualifier. Which one is injected?</summary>
-<p><strong>Correct answer:</strong> The one named by @Qualifier — it overrides @Primary</p>
+<p><strong>Correct answer:</strong> The one named by @Qualifier: it overrides @Primary</p>
 </details>
 
 <details>
@@ -165,5 +165,5 @@ When both appear on the same injection point, `@Qualifier` wins — it overrides
 
 <details>
 <summary>5. You inject a prototype-scoped bean into a singleton-scoped bean. How many prototype instances does the singleton see over its lifetime?</summary>
-<p><strong>Correct answer:</strong> One — the prototype is created once at singleton construction time</p>
+<p><strong>Correct answer:</strong> One: the prototype is created once at singleton construction time</p>
 </details>

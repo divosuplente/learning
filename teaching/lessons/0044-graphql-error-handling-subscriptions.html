@@ -10,13 +10,13 @@
 
 <h1>Error Handling, Subscriptions &amp; Module Review</h1>
 
-<p>GraphQL flips how APIs handle errors: <strong>even a failed query returns HTTP 200</strong>, with the real story told inside the response body. This lesson covers GraphQL's error format, partial results, custom exception handling in Spring Boot, real-time subscriptions over WebSockets, and a review of all things GraphQL from Module 07.</p>
+<p>GraphQL changes how APIs handle errors: <strong>even a failed query returns HTTP 200</strong>, with error details in the response body. This lesson covers GraphQL's error format, partial results, custom exception handling in Spring Boot, real-time subscriptions over WebSockets, and a review of all things GraphQL from Module 07.</p>
 
 <h2>GraphQL Always Returns 200 OK (Almost)</h2>
 
-<p>In REST, a missing resource is a 404. A bad request is a 400. In GraphQL, the HTTP status code is almost always <code>200</code> — even when the query fails. The error lives in the response JSON, inside an <code>errors</code> array:</p>
+<p>In REST, a missing resource is a 404. A bad request is a 400. In GraphQL, the HTTP status code is almost always <code>200</code>, even when the query fails. The error lives in the response JSON, inside an <code>errors</code> array:</p>
 
-<pre><code>// HTTP 200 — but the query failed
+<pre><code>// HTTP 200, but the query failed
 {
   "errors": [
     {
@@ -30,7 +30,7 @@
   "data": null
 }</code></pre>
 
-<p>Why? A single GraphQL request can query <em>multiple</em> things. If one fails and the other succeeds, the HTTP status can't represent both states. So GraphQL uses 200 and puts the details in the body. An HTTP 4xx or 5xx usually means the request itself was malformed — bad JSON, missing headers — before the query even ran.</p>
+<p>Why? A single GraphQL request can query <em>multiple</em> things. If one fails and the other succeeds, the HTTP status can't represent both states. So GraphQL uses 200 and puts the details in the body. An HTTP 4xx or 5xx usually means the request itself was malformed (bad JSON, missing headers) before the query even ran.</p>
 
 <h2>Partial Results</h2>
 
@@ -48,7 +48,7 @@
   ]
 }</code></pre>
 
-<p>The <code>product</code> query succeeded; the <code>order</code> query failed. The client gets both — it can render the product card and show an error message for the order, instead of showing a blank page.</p>
+<p>The <code>product</code> query succeeded; the <code>order</code> query failed. The client gets both: it can render the product card and show an error message for the order, instead of showing a blank page.</p>
 
 <p>The <code>path</code> field in each error tells the client <em>which field</em> failed, so it knows exactly what to mark as broken. Without <code>path</code>, the client would have to guess which piece of <code>data</code> is untrustworthy.</p>
 
@@ -90,7 +90,7 @@ public class GraphQlExceptionHandler {
 
 <h2>Subscriptions: Real-Time via WebSockets</h2>
 
-<p>Queries and mutations are request-response. Subscriptions are <strong>push</strong> — the server sends data to the client when events happen, instead of the client polling.</p>
+<p>Queries and mutations are request-response. Subscriptions are <strong>push</strong>: the server sends data to the client when events happen, instead of the client polling.</p>
 
 <pre><code>subscription {
   orderStatusChanged {
@@ -101,7 +101,7 @@ public class GraphQlExceptionHandler {
   }
 }</code></pre>
 
-<p>Subscriptions use <strong>WebSockets</strong> — a persistent, bidirectional connection. When an order's status changes, the server pushes the update to every subscribed client.</p>
+<p>Subscriptions use <strong>WebSockets</strong>, a persistent, bidirectional connection. When an order's status changes, the server pushes the update to every subscribed client.</p>
 
 <p>WebSocket support requires the spring-boot-starter-websocket dependency:</p>
 
@@ -110,7 +110,7 @@ public class GraphQlExceptionHandler {
     &lt;artifactId&gt;spring-boot-starter-websocket&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 
-<p>A subscription resolver returns a <strong>Flux</strong> — a reactive stream (covered in depth in Module 08). For now, think of <code>Sinks.Many</code> as a broadcaster: you push events in, all subscribers receive them:</p>
+<p>A subscription resolver returns a <strong>Flux</strong>, a reactive stream (covered in depth in Module 08). For now, think of <code>Sinks.Many</code> as a broadcaster: you push events in, all subscribers receive them.</p>
 
 <pre><code>@Controller
 public class OrderSubscriptionResolver {
@@ -136,7 +136,7 @@ public class OrderSubscriptionResolver {
     }
 }</code></pre>
 
-<p>The <code>@SubscriptionMapping</code> annotation marks this as a subscription. The optional <code>orderId</code> argument lets clients filter to a single order. The <code>publishStatusChange</code> method is called by the Kafka consumer (Module 06) when a status event arrives — bridging the async messaging world and the real-time GraphQL world.</p>
+<p>The <code>@SubscriptionMapping</code> annotation marks this as a subscription. The optional <code>orderId</code> argument lets clients filter to a single order. The <code>publishStatusChange</code> method is called by the Kafka consumer (Module 06) when a status event arrives, bridging the async messaging world and the real-time GraphQL world.</p>
 
 <h2>GraphiQL: The Browser IDE</h2>
 
@@ -144,12 +144,12 @@ public class OrderSubscriptionResolver {
 
 <ul>
   <li><strong>Query editor</strong> with autocomplete based on your schema</li>
-  <li><strong>Schema explorer</strong> — browse all types, fields, and documentation</li>
-  <li><strong>Variable panel</strong> — pass query variables as JSON</li>
-  <li><strong>Response viewer</strong> — formatted JSON with error details</li>
+  <li><strong>Schema explorer</strong>: browse all types, fields, and documentation</li>
+  <li><strong>Variable panel</strong>: pass query variables as JSON</li>
+  <li><strong>Response viewer</strong>: formatted JSON with error details</li>
 </ul>
 
-<p>It is the fastest way to test queries, mutations, and subscriptions during development. Do not ship it to production without authentication — it exposes your entire schema.</p>
+<p>It is the fastest way to test queries, mutations, and subscriptions during development. Do not ship it to production without authentication: it exposes your entire schema.</p>
 
 <h2>Module 07 Review: GraphQL</h2>
 
@@ -179,7 +179,7 @@ public class OrderSubscriptionResolver {
     → Sinks.Many emits to Flux
       → WebSocket pushes to every subscribed client</code></pre>
 
-<p>GraphQL does not replace REST — it replaces the <em>rigid contract</em> of REST. You still need services, repositories, entities, and DTOs. The only thing that changes is the API layer: one endpoint, flexible queries, partial results, and real-time subscriptions.</p>
+<p>GraphQL does not replace REST. It replaces the <em>fixed contract</em> of REST. You still need services, repositories, entities, and DTOs. The only thing that changes is the API layer: one endpoint, flexible queries, partial results, and real-time subscriptions.</p>
 
 <p><strong>Primary sources:</strong> <a href="https://spec.graphql.org/October2021/#sec-Errors" target="_blank" rel="noopener">GraphQL Spec: Errors</a> · <a href="https://docs.spring.io/spring-graphql/reference/" target="_blank" rel="noopener">Spring for GraphQL Reference</a> · <a href="https://docs.spring.io/spring-graphql/reference/client/graphiql.html" target="_blank" rel="noopener">Spring: GraphiQL</a> · <a href="https://graphql.org/learn/subscriptions/" target="_blank" rel="noopener">GraphQL: Subscriptions</a></p>
 
@@ -189,7 +189,7 @@ public class OrderSubscriptionResolver {
   <div class="quiz-question">1. A GraphQL query fails because an order ID does not exist. What is the HTTP status code of the response?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">404 Not Found</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">200 OK — the error is in the response body</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">200 OK: the error is in the response body</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">400 Bad Request</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">500 Internal Server Error</li>
   </ul>
@@ -199,9 +199,9 @@ public class OrderSubscriptionResolver {
 <div class="quiz" id="q2">
   <div class="quiz-question">2. A client queries for both <code>product</code> and <code>order</code> in one request. The product is found but the order is not. What does the response contain?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only the error — successful data is discarded</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only the product — errors are silently dropped</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Both <code>data.product</code> and <code>errors</code> — GraphQL returns partial results</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only the error: successful data is discarded</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Only the product: errors are silently dropped</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Both <code>data.product</code> and <code>errors</code>: GraphQL returns partial results</li>
     <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">HTTP 207 Multi-Status with separate bodies for each field</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
@@ -210,10 +210,10 @@ public class OrderSubscriptionResolver {
 <div class="quiz" id="q3">
   <div class="quiz-question">3. An unhandled <code>InsufficientStockException</code> is thrown inside a mutation. Without a custom <code>@GraphQlExceptionHandler</code>, what error type does the client see?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>BAD_REQUEST</code> — Spring infers it from the exception name</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0"><code>INTERNAL_ERROR</code> — unhandled exceptions default to internal error with hidden messages</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>NOT_FOUND</code> — the default for all domain exceptions</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">No error at all — Spring silently returns <code>null</code> for the failed field</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>BAD_REQUEST</code>: Spring infers it from the exception name</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0"><code>INTERNAL_ERROR</code>: unhandled exceptions default to internal error with hidden messages</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>NOT_FOUND</code>: the default for all domain exceptions</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">No error at all: Spring silently returns <code>null</code> for the failed field</li>
   </ul>
   <div class="quiz-feedback" id="q3-feedback"></div>
 </div>
@@ -222,7 +222,7 @@ public class OrderSubscriptionResolver {
   <div class="quiz-question">4. What transport protocol do GraphQL subscriptions use to push real-time updates to clients?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Server-Sent Events (SSE)</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">WebSockets — a persistent bidirectional connection</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">WebSockets: a persistent bidirectional connection</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Long polling over HTTP</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">UDP multicast</li>
   </ul>
@@ -233,8 +233,8 @@ public class OrderSubscriptionResolver {
   <div class="quiz-question">5. In a subscription resolver, <code>Sinks.Many&lt;T&gt;</code> is used as a broadcaster. What happens when a new subscriber connects after events have already been emitted?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The new subscriber receives all previously emitted events</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The new subscriber only receives events emitted after it connected — a multicast sink is hot</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The connection is rejected — subscriptions require all subscribers before the first emit</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The new subscriber only receives events emitted after it connected (a multicast sink is hot)</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The connection is rejected: subscriptions require all subscribers before the first emit</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Spring replays the last 100 events automatically</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
@@ -259,7 +259,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite: review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

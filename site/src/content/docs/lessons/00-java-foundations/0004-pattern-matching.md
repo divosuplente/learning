@@ -1,6 +1,6 @@
 ---
-title: "Pattern Matching with switch"
-description: "Pattern Matching with switch"
+title: "Lesson 4: Pattern Matching with switch"
+description: "Lesson 4: Pattern Matching with switch"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0004-pattern-matching.html
 ---
 
@@ -10,7 +10,7 @@ Java 21 lets you match on types, destructure records, and add guard conditions i
 
 ## Type patterns and variable binding
 
-A **type pattern** matches the runtime type and binds a variable in one step — no casting needed:
+A **type pattern** matches the runtime type and binds a variable in one step: no casting needed:
 
 ```
 String format(Object value) {
@@ -24,7 +24,7 @@ String format(Object value) {
 }
 ```
 
-`case String s` does two things: checks `value instanceof String` and binds `s` to the cast result. Before Java 21, you wrote `if (value instanceof String) { String s = (String) value; ... }` — three lines for what is now one case.
+`case String s` does two things: checks `value instanceof String` and binds `s` to the cast result. Before Java 21, you wrote `if (value instanceof String) { String s = (String) value; ... }`. Three lines for what is now one case.
 
 ## Record destructuring in switch
 
@@ -47,7 +47,7 @@ String describe(Object shape) {
 }
 ```
 
-The pattern `Circle(Point c, double r)` matches a `Circle` and extracts its `center` and `radius` in one step. Nested records destructure recursively — `Point c` captures the whole point.
+The pattern `Circle(Point c, double r)` matches a `Circle` and extracts its `center` and `radius` in one step. Nested records destructure recursively: `Point c` captures the whole point.
 
 ## Guard clauses (`when`)
 
@@ -73,7 +73,7 @@ String describe(Object shape) {
 
 ## Sealed types and exhaustive switch
 
-A `sealed` interface declares exactly which classes can implement it. When every permitted subtype is covered, the switch is **exhaustive** — no `default` needed:
+A `sealed` interface declares exactly which classes can implement it. When every permitted subtype is covered, the switch is **exhaustive**: no `default` needed:
 
 ```
 sealed interface Payment permits CashPayment, CardPayment, BankTransfer {}
@@ -90,7 +90,7 @@ String describe(Payment p) {
 }
 ```
 
-Remove one case and the compiler errors — you didn't cover all permitted subtypes. This is the same exhaustiveness check you know from `enum` switches, but now it works for any sealed hierarchy.
+Remove one case and the compiler errors; you didn't cover all permitted subtypes. This is the same exhaustiveness check you know from `enum` switches, but now it works for any sealed hierarchy.
 
 **Primary source:** [Oracle: Pattern Matching for switch (JEP 441)](https://docs.oracle.com/en/java/javase/21/language/pattern-matching.html)
 
@@ -108,12 +108,12 @@ Remove one case and the compiler errors — you didn't cover all permitted subty
 
 <details>
 <summary>3. A sealed interface Shape permits Circle, Square, Triangle. Your switch covers Circle and Square but omits Triangle. What happens?</summary>
-<p><strong>Correct answer:</strong> Compile error — the switch is not exhaustive</p>
+<p><strong>Correct answer:</strong> Compile error: the switch is not exhaustive</p>
 </details>
 
 <details>
 <summary>4. What will this switch do if shape is a Rectangle with width 3 and height 3?</summary>
-<p><strong>Correct answer:</strong> Returns "Rectangle" — the first matching case wins</p>
+<p><strong>Correct answer:</strong> Returns "Rectangle": the first matching case wins</p>
 </details>
 
 <details>

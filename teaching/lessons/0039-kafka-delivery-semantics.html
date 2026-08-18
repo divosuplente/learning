@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 39 — Delivery Semantics, Idempotency &amp; Module Review</title>
+  <title>Lesson 39: Delivery Semantics, Idempotency &amp; Module Review</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Delivery Semantics, Idempotency &amp; Module Review</h1>
 
-<p>Kafka's default is <strong>at-least-once</strong> delivery — messages are never lost but may arrive twice. This lesson explains the three delivery guarantees, shows how to make your consumers safe against duplicates, and reviews everything from Module 06.</p>
+<p>Kafka's default is <strong>at-least-once</strong> delivery: messages are never lost but may arrive twice. This lesson explains the three delivery guarantees, shows how to make your consumers safe against duplicates, and reviews everything from Module 06.</p>
 
 <h2>The Three Delivery Guarantees</h2>
 
@@ -18,13 +18,13 @@
 
 <h3>At-Most-Once</h3>
 
-<p>The consumer commits the offset <em>before</em> processing. If it crashes mid-processing, the message is lost — Kafka already marked it as consumed.</p>
+<p>The consumer commits the offset <em>before</em> processing. If it crashes mid-processing, the message is lost: Kafka already marked it as consumed.</p>
 
 <pre><code>// Offset committed immediately on read
 [read msg] → [commit offset] → [process] → [CRASH!]
                                         message is lost</code></pre>
 
-<p><strong>Use when:</strong> losing occasional messages is acceptable — for example, non-critical analytics where a missing data point won't matter.</p>
+<p><strong>Use when:</strong> losing occasional messages is acceptable, for example non-critical analytics where a missing data point won't matter.</p>
 
 <h3>At-Least-Once (Default in Spring Boot)</h3>
 
@@ -37,21 +37,21 @@
 
 <h3>Exactly-Once</h3>
 
-<p>Messages are neither lost nor duplicated. This requires Kafka transactions — the producer and consumer coordinate so that the message processing and offset commit happen atomically.</p>
+<p>Messages are neither lost nor duplicated. This requires Kafka transactions: the producer and consumer coordinate so that the message processing and offset commit happen atomically.</p>
 
 <pre><code>// Kafka transaction: both succeed or both roll back
 [read msg] → [begin transaction] → [process] → [commit offset + transaction]
-                                     atomic — no gap for a crash</code></pre>
+                                     atomic: no gap for a crash</code></pre>
 
 <p>The cost is complexity and reduced throughput. Enable it with:</p>
 
 <pre><code>// Producer side
 spring.kafka.producer.transaction-id-prefix: order-txn-
 
-// Consumer side — read only committed transactions
+// Consumer side: read only committed transactions
 spring.kafka.consumer.isolation-level: read_committed</code></pre>
 
-<p><strong>Use when:</strong> duplicates would cause serious problems — financial transactions, billing, inventory decrements where a second debit is unacceptable.</p>
+<p><strong>Use when:</strong> duplicates would cause serious problems, such as financial transactions, billing, or inventory decrements where a second debit is unacceptable.</p>
 
 <h2>Comparison</h2>
 
@@ -75,7 +75,7 @@ spring.kafka.consumer.isolation-level: read_committed</code></pre>
   <tr><td>Create order if not exists (check by ID)</td><td>Yes</td><td>Second call finds it already exists</td></tr>
 </table>
 
-<p>The key technique: <strong>check if the work was already done before doing it.</strong> Use a unique identifier — typically the event's business key — and a database check.</p>
+<p>The key technique: <strong>check if the work was already done before doing it.</strong> Use a unique identifier (typically the event's business key) and a database check.</p>
 
 <pre><code>@Component
 public class OrderEventConsumer {
@@ -89,13 +89,13 @@ public class OrderEventConsumer {
     @KafkaListener(topics = "order-events", groupId = "ordermgmt-group")
     @Transactional
     public void handleOrderCreated(OrderCreatedEvent event) {
-        // Idempotency guard — skip if already processed
+        // Idempotency guard: skip if already processed
         if (orderRepository.existsById(event.orderId())) {
             log.info("skipping_duplicate orderId={}", event.orderId());
             return;
         }
 
-        // Safe to process — first time we've seen this message
+        // Safe to process: first time we've seen this message
         OrderEntity order = new OrderEntity();
         order.setId(event.orderId());
         // ... set fields from event ...
@@ -103,9 +103,9 @@ public class OrderEventConsumer {
     }
 }</code></pre>
 
-<p>The <code>@Transactional</code> annotation ensures the idempotency check and the business logic execute atomically. Without it, a crash between the check and the save could leave the system in an inconsistent state — the message would be redelivered, the check would pass again, and you'd get a duplicate.</p>
+<p>The <code>@Transactional</code> annotation ensures the idempotency check and the business logic execute atomically. Without it, a crash between the check and the save could leave the system in an inconsistent state: the message would be redelivered, the check would pass again, and you'd get a duplicate.</p>
 
-<p>For high-throughput systems, maintaining a separate <strong>processed-message table</strong> (storing message IDs or offset+partition) is more robust than relying on the business entity existing — it works even when the business operation doesn't create an entity.</p>
+<p>For high-throughput systems, maintaining a separate <strong>processed-message table</strong> (storing message IDs or offset+partition) is more robust than relying on the business entity existing: it works even when the business operation doesn't create an entity.</p>
 
 <pre><code>// Alternative: explicit deduplication table
 if (processedMessageRepository.existsById(event.messageId())) {
@@ -120,11 +120,11 @@ processedMessageRepository.save(new ProcessedMessage(event.messageId()));</code>
 
 <table>
   <tr><th>Lesson</th><th>Core Idea</th><th>Key Concept / Pattern</th></tr>
-  <tr><td>35 — Sync vs Async</td><td>Synchronous waits; asynchronous fires and forgets</td><td>Loose coupling via message broker</td></tr>
-  <tr><td>36 — Kafka Concepts</td><td>Topics, partitions, offsets, consumer groups, brokers</td><td>Partition = ordered append-only log; offset = position</td></tr>
-  <tr><td>37 — Spring Kafka</td><td>Producers send with <code>KafkaTemplate</code>; consumers listen with <code>@KafkaListener</code></td><td>Key-based partitioning preserves ordering</td></tr>
-  <tr><td>38 — Serialization &amp; Errors</td><td>JSON serialization via <code>__TypeId__</code> headers; <code>@RetryableTopic</code> + DLQ for failures</td><td>Poison pill → retry topics → dead letter queue</td></tr>
-  <tr><td>39 — Semantics &amp; Idempotency</td><td>At-least-once default means possible duplicates; idempotent guards prevent double-processing</td><td><code>existsById()</code> check + <code>@Transactional</code></td></tr>
+  <tr><td>35: Sync vs Async</td><td>Synchronous waits; asynchronous fires and forgets</td><td>Loose coupling via message broker</td></tr>
+  <tr><td>36: Kafka Concepts</td><td>Topics, partitions, offsets, consumer groups, brokers</td><td>Partition = ordered append-only log; offset = position</td></tr>
+  <tr><td>37: Spring Kafka</td><td>Producers send with <code>KafkaTemplate</code>; consumers listen with <code>@KafkaListener</code></td><td>Key-based partitioning preserves ordering</td></tr>
+  <tr><td>38: Serialization &amp; Errors</td><td>JSON serialization via <code>__TypeId__</code> headers; <code>@RetryableTopic</code> + DLQ for failures</td><td>Poison pill → retry topics → dead letter queue</td></tr>
+  <tr><td>39: Semantics &amp; Idempotency</td><td>At-least-once default means possible duplicates; idempotent guards prevent double-processing</td><td><code>existsById()</code> check + <code>@Transactional</code></td></tr>
 </table>
 
 <p>Event flow through the Order Management System:</p>
@@ -143,8 +143,8 @@ processedMessageRepository.save(new ProcessedMessage(event.messageId()));</code>
 <div class="quiz" id="q1">
   <div class="quiz-question">1. A consumer using at-least-once semantics crashes after processing a message but before committing the offset. What happens?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The message is lost — it was already processed</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">The message is redelivered — the consumer will process it again on restart</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The message is lost: it was already processed</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">The message is redelivered: the consumer will process it again on restart</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Kafka detects the crash and automatically commits the offset</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The message is moved to the dead letter queue</li>
   </ul>
@@ -187,10 +187,10 @@ processedMessageRepository.save(new ProcessedMessage(event.messageId()));</code>
 <div class="quiz" id="q5">
   <div class="quiz-question">5. Which delivery semantic does Spring Boot Kafka use by default?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">At-most-once — messages may be lost but never duplicated</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">At-least-once — messages may be duplicated but never lost</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Exactly-once — messages are delivered once with no loss or duplication</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Best-effort — Kafka makes no guarantees without explicit configuration</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">At-most-once: messages may be lost but never duplicated</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">At-least-once: messages may be duplicated but never lost</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Exactly-once: messages are delivered once with no loss or duplication</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Best-effort: Kafka makes no guarantees without explicit configuration</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
 </div>
@@ -214,7 +214,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite. Review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));

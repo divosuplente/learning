@@ -14,7 +14,7 @@
 
 <h2>The Circular Dependency Problem</h2>
 
-<p>A <strong>circular dependency</strong> occurs when Bean A depends on Bean B, and Bean B depends on Bean A. Spring cannot construct either one first — it needs B to build A, and A to build B — so it throws an error at startup.</p>
+<p>A <strong>circular dependency</strong> occurs when Bean A depends on Bean B, and Bean B depends on Bean A. Spring cannot construct either one first: it needs B to build A, and A to build B, so it throws an error at startup.</p>
 
 <pre><code>@Service
 public class OrderService {
@@ -35,7 +35,7 @@ public class CustomerService {
 }
 // Spring fails: "The dependencies of some of the beans form a cycle"</code></pre>
 
-<p>With constructor injection and <code>final</code> fields, this is a hard failure. Spring can't create a half-constructed object. This is a <em>feature</em>, not a bug — it forces you to fix the design.</p>
+<p>With constructor injection and <code>final</code> fields, this is a hard failure. Spring can't create a half-constructed object. This is a <em>feature</em>, not a bug: it forces you to fix the design.</p>
 
 <h2>Solution 1: Extract a Third Service (Preferred)</h2>
 
@@ -58,7 +58,7 @@ public class CustomerService {
     public CustomerService(OrderLookupService lookup) { this.lookup = lookup; }
 }</code></pre>
 
-<p>The dependency graph goes from <code>A ↔ B</code> to <code>A → C ← B</code>. No cycle. This is almost always the right fix — if two services need each other, a concept is missing from your model.</p>
+<p>The dependency graph goes from <code>A &amp;harr; B</code> to <code>A &amp;rarr; C &amp;larr; B</code>. No cycle. This is almost always the right fix: if two services need each other, a concept is missing from your model.</p>
 
 <h2>Solution 2: Use Application Events</h2>
 
@@ -124,11 +124,11 @@ public class OrderService {
     }
 }</code></pre>
 
-<p>Why not just put this in the constructor? You could for <code>ConnectionPool</code>, but if your initialization calls methods <em>on injected beans</em>, those beans must already be fully wired. The constructor runs before Spring finishes injection on <em>other</em> beans in the same cycle — <code>@PostConstruct</code> guarantees everything is ready.</p>
+<p>Why not just put this in the constructor? You could for <code>ConnectionPool</code>, but if your initialization calls methods <em>on injected beans</em>, those beans must already be fully wired. The constructor runs before Spring finishes injection on <em>other</em> beans in the same cycle. <code>@PostConstruct</code> guarantees everything is ready.</p>
 
 <h2>@PreDestroy</h2>
 
-<p><code>@PreDestroy</code> runs before the application context shuts down. Use it to release resources — close connections, flush buffers, stop threads:</p>
+<p><code>@PreDestroy</code> runs before the application context shuts down. Use it to release resources: close connections, flush buffers, stop threads.</p>
 
 <pre><code>import jakarta.annotation.PreDestroy;
 
@@ -144,7 +144,7 @@ public class OrderService {
 
 <p><strong>Important:</strong> both annotations come from <code>jakarta.annotation</code> (not <code>javax.annotation</code>). Spring Boot 3+ uses the Jakarta namespace.</p>
 
-<h2>Constructor vs @PostConstruct — When to Use Each</h2>
+<h2>Constructor vs @PostConstruct: When to Use Each</h2>
 
 <table>
   <thead>
@@ -210,10 +210,10 @@ public class OrderService {
 <div class="quiz" id="q5">
   <div class="quiz-question">5. <code>OrderService</code> publishes an <code>OrderCreatedEvent</code> and <code>CustomerService</code> handles it with <code>@EventListener</code>. Does <code>OrderService</code> depend on <code>CustomerService</code>?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">No — the publisher only knows about the event, not the listener</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — <code>@EventListener</code> creates a hidden compile-time dependency</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">No: the publisher only knows about the event, not the listener</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes: <code>@EventListener</code> creates a hidden compile-time dependency</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Only if <code>CustomerService</code> is in the same package</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes — Spring wires them together at build time</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Yes: Spring wires them together at build time</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
 </div>

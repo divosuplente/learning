@@ -10,7 +10,7 @@
 
 <h1>What Testing Is &amp; The Test Pyramid</h1>
 
-<p><strong>Testing</strong> is the deliberate execution of your code to verify it does what you intend. You write code, then you write <em>another</em> piece of code that calls the first and checks whether the result is correct. If that sounds circular — good. The test defines what "correct" means, and the production code satisfies it.</p>
+<p><strong>Testing</strong> is the deliberate execution of your code to verify it does what you intend. You write code, then you write <em>another</em> piece of code that calls the first and checks whether the result is correct. If that sounds circular, good. The test defines what "correct" means, and the production code satisfies it.</p>
 
 <h2>Why We Test</h2>
 
@@ -19,7 +19,7 @@
   <tr><td><strong>Catch bugs early</strong></td><td>A bug found during development costs minutes. The same bug found in production costs hours or days.</td></tr>
   <tr><td><strong>Prevent regressions</strong></td><td>When you change code, old tests verify you didn't break existing behavior.</td></tr>
   <tr><td><strong>Living documentation</strong></td><td>Tests show how code is supposed to be used. A new developer can read tests to understand the system.</td></tr>
-  <tr><td><strong>Design feedback</strong></td><td>Code that's hard to test is usually badly designed — too many dependencies, too much coupling.</td></tr>
+  <tr><td><strong>Design feedback</strong></td><td>Code that's hard to test is usually badly designed: too many dependencies, too much coupling.</td></tr>
   <tr><td><strong>Confidence to refactor</strong></td><td>With good tests, you can restructure code without fear of breaking things.</td></tr>
   <tr><td><strong>Faster debugging</strong></td><td>A failing test points you to exactly which code is broken.</td></tr>
 </table>
@@ -41,9 +41,9 @@
 
 <h3>Unit Tests</h3>
 
-<p>A <strong>unit test</strong> tests a single method or class in isolation. All external dependencies are replaced with <strong>mocks</strong> — fake versions that return predetermined values.</p>
+<p>A <strong>unit test</strong> tests a single method or class in isolation. All external dependencies are replaced with <strong>mocks</strong>, fake versions that return predetermined values.</p>
 
-<p><em>Analogy:</em> Testing a single car part on a workbench — you test whether the alternator produces electricity, without needing the entire car.</p>
+<p><em>Analogy:</em> Testing a single car part on a workbench. You test whether the alternator produces electricity, without needing the entire car.</p>
 
 <p><strong>Speed:</strong> milliseconds. You can run hundreds per second.</p>
 
@@ -121,11 +121,11 @@ void shouldCreateOrderViaApi() {
   <tr><td>E2E tests</td><td>~5% of tests</td><td>Slow, fragile, but verify the whole system</td></tr>
 </table>
 
-<p><strong>Why more unit tests?</strong> They're fast (milliseconds), reliable (no external dependencies to fail), and precise (when one fails, you know exactly which code is broken). Integration and E2E tests are slower, and when they fail, the cause could be <em>anywhere</em> in the stack — the database, the network, the configuration, the code itself.</p>
+<p><strong>Why more unit tests?</strong> They're fast (milliseconds), reliable (no external dependencies to fail), and precise (when one fails, you know exactly which code is broken). Integration and E2E tests are slower, and when they fail, the cause could be <em>anywhere</em> in the stack: the database, the network, the configuration, the code itself.</p>
 
-<p>The pyramid is not a rigid formula — it's a heuristic. If your codebase breaks the ratio and has more E2E tests than unit tests, you'll feel it: slow CI, flakes that are hard to diagnose, and long feedback loops. Push tests <em>down</em> the pyramid whenever you can. A bug caught by a unit test is fixed in seconds; the same bug caught by an E2E test is fixed in minutes or hours because you have to locate it first.</p>
+<p>The pyramid is not a rigid formula; it's a heuristic. If your codebase breaks the ratio and has more E2E tests than unit tests, you'll feel it: slow CI, flakes that are hard to diagnose, and long feedback loops. Push tests <em>down</em> the pyramid whenever you can. A bug caught by a unit test is fixed in seconds; the same bug caught by an E2E test is fixed in minutes or hours because you have to locate it first.</p>
 
-<p><strong>Primary sources:</strong> <a href="https://martinfowler.com/articles/practical-test-pyramid.html" target="_blank" rel="noopener">Martin Fowler — The Practical Test Pyramid</a> · <a href="https://junit.org/junit5/docs/current/user-guide/" target="_blank" rel="noopener">JUnit 5 User Guide</a> · <a href="https://docs.spring.io/spring-boot/reference/testing/index.html" target="_blank" rel="noopener">Spring Boot Testing Reference</a></p>
+<p><strong>Primary sources:</strong> <a href="https://martinfowler.com/articles/practical-test-pyramid.html" target="_blank" rel="noopener">Martin Fowler: The Practical Test Pyramid</a> · <a href="https://junit.org/junit5/docs/current/user-guide/" target="_blank" rel="noopener">JUnit 5 User Guide</a> · <a href="https://docs.spring.io/spring-boot/reference/testing/index.html" target="_blank" rel="noopener">Spring Boot Testing Reference</a></p>
 
 <h2>Check your understanding</h2>
 
@@ -143,10 +143,10 @@ void shouldCreateOrderViaApi() {
 <div class="quiz" id="q2">
   <div class="quiz-question">2. According to the test pyramid, you have 100 integration tests and 50 E2E tests. Approximately how many unit tests should you aim for?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">About 150 — roughly equal to the other two combined</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">About 200 — twice as many as integration and E2E combined</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">About 800 — unit tests should be ~80% of the total</li>
-    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">About 500 — the exact ratio depends on team preference, so any number works</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">About 150, roughly equal to the other two combined</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">About 200, twice as many as integration and E2E combined</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">About 800, unit tests should be ~80% of the total</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">About 500, the exact ratio depends on team preference, so any number works</li>
   </ul>
   <div class="quiz-feedback" id="q2-feedback"></div>
 </div>
@@ -155,7 +155,7 @@ void shouldCreateOrderViaApi() {
   <div class="quiz-question">3. An E2E test fails. Why is it harder to locate the bug than when a unit test fails?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">E2E tests run in a different JVM, so stack traces are lost</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">The failure could be in any layer — code, database, network, config — so you must narrow it down first</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">The failure could be in any layer (code, database, network, config), so you must narrow it down first</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">E2E tests don't produce error messages, only pass/fail</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Unit tests catch the same bugs, so the E2E failure is always a false positive</li>
   </ul>
@@ -167,7 +167,7 @@ void shouldCreateOrderViaApi() {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Add more E2E tests to catch more bugs before production</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Delete the integration tests since unit and E2E already cover the same ground</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Push tests down the pyramid — replace E2E scenarios with unit and integration tests</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Push tests down the pyramid: replace E2E scenarios with unit and integration tests</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Run the E2E tests in parallel across more machines without changing the test mix</li>
   </ul>
   <div class="quiz-feedback" id="q4-feedback"></div>
@@ -178,7 +178,7 @@ void shouldCreateOrderViaApi() {
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The method you're testing is private and can't be called directly</li>
     <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">You need to verify that a JPA repository query returns the correct rows from a real database</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Unit tests are always sufficient — integration tests are never necessary</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Unit tests are always sufficient; integration tests are never necessary</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Integration tests run faster than unit tests, so they're preferred for CI</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>

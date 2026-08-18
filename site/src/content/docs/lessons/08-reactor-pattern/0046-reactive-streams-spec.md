@@ -1,12 +1,12 @@
 ---
-title: "Reactive Streams Spec: Publisher, Subscriber, Backpressure"
-description: "Reactive Streams Spec: Publisher, Subscriber, Backpressure"
+title: "Lesson 46: Reactive Streams Spec: Publisher, Subscriber, Backpressure"
+description: "Lesson 46: Reactive Streams Spec: Publisher, Subscriber, Backpressure"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0046-reactive-streams-spec.html
 ---
 
 # Reactive Streams Spec: Publisher, Subscriber, Backpressure
 
-Before learning any specific library (Reactor, RxJava, Mutiny), you need the **Reactive Streams specification** — a contract that defines how asynchronous stream processing must work. Every compliant library implements the same four interfaces. Understand the spec once, and the concepts transfer everywhere.
+Before learning any specific library (Reactor, RxJava, Mutiny), you need the **Reactive Streams specification**: a contract that defines how asynchronous stream processing must work. Every compliant library implements the same four interfaces. Understand the spec once, and the concepts transfer everywhere.
 
 ## The Four Interfaces
 
@@ -37,7 +37,7 @@ public interface Processor<T, R> extends Subscriber<T>, Publisher<R> {
 }
 ```
 
-`Publisher` produces data. `Subscriber` consumes it. `Subscription` is the control channel between them — it carries demand signals. `Processor` is a transformation stage that sits in the middle, subscribing upstream and publishing downstream.
+`Publisher` produces data. `Subscriber` consumes it. `Subscription` is the control channel between them: it carries demand signals. `Processor` is a transformation stage that sits in the middle, subscribing upstream and publishing downstream.
 
 ## The Lifecycle Contract
 
@@ -59,14 +59,14 @@ Key rules enforced by the spec:
 1.  **`onSubscribe` is called exactly once** before any other signal.
 2.  **`onNext` is never called after `onComplete` or `onError`.** Terminal signals are final.
 3.  **A `Subscription` must be cancelled** if the `Subscriber` no longer wants items.
-4.  **Calls are non-interfering** — `onNext` on subscriber A does not block subscriber B.
-5.  **`request(n)` controls demand** — the Publisher *must not* send more items than requested.
+4.  **Calls are non-interfering**: `onNext` on subscriber A does not block subscriber B.
+5.  **`request(n)` controls demand**: the Publisher *must not* send more items than requested.
 
 Notice the asymmetry: the `Subscriber` initiates *both* the subscription and the demand. The `Publisher` never pushes unsolicited data. This is the foundation of backpressure.
 
-## Backpressure — The Push-Pull Model
+## Backpressure: The Push-Pull Model
 
-**Backpressure** is the mechanism by which a `Subscriber` tells a `Publisher`: *"I can only handle N items at a time — don't send more than that."*
+**Backpressure** is the mechanism by which a `Subscriber` tells a `Publisher`: *"I can only handle N items at a time, don't send more than that."*
 
 Without backpressure:
 
@@ -84,9 +84,9 @@ Fast Producer: [item1] [item2] → Slow Consumer (request(2))
                (waits...)
 ```
 
-This is a **push-pull** model. The Publisher *pushes* items, but the Subscriber *pulls* by requesting a specific quantity. The Publisher must respect the demand signal — it cannot send more items than the total requested minus the already delivered.
+This is a **push-pull** model. The Publisher *pushes* items, but the Subscriber *pulls* by requesting a specific quantity. The Publisher must respect the demand signal. It cannot send more items than the total requested minus the already delivered.
 
-A common mistake: calling `request(Long.MAX_VALUE)` effectively disables backpressure, turning the stream into an unbounded push model. Fine for testing, dangerous in production — it defeats the entire purpose of reactive streams.
+A common mistake: calling `request(Long.MAX_VALUE)` effectively disables backpressure, turning the stream into an unbounded push model. Fine for testing, dangerous in production. It defeats the entire purpose of reactive streams.
 
 ## Backpressure Strategies
 
@@ -100,7 +100,7 @@ When a `Subscriber` cannot keep up, different libraries offer strategies for wha
 | **Error** | Signal an error when overwhelmed | Data loss is unacceptable |
 | **Block** | Block the producer thread | Legacy integration (anti-pattern in reactive) |
 
-These strategies are library-specific, but the demand-driven contract — `request(n)` — is universal, guaranteed by the spec.
+These strategies are library-specific, but the demand-driven contract (`request(n)`) is universal, guaranteed by the spec.
 
 ## Implementations of the Spec
 
@@ -122,25 +122,25 @@ The spec guarantees interoperability: a `Publisher` from Reactor can feed a `Sub
 
 <details>
 <summary>1. A Publisher emits 10 items to a Subscriber that has called request(3). How many items does the spec require the Publisher to send?</summary>
-<p><strong>Correct answer:</strong> At most 3 — the Publisher must not exceed the requested demand</p>
+<p><strong>Correct answer:</strong> At most 3, the Publisher must not exceed the requested demand</p>
 </details>
 
 <details>
 <summary>2. After a Subscriber receives onComplete(), can the Publisher subsequently call onNext() on that same Subscriber?</summary>
-<p><strong>Correct answer:</strong> No — onComplete is a terminal signal; no onNext may follow</p>
+<p><strong>Correct answer:</strong> No: onComplete is a terminal signal; no onNext may follow</p>
 </details>
 
 <details>
 <summary>3. A fast Kafka consumer pushes 1,000 events/second into a reactive pipeline, but the downstream database Subscriber can only persist 100/second. What does backpressure prevent?</summary>
-<p><strong>Correct answer:</strong> Buffer overflow — the Subscriber signals demand, the Publisher holds excess</p>
+<p><strong>Correct answer:</strong> Buffer overflow: the Subscriber signals demand, the Publisher holds excess</p>
 </details>
 
 <details>
 <summary>4. A Subscriber calls request(Long.MAX_VALUE) on its Subscription. What is the practical effect?</summary>
-<p><strong>Correct answer:</strong> Backpressure is effectively disabled — the Publisher pushes without restraint</p>
+<p><strong>Correct answer:</strong> Backpressure is effectively disabled: the Publisher pushes without restraint</p>
 </details>
 
 <details>
 <summary>5. The Processor interface extends both Subscriber and Publisher. What is its role in a reactive pipeline?</summary>
-<p><strong>Correct answer:</strong> It acts as a transformation stage — subscribing upstream, publishing transformed data downstream</p>
+<p><strong>Correct answer:</strong> It acts as a transformation stage: subscribing upstream, publishing transformed data downstream</p>
 </details>

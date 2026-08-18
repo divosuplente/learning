@@ -1,12 +1,12 @@
 ---
-title: "HTTP Responses with ResponseEntity & Status Codes"
-description: "HTTP Responses with ResponseEntity & Status Codes"
+title: "Lesson 23: HTTP Responses with ResponseEntity & Status Codes"
+description: "Lesson 23: HTTP Responses with ResponseEntity & Status Codes"
 editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0023-http-responses.html
 ---
 
 # HTTP Responses with `ResponseEntity` & Status Codes
 
-A controller method that returns a plain object always sends **200 OK**. That's fine for reading data, but REST APIs need richer responses — **201 Created** when a resource is born, **204 No Content** after a deletion, **404 Not Found** when something doesn't exist. Spring's `ResponseEntity<T>` gives you full control over the status code, headers, and body in one return value.
+A controller method that returns a plain object always sends **200 OK**. That's fine for reading data, but REST APIs need richer responses: **201 Created** when a resource is born, **204 No Content** after a deletion, **404 Not Found** when something doesn't exist. Spring's `ResponseEntity<T>` gives you full control over the status code, headers, and body in one return value.
 
 ## Why `ResponseEntity`?
 
@@ -20,7 +20,7 @@ public OrderResponse getOrder(@PathVariable Long id) {
 }
 ```
 
-If the order doesn't exist, this throws an exception or returns `null` (which becomes 404 or 200-with-null — neither ideal). `ResponseEntity` lets you **explicitly choose** the status and, optionally, add headers:
+If the order doesn't exist, this throws an exception or returns `null` (which becomes 404 or 200-with-null, neither ideal). `ResponseEntity` lets you **explicitly choose** the status and, optionally, add headers:
 
 ```
 @GetMapping("/{id}")
@@ -57,26 +57,26 @@ return ResponseEntity.status(HttpStatus.CONFLICT)
     .body(error);
 ```
 
-Notice the pattern: methods like `.ok()` and `.noContent()` return a **builder**. You finish with `.body(…)` when you have a payload, or `.build()` when you don't. Calling `.build()` on a builder that expects a body compiles — but sends an empty response, which is almost certainly a bug.
+Notice the pattern: methods like `.ok()` and `.noContent()` return a **builder**. You finish with `.body(…)` when you have a payload, or `.build()` when you don't. Calling `.build()` on a builder that expects a body compiles, but sends an empty response, which is almost certainly a bug.
 
 ## Status codes: when to use each
 
 | Code | Name | Use when | Body? |
 | --- | --- | --- | --- |
 | **200** | OK | Successful GET or PUT that returns data | Yes |
-| **201** | Created | POST that creates a new resource | Yes — the created resource |
+| **201** | Created | POST that creates a new resource | Yes, the created resource |
 | **204** | No Content | DELETE, or PUT that returns nothing | No |
-| **400** | Bad Request | Client sent invalid input | Usually — error details |
-| **404** | Not Found | Requested resource doesn't exist | Optional — error details |
-| **409** | Conflict | Action conflicts with current state | Usually — reason |
-| **500** | Internal Server Error | Unexpected server failure | Rarely — don't leak stack traces |
+| **400** | Bad Request | Client sent invalid input | Usually, error details |
+| **404** | Not Found | Requested resource doesn't exist | Optional, error details |
+| **409** | Conflict | Action conflicts with current state | Usually, reason |
+| **500** | Internal Server Error | Unexpected server failure | Rarely, don't leak stack traces |
 
-## 201 vs 204 — the tricky pair
+## 201 vs 204: the tricky pair
 
 Both indicate success, but they mean different things:
 
--   **201 Created** — a new resource was born. The response body should contain it (so the client gets the server-assigned ID, timestamps, etc.). Also convention: include a `Location` header pointing to the new resource.
--   **204 No Content** — the action succeeded, but there's nothing to return. Classic case: `DELETE /api/orders/42`. The resource is gone; there's nothing to show.
+-   **201 Created**: a new resource was born. The response body should contain it (so the client gets the server-assigned ID, timestamps, etc.). Also convention: include a `Location` header pointing to the new resource.
+-   **204 No Content**: the action succeeded, but there's nothing to return. Classic case: `DELETE /api/orders/42`. The resource is gone; there's nothing to show.
 
 ```
 // POST — creates something, so 201 + body + Location header
@@ -96,9 +96,9 @@ public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
 }
 ```
 
-`ResponseEntity.created(location)` is a convenience — it sets both the 201 status *and* the `Location` header in one call.
+`ResponseEntity.created(location)` is a convenience: it sets both the 201 status *and* the `Location` header in one call.
 
-## 409 Conflict — when to reach for it
+## 409 Conflict: when to reach for it
 
 Use 409 when the request is *valid* but can't be satisfied because of the *current state* of the system:
 
@@ -122,7 +122,7 @@ return ResponseEntity.ok()               // HeadersBuilder
     .body(orders);                       // ResponseEntity<List<Order>>
 ```
 
-The first form returns the final `ResponseEntity` immediately — you can't chain `.header()` after it. If you need headers, use the no-arg `.ok()` builder form.
+The first form returns the final `ResponseEntity` immediately. You can't chain `.header()` after it. If you need headers, use the no-arg `.ok()` builder form.
 
 ## Full CRUD example
 
@@ -180,7 +180,7 @@ public class OrderController {
 
 <details>
 <summary>3. A user tries to register with an email that's already taken. The input format is valid. Which status code fits best?</summary>
-<p><strong>Correct answer:</strong> 409 Conflict — valid input, but current state prevents it</p>
+<p><strong>Correct answer:</strong> 409 Conflict, valid input, but current state prevents it</p>
 </details>
 
 <details>

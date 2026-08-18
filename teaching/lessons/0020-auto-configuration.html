@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lesson 20 — Auto-configuration &amp; @SpringBootApplication</title>
+  <title>Lesson 20: Auto-configuration &amp; @SpringBootApplication</title>
   <link rel="stylesheet" href="../assets/base.css">
 </head>
 <body>
 
 <h1>Auto-configuration &amp; <code>@SpringBootApplication</code></h1>
 
-<p>Plain Spring works — but it makes you earn every bean. You write XML, you hand-configure a DataSource, you deploy a WAR to Tomcat, and somewhere around the fiftieth <code>&lt;bean&gt;</code> tag you wonder if there's a better way. There is. Spring Boot doesn't replace Spring; it <em>automates</em> the setup so you can focus on business code.</p>
+<p>Plain Spring works, but it makes you earn every bean. You write XML, you hand-configure a DataSource, you deploy a WAR to Tomcat, and somewhere around the fiftieth <code>&lt;bean&gt;</code> tag you wonder if there's a better way. There is. Spring Boot doesn't replace Spring; it <em>automates</em> the setup so you can focus on business code.</p>
 
 <h2>Spring Boot vs plain Spring</h2>
 
@@ -27,9 +27,9 @@
 
 <p>The principle is <strong>convention over configuration</strong>: follow the defaults and Spring Boot fills in the details. Override only when you need to.</p>
 
-<h2>Auto-configuration — how it actually works</h2>
+<h2>Auto-configuration: how it actually works</h2>
 
-<p>When you add a dependency to your <code>pom.xml</code>, Spring Boot detects it on the classpath and wires the corresponding beans automatically. No XML, no <code>@Bean</code> methods — it just works.</p>
+<p>When you add a dependency to your <code>pom.xml</code>, Spring Boot detects it on the classpath and wires the corresponding beans automatically. No XML, no <code>@Bean</code> methods. It just works.</p>
 
 <p>Some concrete triggers:</p>
 
@@ -39,9 +39,9 @@
   <li>PostgreSQL JDBC driver on classpath → a connection pool targeting PostgreSQL is set up (once you provide URL/credentials in <code>application.yml</code>).</li>
 </ul>
 
-<p>Behind the scenes, each auto-configuration class is guarded by a <strong>condition</strong> — typically <code>@ConditionalOnClass</code> (a specific class exists on the classpath) or <code>@ConditionalOnMissingBean</code> (the user hasn't already defined one). If the condition fails, the configuration is skipped entirely. This is why auto-configuration never overrides your own beans — yours always win.</p>
+<p>Behind the scenes, each auto-configuration class is guarded by a <strong>condition</strong>, typically <code>@ConditionalOnClass</code> (a specific class exists on the classpath) or <code>@ConditionalOnMissingBean</code> (the user hasn't already defined one). If the condition fails, the configuration is skipped entirely. This is why auto-configuration never overrides your own beans. Yours always win.</p>
 
-<h2><code>@SpringBootApplication</code> — the three-in-one annotation</h2>
+<h2><code>@SpringBootApplication</code>: the three-in-one annotation</h2>
 
 <p>Every Spring Boot application has an entry point that looks like this:</p>
 
@@ -65,8 +65,8 @@ public class OrderManagementApplication {
 <p>When <code>main()</code> runs, Spring Boot:</p>
 <ol>
   <li>Creates the application context (the IoC container holding all beans).</li>
-  <li>Runs component scanning — finds your <code>@Service</code>, <code>@Repository</code>, and <code>@Controller</code> classes under the application package.</li>
-  <li>Runs auto-configuration — inspects the classpath and registers infrastructure beans.</li>
+  <li>Runs component scanning: finds your <code>@Service</code>, <code>@Repository</code>, and <code>@Controller</code> classes under the application package.</li>
+  <li>Runs auto-configuration: inspects the classpath and registers infrastructure beans.</li>
   <li>Starts the embedded Tomcat server on port 8080 (if a web starter is present).</li>
 </ol>
 
@@ -74,7 +74,7 @@ public class OrderManagementApplication {
 
 <h2>Embedded Tomcat</h2>
 
-<p>In the old model, you built a WAR file and deployed it to a standalone Tomcat instance. Spring Boot flips this: Tomcat runs <em>inside</em> your application. The fat JAR you produce with <code>mvn package</code> contains your code, your dependencies, <em>and</em> the web server — you run it with <code>java -jar app.jar</code>, and it starts on port 8080.</p>
+<p>In the old model, you built a WAR file and deployed it to a standalone Tomcat instance. Spring Boot flips this: Tomcat runs <em>inside</em> your application. The fat JAR you produce with <code>mvn package</code> contains your code, your dependencies, <em>and</em> the web server. You run it with <code>java -jar app.jar</code>, and it starts on port 8080.</p>
 
 <p>All it takes is this dependency:</p>
 
@@ -83,8 +83,8 @@ public class OrderManagementApplication {
     &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
 &lt;/dependency&gt;</code></pre>
 
-<p>Spring Boot auto-configures Tomcat at startup. You didn't write a single line of server configuration — but you <em>can</em> override any default in <code>application.yml</code>:</p>
-<p><strong>Virtual threads by default.</strong> As of Spring Boot 4, embedded Tomcat uses a virtual thread pool instead of the traditional platform thread pool. This means Spring MVC requests are handled on virtual threads out of the box — no configuration changes needed. Each incoming request still follows the familiar blocking MVC model, but the lightweight virtual threads make it far cheaper to handle many concurrent connections without resorting to reactive WebFlux.</p>
+<p>Spring Boot auto-configures Tomcat at startup. You didn't write a single line of server configuration, but you <em>can</em> override any default in <code>application.yml</code>:</p>
+<p><strong>Virtual threads by default.</strong> As of Spring Boot 4, embedded Tomcat uses a virtual thread pool instead of the traditional platform thread pool. This means Spring MVC requests are handled on virtual threads out of the box, no configuration changes needed. Each incoming request still follows the familiar blocking MVC model, but the lightweight virtual threads make it far cheaper to handle many concurrent connections without resorting to reactive WebFlux.</p>
 
 <pre><code>server:
   port: 9090          # change the port
@@ -98,9 +98,9 @@ public class OrderManagementApplication {
 <div class="quiz" id="q1">
   <div class="quiz-question">1. What happens when you add <code>spring-boot-starter-web</code> to your POM and run the application?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The build fails — you must also configure a Tomcat bean</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The build fails; you must also configure a Tomcat bean</li>
     <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">An embedded Tomcat starts on port 8080 with Spring MVC configured</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The application starts but no web server runs — starters are compile-only</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The application starts but no web server runs; starters are compile-only</li>
     <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Spring Boot opens a browser window at localhost:8080</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
@@ -120,8 +120,8 @@ public class OrderManagementApplication {
 <div class="quiz" id="q3">
   <div class="quiz-question">3. You define a <code>@Bean</code> method for <code>DataSource</code> in a <code>@Configuration</code> class. Spring Boot's auto-configuration also defines a <code>DataSource</code> bean. Which one wins?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Your bean wins — auto-configuration steps aside when a bean already exists</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The auto-configured bean wins — framework defaults always take priority</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Your bean wins; auto-configuration steps aside when a bean already exists</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The auto-configured bean wins; framework defaults always take priority</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring throws a <code>BeanDefinitionOverrideException</code> at startup</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Both beans are registered; injection picks one randomly</li>
   </ul>
@@ -131,8 +131,8 @@ public class OrderManagementApplication {
 <div class="quiz" id="q4">
   <div class="quiz-question">4. Your <code>@SpringBootApplication</code> class is in <code>com.example.app</code>. A <code>@Service</code> class lives in <code>com.example.util</code>. Will Spring discover it?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Yes — <code>com.example.util</code> is a sub-package of <code>com.example</code>, which is scanned</li>
-    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">No — only <code>com.example.app</code> and its sub-packages are scanned</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Yes, <code>com.example.util</code> is a sub-package of <code>com.example</code>, which is scanned</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">No, only <code>com.example.app</code> and its sub-packages are scanned</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Only if the service is also annotated with <code>@EnableAutoConfiguration</code></li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Only if you add <code>@Import</code> to the main class</li>
   </ul>

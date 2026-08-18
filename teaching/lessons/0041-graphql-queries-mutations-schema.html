@@ -10,11 +10,11 @@
 
 <h1>GraphQL Queries, Mutations &amp; Schema Definition</h1>
 
-<p>In Lesson 40 you saw why REST's fixed-shape responses cause over-fetching and under-fetching. GraphQL solves this by letting the <strong>client</strong> declare exactly what it needs. But before you can write queries, you need a schema — the contract that tells both sides what data exists and what operations are available. This lesson covers the query language, the difference between queries and mutations, and the Schema Definition Language (SDL) that ties it all together.</p>
+<p>In Lesson 40 you saw why REST's fixed-shape responses cause over-fetching and under-fetching. GraphQL solves this by letting the <strong>client</strong> declare exactly what it needs. But before you can write queries, you need a schema: the contract that tells both sides what data exists and what operations are available. This lesson covers the query language, the difference between queries and mutations, and the Schema Definition Language (SDL) that ties it all together.</p>
 
 <h2>Queries: Reading Data</h2>
 
-<p>A <strong>query</strong> reads data — the GraphQL equivalent of a <code>GET</code> request. The client sends a query document to a single endpoint:</p>
+<p>A <strong>query</strong> reads data, the GraphQL equivalent of a <code>GET</code> request. The client sends a query document to a single endpoint:</p>
 
 <pre><code>POST /graphql
 
@@ -22,7 +22,7 @@
   "query": "{ order(id: 42) { id status } }"
 }</code></pre>
 
-<p>The response contains exactly the fields requested — nothing more:</p>
+<p>The response contains exactly the fields requested, nothing more:</p>
 
 <pre><code>{
   "data": {
@@ -37,7 +37,7 @@
 
 <h3>Nested Fields</h3>
 
-<p>Related data lives in the same query — no under-fetching either. A single request fetches the order, its customer, and every item's product:</p>
+<p>Related data lives in the same query, so no under-fetching either. A single request fetches the order, its customer, and every item's product:</p>
 
 <pre><code>{
   order(id: 42) {
@@ -62,7 +62,7 @@
 
 <h3>Query Arguments</h3>
 
-<p>Fields can accept arguments — like path parameters and query parameters combined, but typed:</p>
+<p>Fields can accept arguments: like path parameters and query parameters combined, but typed:</p>
 
 <pre><code>{
   orders(customerId: 7) {
@@ -76,7 +76,7 @@
 
 <h2>Mutations: Writing Data</h2>
 
-<p>A <strong>mutation</strong> modifies data — the GraphQL equivalent of <code>POST</code>, <code>PUT</code>, or <code>DELETE</code>. The key difference from a query is intent: mutations change state, queries do not. The server can batch and optimize queries however it likes; mutations execute sequentially.</p>
+<p>A <strong>mutation</strong> modifies data, the GraphQL equivalent of <code>POST</code>, <code>PUT</code>, or <code>DELETE</code>. The key difference from a query is intent: mutations change state, queries do not. The server can batch and optimize queries however it likes; mutations execute sequentially.</p>
 
 <pre><code>mutation {
   confirmOrder(id: 42) {
@@ -85,7 +85,7 @@
   }
 }</code></pre>
 
-<p>Mutations also return data — the client specifies which fields of the result it wants, just like a query. This avoids a second round trip to fetch the updated object.</p>
+<p>Mutations also return data: the client specifies which fields of the result it wants, just like a query. This avoids a second round trip to fetch the updated object.</p>
 
 <h3>Input Types</h3>
 
@@ -136,7 +136,7 @@
   <tr><td><code>ID</code></td><td><code>String</code></td><td>Unique identifier, serialized as string</td></tr>
 </table>
 
-<p>Java types without a built-in GraphQL equivalent — <code>BigDecimal</code>, <code>Instant</code> — require <strong>custom scalars</strong> registered in your Spring configuration.</p>
+<p>Java types without a built-in GraphQL equivalent, like <code>BigDecimal</code> and <code>Instant</code>, require <strong>custom scalars</strong> registered in your Spring configuration.</p>
 
 <h3>Object Types</h3>
 
@@ -154,7 +154,7 @@
 
 <h3>Enums</h3>
 
-<p>Enums work just like Java enums — a closed set of values:</p>
+<p>Enums work just like Java enums: a closed set of values:</p>
 
 <pre><code>enum OrderStatus {
     PENDING
@@ -166,7 +166,7 @@
 
 <h3>Input Types</h3>
 
-<p>Input types define the shape of data <strong>going in</strong> to a mutation. They differ from object types: they cannot have relationships (no <code>customer: Customer</code> field), and their purpose is purely structural — grouping arguments:</p>
+<p>Input types define the shape of data <strong>going in</strong> to a mutation. They differ from object types: they cannot have relationships (no <code>customer: Customer</code> field), and their purpose is purely structural, grouping arguments:</p>
 
 <pre><code>input CreateOrderInput {
     customerId: ID!
@@ -195,7 +195,7 @@ type Mutation {
     cancelOrder(id: ID!): Order!
 }</code></pre>
 
-<p>Notice that <code>order(id: ID!): Order</code> returns a nullable <code>Order</code> — the order might not exist. Meanwhile <code>orders(customerId: ID): [Order!]!</code> returns a non-null list that <em>can be empty</em> (the <code>!</code> outside the brackets guarantees the list itself is never null, but there may be zero items), and <code>customerId</code> is optional — omit it to get all orders.</p>
+<p>Notice that <code>order(id: ID!): Order</code> returns a nullable <code>Order</code>: the order might not exist. Meanwhile <code>orders(customerId: ID): [Order!]!</code> returns a non-null list that <em>can be empty</em> (the <code>!</code> outside the brackets guarantees the list itself is never null, but there may be zero items), and <code>customerId</code> is optional. Omit it to get all orders.</p>
 
 <h2>GraphQL vs REST: The Structural Difference</h2>
 
@@ -204,7 +204,7 @@ type Mutation {
   <tr><td>Endpoints</td><td>Many resource URLs</td><td>One (<code>/graphql</code>)</td></tr>
   <tr><td>Data shape</td><td>Fixed by the server</td><td>Chosen by the client</td></tr>
   <tr><td>Relationships</td><td>Extra calls or embedded (chose one)</td><td>Nested in a single query</td></tr>
-  <tr><td>Versioning</td><td>URL versioning (<code>/v1/</code>)</td><td>Add fields — old clients unaffected</td></tr>
+  <tr><td>Versioning</td><td>URL versioning (<code>/v1/</code>)</td><td>Add fields; old clients unaffected</td></tr>
   <tr><td>HTTP methods</td><td>GET, POST, PUT, DELETE</td><td>POST for everything</td></tr>
   <tr><td>Caching</td><td>Browser / CDN (HTTP-level)</td><td>Custom (Apollo Client, etc.)</td></tr>
 </table>
@@ -218,10 +218,10 @@ type Mutation {
 <div class="quiz" id="q1">
   <div class="quiz-question">1. What HTTP method does a GraphQL <strong>query</strong> use?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">GET — queries are read-only, so they use GET</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">POST — GraphQL uses POST for both queries and mutations</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">DEPENDS — GET for queries, POST for mutations</li>
-    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">OPTIONS — the server inspects headers first</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">GET: queries are read-only, so they use GET</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">POST: GraphQL uses POST for both queries and mutations</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">DEPENDS: GET for queries, POST for mutations</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">OPTIONS: the server inspects headers first</li>
   </ul>
   <div class="quiz-feedback" id="q1-feedback"></div>
 </div>
@@ -241,7 +241,7 @@ type Mutation {
   <div class="quiz-question">3. Why do mutations use <code>input</code> types instead of regular object types for their arguments?</div>
   <ul class="quiz-options">
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Input types are validated automatically by Spring</li>
-    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Object types cannot be used as arguments — it is a syntax error</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Object types cannot be used as arguments: it is a syntax error</li>
     <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Input types cannot contain relationships and are purely structural groupings</li>
     <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Input types are serialized as XML instead of JSON</li>
   </ul>
@@ -249,9 +249,9 @@ type Mutation {
 </div>
 
 <div class="quiz" id="q4">
-  <div class="quiz-question">4. A query field is declared as <code>order(id: ID!): Order</code> — without a <code>!</code> on the return type. What does this mean?</div>
+  <div class="quiz-question">4. A query field is declared as <code>order(id: ID!): Order</code>, without a <code>!</code> on the return type. What does this mean?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The order might not exist — the result can be null</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The order might not exist: the result can be null</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The query is optional and can be omitted</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The field returns a list of orders</li>
     <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The id argument is optional</li>
@@ -262,9 +262,9 @@ type Mutation {
 <div class="quiz" id="q5">
   <div class="quiz-question">5. Your team adds a new <code>discountCode</code> field to the <code>Order</code> type in the GraphQL schema. What happens to existing clients that don't request this field?</div>
   <ul class="quiz-options">
-    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">They break — the response shape changed</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">They break: the response shape changed</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">They receive <code>discountCode: null</code> automatically</li>
-    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Nothing — they didn't request the field, so it doesn't appear in their response</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Nothing: they didn't request the field, so it doesn't appear in their response</li>
     <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The schema rejects the addition unless you bump the API version</li>
   </ul>
   <div class="quiz-feedback" id="q5-feedback"></div>
@@ -289,7 +289,7 @@ document.querySelectorAll('.quiz-option').forEach(option => {
       feedback.style.color = 'var(--correct)';
     } else {
       option.classList.add('wrong');
-      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.textContent = 'Not quite: review the lesson above and try again.';
       feedback.style.color = 'var(--wrong)';
       setTimeout(() => {
         siblings.forEach(s => s.classList.remove('selected', 'wrong'));
