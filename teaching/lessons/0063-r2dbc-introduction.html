@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 63 — R2DBC: Reactive Relational Database Connectivity</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>R2DBC: Reactive Relational Database Connectivity</h1>
+
+<p>JDBC blocks a thread for every database call: the calling thread sits idle until the database responds. On a server handling thousands of concurrent requests, those blocked threads waste memory and cap throughput. <strong>R2DBC</strong> (Reactive Relational Database Connectivity) is a specification for non-blocking, reactive access to relational databases. Where JDBC ties up a thread per query, R2DBC streams results over the same event loop your reactive web server already uses.</p>
+
+<h2>Why R2DBC Exists</h2>
+
+<p>Spring WebFlux runs on a small number of event-loop threads (typically one per CPU core). If even one of those threads blocks on a JDBC call, the entire event loop stalls and every request queued on it waits. R2DBC solves this directly: it gives reactive applications a database driver that never blocks a thread.</p>
+
+<p>The R2DBC specification was created independently of Spring. It defines a <strong>Service Provider Interface (SPI)</strong> that vendors implement for each database, the same way JDBC defines an interface that database vendors ship drivers for. Spring Data R2DBC builds on top of that SPI the same way Spring Data JPA builds on top of JDBC.</p>
+
+<h2>JDBC vs R2DBC</h2>
+
+<p>The two APIs solve the same problem with different concurrency models:</p>
+
+<table>
+  <tr><th>Aspect</th><th>JDBC</th><th>R2DBC</th></tr>
+  <tr><td>Threading model</td><td>Blocking: calling thread waits</td><td>Non-blocking: returns a <code>Publisher</code></td></tr>
+  <tr><td>Result delivery</td><td>Synchronous <code>ResultSet</code></td><td>Reactive <code>Publisher&lt;T&gt;</code> / <code>Flux&lt;T&gt;</code></td></tr>
+  <tr><td>Connection pooling</td><td><code>HikariCP</code> (thread-bound)</td><td><code>r2dbc-pool</code> (reactive checkout)</td></tr>
+  <tr><td>Typical stack</td><td>Spring MVC + Tomcat</td><td>Spring WebFlux + Netty</td></tr>
+  <tr><td>Thread requirement per query</td><td>One thread blocks until done</td><td>Zero blocking threads; notified via callback</td></tr>
+</table>
+
+<p>A JDBC connection pool like HikariCP ties each checkout to a thread. If you have 200 concurrent queries, you need 200 pooled connections and at least 200 threads to use them. R2DBC decouples connections from threads: the same connection can serve multiple sequential requests on the same event loop because no thread is held while the database processes the query.</p>
+
+<h2>The R2DBC Driver Architecture</h2>
+
+<p>R2DBC is built on the <strong>Reactive Streams</strong> specification, which defines four core interfaces: <code>Publisher</code>, <code>Subscriber</code>, <code>Subscription</code>, and <code>Processor</code>. Every R2DBC operation returns a <code>Publisher</code> that the subscriber consumes at its own pace, governed by backpressure.</p>
+
+<p>The flow for a single query looks like this:</p>
+
+<pre><code>Application code
+       |
+       v
+ConnectionFactory.create()   --&gt; Publisher&lt;Connection&gt;
+       |
+       v
+Connection.createStatement() --&gt; Statement
+       |
+       v
+Statement.execute()          --&gt; Publisher&lt;Result&gt;
+       |
+       v
+Result.map((row, metadata) -&gt; ...) --&gt; Publisher&lt;T&gt;</code></pre>
+
+<p>At each step, nothing happens until a subscriber requests data. The database driver pushes rows downstream only when the subscriber signals demand via <code>Subscription.request(n)</code>. This is backpressure: the subscriber controls the flow rather than being overwhelmed by the producer.</p>
+
+<p>Key interfaces in <code>io.r2dbc.spi</code>:</p>
+
+<ul>
+  <li><strong><code>ConnectionFactory</code></strong>: the entry point; creates <code>Connection</code> objects</li>
+  <li><strong><code>Connection</code></strong>: represents an active database session</li>
+  <li><strong><code>Statement</code></strong>: a parameterized SQL statement to execute</li>
+  <li><strong><code>Result</code></strong>: the query result; you map rows from it</li>
+  <li><strong><code>Row</code></strong>: a single result row; read columns by name or index</li>
+</ul>
+
+<h2>When to Use R2DBC vs JDBC</h2>
+
+<p>Reach for R2DBC when your application already runs on the reactive stack (Spring WebFlux, Netty). Mixing blocking JDBC into a WebFlux application negates the throughput benefits of the event-loop model. Conversely, if you are on Spring MVC with Tomcat, JDBC and JPA remain the natural choice; adding R2DBC there gains nothing and loses JPA's mature feature set.</p>
+
+<p>Trade-offs to consider:</p>
+
+<ul>
+  <li><strong>R2DBC lacks JPA features.</strong> No lazy loading, no second-level cache, no dirty checking, no automatic schema generation. You write queries and map rows yourself (or let Spring Data R2DBC do it).</li>
+  <li><strong>Driver maturity.</strong> PostgreSQL and MySQL have solid R2DBC drivers. Support for niche databases varies.</li>
+  <li><strong>Debugging is harder.</strong> Stack traces in reactive pipelines are less readable than synchronous call chains.</li>
+  <li><strong>Throughput vs latency.</strong> R2DBC improves throughput under concurrent load but does not make individual queries faster.</li>
+</ul>
+
+<h2>Maven Dependencies</h2>
+
+<p>R2DBC uses a Bill of Materials (BOM) to align driver versions. In your <code>pom.xml</code>:</p>
+
+<pre><code>&lt;dependencyManagement&gt;
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;io.r2dbc&lt;/groupId&gt;
+            &lt;artifactId&gt;r2dbc-bom&lt;/artifactId&gt;
+            &lt;version&gt;1.0.0.RELEASE&lt;/version&gt;
+            &lt;type&gt;pom&lt;/type&gt;
+            &lt;scope&gt;import&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;
+
+&lt;dependencies&gt;
+    &lt;!-- Spring Data R2DBC starter (includes SPI + Spring integration) --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-data-r2dbc&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- PostgreSQL R2DBC driver --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.postgresql&lt;/groupId&gt;
+        &lt;artifactId&gt;r2dbc-postgresql&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+<p>The BOM manages driver versions so you omit <code>&lt;version&gt;</code> from individual R2DBC dependencies. Spring Boot's starter auto-configures a <code>ConnectionFactory</code> from properties in <code>application.yml</code>.</p>
+
+<h2>A Basic R2DBC Connection Example</h2>
+
+<p>Before Spring Data abstracts it away, it helps to see the raw SPI in action. This standalone example uses the R2DBC PostgreSQL driver directly:</p>
+
+<pre><code>import io.r2dbc.spi.ConnectionFactories;
+import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactoryOptions;
+import reactor.core.publisher.Mono;
+
+import static io.r2dbc.spi.ConnectionFactoryOptions.*;
+
+public class RawR2dbcExample {
+
+    public static void main(String[] args) {
+        ConnectionFactory factory = ConnectionFactories.get(
+            ConnectionFactoryOptions.builder()
+                .option(DRIVER, "postgresql")
+                .option(HOST, "localhost")
+                .option(PORT, 5432)
+                .option(USER, "postgres")
+                .option(PASSWORD, "secret")
+                .option(DATABASE, "mydb")
+                .build()
+        );
+
+        Mono.from(factory.create())
+            .flatMap(conn -&gt;
+                Mono.from(conn.createStatement(
+                        "SELECT name FROM customers WHERE id = $1"
+                    )
+                    .bind("$1", 1)
+                    .execute())
+                .flatMap(result -&gt;
+                    Mono.from(result.map((row, metadata) -&gt;
+                        row.get("name", String.class)
+                    ))
+                )
+                .doFinally(signalType -&gt; conn.close().subscribe())
+            )
+            .subscribe(name -&gt; System.out.println("Found: " + name));
+    }
+}</code></pre>
+
+<p>Key observations:</p>
+
+<ul>
+  <li><code>ConnectionFactory</code> is created from options, not a URL string (though R2DBC also supports <code>r2dbc:postgresql://user:pass@host:5432/db</code> URL syntax).</li>
+  <li>PostgreSQL R2DBC uses <code>$1</code>, <code>$2</code> parameter placeholders rather than JDBC's <code>?</code>.</li>
+  <li>Everything returns a <code>Publisher</code>; nothing executes until you <code>subscribe()</code>.</li>
+  <li>The connection must be closed explicitly. In a real application, Spring handles this.</li>
+</ul>
+
+<p>With Spring Data R2DBC, you rarely write this boilerplate. You define a <code>ReactiveCrudRepository</code> interface and Spring generates the implementation. The raw SPI is shown here so you understand what happens underneath.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://r2dbc.io/spec/1.0.0.RELEASE/spec/html/" target="_blank" rel="noopener">R2DBC Specification 1.0.0</a> &middot; <a href="https://docs.spring.io/spring-data/r2dbc/docs/current/reference/html/" target="_blank" rel="noopener">Spring Data R2DBC Reference</a> &middot; <a href="https://www.reactive-streams.org/" target="_blank" rel="noopener">Reactive Streams Specification</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What is the primary reason R2DBC was created?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">To replace JPA as the default ORM in Spring Boot</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">To provide non-blocking database access for reactive applications</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">To add lazy loading and dirty checking to relational databases</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">To make SQL queries run faster through query caching</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. In R2DBC, what happens when you call <code>Statement.execute()</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The query runs immediately and returns a synchronous <code>ResultSet</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The query is queued and will run on a separate thread pool</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">It returns a <code>Publisher&lt;Result&gt;</code> that executes only when subscribed to</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It buffers all rows in memory before returning them</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. Which combination is the natural fit for R2DBC?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring MVC with Tomcat and JPA</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Spring WebFlux with Netty and reactive repositories</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring MVC with Netty and JDBC</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Spring WebFlux with Tomcat and JPA</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. What role does <code>r2dbc-bom</code> play in a Maven project?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It provides the reactive web server runtime</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">It aligns versions across all R2DBC dependencies so you omit version tags</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It auto-generates entity classes from database schema</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It replaces the need for a specific database driver</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. How does backpressure work in the R2DBC driver model?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The publisher buffers all rows before the subscriber starts</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The subscriber processes rows on a separate blocking thread</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The subscriber signals demand via <code>Subscription.request(n)</code>, and the publisher only sends that many items</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The database drops rows when the subscriber falls behind</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0062-kotlin-migration-strategy.html" class="nav-prev">&larr; Prev</a>
+  <a href="0064-spring-data-r2dbc.html" class="nav-next">Next &rarr;</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

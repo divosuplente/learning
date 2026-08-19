@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 65 — Reactive Patterns with R2DBC</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Reactive Patterns with R2DBC</h1>
+
+<p>You have seen how Spring Data R2DBC replaces JPA's blocking calls with <code>Mono</code> and <code>Flux</code>. But real services need transactions, batch operations, error recovery, and composed database calls. This lesson covers the reactive patterns that make R2DBC work in production: transaction management with <code>ReactiveTransactionTemplate</code>, bulk operations, Project Reactor error handling, call composition, backpressure, and the cases where R2DBC is the wrong choice.</p>
+
+<h2>Transaction Management in Reactive Code</h2>
+
+<p>JDBC transactions are bound to <code>ThreadLocal</code>. The connection is stored on the current thread, and Spring's <code>@Transactional</code> interceptor sets it up before your method runs and tears it down after. This model does not work in reactive code because a <code>Mono</code> or <code>Flux</code> may execute across multiple threads. The subscription that starts a database call and the callback that processes the result often run on different event-loop threads, so <code>ThreadLocal</code> cannot carry the connection.</p>
+
+<p>Spring solves this with <strong>reactive transactions</strong>, which store the database connection in the Reactor <code>Context</code> instead of <code>ThreadLocal</code>. The <code>Context</code> travels with the reactive chain, so every operator in the pipeline can access the same connection regardless of which thread runs it.</p>
+
+<h3>Declarative: @Transactional</h3>
+
+<p>Spring's <code>@Transactional</code> annotation works with R2DBC the same way it works with JPA. The interceptor detects the reactive return type and uses <code>Context</code>-based transaction management:</p>
+
+<pre><code>@Service
+public class OrderService {
+
+    private final OrderRepository orderRepo;
+    private final OrderItemRepository itemRepo;
+
+    @Transactional
+    public Mono&lt;Order&gt; createOrder(OrderRequest request) {
+        return orderRepo.save(Order.of(request))
+            .flatMap(order -> {
+                List&lt;OrderItem&gt; items = request.items().stream()
+                    .map(i -> OrderItem.of(order.getId(), i))
+                    .toList();
+                return itemRepo.saveAll(items)
+                    .collectList()
+                    .thenReturn(order);
+            });
+    }
+}</code></pre>
+
+<p>When <code>@Transactional</code> is on a method returning <code>Mono</code> or <code>Flux</code>, Spring automatically uses the reactive transaction manager. The transaction commits when the <code>Mono</code> completes successfully and rolls back when it errors.</p>
+
+<h3>Programmatic: ReactiveTransactionTemplate</h3>
+
+<p>When you need fine-grained control over transaction boundaries, use <code>ReactiveTransactionTemplate</code>. It works like the blocking <code>TransactionTemplate</code> but returns <code>Mono</code>:</p>
+
+<pre><code>@Service
+public class OrderService {
+
+    private final ReactiveTransactionTemplate txTemplate;
+    private final OrderRepository orderRepo;
+    private final InventoryRepository inventoryRepo;
+
+    public Mono&lt;Order&gt; reserveAndCreate(OrderRequest request) {
+        return txTemplate.execute(status -> {
+            return inventoryRepo.reserve(request.productId(), request.quantity())
+                .flatMap(reserved -> {
+                    if (!reserved) {
+                        return Mono.error(new InsufficientStockException(
+                            request.productId()));
+                    }
+                    return orderRepo.save(Order.of(request));
+                });
+        });
+    }
+}</code></pre>
+
+<p><code>ReactiveTransactionTemplate.execute</code> takes a <code>TransactionCallback&lt;T&gt;</code> whose single method returns <code>Mono&lt;T&gt;</code>. The template opens the transaction, runs your callback, and commits or rolls back based on whether the <code>Mono</code> completes or errors. You configure it with a <code>ReactiveTransactionManager</code>:</p>
+
+<pre><code>@Bean
+public ReactiveTransactionTemplate reactiveTransactionTemplate(
+        ReactiveTransactionManager transactionManager) {
+    return new ReactiveTransactionTemplate(transactionManager);
+}</code></pre>
+
+<h3>Pitfall: Breaking the Chain</h3>
+
+<p>A transaction only covers operations that are <strong>inside the reactive chain</strong>. If you call a blocking method or start a new chain outside the callback, it runs without a transaction:</p>
+
+<pre><code>// WRONG: saveAll runs outside the transaction
+public Mono&lt;Order&gt; createOrder(OrderRequest request) {
+    return txTemplate.execute(status ->
+        orderRepo.save(Order.of(request))
+    ).flatMap(order -> {
+        // This runs AFTER the transaction commits
+        return itemRepo.saveAll(buildItems(order, request))
+            .collectList()
+            .thenReturn(order);
+    });
+}</code></pre>
+
+<p>The fix is to nest the <code>saveAll</code> inside the callback, as in the earlier examples.</p>
+
+<h2>Batch Operations with R2DBC</h2>
+
+<p>Saving entities one at a time produces N round trips to the database. R2DBC supports batch operations that send multiple statements in a single round trip.</p>
+
+<h3>saveAll with ReactiveCrudRepository</h3>
+
+<p><code>ReactiveCrudRepository.saveAll</code> accepts an <code>Iterable</code> or <code>Flux</code> and returns a <code>Flux</code> of saved entities. The implementation depends on the driver: most drivers (including <code>r2dbc-postgresql</code>) batch the insert statements:</p>
+
+<pre><code>public Flux&lt;OrderItem&gt; saveAllItems(List&lt;OrderItem&gt; items) {
+    return itemRepo.saveAll(items);
+}</code></pre>
+
+<p>The returned <code>Flux</code> emits each saved entity as the database confirms it. If any insert fails, the <code>Flux</code> terminates with an error.</p>
+
+<h3>Bulk Upserts with DatabaseClient</h3>
+
+<p>For UPDATE-or-INSERT logic, use <code>DatabaseClient</code> to execute a native batch statement. PostgreSQL supports <code>INSERT ... ON CONFLICT</code> for upserts:</p>
+
+<pre><code>@Service
+public class InventoryService {
+
+    private final DatabaseClient db;
+
+    public Flux&lt;Void&gt; bulkUpsert(List&lt;InventoryEntry&gt; entries) {
+        return Flux.fromIterable(entries)
+            .flatMap(entry -> db.sql("""
+                    INSERT INTO inventory (product_id, quantity)
+                    VALUES (:productId, :quantity)
+                    ON CONFLICT (product_id)
+                    DO UPDATE SET quantity = inventory.quantity + :quantity
+                """)
+                .bind("productId", entry.productId())
+                .bind("quantity", entry.quantity())
+                .then());
+    }
+}</code></pre>
+
+<p>Each upsert is a separate statement through <code>DatabaseClient</code>. For true multi-row inserts in a single statement, build the SQL with parameter lists:</p>
+
+<pre><code>public Mono&lt;Integer&gt; batchInsert(List&lt;Product&gt; products) {
+    String sql = "INSERT INTO products (name, price) VALUES ($1, $2)";
+    return connectionFactory.create()
+        .flatMapMany(conn -> {
+            R2dbcStatement&lt;Product&gt; stmt = conn.createStatement(sql);
+            for (int i = 0; i &lt; products.size(); i++) {
+                Product p = products.get(i);
+                stmt.bind(0, p.getName()).bind(1, p.getPrice());
+                if (i &lt; products.size() - 1) {
+                    stmt.add();
+                }
+            }
+            return Flux.from(stmt.execute())
+                .flatMap(Result::getRowsUpdated)
+                .doFinally(signal -> conn.close());
+        })
+        .reduce(0, Integer::sum);
+}</code></pre>
+
+<p>The <code>stmt.add()</code> call separates parameter sets within a single batched statement. The driver sends all rows to the database in one round trip.</p>
+
+<h2>Error Handling in Reactive Database Flows</h2>
+
+<p>In JDBC code, you handle database errors with try-catch. In reactive code, errors propagate through the <code>Mono</code>/<code>Flux</code> chain and you handle them with Reactor operators.</p>
+
+<h3>onErrorResume: Recover from Errors</h3>
+
+<p><code>onErrorResume</code> is the reactive equivalent of a catch block. It catches an error and substitutes a fallback <code>Mono</code> or <code>Flux</code>:</p>
+
+<pre><code>public Mono&lt;Order&gt; findOrderOrEmpty(Long id) {
+    return orderRepo.findById(id)
+        .onErrorResume(R2dbcNonTransientException.class, e -> {
+            log.warn("Database error fetching order {}", id, e);
+            return Mono.empty();
+        });
+}</code></pre>
+
+<p>You can filter by exception type. Common R2DBC exceptions:</p>
+
+<ul>
+  <li><strong><code>R2dbcNonTransientException</code></strong>: data integrity violations, constraint violations. These will fail on retry.</li>
+  <li><strong><code>R2dbcTransientException</code></strong>: deadlocks, timeouts. These may succeed on retry.</li>
+  <li><strong><code>R2dbcPermissionDeniedException</code></strong>: authentication or authorization failures.</li>
+</ul>
+
+<h3>retry: Automatically Retry Transient Failures</h3>
+
+<p>For transient errors (deadlocks, connection timeouts), <code>retry</code> resubscribes to the source <code>Mono</code> or <code>Flux</code>:</p>
+
+<pre><code>public Mono&lt;Order&gt; saveWithRetry(Order order) {
+    return orderRepo.save(order)
+        .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+            .maxBackoff(Duration.ofSeconds(2))
+            .filter(e -> e instanceof R2dbcTransientException)
+            .doBeforeRetry(signal -> log.warn(
+                "Retry {} for order save", signal.totalRetries())));
+}</code></pre>
+
+<p>Key points about <code>retryWhen</code>:</p>
+
+<ul>
+  <li><strong>Exponential backoff</strong> prevents hammering a struggling database. <code>Retry.backoff(3, Duration.ofMillis(100))</code> retries up to 3 times with a 100ms initial delay that doubles each attempt.</li>
+  <li><strong>Filter by exception type</strong> so you only retry transient errors, not data integrity violations.</li>
+  <li><strong>The entire chain resubscribes</strong> on retry, not just the failing operator. If your chain includes non-idempotent operations (like sending an email), use <code>retryWhen</code> only on the database portion.</li>
+</ul>
+
+<h3>Combining onErrorResume and retry</h3>
+
+<p>Retry first, then fall back. This pattern retries transient errors and recovers from permanent ones:</p>
+
+<pre><code>public Mono&lt;Order&gt; findResilient(Long id) {
+    return orderRepo.findById(id)
+        .retryWhen(Retry.backoff(2, Duration.ofMillis(50))
+            .filter(e -> e instanceof R2dbcTransientException))
+        .onErrorResume(R2dbcNonTransientException.class, e -> {
+            log.error("Permanent error for order {}", id, e);
+            return Mono.empty();
+        });
+}</code></pre>
+
+<h2>Composition: Chaining Database Calls</h2>
+
+<p>Real service methods rarely make a single database call. You chain calls with Reactor operators.</p>
+
+<h3>flatMap: Sequential Dependent Calls</h3>
+
+<p>Use <code>flatMap</code> when the second call depends on the result of the first. Each inner <code>Mono</code> subscribes after the previous one completes:</p>
+
+<pre><code>public Mono&lt;OrderSummary&gt; getOrderSummary(Long orderId) {
+    return orderRepo.findById(orderId)
+        .flatMap(order ->
+            itemRepo.findByOrderId(orderId)
+                .collectList()
+                .map(items -> new OrderSummary(order, items))
+        );
+}</code></pre>
+
+<h3>concatMap: Ordered Dependent Calls</h3>
+
+<p><code>concatMap</code> is like <code>flatMap</code> but preserves ordering and processes inner publishers one at a time. Use it with <code>Flux</code> sources when order matters:</p>
+
+<pre><code>public Flux&lt;OrderWithItems&gt; getOrdersWithItems(Long customerId) {
+    return orderRepo.findByCustomerId(customerId)
+        .concatMap(order ->
+            itemRepo.findByOrderId(order.getId())
+                .collectList()
+                .map(items -> new OrderWithItems(order, items))
+        );
+}</code></pre>
+
+<p><code>concatMap</code> processes one order at a time, ensuring the items for order 1 arrive before order 2 starts processing. <code>flatMap</code> with a concurrency limit (<code>flatMap(fn, 4)</code>) achieves the same ordering guarantee with controlled parallelism.</p>
+
+<h3>zip: Parallel Independent Calls</h3>
+
+<p>When two calls are independent, <code>Mono.zip</code> runs them concurrently and combines the results:</p>
+
+<pre><code>public Mono&lt;Dashboard&gt; getDashboard(Long customerId) {
+    Mono&lt;List&lt;Order&gt;&gt; orders = orderRepo.findByCustomerId(customerId)
+        .collectList()
+        .subscribeOn(Schedulers.boundedElastic());
+    Mono&lt;Customer&gt; customer = customerRepo.findById(customerId)
+        .subscribeOn(Schedulers.boundedElastic());
+
+    return Mono.zip(orders, customer, Dashboard::new);
+}</code></pre>
+
+<p>The <code>subscribeOn</code> calls ensure each query can start on a different thread. Without <code>subscribeOn</code>, Reactor may still interleave the subscriptions but the actual database calls could serialize on the same connection.</p>
+
+<h2>Backpressure Considerations</h2>
+
+<p>Backpressure is the mechanism by which a <code>Flux</code> subscriber tells the publisher how many items it can process. Without backpressure, a fast database query can flood a slow consumer with more data than it can handle, causing out-of-memory errors.</p>
+
+<h3>How R2DBC Handles Backpressure</h3>
+
+<p>R2DBC drivers that support cursors (PostgreSQL does) fetch rows incrementally. The driver requests rows from the database in batches as the subscriber signals demand, so a <code>Flux</code> from <code>findAll()</code> does not load the entire result set into memory.</p>
+
+<h3>When Backpressure Matters</h3>
+
+<pre><code>// Risk: unbounded in-memory accumulation
+itemRepo.findByOrderId(orderId)
+    .collectList()          // loads all items into memory
+    .map(this::calculateTotal);
+
+// Safer: process incrementally
+itemRepo.findByOrderId(orderId)
+    .reduce(BigDecimal.ZERO, (sum, item) ->
+        sum.add(item.getPrice().multiply(
+            BigDecimal.valueOf(item.getQuantity()))));</code></pre>
+
+<p>Use <code>reduce</code>, <code>scan</code>, or other incremental operators instead of <code>collectList</code> when the result set might be large. <code>collectList</code> is fine for small, bounded sets (order items for a single order).</p>
+
+<h3>Rate Limiting with limitRate</h3>
+
+<p>When consuming a <code>Flux</code> from a large table, <code>limitRate</code> controls how many items the subscriber requests at a time:</p>
+
+<pre><code>productRepo.findAll()
+    .limitRate(100)         // request 100 rows at a time
+    .flatMap(product -> reindexService.index(product)
+        .subscribeOn(Schedulers.parallel()), 32)
+    .then();</code></pre>
+
+<p><code>limitRate(100)</code> tells the database driver to fetch at most 100 rows per batch. The <code>flatMap</code> concurrency of 32 ensures at most 32 index operations run in parallel.</p>
+
+<h2>When NOT to Use R2DBC</h2>
+
+<p>R2DBC is not a universal upgrade from JDBC. It adds complexity and limits your library choices. Weigh these factors before committing.</p>
+
+<h3>Simple CRUD on a Blocking Stack</h3>
+
+<p>If your application uses Spring MVC, JPA, and handles moderate traffic, there is no benefit to R2DBC. The reactive pipeline requires every layer (controller, service, repository, driver) to be non-blocking. Mixing R2DBC into a blocking Spring MVC application gives you the complexity of reactive code without the throughput benefits.</p>
+
+<h3>Existing JDBC Investment</h3>
+
+<p>If your team has years of JDBC experience, extensive JPA entity mappings, and mature Hibernate configurations, migrating to R2DBC means rewriting all of it. R2DBC has no lazy loading, no second-level cache, no dirty checking, and no JPA-compliant query language. You lose Hibernate's entire feature set.</p>
+
+<h3>Library and Tool Compatibility</h3>
+
+<p>Many Java database tools assume JDBC:</p>
+
+<ul>
+  <li><strong>Flyway and Liquibase</strong>: work with JDBC connections, not R2DBC. You still need a JDBC driver for migrations.</li>
+  <li><strong>jOOQ</strong>: added R2DBC support, but the reactive API is less mature than its JDBC counterpart.</li>
+  <li><strong>Spring Batch</strong>: designed around JDBC transaction management. R2DBC integration is limited.</li>
+  <li><strong>Monitoring tools</strong>: JDBC proxies (P6Spy, SkyWalking) do not instrument R2DBC connections.</li>
+</ul>
+
+<h3>When R2DBC Is the Right Choice</h3>
+
+<ul>
+  <li>Your application is already on WebFlux and you need non-blocking database access end-to-end.</li>
+  <li>You are building a high-concurrency service where thread-per-request scaling is a bottleneck.</li>
+  <li>You are streaming large result sets to clients and want backpressure-aware database consumption.</li>
+  <li>Your database operations are simple reads and writes that do not need JPA's advanced features.</li>
+</ul>
+
+<h2>Practical Example: Reactive Order Service</h2>
+
+<p>The following service demonstrates transactions, error handling, and composition in a single class:</p>
+
+<pre><code>@Service
+public class ReactiveOrderService {
+
+    private final ReactiveTransactionTemplate txTemplate;
+    private final OrderRepository orderRepo;
+    private final OrderItemRepository itemRepo;
+    private final InventoryRepository inventoryRepo;
+
+    public ReactiveOrderService(ReactiveTransactionTemplate txTemplate,
+                                OrderRepository orderRepo,
+                                OrderItemRepository itemRepo,
+                                InventoryRepository inventoryRepo) {
+        this.txTemplate = txTemplate;
+        this.orderRepo = orderRepo;
+        this.itemRepo = itemRepo;
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    /**
+     * Create an order with items and inventory reservation
+     * in a single transaction. Retries transient failures,
+     * recovers from permanent ones.
+     */
+    public Mono&lt;Order&gt; createOrder(OrderRequest request) {
+        return txTemplate.execute(status ->
+            inventoryRepo.reserve(request.productId(), request.quantity())
+                .flatMap(reserved -> {
+                    if (!reserved) {
+                        return Mono.error(
+                            new InsufficientStockException(request.productId()));
+                    }
+                    return orderRepo.save(Order.of(request))
+                        .flatMap(order -> {
+                            List&lt;OrderItem&gt; items = request.items().stream()
+                                .map(i -> OrderItem.of(order.getId(), i))
+                                .toList();
+                            return itemRepo.saveAll(items)
+                                .collectList()
+                                .thenReturn(order);
+                        });
+                })
+        )
+        .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
+            .maxBackoff(Duration.ofSeconds(2))
+            .filter(e -> e instanceof R2dbcTransientException)
+            .doBeforeRetry(signal -> log.warn(
+                "Retry {} for order creation", signal.totalRetries())))
+        .onErrorResume(InsufficientStockException.class, e ->
+            Mono.error(e))   // propagate business errors
+        .onErrorResume(R2dbcNonTransientException.class, e -> {
+            log.error("Failed to create order", e);
+            return Mono.error(new OrderCreationException(
+                "Order could not be created", e));
+        });
+    }
+
+    /**
+     * Fetch an order with its items. Independent queries
+     * run concurrently with zip.
+     */
+    public Mono&lt;OrderDetail&gt; getOrderDetail(Long orderId) {
+        Mono&lt;Order&gt; order = orderRepo.findById(orderId)
+            .switchIfEmpty(Mono.error(
+                new OrderNotFoundException(orderId)));
+        Mono&lt;List&lt;OrderItem&gt;&gt; items = itemRepo.findByOrderId(orderId)
+            .collectList();
+
+        return Mono.zip(order, items, OrderDetail::new);
+    }
+
+    /**
+     * Stream all orders for a customer with backpressure control.
+     */
+    public Flux&lt;OrderSummary&gt; getOrderSummaries(Long customerId) {
+        return orderRepo.findByCustomerId(customerId)
+            .limitRate(50)
+            .concatMap(order ->
+                itemRepo.findByOrderId(order.getId())
+                    .reduce(BigDecimal.ZERO, (sum, item) ->
+                        sum.add(item.getPrice()))
+                    .map(total -> new OrderSummary(order, total))
+            );
+    }
+}</code></pre>
+
+<p>Key patterns in this example:</p>
+
+<ul>
+  <li><strong>Transaction boundary wraps all related operations</strong>: inventory check, order insert, and item inserts all run inside <code>txTemplate.execute</code>. If any step fails, the entire transaction rolls back.</li>
+  <li><strong>Ordered error handling</strong>: <code>retryWhen</code> handles transient database errors before <code>onErrorResume</code> maps permanent errors to domain exceptions. Business exceptions (insufficient stock) pass through.</li>
+  <li><strong>Independent queries with zip</strong>: fetching an order and its items are independent, so <code>Mono.zip</code> runs them concurrently.</li>
+  <li><strong>Backpressure with limitRate and reduce</strong>: the streaming endpoint fetches items incrementally and accumulates totals without collecting the full list into memory.</li>
+</ul>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-framework/reference/data-access/r2dbc.html" target="_blank" rel="noopener">Spring Framework R2DBC Reference</a> · <a href="https://docs.spring.io/spring-data/r2dbc/docs/current/reference/html/#r2dbc.transactions" target="_blank" rel="noopener">Spring Data R2DBC Transactions</a> · <a href="https://projectreactor.io/docs/core/release/reference/html/#which-errors" target="_blank" rel="noopener">Project Reactor Error Handling</a> · <a href="https://r2dbc.io/spec/0.9.1.RELEASE/spec/html/" target="_blank" rel="noopener">R2DBC Specification 0.9</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. Why does Spring's <code>@Transactional</code> not work with R2DBC using the same <code>ThreadLocal</code> mechanism as JDBC?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">R2DBC drivers do not support transactions</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Reactive chains may execute across multiple threads, so <code>ThreadLocal</code> cannot reliably carry the database connection</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">R2DBC uses a separate connection pool that ignores thread boundaries</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>@Transactional</code> requires JPA and cannot be used without Hibernate</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. You use <code>ReactiveTransactionTemplate.execute</code> to wrap an order save and an item save. The item save is chained with <code>flatMap</code> <em>outside</em> the callback. What happens?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">Both saves run in the same transaction</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">The item save runs after the transaction commits, outside any transaction</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">A new transaction is automatically started for the item save</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The item save fails because the connection is closed</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. Your <code>Flux</code> from <code>findAll()</code> on a table with 500,000 rows occasionally causes out-of-memory errors. Which change addresses the root cause?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Add more heap memory to the JVM</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">Replace <code>collectList()</code> with <code>reduce()</code> or add <code>limitRate()</code> to process rows incrementally</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Switch to JDBC with a scrollable result set</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Increase the R2DBC connection pool size</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. You want to retry a database insert only on transient errors like deadlocks. Which <code>retryWhen</code> configuration is correct?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>retryWhen(Retry.backoff(3, Duration.ofMillis(100)))</code> without a filter</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0"><code>retryWhen(Retry.backoff(3, Duration.ofMillis(100)).filter(e -> e instanceof R2dbcTransientException))</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>retryWhen(Retry.backoff(3, Duration.ofMillis(100)).filter(e -> e instanceof R2dbcNonTransientException))</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>onErrorResume(R2dbcTransientException.class, e -> orderRepo.save(order))</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Your Spring MVC application uses JPA, Hibernate, and handles moderate traffic. Your team suggests migrating to R2DBC for better performance. What is the strongest argument against it?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">R2DBC does not support PostgreSQL</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">The application is on a blocking stack; R2DBC requires every layer to be non-blocking, and you lose JPA features (lazy loading, caching, dirty checking) without throughput gains</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">R2DBC cannot handle more than 100 concurrent connections</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">R2DBC does not support transactions</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0064-spring-data-r2dbc.html" class="nav-prev">← Prev</a>
+  <a href="0066-postgresql-deep-dive.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

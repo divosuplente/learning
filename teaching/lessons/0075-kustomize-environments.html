@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 75 — Kustomize: Managing Kubernetes Environments</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Kustomize: Managing Kubernetes Environments</h1>
+
+<p>Every Spring Boot service you deploy to Kubernetes needs different settings per environment: fewer replicas in dev, more in prod; a <code>latest</code> tag in dev but a pinned SHA in prod; smaller resource limits locally, larger ones under load. Maintaining separate YAML files for each environment leads to drift and copy-paste errors. Kustomize solves this by layering environment-specific patches on top of a shared base, with no templating engine required.</p>
+
+<h2>The Problem with Raw YAML</h2>
+
+<p>A typical Spring Boot deployment starts with a single <code>deployment.yaml</code>. The moment you need dev, staging, and prod variants, you face three bad options:</p>
+
+<ul>
+  <li><strong>Copy the whole file</strong> per environment. Changes to the base must be replicated three times. You will forget one.</li>
+  <li><strong>Sed/substitute at deploy time</strong>. Shell scripts that replace values are fragile, hard to audit, and invisible in git history.</li>
+  <li><strong>Parameterize with Helm</strong>. This works, but brings a templating engine and a dependency you may not need just to vary two fields.</li>
+</ul>
+
+<p>Kustomize takes a different approach: declare what makes each environment different as a <strong>patch</strong> over the same base resources. No templates, no variables, no rendering step beyond <code>kubectl kustomize</code>.</p>
+
+<h2>How Kustomize Works</h2>
+
+<p>Kustomize organizes Kubernetes manifests into a <strong>base</strong> (shared resources) and <strong>overlays</strong> (environment-specific modifications). The base contains real, valid Kubernetes YAML. Overlays contain only what changes. At build time, Kustomize merges overlays onto the base and emits complete YAML you can pipe directly to <code>kubectl apply</code>.</p>
+
+<p>Directory layout:</p>
+<pre><code>k8s/
+  base/
+    kustomization.yaml
+    deployment.yaml
+    service.yaml
+  overlays/
+    dev/
+      kustomization.yaml
+      patch-replicas.yaml
+    staging/
+      kustomization.yaml
+      patch-replicas.yaml
+      patch-resources.yaml
+    prod/
+      kustomization.yaml
+      patch-replicas.yaml
+      patch-resources.yaml
+      patch-image.yaml</code></pre>
+
+<p>Every directory has a <code>kustomization.yaml</code>. That file tells Kustomize what resources to include and what transformations to apply.</p>
+
+<h2>kustomization.yaml: The Core File</h2>
+
+<p>The <code>kustomization.yaml</code> in a base directory lists the resources and any cross-cutting transformations:</p>
+
+<pre><code># base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+namePrefix: orderservice-          # every resource name gets this prefix
+commonLabels:
+  app.kubernetes.io/part-of: order-service   # added to every resource
+
+configMapGenerator:
+  - name: app-config
+    literals:
+      - SPRING_PROFILES_ACTIVE=default
+      - LOGGING_LEVEL_ROOT=INFO
+
+secretGenerator:
+  - name: db-credentials
+    literals:
+      - SPRING_DATASOURCE_PASSWORD=changeme</code></pre>
+
+<h3>Key directives</h3>
+
+<ul>
+  <li><strong><code>resources</code></strong>: the Kubernetes YAML files to include. These are standard, valid manifests.</li>
+  <li><strong><code>namePrefix</code></strong>: prepended to every resource name. Useful when multiple services share a cluster and you need to avoid name collisions.</li>
+  <li><strong><code>commonLabels</code></strong>: labels added to every resource and selector. Replaces manual label editing.</li>
+  <li><strong><code>configMapGenerator</code></strong>: creates a ConfigMap from literals, files, or env files. The generated name includes a hash suffix, so changes to the data trigger a rolling update because the pod template reference changes.</li>
+  <li><strong><code>secretGenerator</code></strong>: same as configMapGenerator but for Secrets. The hash suffix ensures rotated credentials trigger redeployment.</li>
+</ul>
+
+<div class="note">
+<p><strong>Hash suffixes matter.</strong> When <code>configMapGenerator</code> or <code>secretGenerator</code> produces a ConfigMap named <code>app-config-7b8c9d2f</code>, the hash changes when the data changes. If your Deployment references this ConfigMap as a volume or env source, the new hash causes the Deployment's pod template to change, which triggers a rolling update. This is Kustomize's built-in answer to "how do I restart pods when config changes?"</p>
+</div>
+
+<h2>Overlays: Environment-Specific Patches</h2>
+
+<p>An overlay references a base and applies patches. The <code>kustomization.yaml</code> in an overlay looks like this:</p>
+
+<pre><code># overlays/dev/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+patches:
+  - path: patch-replicas.yaml</code></pre>
+
+<p>The <code>resources</code> field pulls in the base. The <code>patches</code> field lists files that modify specific fields of the base resources.</p>
+
+<h3>Strategic merge patch</h3>
+
+<p>A strategic merge patch is a partial Kubernetes manifest. You include only the fields you want to change, plus enough metadata for Kustomize to identify which resource to patch:</p>
+
+<pre><code># overlays/dev/patch-replicas.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderservice-app   # must match the base Deployment name (after namePrefix)
+spec:
+  replicas: 1</code></pre>
+
+<p>Only the <code>replicas</code> field is overwritten. The rest of the base deployment passes through unchanged.</p>
+
+<h3>Image patch</h3>
+<p>For most Kubernetes resources, Kustomize uses strategic merge patches:</p>
+<pre><code># overlays/prod/patch-image.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderservice-app
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          image: registry.example.com/order-service:v2.3.1-sha.a9b3c7</code></pre>
+<p>This replaces the container image for prod while leaving the dev overlay on the default tag from the base.</p>
+
+<h2>A Full Working Example</h2>
+
+<p>Start with a base deployment for a Spring Boot service:</p>
+
+<pre><code># base/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: app
+          image: registry.example.com/order-service:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: default</code></pre>
+
+<p>Dev overlay: single replica, dev profile, lower resource limits:</p>
+
+<pre><code># overlays/dev/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namePrefix: dev-
+
+commonLabels:
+  environment: dev
+
+patches:
+  - path: patch-replicas.yaml
+  - path: patch-resources.yaml
+
+configMapGenerator:
+  - name: app-config
+    behavior: replace
+    literals:
+      - SPRING_PROFILES_ACTIVE=dev</code></pre>
+
+<pre><code># overlays/dev/patch-replicas.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-app
+spec:
+  replicas: 1</code></pre>
+
+<pre><code># overlays/dev/patch-resources.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-app
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"</code></pre>
+
+<p>Prod overlay: five replicas, pinned image tag, higher resource limits:</p>
+
+<pre><code># overlays/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namePrefix: prod-
+
+commonLabels:
+  environment: prod
+
+patches:
+  - path: patch-replicas.yaml
+  - path: patch-image.yaml
+  - path: patch-resources.yaml
+
+configMapGenerator:
+  - name: app-config
+    behavior: replace
+    literals:
+      - SPRING_PROFILES_ACTIVE=prod</code></pre>
+
+<pre><code># overlays/prod/patch-replicas.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-app
+spec:
+  replicas: 5</code></pre>
+
+<pre><code># overlays/prod/patch-image.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-app
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          image: registry.example.com/order-service:v2.3.1</code></pre>
+
+<pre><code># overlays/prod/patch-resources.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-app
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"</code></pre>
+
+<h2>Building and Applying</h2>
+
+<p>Kustomize has been built into <code>kubectl</code> since version 1.14. No separate installation required.</p>
+
+<p>Preview the rendered YAML for dev:</p>
+<pre><code>kubectl kustomize overlays/dev/</code></pre>
+
+<p>Apply it directly:</p>
+<pre><code>kubectl apply -k overlays/dev/</code></pre>
+
+<p>Same for prod:</p>
+<pre><code>kubectl apply -k overlays/prod/</code></pre>
+
+<p>The <code>-k</code> flag tells kubectl to read the <code>kustomization.yaml</code> in the given directory, build the resources, and apply the result. You can also use <code>kubectl kustomize .</code> inside an overlay directory to print the final YAML to stdout for inspection or piping.</p>
+
+<div class="note">
+<p><strong>GitOps tip:</strong> If you use Argo CD (covered in the next lesson), point the application source at an overlay directory. Argo CD runs <code>kubectl kustomize</code> internally and applies the result. The overlay directory in git becomes your source of truth for what is deployed.</p>
+</div>
+
+<h2>Kustomize vs Helm</h2>
+
+<p>Both tools manage Kubernetes manifests, but they take different approaches:</p>
+
+<table>
+  <thead>
+    <tr><th>Aspect</th><th>Kustomize</th><th>Helm</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Core mechanism</td><td>Patch layering over plain YAML</td><td>Go templating over YAML skeletons</td></tr>
+    <tr><td>Learning curve</td><td>Low: Kubernetes YAML plus patch syntax</td><td>Higher: template language, values files, chart structure</td></tr>
+    <tr><td>Input validity</td><td>Base files are valid Kubernetes YAML</td><td>Templates are not valid YAML until rendered</td></tr>
+    <tr><td>Diff visibility</td><td>Overlay patches show exactly what changes</td><td>Values files drive generation; diff requires <code>helm template</code></td></tr>
+    <tr><td>Toolchain dependency</td><td>None: built into kubectl</td><td>Requires Helm CLI installed</td></tr>
+    <tr><td>Best fit</td><td>Same app, multiple environments, small per-env diffs</td><td>Packaging and distributing reusable charts with many configurable options</td></tr>
+  </tbody>
+</table>
+
+<p>Use Kustomize when you own the manifests and the main problem is environment variation. Use Helm when you need to package a chart for external consumers who configure it via <code>values.yaml</code>. They can be combined: Kustomize can consume a Helm chart as a resource via <code>helmChart</code> or <code>helmCharts</code>, then patch the output.</p>
+
+<h2>Common Pitfalls</h2>
+
+<ul>
+  <li><strong>Name mismatches in patches.</strong> The <code>metadata.name</code> in your patch must match the resource name <em>after</em> Kustomize transforms it (including <code>namePrefix</code>). A patch targeting <code>app</code> when the base has <code>namePrefix: dev-</code> will not match <code>dev-app</code>.</li>
+  <li><strong>Patching the wrong level.</strong> To change a container field, you must patch <code>spec.template.spec.containers</code>, not <code>spec.containers</code>. The Deployment's own spec does not have containers directly.</li>
+  <li><strong>Overlapping patches.</strong> Two patches modifying the same array field (like <code>containers</code>) can conflict. Use <code> strategicMergePatch</code> for known K8s fields or fall back to JSON 6902 merge for explicit array indexing.</li>
+  <li><strong>Forgetting to reference ConfigMaps by generated name.</strong> If your Deployment mounts a ConfigMap created by <code>configMapGenerator</code>, the reference must include the hash suffix. Kustomize updates these references automatically only if you use the <code>configMapGenerator</code> name without the suffix in your Deployment; Kustomize rewrites it at build time.</li>
+</ul>
+
+<p><strong>Primary sources:</strong> <a href="https://kustomize.io/" target="_blank" rel="noopener">Kustomize Documentation</a> · <a href="https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/" target="_blank" rel="noopener">Kubernetes: Declarative Management with Kustomize</a> · <a href="https://kubectl.docs.kubernetes.io/references/kustomize/" target="_blank" rel="noopener">kubectl kustomize Reference</a> · <a href="https://kubectl.docs.kubernetes.io/references/kustomize/glossary/strategic-merge-patch/" target="_blank" rel="noopener">Strategic Merge Patch</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. You have three environments (dev, staging, prod) that differ only in replica count and image tag. What is the most Kustomize-native way to manage this?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Copy the full deployment YAML into each overlay directory and edit the fields that differ</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">Keep one base deployment YAML and write small patches in each overlay that change only replicas and image</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Use Helm with three values files that set replicas and image per environment</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">Write a shell script that runs sed on a template before applying</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. In a <code>kustomization.yaml</code>, what does <code>configMapGenerator</code> do that simply listing a ConfigMap YAML in <code>resources</code> does not?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It encrypts the ConfigMap data automatically</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">It appends a hash suffix to the ConfigMap name so that data changes trigger pod restarts</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It converts the ConfigMap into a Secret at build time</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It validates that the ConfigMap keys match Spring Boot property names</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. Your base uses <code>namePrefix: dev-</code> and your Deployment is named <code>app</code> in the base YAML. Your patch file must target which metadata name?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>app</code> (the original base name)</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0"><code>dev-app</code> (the name after Kustomize applies the prefix)</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>app-dev</code> (prefix appended, not prepended)</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">Either name works; Kustomize resolves both</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Which command builds and applies the prod overlay in a single step?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>kubectl apply -f overlays/prod/</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0"><code>kubectl apply -k overlays/prod/</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>kustomize build overlays/prod/ | kubectl apply</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>kubectl kustomize overlays/prod/ --apply</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. When is Helm a better choice than Kustomize?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">When you need to vary replica count between dev and prod</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">When you are packaging a reusable chart for external consumers who configure it via values files</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">When you want to avoid installing any additional CLI tools</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">When your base YAML needs to remain valid Kubernetes manifests</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0074-terraform-infrastructure.html" class="nav-prev">← Prev</a>
+  <a href="0076-argo-cd-gitops.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

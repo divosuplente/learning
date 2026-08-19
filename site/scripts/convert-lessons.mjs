@@ -28,6 +28,10 @@ const MODULE_MAP = [
   { range: [50, 54], slug: '09-tdd' },
   { range: [55, 57], slug: '10-capstone-project' },
   { range: [58, 62], slug: '11-migrating-java-to-kotlin' },
+  { range: [63, 65], slug: '12-r2dbc-reactive-data' },
+  { range: [66, 68], slug: '13-postgresql-database' },
+  { range: [69, 72], slug: '14-spring-security' },
+  { range: [73, 76], slug: '15-infrastructure-platform' },
 ];
 
 function getModuleSlug(lessonNum) {

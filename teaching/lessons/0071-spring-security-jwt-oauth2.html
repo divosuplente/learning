@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 71 — Spring Security: JWT and OAuth2</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Spring Security: JWT and OAuth2</h1>
+
+<p>Session-based authentication stores state on the server: a session ID in a cookie maps to server-side session data. This works for a single server, but fails when you have multiple instances behind a load balancer, because no shared store tracks which instance holds the session. <strong>JSON Web Tokens</strong> solve this by carrying authentication data inside the token itself, so the server never needs to look up session state. Below: how JWT works, how Spring Security validates JWTs as an OAuth2 Resource Server, and how to configure OAuth2 Client login with external providers like Google and GitHub.</p>
+
+<h2>JWT structure: header, payload, signature</h2>
+
+<p>A JWT is three Base64URL-encoded segments separated by dots:</p>
+
+<pre><code>eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZGFtIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzAwMDAwMDAwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</code></pre>
+
+<p>Decoded, those three segments are:</p>
+
+<pre><code>// Header — algorithm and token type
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+
+// Payload — claims about the subject
+{
+  "sub": "adam",
+  "role": "admin",
+  "iat": 1700000000
+}
+
+// Signature — HMAC-SHA256( Base64URL(header) + "." + Base64URL(payload), secret )</code></pre>
+
+<p>The <strong>header</strong> identifies the signing algorithm. The <strong>payload</strong> holds <em>claims</em>: key-value pairs like <code>sub</code> (subject), <code>iat</code> (issued-at), <code>exp</code> (expiration), and any custom claims your application needs. The <strong>signature</strong> ensures the token has not been tampered with. Anyone can decode the first two segments, but only the holder of the signing key can produce a valid signature.</p>
+
+<p>JWTS are <strong>not encrypted</strong>. Never put secrets in the payload. The signature guarantees integrity, not confidentiality.</p>
+
+<h2>Stateless authentication vs sessions</h2>
+
+<p>In a session-based flow, the server creates a session after login, stores it in memory (or a database, or Redis), and sends a session cookie to the browser. Every request carries the cookie; the server looks up the session. If you run three instances behind a load balancer, they must share session storage, or the user gets logged out when the balancer routes them to a different instance.</p>
+
+<p>With JWT, the server issues a signed token after login. The client includes it in the <code>Authorization</code> header on every request:</p>
+
+<pre><code>Authorization: Bearer eyJhbGciOi...</code></pre>
+
+<p>The server validates the signature and reads the claims directly from the token. No session lookup. Any instance can validate the token independently, using only the signing key. This is <strong>stateless authentication</strong>.</p>
+
+<p>Tradeoff: you cannot revoke a JWT before it expires. The server has no list of valid tokens to remove one from. Short expiration times and refresh tokens mitigate this. If you need immediate revocation, you need a token blocklist, which reintroduces server state.</p>
+
+<h2>Spring Security OAuth2 Resource Server</h2>
+
+<p>Spring Security's <strong>Resource Server</strong> role validates incoming JWTs and populates the security context with the token's claims. Add the dependency:</p>
+
+<pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-oauth2-resource-server&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+<p>Configure the issuer URI so Spring can fetch the authorization server's JWKS (JSON Web Key Set) and validate signatures automatically:</p>
+
+<pre><code>spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://accounts.google.com</code></pre>
+
+<p>At startup, Spring fetches <code>https://accounts.google.com/.well-known/openid-configuration</code>, reads the <code>jwks_uri</code> from that document, and loads the signing keys. Every incoming <code>Bearer</code> token is validated against those keys. No local secret configuration needed; the authorization server's public keys do all the work.</p>
+
+<h2>JWT decoder and validator setup</h2>
+
+<p>When <code>spring.security.oauth2.resourceserver.jwt.issuer-uri</code> is set, Spring Boot auto-configures a <code>JwtDecoder</code>. You can customize validation by exposing your own bean:</p>
+
+<pre><code>@Bean
+JwtDecoder jwtDecoder() {
+    NimbusJwtDecoder decoder = JwtDecoders
+        .withIssuerLocation("https://accounts.google.com")
+        .build();
+
+    decoder.setJwtValidator(new DelegatingOAuth2TokenValidator(
+        JwtValidators.createDefaultWithIssuer("https://accounts.google.com"),
+        new JwtTimestampValidator()
+    ));
+
+    return decoder;
+}</code></pre>
+
+<p><code>DelegatingOAuth2TokenValidator</code> runs multiple validators in sequence. The default validators check the <code>iss</code> (issuer) and <code>exp</code> (expiration) claims. You can add custom validators, for example checking that a specific <code>aud</code> (audience) claim is present:</p>
+
+<pre><code>new OAuth2TokenValidator&lt;Jwt&gt;() {
+    @Override
+    public OAuth2TokenValidatorResult validate(Jwt jwt) {
+        Set&lt;String&gt; audiences = jwt.getAudience();
+        if (audiences != null &amp;&amp; audiences.contains("my-api")) {
+            return OAuth2TokenValidatorResult.success();
+        }
+        return OAuth2TokenValidatorResult.failure(
+            new OAuth2Error("invalid_token", "Wrong audience", null)
+        );
+    }
+}</code></pre>
+
+<h2>Protected endpoints with @AuthenticationPrincipal</h2>
+
+<p>Once the JWT is validated, Spring Security populates the authentication object. You can access the authenticated user's claims in a controller:</p>
+
+<pre><code>@RestController
+@RequestMapping("/api")
+public class UserController {
+
+    @GetMapping("/me")
+    public Map&lt;String, Object&gt; me(@AuthenticationPrincipal Jwt jwt) {
+        return Map.of(
+            "subject", jwt.getSubject(),
+            "claims", jwt.getClaims()
+        );
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasAuthority('ROLE_admin')")
+    public String admin() {
+        return "Admin area";
+    }
+}</code></pre>
+
+<p><code>@AuthenticationPrincipal Jwt jwt</code> injects the decoded JWT. You can read any claim: <code>jwt.getSubject()</code>, <code>jwt.getClaimAsString("role")</code>, <code>jwt.getClaims()</code> for all of them. <code>hasAuthority()</code> checks granted authorities derived from the token's <code>scope</code> claim by default. To map custom claims to roles, configure a <code>JwtAuthenticationConverter</code>:</p>
+
+<pre><code>@Bean
+JwtAuthenticationConverter jwtAuthenticationConverter() {
+    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+    converter.setJwtGrantedAuthoritiesConverter(jwt -&gt; {
+        String role = jwt.getClaimAsString("role");
+        if (role == null) return List.of();
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+    });
+    return converter;
+}</code></pre>
+
+<h2>OAuth2 Client: login with external providers</h2>
+
+<p>The <strong>OAuth2 Client</strong> role lets your application redirect users to an external provider (Google, GitHub, Okta) for login. Add the dependency:</p>
+
+<pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-oauth2-client&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+<p>Configure the provider credentials in <code>application.yml</code>:</p>
+
+<pre><code>spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope:
+              - read:user
+              - user:email
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login</code></pre>
+
+<p>Spring auto-generates the OAuth2 login flow: <code>/oauth2/authorization/google</code> redirects to Google, Google redirects back with an authorization code, Spring exchanges it for tokens, and the user is authenticated. You get a default login page at <code>/login</code> listing all configured providers.</p>
+
+<p>To require login for all endpoints, configure the security filter chain:</p>
+
+<pre><code>@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -&gt; auth
+                .requestMatchers("/public/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .oauth2Login(Customizer.withDefaults())
+            .oauth2ResourceServer(oauth2 -&gt; oauth2.jwt(Customizer.withDefaults()));
+        return http.build();
+    }
+}</code></pre>
+
+<p>This single configuration supports two flows: browser users log in via the OAuth2 Client redirect flow (Google/GitHub login page), and API clients send <code>Bearer</code> JWTs validated by the Resource Server.</p>
+
+<h2>Practical: configure a resource server to validate JWT tokens</h2>
+
+<p>Given an API that accepts JWTs issued by an external authorization server at <code>https://auth.example.com</code>, here is the minimal setup:</p>
+
+<p><strong>1. Add the dependency</strong></p>
+
+<pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;spring-boot-starter-oauth2-resource-server&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+<p><strong>2. Configure the issuer</strong></p>
+
+<pre><code># application.yml
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.example.com</code></pre>
+
+<p><strong>3. Secure the endpoints</strong></p>
+
+<pre><code>@Configuration
+@EnableWebSecurity
+public class ResourceServerConfig {
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -&gt; auth
+                .requestMatchers("/health").permitAll()
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -&gt; oauth2.jwt(Customizer.withDefaults()));
+        return http.build();
+    }
+}</code></pre>
+
+<p><strong>4. Use the claims in your controller</strong></p>
+
+<pre><code>@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    @GetMapping
+    public List&lt;Order&gt; list(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        return orderService.findByOwner(userId);
+    }
+}</code></pre>
+
+<p>Send a request with a valid JWT:</p>
+
+<pre><code>curl -H "Authorization: Bearer eyJhbGciOi..." https://localhost:8080/api/orders</code></pre>
+
+<p>If the token is valid, <code>jwt.getSubject()</code> returns the user ID from the token's <code>sub</code> claim. If the token is expired, has the wrong issuer, or an invalid signature, Spring returns <code>401 Unauthorized</code> before your controller is reached.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html" target="_blank" rel="noopener">Spring Security: OAuth2 Resource Server JWT</a> · <a href="https://jwt.io/introduction" target="_blank" rel="noopener">JWT.io: Introduction to JSON Web Tokens</a> · <a href="https://docs.spring.io/spring-security/reference/servlet/oauth2/client/index.html" target="_blank" rel="noopener">Spring Security: OAuth2 Client</a> · <a href="https://datatracker.ietf.org/doc/html/rfc7519" target="_blank" rel="noopener">RFC 7519: JSON Web Token</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What does the signature in a JWT guarantee?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The payload is encrypted and unreadable without the key</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">The token has not been modified since it was signed</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The token will never expire</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The client is authorized to access all server resources</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. What does Spring Boot do when you set spring.security.oauth2.resourceserver.jwt.issuer-uri?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It generates and signs JWTs for outgoing requests</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">It fetches the provider's JWKS and auto-configures a JwtDecoder to validate incoming tokens</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It creates a session store backed by the issuer's API</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">It redirects unauthenticated users to the issuer's login page</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. Why is JWT authentication called "stateless"?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The client does not send any credentials with each request</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">The server stores tokens in a distributed cache instead of local memory</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">The server validates the token from its contents alone without looking up session state</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">JWT tokens contain no information about the user</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Which starter do you add to configure Spring Security as an OAuth2 Client that redirects users to Google for login?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">spring-boot-starter-security</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">spring-boot-starter-oauth2-client</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">spring-boot-starter-oauth2-resource-server</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">spring-boot-starter-web</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. What happens when a request arrives with a JWT whose iss claim does not match the configured issuer-uri?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The request is processed but no claims are available</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Spring Security rejects the token and returns 401 Unauthorized</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The token is accepted but logged as a warning</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Spring automatically reissues the token with the correct issuer</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0070-spring-security-authorization.html" class="nav-prev">&larr; Prev</a>
+  <a href="0072-spring-security-csrf-cors.html" class="nav-next">Next &rarr;</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

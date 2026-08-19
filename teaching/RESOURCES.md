@@ -64,6 +64,30 @@ Never trust parametric knowledge — cite these.
 - **Kotlin Reference** — Type: docs — https://kotlinlang.org/docs/home.html — Trust: official — Data classes, coroutines, null safety.
 - **Spring Boot Kotlin** — Type: guides — https://spring.io/guides/tutorials/spring-boot-kotlin/ — Trust: official — Building Spring Boot apps in Kotlin.
 
+## R2DBC & Reactive Data Access (Module 12)
+
+- **Spring Data R2DBC Reference** — Type: docs — https://docs.spring.io/spring-data/r2dbc/reference/ — Trust: official — Reactive CRUD repositories, query derivation, transactions.
+- **R2DBC Specification** — Type: spec — https://github.com/r2dbc/r2dbc-spec — Trust: official — The reactive relational database connectivity spec.
+- **R2DBC Drivers** — Type: docs — https://github.com/r2dbc/r2dbc-bom — Trust: official — Driver matrix and version alignment.
+
+## PostgreSQL & Advanced Database Concepts (Module 13)
+
+- **PostgreSQL Documentation** — Type: docs — https://www.postgresql.org/docs/current/ — Trust: official — Types, indexes, query planner, EXPLAIN.
+- **Use The Index, Luke** — Type: articles — https://use-the-index-luke.com/ — Trust: high — Access methods, statistics, and query optimization explained visually.
+- **Hypersistence Utils** — Type: docs — https://github.com/vladmihalcea/hypersistence-utils — Trust: high — Hibernate types for PostgreSQL JSONB, ARRAY, and more.
+
+## Spring Security (Module 14)
+
+- **Spring Security Reference** — Type: docs — https://docs.spring.io/spring-security/reference/ — Trust: official — Authentication, authorization, CSRF, CORS, OAuth2.
+- **Spring Security 6 Migration** — Type: docs — https://docs.spring.io/spring-security/reference/migration/servlet/index.html — Trust: official — Breaking changes from Spring Security 5 to 6.
+- **JWT.io Specification** — Type: spec — https://www.rfc-editor.org/rfc/rfc7519 — Trust: official — JSON Web Token standard.
+
+## Infrastructure & Platform Engineering (Module 15)
+
+- **Kubernetes Documentation** — Type: docs — https://kubernetes.io/docs/home/ — Trust: official — Pods, Deployments, Services, Kustomize.
+- **Terraform Language Docs** — Type: docs — https://developer.hashicorp.com/terraform/language — Trust: official — HCL syntax, providers, modules, state.
+- **Argo CD Documentation** — Type: docs — https://argo-cd.readthedocs.io/ — Trust: official — Application resource, sync policies, health status.
+
 ## Communities
 
 - **r/java** — Type: forum — https://reddit.com/r/java — Trust: medium — Java ecosystem discussion.

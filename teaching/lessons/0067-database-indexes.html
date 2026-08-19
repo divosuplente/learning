@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 67 — Database Indexes</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Database Indexes</h1>
+
+<p>A query like <code>SELECT * FROM orders WHERE customer_id = 42</code> scans every row in the table to find matches. On a table with ten million rows, that means reading ten million rows even if only three match. An index gives PostgreSQL a shortcut: a sorted data structure that lets it jump straight to the rows it needs, the way a book index sends you to a page number without reading every page. This lesson covers the index types PostgreSQL offers, how to choose the right one, and how to spot when an index is missing or when too many are hurting you.</p>
+
+<h2>What an Index Is: B-Tree Structure</h2>
+
+<p>PostgreSQL's default index type is a <strong>B-tree</strong> (balanced tree). A B-tree stores indexed values in sorted order inside a multi-level tree. The root and branch pages hold key ranges that point to child pages. Leaf pages hold the actual values and pointers to table rows (CTIDs). To find a value, the database descends from root to leaf in O(log n) page reads instead of scanning all pages sequentially.</p>
+
+<pre><code>-- Without an index: sequential scan of every row
+EXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 42;
+-- Seq Scan on orders  (cost=0.00..154321.00 rows=1 width=72) (actual time=85.4..312.6 rows=3 loops=1)
+
+-- Create a B-tree index
+CREATE INDEX idx_orders_customer_id ON orders (customer_id);
+
+-- With the index: index scan, a few page reads
+EXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 42;
+-- Index Scan using idx_orders_customer_id on orders  (cost=0.42..8.45 rows=3 width=72) (actual time=0.015..0.022 rows=3 loops=1)</code></pre>
+
+An index trades disk space for query speed.
+
+<h2>B-Tree Indexes</h2>
+
+<p>B-tree is the default when you write <code>CREATE INDEX</code>. It handles all the common comparison operators:</p>
+
+<ul>
+  <li>Equality: <code>=</code></li>
+  <li>Range: <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, <code>BETWEEN</code></li>
+  <li>Sorted output: <code>ORDER BY</code> on the indexed column (the index is already sorted, so no sort step needed)</li>
+  <li>Prefix pattern matching: <code>LIKE 'abc%'</code> (but not <code>LIKE '%abc'</code>)</li>
+</ul>
+
+<pre><code>-- Range query benefits from B-tree
+SELECT * FROM products WHERE price BETWEEN 10 AND 50 ORDER BY price;
+
+-- ORDER BY can use the index directly
+SELECT * FROM orders WHERE status = 'PENDING' ORDER BY created_at;
+CREATE INDEX idx_orders_status_created ON orders (status, created_at);</code></pre>
+
+<div class="note">
+<p><strong>Check the operator class:</strong> B-tree indexes work with data types that have a sort order (numbers, dates, text). Types without a natural ordering, like <code>jsonb</code> or <code>uuid</code>, need GIN or hash indexes instead for exact-match lookups.</p>
+</div>
+
+<h2>Hash Indexes</h2>
+
+<p>A hash index stores a hash code of the indexed value. It supports <strong>only equality comparisons</strong> (<code>=</code>). No range queries, no ordering. The tradeoff: for exact-match lookups, hash indexes can be faster than B-tree because they skip the tree traversal and go directly to a bucket.</p>
+
+<pre><code>-- Hash index: equality only
+CREATE INDEX idx_sessions_token ON sessions USING hash (token);
+
+-- This uses the index
+SELECT * FROM sessions WHERE token = 'abc123';
+
+-- This does NOT use the hash index (range query)
+SELECT * FROM sessions WHERE token &gt; 'abc123';</code></pre>
+
+<p>Historically, hash indexes in PostgreSQL were not crash-safe before version 10. Since PostgreSQL 10, they are fully WAL-logged and safe for production. Use them when you need fast exact-match lookups on columns with no range queries, such as session tokens, short identifiers, or lookup keys.</p>
+
+<h2>Unique Indexes</h2>
+
+<p>A unique index enforces that no two rows share the same value in the indexed column(s). It also provides the same lookup speed as a regular index. PostgreSQL automatically creates a unique index when you declare a <code>UNIQUE</code> constraint or a <code>PRIMARY KEY</code>.</p>
+
+<pre><code>-- Explicit unique index
+CREATE UNIQUE INDEX idx_users_email ON users (email);
+
+-- These are equivalent: both create a unique B-tree index
+ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);
+
+-- Primary key creates a unique index automatically
+ALTER TABLE orders ADD PRIMARY KEY (id);
+-- PostgreSQL creates: CREATE UNIQUE INDEX orders_pkey ON orders (id);</code></pre>
+
+Inserting a duplicate value fails with a constraint violation:
+
+<pre><code>INSERT INTO users (email, name) VALUES ('alice@example.com', 'Alice');
+-- OK
+
+INSERT INTO users (email, name) VALUES ('alice@example.com', 'Another Alice');
+-- ERROR: duplicate key value violates unique constraint "idx_users_email"
+-- DETAIL: Key (email)=(alice@example.com) already exists.</code></pre>
+
+Use <code>INSERT ... ON CONFLICT</code> to handle duplicates:
+
+<pre><code>INSERT INTO users (email, name) VALUES ('alice@example.com', 'Alice Updated')
+ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name;</code></pre>
+
+<h2>Composite Indexes</h2>
+
+<p>A composite index covers multiple columns. The <strong>column order matters</strong>. A B-tree composite index is sorted left-to-right: first by the leftmost column, then by the next, and so on. A query can use the index only if it filters on a <strong>leftmost prefix</strong> of the indexed columns.</p>
+
+<pre><code>-- Composite index on (status, created_at)
+CREATE INDEX idx_orders_status_created ON orders (status, created_at);
+
+-- Uses the index: filters on the leftmost column
+SELECT * FROM orders WHERE status = 'SHIPPED';
+
+-- Uses the index: filters on both columns (full prefix)
+SELECT * FROM orders WHERE status = 'SHIPPED' AND created_at &gt; '2025-01-01';
+
+-- Does NOT use the index: skips the leftmost column
+SELECT * FROM orders WHERE created_at &gt; '2025-01-01';
+
+-- Uses the index for status, but created_at is not filtered
+SELECT * FROM orders WHERE status = 'SHIPPED' ORDER BY created_at;</code></pre>
+
+<h3>The leftmost prefix rule</h3>
+
+<p>Think of a phone book sorted by last name, then first name. You can find everyone with last name "Smith" easily. You can find "Smith, Alice" easily. But you cannot find everyone with first name "Alice" without scanning the whole book, because first names are only sorted <em>within</em> each last name group. Composite indexes work the same way.</p>
+
+<div class="note">
+<p><strong>Rule of thumb:</strong> Put the column with the most selective filters (the one that narrows results the most) as the leftmost column. If queries filter on both columns equally, put the column used in equality conditions first and range conditions second.</p>
+</div>
+
+<h2>Partial Indexes</h2>
+
+<p>A partial index includes only rows that match a <code>WHERE</code> condition. It is smaller than a full index because it excludes rows that do not match, and it accelerates queries that target the same subset.</p>
+
+<pre><code>-- Index only active users, not the millions of soft-deleted ones
+CREATE INDEX idx_users_email_active ON users (email)
+WHERE deleted_at IS NULL;
+
+-- Query the index covers
+SELECT * FROM users WHERE email = 'alice@example.com' AND deleted_at IS NULL;
+
+-- Index only unpaid orders for a common dashboard query
+CREATE INDEX idx_orders_unpaid ON orders (customer_id, created_at)
+WHERE status = 'UNPAID';
+
+-- This uses the partial index
+SELECT * FROM orders WHERE customer_id = 42 AND status = 'UNPAID';
+-- This does NOT (status condition not in the query)
+SELECT * FROM orders WHERE customer_id = 42;</code></pre>
+
+<p>Partial indexes are useful when a large fraction of rows never appears in queries: soft-deleted records, inactive accounts, completed tasks. The index stays small and fast because it skips the irrelevant rows.</p>
+
+<h2>Covering Indexes (INCLUDE)</h2>
+
+<p>A covering index includes extra columns in its leaf pages that the query needs, so the database can answer the query from the index alone without going back to the table. This is called an <strong>index-only scan</strong>, and it is often an order of magnitude faster because it avoids random I/O to fetch table pages.</p>
+
+<pre><code>-- Standard index: PostgreSQL finds the row in the index, then fetches the full row from the table
+CREATE INDEX idx_orders_customer_id ON orders (customer_id);
+
+-- Covering index: includes columns the query needs
+CREATE INDEX idx_orders_customer_covering ON orders (customer_id)
+INCLUDE (total_amount, status);
+
+-- This query can now be answered entirely from the index
+SELECT customer_id, total_amount, status
+FROM orders
+WHERE customer_id = 42;
+
+-- EXPLAIN shows "Index Only Scan" instead of "Index Scan"</code></pre>
+
+<p>Columns in <code>INCLUDE</code> are stored in leaf pages but are <strong>not part of the sort key</strong>. This means they cannot be used for filtering or ordering, only for returning values. The index stays sorted by <code>customer_id</code> alone, so the tree remains compact.</p>
+
+<div class="note">
+<p><strong>When to use INCLUDE:</strong> If a query selects a few extra columns beyond the indexed ones, adding them via <code>INCLUDE</code> can eliminate the table lookup entirely. Do not include columns you rarely query: they enlarge the index without benefit.</p>
+</div>
+
+<h2>Finding Missing Indexes with EXPLAIN ANALYZE</h2>
+
+<p>PostgreSQL tells you exactly how it executes a query. <code>EXPLAIN</code> shows the plan; <code>EXPLAIN ANALYZE</code> runs the query and reports actual times.</p>
+
+<h3>Reading EXPLAIN output</h3>
+
+<pre><code>EXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 42;
+
+-- Without index:
+-- Seq Scan on orders  (cost=0.00..154321.00 rows=3 width=72) (actual time=85.4..312.6 rows=3 loops=1)
+--   Filter: (customer_id = 42)
+--   Rows Removed by Filter: 999997
+-- Planning Time: 0.08 ms
+-- Execution Time: 313.1 ms
+
+-- With index:
+-- Index Scan using idx_orders_customer_id on orders  (cost=0.42..8.45 rows=3 width=72) (actual time=0.015..0.022 rows=3 loops=1)
+--   Index Cond: (customer_id = 42)
+-- Planning Time: 0.12 ms
+-- Execution Time: 0.04 ms</code></pre>
+
+<p>Key signals that an index is missing:</p>
+
+<ul>
+  <li><strong>Seq Scan</strong> on a large table with a <code>Filter</code> line removing almost all rows.</li>
+  <li><strong>Rows Removed by Filter</strong> is high relative to rows returned.</li>
+  <li><strong>Execution Time</strong> is noticeably slow despite few results.</li>
+</ul>
+
+<h3>Checking for sequential scans at scale</h3>
+
+<p>PostgreSQL tracks index usage statistics. Query <code>pg_stat_user_tables</code> to find tables with high sequential scans:</p>
+
+<pre><code>SELECT relname AS table_name,
+       seq_scan,
+       idx_scan,
+       n_live_tup AS row_count
+FROM pg_stat_user_tables
+ORDER BY seq_scan DESC
+LIMIT 10;</code></pre>
+
+<p>A table with millions of rows and a high <code>seq_scan</code> count relative to <code>idx_scan</code> likely needs an index on its common filter columns.</p>
+
+<h2>When Indexes Hurt</h2>
+
+<p>Indexes are not free. Every <code>INSERT</code>, <code>UPDATE</code>, or <code>DELETE</code> must update every index on the affected table. More indexes means slower writes.</p>
+
+<pre><code>-- Each of these adds overhead to every INSERT/UPDATE/DELETE on orders
+CREATE INDEX idx_orders_customer_id ON orders (customer_id);
+CREATE INDEX idx_orders_status ON orders (status);
+CREATE INDEX idx_orders_created_at ON orders (created_at);
+CREATE INDEX idx_orders_total ON orders (total_amount);
+CREATE INDEX idx_orders_status_created ON orders (status, created_at);</code></pre>
+
+<p>The costs:</p>
+
+<ul>
+  <li><strong>Write slowdown:</strong> Each index adds roughly 10-30% overhead to write operations. Five indexes can double or triple insertion time.</li>
+  <li><strong>Storage:</strong> Each index is a separate data structure on disk. On a large table, five indexes can consume as much space as the table itself.</li>
+  <li><strong>Maintenance:</strong> <code>VACUUM</code> and <code>ANALYZE</code> have more work to do. Index bloat accumulates over time if the table sees heavy updates.</li>
+  <li><strong>Optimizer confusion:</strong> With many similar indexes, the planner may pick a suboptimal one, or waste planning time choosing.</li>
+</ul>
+
+<div class="note">
+<p><strong>Rule of thumb:</strong> Index to support your actual queries, not every column. Start with the slow queries from <code>EXPLAIN ANALYZE</code> and add indexes only where sequential scans are the bottleneck. Drop indexes that no query uses.</p>
+</div>
+
+<p>Find unused indexes:</p>
+
+<pre><code>SELECT indexrelname AS index_name,
+       idx_scan AS times_used,
+       pg_size_pretty(pg_relation_size(indexrelid)) AS size
+FROM pg_stat_user_indexes
+WHERE idx_scan = 0
+ORDER BY pg_relation_size(indexrelid) DESC;</code></pre>
+
+<p>An index with <code>idx_scan = 0</code> since the last statistics reset has never been used for a query. It is costing writes and storage for no benefit. Drop it.</p>
+
+<h2>Practical Examples</h2>
+
+<h3>Index for a common lookup</h3>
+
+<pre><code>-- User login query: exact match on email
+SELECT * FROM users WHERE email = 'alice@example.com';
+
+-- Add a unique index (enforces uniqueness + speeds up)
+CREATE UNIQUE INDEX idx_users_email ON users (email);</code></pre>
+
+<h3>Index for a filtered dashboard query</h3>
+
+<pre><code>-- Dashboard shows recent unpaid orders per customer
+SELECT * FROM orders
+WHERE customer_id = 42 AND status = 'UNPAID'
+ORDER BY created_at DESC;
+
+-- Composite index with leftmost prefix matching both filters
+CREATE INDEX idx_orders_customer_status_created
+ON orders (customer_id, status, created_at DESC);</code></pre>
+
+<h3>Partial index for soft-deleted rows</h3>
+
+<pre><code>-- Most queries filter out soft-deleted records
+SELECT * FROM products WHERE category = 'electronics' AND deleted_at IS NULL;
+
+-- Index only the active rows
+CREATE INDEX idx_products_category_active
+ON products (category) WHERE deleted_at IS NULL;</code></pre>
+
+<h3>Covering index for a reporting query</h3>
+
+<pre><code>-- Report: total amount per status
+SELECT status, SUM(total_amount) FROM orders GROUP BY status;
+
+-- Covering index: the query never touches the table
+CREATE INDEX idx_orders_status_total
+ON orders (status) INCLUDE (total_amount);</code></pre>
+
+<p><strong>Primary sources:</strong> <a href="https://www.postgresql.org/docs/current/sql-createindex.html" target="_blank" rel="noopener">PostgreSQL CREATE INDEX</a> · <a href="https://www.postgresql.org/docs/current/using-explain.html" target="_blank" rel="noopener">PostgreSQL EXPLAIN</a> · <a href="https://www.postgresql.org/docs/current/indexes-types.html" target="_blank" rel="noopener">PostgreSQL Index Types</a> · <a href="https://www.postgresql.org/docs/current/indexes-partial.html" target="_blank" rel="noopener">Partial Indexes</a> · <a href="https://www.postgresql.org/docs/current/indexes-index-only-scans.html" target="_blank" rel="noopener">Index-Only Scans</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. A B-tree composite index is defined as <code>CREATE INDEX idx ON orders (status, created_at)</code>. Which query can use this index?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>SELECT * FROM orders WHERE created_at &gt; '2025-01-01'</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0"><code>SELECT * FROM orders WHERE status = 'SHIPPED'</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>SELECT * FROM orders ORDER BY created_at</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0"><code>SELECT * FROM orders WHERE created_at = '2025-06-01' AND status = 'SHIPPED'</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. What does <code>EXPLAIN ANALYZE</code> show that <code>EXPLAIN</code> alone does not?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The estimated cost of the query plan</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The indexes available on the queried tables</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0">Actual execution times and row counts from running the query</li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">The query rewrite and optimization steps</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. A partial index <code>CREATE INDEX idx ON orders (customer_id) WHERE status = 'UNPAID'</code> would be used by which query?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>SELECT * FROM orders WHERE customer_id = 42</code></li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>SELECT * FROM orders WHERE status = 'UNPAID'</code></li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0"><code>SELECT * FROM orders WHERE customer_id = 42 AND status = 'UNPAID'</code></li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0"><code>SELECT * FROM orders WHERE customer_id = 42 OR status = 'UNPAID'</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. What is the primary advantage of adding columns via <code>INCLUDE</code> in a covering index?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The included columns can be used for range filtering</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The included columns are compressed to save disk space</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The query can be answered from the index alone without reading the table</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">The included columns enforce a uniqueness constraint</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. You find an index with <code>idx_scan = 0</code> in <code>pg_stat_user_indexes</code>. What should you do?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Keep it: the optimizer may use it under heavy load</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">Drop it: it adds write overhead and storage cost with no query benefit</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Rebuild it with <code>REINDEX</code> to make it more efficient</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">Convert it to a unique index to enforce data integrity</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0066-postgresql-deep-dive.html" class="nav-prev">&larr; Prev</a>
+  <a href="0068-query-planner.html" class="nav-next">Next &rarr;</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite - review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

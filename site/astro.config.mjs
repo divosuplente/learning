@@ -138,6 +138,40 @@ export default defineConfig({
                 { label: 'Migration Strategy & Module Review', slug: 'lessons/11-migrating-java-to-kotlin/0062-kotlin-migration-strategy' },
               ],
             },
+            {
+              label: '12 — R2DBC & Reactive Data Access',
+              items: [
+                { label: 'R2DBC: Reactive Relational Database Connectivity', slug: 'lessons/12-r2dbc-reactive-data/0063-r2dbc-introduction' },
+                { label: 'Spring Data R2DBC Repositories', slug: 'lessons/12-r2dbc-reactive-data/0064-spring-data-r2dbc' },
+                { label: 'Reactive Patterns with R2DBC', slug: 'lessons/12-r2dbc-reactive-data/0065-r2dbc-reactive-patterns' },
+              ],
+            },
+            {
+              label: '13 — PostgreSQL & Advanced Database Concepts',
+              items: [
+                { label: 'PostgreSQL Deep Dive', slug: 'lessons/13-postgresql-database/0066-postgresql-deep-dive' },
+                { label: 'Database Indexes', slug: 'lessons/13-postgresql-database/0067-database-indexes' },
+                { label: 'The PostgreSQL Query Planner', slug: 'lessons/13-postgresql-database/0068-query-planner' },
+              ],
+            },
+            {
+              label: '14 — Spring Security',
+              items: [
+                { label: 'Spring Security: Authentication', slug: 'lessons/14-spring-security/0069-spring-security-authentication' },
+                { label: 'Spring Security Authorization', slug: 'lessons/14-spring-security/0070-spring-security-authorization' },
+                { label: 'Spring Security: JWT and OAuth2', slug: 'lessons/14-spring-security/0071-spring-security-jwt-oauth2' },
+                { label: 'Spring Security: CSRF, CORS & Security Headers', slug: 'lessons/14-spring-security/0072-spring-security-csrf-cors' },
+              ],
+            },
+            {
+              label: '15 — Infrastructure & Platform Engineering',
+              items: [
+                { label: 'Kubernetes Fundamentals: Pods, Deployments, Services, ConfigMaps', slug: 'lessons/15-infrastructure-platform/0073-kubernetes-fundamentals' },
+                { label: 'Terraform Infrastructure as Code', slug: 'lessons/15-infrastructure-platform/0074-terraform-infrastructure' },
+                { label: 'Kustomize: Managing Kubernetes Environments', slug: 'lessons/15-infrastructure-platform/0075-kustomize-environments' },
+                { label: 'Argo CD & GitOps', slug: 'lessons/15-infrastructure-platform/0076-argo-cd-gitops' },
+              ],
+            },
           ],
         },
         { label: '00 — Java Foundations', slug: '00-java-foundations' },
@@ -199,6 +233,10 @@ export default defineConfig({
           ],
         },
         { label: '11 — Migrating Java to Kotlin', slug: '11-migrating-java-to-kotlin' },
+        { label: '12 — R2DBC & Reactive Data Access', slug: '12-r2dbc-reactive-data' },
+        { label: '13 — PostgreSQL & Advanced Database Concepts', slug: '13-postgresql-database' },
+        { label: '14 — Spring Security', slug: '14-spring-security' },
+        { label: '15 — Infrastructure & Platform Engineering', slug: '15-infrastructure-platform' },
         {
           label: 'Reference',
           items: [

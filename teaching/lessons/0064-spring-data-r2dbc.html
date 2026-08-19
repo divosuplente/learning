@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 64 - Spring Data R2DBC Repositories</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Spring Data R2DBC Repositories</h1>
+
+<p>Spring Data JPA provides synchronous repositories backed by Hibernate. Spring Data R2DBC provides the same repository abstraction, but every method returns <code>Mono</code> or <code>Flux</code> and every database call is non-blocking. This lesson covers reactive entities, <code>ReactiveCrudRepository</code>, derived queries, <code>@Query</code> with native SQL, and a side-by-side comparison with JPA.</p>
+
+<h2>Reactive Entities</h2>
+
+<p>R2DBC entities look similar to JPA entities but use different annotations from <code>org.springframework.data.annotation</code> and <code>org.springframework.data.relational.core.mapping</code>. There is no lazy loading, no dirty checking, and no second-level cache. An R2DBC entity is a plain data container mapped to a row.</p>
+
+<pre><code>import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+@Table("orders")
+public class Order {
+
+    @Id
+    private Long id;
+
+    @Column("customer_name")
+    private String customerName;
+
+    private String status;
+    private LocalDateTime createdAt;
+
+    // Default constructor required by Spring Data
+    public Order() {}
+
+    public Order(String customerName, String status, LocalDateTime createdAt) {
+        this.customerName = customerName;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
+
+    // Getters and setters omitted for brevity
+}</code></pre>
+
+<p>Key differences from JPA entities:</p>
+
+<ul>
+  <li><strong>No <code>@Entity</code></strong>: use <code>@Table</code> from Spring Data, not <code>javax.persistence</code></li>
+  <li><strong>No <code>@GeneratedValue</code></strong>: R2DBC does not define an ID generation strategy. Databases handle auto-increment natively, or you generate IDs yourself.</li>
+  <li><strong>No lazy loading</strong>: relationships are not proxied. Fetch what you need in the query.</li>
+  <li><strong>No <code>@OneToMany</code> / <code>@ManyToOne</code></strong>: R2DBC has no object-relational mapping. Model related data as separate queries or embed it inline.</li>
+</ul>
+
+<h2>ReactiveCrudRepository</h2>
+
+<p>Where JPA uses <code>JpaRepository</code>, R2DBC uses <code>ReactiveCrudRepository</code>. The interface is in <code>org.springframework.data.repository.reactive</code>. It provides the same CRUD operations but returns reactive types:</p>
+
+<pre><code>import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+
+public interface OrderRepository extends ReactiveCrudRepository&lt;Order, Long&gt; {
+
+    // Inherited methods — all reactive:
+    // Mono&lt;Order&gt;       findById(Long id)
+    // Flux&lt;Order&gt;       findAll()
+    // Mono&lt;Order&gt;       save(Order entity)
+    // Mono&lt;Void&gt;        deleteById(Long id)
+    // Mono&lt;Long&gt;        count()
+}</code></pre>
+
+<p>Spring Boot auto-configures the implementation when <code>spring-boot-starter-data-r2dbc</code> is on the classpath and a <code>ConnectionFactory</code> bean exists. You do not write an implementation class.</p>
+
+<h3>Dependency Setup</h3>
+
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-data-r2dbc&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;org.postgresql&lt;/groupId&gt;
+    &lt;artifactId&gt;r2dbc-postgresql&lt;/artifactId&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+
+<p>Configure the connection in <code>application.yml</code>:</p>
+
+<pre><code>spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/orderdb
+    username: postgres
+    password: secret</code></pre>
+
+<p>Note the <code>r2dbc:</code> scheme, not <code>jdbc:</code>. R2DBC uses its own driver protocol.</p>
+
+<h2>Derived Query Methods</h2>
+
+<p>Spring Data R2DBC supports the same derived query convention as JPA. The method name expresses the predicate; Spring generates the SQL at startup. The difference is the return type: use <code>Flux</code> for multiple results and <code>Mono</code> for zero or one.</p>
+
+<pre><code>public interface OrderRepository extends ReactiveCrudRepository&lt;Order, Long&gt; {
+
+    Flux&lt;Order&gt; findByStatus(String status);
+
+    Flux&lt;Order&gt; findByCustomerNameAndStatus(String customerName, String status);
+
+    Mono&lt;Order&gt; findFirstByCustomerNameOrderByCreatedAtDesc(String customerName);
+
+    Flux&lt;Order&gt; findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    Mono&lt;Long&gt; countByStatus(String status);
+
+    Mono&lt;Void&gt; deleteByStatus(String status);
+}</code></pre>
+
+<p>The derivation rules are identical to JPA: <code>findBy</code>, <code>And</code>/<code>Or</code>, <code>Between</code>, <code>OrderBy</code>, <code>First</code>, <code>countBy</code>, <code>deleteBy</code>. What changes is that every method returns a reactive type.</p>
+
+<h2>@Query with Native SQL</h2>
+
+<p>When derived queries cannot express what you need, use <code>@Query</code> with plain SQL. R2DBC does not have JPQL or HQL. The query string is native SQL against your database.</p>
+
+<pre><code>import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+
+public interface OrderRepository extends ReactiveCrudRepository&lt;Order, Long&gt; {
+
+    @Query("SELECT * FROM orders WHERE customer_name = :name AND status = :status")
+    Flux&lt;Order&gt; findByCustomerAndStatus(@Param("name") String name,
+                                         @Param("status") String status);
+
+    @Query("SELECT * FROM orders WHERE created_at &gt; :since ORDER BY created_at DESC LIMIT :limit")
+    Flux&lt;Order&gt; findRecentOrders(@Param("since") LocalDateTime since,
+                                  @Param("limit") int limit);
+
+    @Query("UPDATE orders SET status = :newStatus WHERE id = :id")
+    Mono&lt;Integer&gt; updateStatus(@Param("id") Long id, @Param("newStatus") String newStatus);
+}</code></pre>
+
+<p>Named parameters use <code>:paramName</code> syntax. Bind them with <code>@Param</code>. The return type follows the same rule: <code>Flux&lt;Order&gt;</code> for rows, <code>Mono&lt;Integer&gt;</code> for update counts.</p>
+
+<h2>Saving, Finding, Deleting</h2>
+
+<p>Every operation on a reactive repository returns a <code>Mono</code> or <code>Flux</code>. Nothing happens until you subscribe. In a WebFlux controller, the framework subscribes for you when the <code>Mono</code> or <code>Flux</code> is returned from a handler method.</p>
+
+<h3>Saving</h3>
+
+<pre><code>@Service
+public class OrderService {
+
+    private final OrderRepository repo;
+
+    public OrderService(OrderRepository repo) {
+        this.repo = repo;
+    }
+
+    public Mono&lt;Order&gt; createOrder(String customerName, String status) {
+        Order order = new Order(customerName, status, LocalDateTime.now());
+        return repo.save(order);
+        // save() returns Mono&lt;Order&gt; with the generated id populated
+    }
+}</code></pre>
+
+<p><code>save()</code> inserts if the entity has no <code>@Id</code> value and updates if it does. The returned <code>Mono</code> contains the entity with the database-generated ID.</p>
+
+<h3>Finding</h3>
+
+<pre><code>public Mono&lt;Order&gt; getOrder(Long id) {
+    return repo.findById(id)
+        .switchIfEmpty(Mono.error(new OrderNotFoundException(id)));
+}
+
+public Flux&lt;Order&gt; getPendingOrders() {
+    return repo.findByStatus("PENDING");
+}</code></pre>
+
+<p><code>findById</code> returns an empty <code>Mono</code> when no row matches. Chain <code>.switchIfEmpty()</code> to convert that into an error or a default.</p>
+
+<h3>Deleting</h3>
+
+<pre><code>public Mono&lt;Void&gt; removeOrder(Long id) {
+    return repo.deleteById(id);
+}
+
+public Mono&lt;Void&gt; cancelPendingOrders(String customerName) {
+    return repo.findByCustomerNameAndStatus(customerName, "PENDING")
+        .flatMap(order -> {
+            order.setStatus("CANCELLED");
+            return repo.save(order);
+        })
+        .then();
+}</code></pre>
+
+<p><code>deleteById</code> returns <code>Mono&lt;Void&gt;</code>. For conditional deletes, find first, mutate, save back. The <code>.then()</code> call on the final <code>Flux</code> discards the emitted values and returns <code>Mono&lt;Void&gt;</code> when the stream completes.</p>
+
+<h2>JPA vs R2DBC: Repository Comparison</h2>
+
+<table>
+  <tr><th>Aspect</th><th>Spring Data JPA</th><th>Spring Data R2DBC</th></tr>
+  <tr><td>Base interface</td><td><code>JpaRepository&lt;T, ID&gt;</code></td><td><code>ReactiveCrudRepository&lt;T, ID&gt;</code></td></tr>
+  <tr><td>Return types</td><td><code>Optional&lt;T&gt;</code>, <code>List&lt;T&gt;</code>, <code>void</code></td><td><code>Mono&lt;T&gt;</code>, <code>Flux&lt;T&gt;</code>, <code>Mono&lt;Void&gt;</code></td></tr>
+  <tr><td>Query language</td><td>JPQL / HQL + native SQL</td><td>Native SQL only</td></tr>
+  <tr><td>Entity annotations</td><td><code>javax.persistence.*</code></td><td><code>org.springframework.data.*</code></td></tr>
+  <tr><td>Lazy loading</td><td>Yes (proxied)</td><td>No</td></tr>
+  <tr><td>Relationships</td><td><code>@OneToMany</code>, <code>@ManyToOne</code>, etc.</td><td>Not supported; model as separate queries</td></tr>
+  <tr><td>Dirty checking</td><td>Automatic on transaction commit</td><td>No; explicit <code>save()</code> required</td></tr>
+  <tr><td>Transactions</td><td><code>@Transactional</code></td><td><code>@Transactional</code> (reactive, from <code>org.springframework.transaction</code>)</td></tr>
+  <tr><td>Schema generation</td><td><code>spring.jpa.hibernate.ddl-auto</code></td><td>None; use Flyway or Liquibase</td></tr>
+  <tr><td>Connection pool</td><td>HikariCP (blocking)</td><td>R2DBC pool (e.g. <code>r2dbc-pool</code>)</td></tr>
+</table>
+
+<p>The trade-off: JPA provides ORM features (lazy loading, dirty checking, cascading) at the cost of blocking I/O and thread-per-request. R2DBC provides non-blocking I/O but leaves object-relational mapping to you.</p>
+
+<h2>Full Example: Reactive OrderRepository</h2>
+
+<p>A complete repository interface, entity, service, and controller wired end-to-end with R2DBC:</p>
+
+<pre><code>// --- Entity ---
+@Table("orders")
+public class Order {
+
+    @Id
+    private Long id;
+
+    @Column("customer_name")
+    private String customerName;
+
+    private String status;
+    private LocalDateTime createdAt;
+
+    public Order() {}
+
+    public Order(String customerName, String status, LocalDateTime createdAt) {
+        this.customerName = customerName;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getCustomerName() { return customerName; }
+    public void setStatus(String status) { this.status = status; }
+    public String getStatus() { return status; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+}
+
+// --- Repository ---
+public interface OrderRepository extends ReactiveCrudRepository&lt;Order, Long&gt; {
+
+    Flux&lt;Order&gt; findByStatus(String status);
+
+    Flux&lt;Order&gt; findByCustomerNameOrderByCreatedAtDesc(String customerName);
+
+    Mono&lt;Long&gt; countByStatus(String status);
+
+    @Query("SELECT * FROM orders WHERE created_at &gt; :since AND status = :status")
+    Flux&lt;Order&gt; findCreatedSince(@Param("since") LocalDateTime since,
+                                  @Param("status") String status);
+}
+
+// --- Service ---
+@Service
+public class OrderService {
+
+    private final OrderRepository repo;
+
+    public OrderService(OrderRepository repo) {
+        this.repo = repo;
+    }
+
+    public Mono&lt;Order&gt; create(String customerName) {
+        return repo.save(new Order(customerName, "PENDING", LocalDateTime.now()));
+    }
+
+    public Mono&lt;Order&gt; findById(Long id) {
+        return repo.findById(id);
+    }
+
+    public Flux&lt;Order&gt; findPending() {
+        return repo.findByStatus("PENDING");
+    }
+
+    public Mono&lt;Order&gt; ship(Long id) {
+        return repo.findById(id)
+            .map(order -> {
+                order.setStatus("SHIPPED");
+                return order;
+            })
+            .flatMap(repo::save);
+    }
+
+    public Flux&lt;Order&gt; recentByCustomer(String customerName) {
+        return repo.findByCustomerNameOrderByCreatedAtDesc(customerName);
+    }
+}
+
+// --- Controller ---
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private final OrderService service;
+
+    public OrderController(OrderService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public Mono&lt;Order&gt; create(@RequestBody CreateOrderRequest req) {
+        return service.create(req.customerName());
+    }
+
+    @GetMapping("/{id}")
+    public Mono&lt;Order&gt; get(@PathVariable Long id) {
+        return service.findById(id);
+    }
+
+    @GetMapping(params = "status=PENDING")
+    public Flux&lt;Order&gt; pending() {
+        return service.findPending();
+    }
+
+    @PostMapping("/{id}/ship")
+    public Mono&lt;Order&gt; ship(@PathVariable Long id) {
+        return service.ship(id);
+    }
+}</code></pre>
+
+<p>Every layer returns <code>Mono</code> or <code>Flux</code>. The WebFlux server handles each request on an event-loop thread and releases it when the database responds.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-data/r2dbc/docs/current/reference/html/" target="_blank" rel="noopener">Spring Data R2DBC Reference</a> · <a href="https://projectreactor.io/docs/core/release/reference/" target="_blank" rel="noopener">Project Reactor Reference</a> · <a href="https://r2dbc.io/" target="_blank" rel="noopener">R2DBC Specification</a> · <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/data.html#data.nosql.r2dbc" target="_blank" rel="noopener">Spring Boot R2DBC Guide</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What does <code>ReactiveCrudRepository&lt;Order, Long&gt;</code> use as its ID type, and what does <code>findById()</code> return?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">ID type is <code>Integer</code>; <code>findById</code> returns <code>Flux&lt;Order&gt;</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">ID type is <code>Long</code>; <code>findById</code> returns <code>Optional&lt;Order&gt;</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">ID type is <code>Long</code>; <code>findById</code> returns <code>Mono&lt;Order&gt;</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">ID type is <code>String</code>; <code>findById</code> returns <code>List&lt;Order&gt;</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. Which annotation maps a field to a database column in an R2DBC entity, and which package does it come from?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>@Column</code> from <code>javax.persistence</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0"><code>@Column</code> from <code>org.springframework.data.relational.core.mapping</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>@Column</code> from <code>jakarta.persistence</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>@Field</code> from <code>org.springframework.data.annotation</code></li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. You call <code>repo.save(order)</code> on a new order with no <code>@Id</code> value. What does R2DBC do?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">It inserts the row and returns a <code>Mono&lt;Order&gt;</code> with the generated ID populated</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">It throws an exception because the ID is null</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">It performs an update and returns <code>Mono&lt;Integer&gt;</code> with the row count</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">It inserts the row and the ID remains null in the returned entity</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. In a <code>@Query</code> method on an R2DBC repository, what query language do you write?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">JPQL, the same as JPA <code>@Query</code></li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">HQL with R2DBC-specific extensions</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">Native SQL against the target database, because R2DBC has no object query language</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">Criteria API expressions converted to reactive SQL</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. Why does R2DBC not support <code>@OneToMany</code> or <code>@ManyToOne</code> relationships on entities?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">The annotations are not yet implemented but are planned for a future release</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">R2DBC supports them but only with PostgreSQL and the <code>r2dbc-postgresql</code> driver</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">R2DBC is not an ORM; it maps rows to objects without lazy-loading proxies, so relationships must be fetched as separate queries</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">You can use them by adding the JPA dependency alongside R2DBC in the same project</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0063-r2dbc-introduction.html" class="nav-prev">← Prev</a>
+  <a href="0065-r2dbc-reactive-patterns.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

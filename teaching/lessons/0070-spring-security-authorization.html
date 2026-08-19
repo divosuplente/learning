@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 70: Spring Security Authorization</title>
+  <link rel="stylesheet" href="../assets/base.css">
+</head>
+<body>
+
+<h1>Spring Security Authorization</h1>
+
+<p>Authentication answers "who are you?" Authorization answers "what are you allowed to do?" Spring Security separates the two. This lesson covers URL-based authorization rules, role and authority naming conventions, method-level security annotations, and SpEL expressions for custom access decisions.</p>
+
+<h2>URL-based authorization with <code>authorizeHttpRequest</code></h2>
+
+<p>Spring Security 6 introduced <code>authorizeHttpRequests()</code> (replacing the deprecated <code>authorizeRequests()</code>). It matches requests in declaration order and applies the first rule that matches:</p>
+
+<pre><code>@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/public/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().denyAll()
+            )
+            .formLogin(Customizer.withDefaults())
+            .build();
+    }
+}</code></pre>
+
+<p><code>requestMatchers()</code> accepts Ant patterns by default. Use <code>MvcRequestMatchers</code> for Spring MVC path matching or <code>RegexRequestMatcher</code> for regex patterns. The matcher chain is order-dependent: <code>anyRequest()</code> must be last because it matches every remaining request.</p>
+
+<p>Common built-in rules:</p>
+
+<table>
+  <tr><th>Method</th><th>Meaning</th></tr>
+  <tr><td><code>permitAll()</code></td><td>Anyone, including anonymous</td></tr>
+  <tr><td><code>authenticated()</code></td><td>Any logged-in user</td></tr>
+  <tr><td><code>hasRole("ADMIN")</code></td><td>User has role ADMIN</td></tr>
+  <tr><td><code>hasAuthority("document:write")</code></td><td>User has a specific authority</td></tr>
+  <tr><td><code>hasAnyRole("ADMIN", "EDITOR")</code></td><td>User has at least one of the roles</td></tr>
+  <tr><td><code>denyAll()</code></td><td>Always rejects</td></tr>
+</table>
+
+<h2>Roles, authorities, and the <code>ROLE_</code> prefix</h2>
+
+<p>Spring Security distinguishes <strong>roles</strong> from <strong>authorities</strong> by convention, not by type. Both are strings stored in <code>GrantedAuthority</code>. The difference is the <code>ROLE_</code> prefix:</p>
+
+<pre><code>// These are equivalent:
+.hasRole("ADMIN")         // checks for authority "ROLE_ADMIN"
+.hasAuthority("ROLE_ADMIN") // checks the same thing
+
+// This is a fine-grained authority (no ROLE_ prefix):
+.hasAuthority("document:write")</code></pre>
+
+<p>When you call <code>hasRole("ADMIN")</code>, Spring Security prepends <code>ROLE_</code> and checks for the authority <code>ROLE_ADMIN</code>. When you call <code>hasAuthority("ADMIN")</code>, it checks for the literal string <code>ADMIN</code> with no prefix. This is a common source of bugs: granting authority <code>"ADMIN"</code> but checking with <code>hasRole("ADMIN")</code> fails because it looks for <code>ROLE_ADMIN</code>.</p>
+
+<p>When configuring users in <code>UserDetailsService</code> or testing with <code>UserBuilder</code>:</p>
+
+<pre><code>UserBuilder users = User.withDefaultPasswordEncoder();
+
+UserDetails admin = users
+    .username("alice")
+    .password("password")
+    .roles("ADMIN", "EDITOR")         // stored as ROLE_ADMIN, ROLE_EDITOR
+    .build();
+
+UserDetails viewer = users
+    .username("bob")
+    .password("password")
+    .authorities("document:read")     // stored as-is, no prefix
+    .build();</code></pre>
+
+<p>Do not mix <code>.roles()</code> and <code>.authorities()</code> on the same <code>UserBuilder</code> call. <code>.roles()</code> calls <code>.authorities()</code> internally with the prefix added. Calling both overwrites one with the other.</p>
+
+<h2>Method-level security</h2>
+
+<p>URL rules protect endpoints. Method security protects individual methods on any Spring bean. You can enforce authorization at the service layer regardless of which controller or endpoint calls the method.</p>
+
+<p>Enable it with <code>@EnableMethodSecurity</code> on a configuration class:</p>
+
+<pre><code>@Configuration
+@EnableMethodSecurity
+public class MethodSecurityConfig {
+}</code></pre>
+
+<p><code>@EnableMethodSecurity</code> (introduced in Spring Security 5.6, default in 6.x) replaces the deprecated <code>@EnableGlobalMethodSecurity</code>. The old annotation required you to opt in per-feature (<code>prePostEnabled</code>, <code>securedEnabled</code>, <code>jsr250Enabled</code>). The new one enables <code>@PreAuthorize</code> and <code>@PostAuthorize</code> by default. To enable <code>@Secured</code> and <code>@RolesAllowed</code>, pass the flags:</p>
+
+<pre><code>@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)</code></pre>
+
+<h3>The four method security annotations</h3>
+
+<table>
+  <tr><th>Annotation</th><th>When evaluated</th><th>Source</th></tr>
+  <tr><td><code>@PreAuthorize</code></td><td>Before method execution</td><td>Spring Security</td></tr>
+  <tr><td><code>@PostAuthorize</code></td><td>After method execution</td><td>Spring Security</td></tr>
+  <tr><td><code>@Secured</code></td><td>Before method execution</td><td>Spring Security (legacy)</td></tr>
+  <tr><td><code>@RolesAllowed</code></td><td>Before method execution</td><td>JSR-250 (jakarta.annotation)</td></tr>
+</table>
+
+<code>@PreAuthorize</code> is the preferred annotation. It supports SpEL expressions for role checks, authority checks, and custom logic. <code>@Secured</code> and <code>@RolesAllowed</code> only support role lists with no expressions.
+
+<pre><code>// Preferred: SpEL expression
+@PreAuthorize("hasRole('ADMIN')")
+public void deleteUser(Long id) { ... }
+
+// Legacy: role list only
+@Secured("ROLE_ADMIN")
+public void deleteUser(Long id) { ... }
+
+// JSR-250: role list only
+@RolesAllowed("ADMIN")
+public void deleteUser(Long id) { ... }</code></pre>
+
+<h2>SpEL expressions in <code>@PreAuthorize</code></h2>
+
+<code>@PreAuthorize</code> accepts Spring Expression Language (SpEL). Common built-in functions:
+
+<table>
+  <tr><th>Expression</th><th>Checks</th></tr>
+  <tr><td><code>hasRole('X')</code></td><td>Authority <code>ROLE_X</code></td></tr>
+  <tr><td><code>hasAuthority('X')</code></td><td>Exact authority string <code>X</code></td></tr>
+  <tr><td><code>hasAnyRole('X','Y')</code></td><td>Any of the roles</td></tr>
+  <tr><td><code>hasAnyAuthority('X','Y')</code></td><td>Any of the authorities</td></tr>
+  <tr><td><code>isAuthenticated()</code></td><td>Not anonymous</td></tr>
+  <tr><td><code>permitAll</code></td><td>Always true</td></tr>
+  <tr><td><code>denyAll</code></td><td>Always false</td></tr>
+</table>
+
+<p>You can reference method parameters with <code>#paramName</code> and the current authentication with <code>#authentication</code>:</p>
+
+<pre><code>// Only the user who owns the profile can view it
+@PreAuthorize("#email == authentication.principal.username")
+public UserProfile getProfile(String email) { ... }
+
+// Or, if your UserDetails stores more fields:
+@PreAuthorize("#authentication.principal.email == #email")
+public UserProfile getProfile(String email) { ... }
+
+// Combine role check with parameter check
+@PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
+public User getUser(Long userId) { ... }</code></pre>
+
+<p><code>@PostAuthorize</code> runs after the method returns and can inspect the result with <code>returnObject</code>:</p>
+
+<pre><code>@PostAuthorize("returnObject.owner == authentication.principal.username")
+public Document getDocument(Long id) {
+    return documentRepository.findById(id).orElseThrow();
+}</code></pre>
+
+<p><code>@PostAuthorize</code> has a drawback: the method body already ran by the time the check evaluates. Any side effects (logging, auditing, cache writes) happen regardless of authorization outcome. Use <code>@PreAuthorize</code> when you can determine access from the input parameters alone.</p>
+
+<h2>Putting it together: URL rules + method security</h2>
+
+In practice, applications use both layers. URL rules provide coarse-grained access at the HTTP boundary. Method security provides fine-grained access at the business logic layer. A request must pass both checks.
+
+<pre><code>// SecurityConfig.java — coarse URL rules
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().denyAll()
+            )
+            .formLogin(Customizer.withDefaults())
+            .build();
+    }
+}
+
+// DocumentController.java — HTTP layer
+@RestController
+@RequestMapping("/api/documents")
+public class DocumentController {
+
+    private final DocumentService documentService;
+
+    public DocumentController(DocumentService documentService) {
+        this.documentService = documentService;
+    }
+
+    @GetMapping("/{id}")
+    public Document getDocument(@PathVariable Long id) {
+        return documentService.findById(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteDocument(@PathVariable Long id) {
+        documentService.deleteById(id);
+    }
+}
+
+// DocumentService.java — method-level rules
+@Service
+public class DocumentService {
+
+    private final DocumentRepository repo;
+
+    public DocumentService(DocumentRepository repo) {
+        this.repo = repo;
+    }
+
+    // Only the document owner or an admin can view
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    public Document findById(Long id) {
+        return repo.findById(id).orElseThrow();
+    }
+
+    // Only admins can delete
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteById(Long id) {
+        repo.deleteById(id);
+    }
+}</code></pre>
+
+<p>The <code>SecurityFilterChain</code> blocks unauthenticated users before they reach the controller. The <code>@PreAuthorize</code> checks enforce business rules on who can access specific data. If both layers pass, the method executes. If either fails, Spring Security returns 403 Forbidden.</p>
+
+<p><strong>Primary sources:</strong> <a href="https://docs.spring.io/spring-security/reference/servlet/authorization/index.html" target="_blank" rel="noopener">Spring Security: Authorization</a> · <a href="https://docs.spring.io/spring-security/reference/servlet/authorization/method-security.html" target="_blank" rel="noopener">Spring Security: Method Security</a> · <a href="https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html" target="_blank" rel="noopener">Spring Security: Authorize HttpRequest</a></p>
+
+<h2>Check your understanding</h2>
+
+<div class="quiz" id="q1">
+  <div class="quiz-question">1. What does <code>hasRole("ADMIN")</code> actually check for in the user's authorities?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The authority string <code>"ADMIN"</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="true" tabindex="0">The authority string <code>"ROLE_ADMIN"</code></li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">A database table mapping the user to the ADMIN role</li>
+    <li class="quiz-option" data-quiz="q1" data-correct="false" tabindex="0">The presence of an <code>isAdmin()</code> method on the principal</li>
+  </ul>
+  <div class="quiz-feedback" id="q1-feedback"></div>
+</div>
+
+<div class="quiz" id="q2">
+  <div class="quiz-question">2. What replaces <code>@EnableGlobalMethodSecurity</code> in Spring Security 6?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>@EnableMethodSecurityChain</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="true" tabindex="0"><code>@EnableMethodSecurity</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0"><code>@EnablePrePostAuthorize</code></li>
+    <li class="quiz-option" data-quiz="q2" data-correct="false" tabindex="0">No replacement needed; method security is auto-configured</li>
+  </ul>
+  <div class="quiz-feedback" id="q2-feedback"></div>
+</div>
+
+<div class="quiz" id="q3">
+  <div class="quiz-question">3. In a SpEL expression inside <code>@PreAuthorize</code>, what does <code>#userId</code> refer to?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A request parameter named <code>userId</code></li>
+    <li class="quiz-option" data-quiz="q3" data-correct="true" tabindex="0">A method parameter named <code>userId</code></li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A field on the principal object</li>
+    <li class="quiz-option" data-quiz="q3" data-correct="false" tabindex="0">A bean named <code>userId</code> from the application context</li>
+  </ul>
+  <div class="quiz-feedback" id="q3-feedback"></div>
+</div>
+
+<div class="quiz" id="q4">
+  <div class="quiz-question">4. Why should <code>@PostAuthorize</code> be used sparingly compared to <code>@PreAuthorize</code>?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>@PostAuthorize</code> is deprecated in Spring Security 6</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="true" tabindex="0">The method body already executed; side effects happen even if authorization fails</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0"><code>@PostAuthorize</code> only works with <code>hasRole()</code>, not SpEL</li>
+    <li class="quiz-option" data-quiz="q4" data-correct="false" tabindex="0">It requires a separate AOP proxy and degrades performance</li>
+  </ul>
+  <div class="quiz-feedback" id="q4-feedback"></div>
+</div>
+
+<div class="quiz" id="q5">
+  <div class="quiz-question">5. If URL-based rules allow a request through and a method-level <code>@PreAuthorize</code> denies it, what HTTP status does the client receive?</div>
+  <ul class="quiz-options">
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">200 OK with an empty body</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">401 Unauthorized</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="true" tabindex="0">403 Forbidden</li>
+    <li class="quiz-option" data-quiz="q5" data-correct="false" tabindex="0">500 Internal Server Error</li>
+  </ul>
+  <div class="quiz-feedback" id="q5-feedback"></div>
+</div>
+
+<div class="lesson-nav">
+  <a href="0069-spring-security-authentication.html" class="nav-prev">← Prev</a>
+  <a href="0071-spring-security-jwt-oauth2.html" class="nav-next">Next →</a>
+</div>
+
+<script>
+document.querySelectorAll('.quiz-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const quizId = option.dataset.quiz;
+    const feedback = document.getElementById(quizId + '-feedback');
+    const siblings = option.parentElement.querySelectorAll('.quiz-option');
+    siblings.forEach(s => s.classList.remove('selected', 'correct', 'wrong'));
+    option.classList.add('selected');
+    if (option.dataset.correct === 'true') {
+      option.classList.add('correct');
+      feedback.textContent = 'Correct.';
+      feedback.style.color = 'var(--correct)';
+    } else {
+      option.classList.add('wrong');
+      feedback.textContent = 'Not quite — review the lesson above and try again.';
+      feedback.style.color = 'var(--wrong)';
+      setTimeout(() => {
+        siblings.forEach(s => s.classList.remove('selected', 'wrong'));
+        feedback.textContent = '';
+      }, 2000);
+    }
+  });
+});
+</script>
+
+</body>
+</html>

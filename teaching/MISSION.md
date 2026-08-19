@@ -12,6 +12,10 @@ needs the full stack: language → tools → framework → architecture.
 - Write a GraphQL API with proper error handling
 - Apply TDD to ship tested, maintainable code
 - Explain architectural decisions in interview settings
+- Secure a Spring Boot application with authentication, authorization, and JWT
+- Use R2DBC for non-blocking database access in reactive applications
+- Tune PostgreSQL queries with indexes and the query planner
+- Deploy containerized services to Kubernetes with Terraform, Kustomize, and Argo CD
 
 ## Constraints
 - Self-directed study alongside other commitments
@@ -20,5 +24,4 @@ needs the full stack: language → tools → framework → architecture.
 
 ## Out of scope
 - Frontend development
-- DevOps / infrastructure beyond basic deployment
 - Languages other than Java/Kotlin (until the migration module)
