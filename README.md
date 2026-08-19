@@ -4,7 +4,7 @@ Self-directed Java and Spring Boot curriculum. Starts from language fundamentals
 
 ## Curriculum
 
-12 modules, 62 lessons, 5 quizzes per lesson.
+16 modules, 76 lessons, 5 quizzes per lesson.
 
 | Module | Topic |
 |---|---|
@@ -20,6 +20,10 @@ Self-directed Java and Spring Boot curriculum. Starts from language fundamentals
 | 09 | TDD: JUnit 5, AssertJ, Mockito, Spring Boot test slices |
 | 10 | Capstone: order management system (architecture, build, test, deploy) |
 | 11 | Kotlin Migration: syntax, coroutines, J2K converter, migration strategy |
+| 12 | R2DBC & Reactive Data Access: non-blocking DB, Spring Data R2DBC, reactive patterns |
+| 13 | PostgreSQL & Advanced Database Concepts: deep dive, indexes, query planner |
+| 14 | Spring Security: authentication, authorization, JWT/OAuth2, CSRF/CORS |
+| 15 | Infrastructure & Platform Engineering: Kubernetes, Terraform, Kustomize, Argo CD |
 
 ## Project Structure
 
