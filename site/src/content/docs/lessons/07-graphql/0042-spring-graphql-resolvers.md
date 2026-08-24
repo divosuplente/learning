@@ -1,7 +1,7 @@
 ---
 title: "Spring Boot GraphQL Resolvers"
 description: "Spring Boot GraphQL Resolvers"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0042-spring-graphql-resolvers.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0042-spring-graphql-resolvers.md
 ---
 
 # Spring Boot GraphQL Resolvers

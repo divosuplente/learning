@@ -1,7 +1,7 @@
 ---
 title: "Architecture Patterns: Monolith vs Microservices vs SOA"
 description: "Architecture Patterns: Monolith vs Microservices vs SOA"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0030-architecture-patterns.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/05-service-oriented-architecture/0030-architecture-patterns.md
 ---
 
 # Architecture Patterns: Monolith vs Microservices vs SOA

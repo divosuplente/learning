@@ -1,7 +1,7 @@
 ---
 title: "Spring Security: CSRF, CORS & Security Headers"
 description: "Spring Security: CSRF, CORS & Security Headers"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0072-spring-security-csrf-cors.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/14-spring-security/0072-spring-security-csrf-cors.md
 ---
 
 # Spring Security: CSRF, CORS & Security Headers

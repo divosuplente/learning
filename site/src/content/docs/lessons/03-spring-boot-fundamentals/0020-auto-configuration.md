@@ -1,7 +1,7 @@
 ---
 title: "Lesson 20: Auto-configuration & @SpringBootApplication"
 description: "Lesson 20: Auto-configuration & @SpringBootApplication"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0020-auto-configuration.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/03-spring-boot-fundamentals/0020-auto-configuration.md
 ---
 
 # Auto-configuration & `@SpringBootApplication`
@@ -110,7 +110,7 @@ server:
 
 <details>
 <summary>4. Your @SpringBootApplication class is in com.example.app. A @Service class lives in com.example.util. Will Spring discover it?</summary>
-<p><strong>Correct answer:</strong> Yes, com.example.util is a sub-package of com.example, which is scanned</p>
+<p><strong>Correct answer:</strong> No, component scanning starts from `com.example.app` and only scans its sub-packages; `com.example.util` is a sibling package, not a sub-package</p>
 </details>
 
 <details>

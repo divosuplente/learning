@@ -1,7 +1,7 @@
 ---
 title: "R2DBC: Reactive Relational Database Connectivity"
 description: "R2DBC: Reactive Relational Database Connectivity"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0063-r2dbc-introduction.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/12-r2dbc-reactive-data/0063-r2dbc-introduction.md
 ---
 
 # R2DBC: Reactive Relational Database Connectivity

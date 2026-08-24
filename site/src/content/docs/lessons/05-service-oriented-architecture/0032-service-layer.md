@@ -1,7 +1,7 @@
 ---
 title: "The Service Layer & @Transactional"
 description: "The Service Layer & @Transactional"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0032-service-layer.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/05-service-oriented-architecture/0032-service-layer.md
 ---
 
 # The Service Layer & `@Transactional`

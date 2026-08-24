@@ -1,7 +1,7 @@
 ---
 title: "Mockito for Mocking Dependencies"
 description: "Mockito for Mocking Dependencies"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0053-mockito-for-mocking.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/09-tdd/0053-mockito-for-mocking.md
 ---
 
 # Mockito for Mocking Dependencies

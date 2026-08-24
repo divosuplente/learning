@@ -1,7 +1,7 @@
 ---
 title: "Bean Scopes, @Configuration/@Bean, @Qualifier/@Primary"
 description: "Bean Scopes, @Configuration/@Bean, @Qualifier/@Primary"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0018-bean-scopes-and-config.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/02-dependency-injection/0018-bean-scopes-and-config.md
 ---
 
 # Bean Scopes, `@Configuration`/`@Bean`, `@Qualifier`/`@Primary`

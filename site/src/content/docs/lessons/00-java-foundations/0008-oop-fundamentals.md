@@ -1,7 +1,7 @@
 ---
 title: "Lesson 8: OOP Fundamentals"
 description: "Lesson 8: OOP Fundamentals"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0008-oop-fundamentals.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0008-oop-fundamentals.md
 ---
 
 # OOP Fundamentals

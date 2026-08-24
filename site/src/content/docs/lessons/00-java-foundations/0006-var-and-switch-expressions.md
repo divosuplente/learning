@@ -1,7 +1,7 @@
 ---
 title: "Lesson 6: var & Switch Expressions"
 description: "Lesson 6: var & Switch Expressions"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0006-var-and-switch-expressions.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0006-var-and-switch-expressions.md
 ---
 
 # var & Switch Expressions

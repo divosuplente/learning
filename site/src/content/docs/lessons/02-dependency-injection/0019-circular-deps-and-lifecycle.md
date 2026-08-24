@@ -1,7 +1,7 @@
 ---
 title: "Circular Dependencies & Lifecycle Hooks"
 description: "Circular Dependencies & Lifecycle Hooks"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0019-circular-deps-and-lifecycle.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/02-dependency-injection/0019-circular-deps-and-lifecycle.md
 ---
 
 # Circular Dependencies & Lifecycle Hooks

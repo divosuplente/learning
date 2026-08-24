@@ -1,7 +1,7 @@
 ---
 title: "Lesson 24: Input Validation & Exception Handling"
 description: "Lesson 24: Input Validation & Exception Handling"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0024-validation-and-exceptions.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/03-spring-boot-fundamentals/0024-validation-and-exceptions.md
 ---
 
 # Input Validation & Exception Handling

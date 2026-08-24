@@ -1,7 +1,7 @@
 ---
 title: "Types of Injection: Why Constructor Is Preferred"
 description: "Types of Injection: Why Constructor Is Preferred"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0017-types-of-injection.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/02-dependency-injection/0017-types-of-injection.md
 ---
 
 # Types of Injection: Why Constructor Is Preferred

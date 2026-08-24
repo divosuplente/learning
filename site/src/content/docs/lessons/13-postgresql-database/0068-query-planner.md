@@ -1,7 +1,7 @@
 ---
 title: "Lesson 68: The PostgreSQL Query Planner"
 description: "Lesson 68: The PostgreSQL Query Planner"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0068-query-planner.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/13-postgresql-database/0068-query-planner.md
 ---
 
 # The PostgreSQL Query Planner

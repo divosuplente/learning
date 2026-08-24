@@ -1,7 +1,7 @@
 ---
 title: "DTOs, Domain Exceptions & Application Events"
 description: "DTOs, Domain Exceptions & Application Events"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0033-dtos-and-events.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/05-service-oriented-architecture/0033-dtos-and-events.md
 ---
 
 # DTOs, Domain Exceptions & Application Events

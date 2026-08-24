@@ -1,7 +1,7 @@
 ---
 title: "The Problem: Tight Coupling & What DI Solves"
 description: "The Problem: Tight Coupling & What DI Solves"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0015-tight-coupling-and-di.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/02-dependency-injection/0015-tight-coupling-and-di.md
 ---
 
 # The Problem: Tight Coupling & What DI Solves

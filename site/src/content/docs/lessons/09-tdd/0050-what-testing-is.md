@@ -1,7 +1,7 @@
 ---
 title: "What Testing Is & The Test Pyramid"
 description: "What Testing Is & The Test Pyramid"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0050-what-testing-is.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/09-tdd/0050-what-testing-is.md
 ---
 
 # What Testing Is & The Test Pyramid

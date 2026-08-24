@@ -1,7 +1,7 @@
 ---
 title: "Lesson 39: Delivery Semantics, Idempotency & Module Review"
 description: "Lesson 39: Delivery Semantics, Idempotency & Module Review"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0039-kafka-delivery-semantics.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0039-kafka-delivery-semantics.md
 ---
 
 # Delivery Semantics, Idempotency & Module Review

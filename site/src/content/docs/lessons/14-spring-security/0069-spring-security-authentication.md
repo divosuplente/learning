@@ -1,7 +1,7 @@
 ---
 title: "Spring Security: Authentication"
 description: "Spring Security: Authentication"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0069-spring-security-authentication.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/14-spring-security/0069-spring-security-authentication.md
 ---
 
 # Spring Security: Authentication

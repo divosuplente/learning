@@ -1,7 +1,7 @@
 ---
 title: "Application Config & Spring Profiles"
 description: "Application Config & Spring Profiles"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0013-application-config-and-profiles.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0013-application-config-and-profiles.md
 ---
 
 # Application Config & Spring Profiles

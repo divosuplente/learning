@@ -1,7 +1,7 @@
 ---
 title: "Spring Boot Tests: @WebMvcTest, @DataJpaTest, Testcontainers & Module Review"
 description: "Spring Boot Tests: @WebMvcTest, @DataJpaTest, Testcontainers & Module Review"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0054-spring-boot-tests.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/09-tdd/0054-spring-boot-tests.md
 ---
 
 # Spring Boot Tests: @WebMvcTest, @DataJpaTest, Testcontainers & Module Review

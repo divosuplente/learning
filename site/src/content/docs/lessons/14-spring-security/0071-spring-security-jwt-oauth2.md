@@ -1,57 +1,30 @@
 ---
 title: "Spring Security: JWT and OAuth2"
 description: "Spring Security: JWT and OAuth2"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0071-spring-security-jwt-oauth2.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/14-spring-security/0071-spring-security-jwt-oauth2.md
 ---
 
 # Spring Security: JWT and OAuth2
 
-Session-based authentication stores state on the server: a session ID in a cookie maps to server-side session data. This works for a single server, but fails when you have multiple instances behind a load balancer, because no shared store tracks which instance holds the session. **JSON Web Tokens** solve this by carrying authentication data inside the token itself, so the server never needs to look up session state. Below: how JWT works, how Spring Security validates JWTs as an OAuth2 Resource Server, and how to configure OAuth2 Client login with external providers like Google and GitHub.
+Session-based authentication stores state on the server. Behind a load balancer, multiple instances need shared session storage. **JSON Web Tokens** eliminate that: the signed token carries authentication data, so any server instance validates independently without looking up session state. JWTs cannot be revoked before expiration — use short lifetimes, refresh tokens, or a token blocklist. This lesson covers JWT structure, Spring Security OAuth2 Resource Server configuration, and OAuth2 Client login with external providers.
 
-## JWT structure: header, payload, signature
+## JWT structure
 
-A JWT is three Base64URL-encoded segments separated by dots:
-
-```
-eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZGFtIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzAwMDAwMDAwfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-```
-
-Decoded, those three segments are:
+A JWT is three Base64URL-encoded segments separated by dots: `header.payload.signature`. Decoded:
 
 ```
 // Header — algorithm and token type
-{
-  "alg": "HS256",
-  "typ": "JWT"
-}
+{ "alg": "HS256", "typ": "JWT" }
 
-// Payload — claims about the subject
-{
-  "sub": "adam",
-  "role": "admin",
-  "iat": 1700000000
-}
+// Payload — claims: sub (subject), iat (issued-at), exp (expiration), plus custom claims
+{ "sub": "adam", "role": "admin", "iat": 1700000000 }
 
 // Signature — HMAC-SHA256( Base64URL(header) + "." + Base64URL(payload), secret )
 ```
 
-The **header** identifies the signing algorithm. The **payload** holds *claims*: key-value pairs like `sub` (subject), `iat` (issued-at), `exp` (expiration), and any custom claims your application needs. The **signature** ensures the token has not been tampered with. Anyone can decode the first two segments, but only the holder of the signing key can produce a valid signature.
+The **signature** ensures the token has not been tampered with — anyone can decode the header and payload, but only the signing key holder produces a valid signature.
 
-JWTS are **not encrypted**. Never put secrets in the payload. The signature guarantees integrity, not confidentiality.
-
-## Stateless authentication vs sessions
-
-In a session-based flow, the server creates a session after login, stores it in memory (or a database, or Redis), and sends a session cookie to the browser. Every request carries the cookie; the server looks up the session. If you run three instances behind a load balancer, they must share session storage, or the user gets logged out when the balancer routes them to a different instance.
-
-With JWT, the server issues a signed token after login. The client includes it in the `Authorization` header on every request:
-
-```
-Authorization: Bearer eyJhbGciOi...
-```
-
-The server validates the signature and reads the claims directly from the token. No session lookup. Any instance can validate the token independently, using only the signing key. This is **stateless authentication**.
-
-Tradeoff: you cannot revoke a JWT before it expires. The server has no list of valid tokens to remove one from. Short expiration times and refresh tokens mitigate this. If you need immediate revocation, you need a token blocklist, which reintroduces server state.
+JWTs are **not encrypted**. Never put secrets in the payload.
 
 ## Spring Security OAuth2 Resource Server
 
@@ -75,62 +48,43 @@ spring:
           issuer-uri: https://accounts.google.com
 ```
 
-At startup, Spring fetches `https://accounts.google.com/.well-known/openid-configuration`, reads the `jwks_uri` from that document, and loads the signing keys. Every incoming `Bearer` token is validated against those keys. No local secret configuration needed; the authorization server's public keys do all the work.
+At startup, Spring fetches `https://accounts.google.com/.well-known/openid-configuration`, reads the `jwks_uri`, and loads signing keys. Every incoming `Bearer` token is validated automatically.
 
-## JWT decoder and validator setup
-
-When `spring.security.oauth2.resourceserver.jwt.issuer-uri` is set, Spring Boot auto-configures a `JwtDecoder`. You can customize validation by exposing your own bean:
+To add custom validation (e.g., audience checking), expose a `JwtDecoder` bean:
 
 ```
 @Bean
 JwtDecoder jwtDecoder() {
-    NimbusJwtDecoder decoder = JwtDecoders
-        .withIssuerLocation("https://accounts.google.com")
-        .build();
-
+    NimbusJwtDecoder decoder = JwtDecoders.withIssuerLocation("https://accounts.google.com").build();
     decoder.setJwtValidator(new DelegatingOAuth2TokenValidator(
         JwtValidators.createDefaultWithIssuer("https://accounts.google.com"),
-        new JwtTimestampValidator()
+        new OAuth2TokenValidator<Jwt>() {
+            @Override
+            public OAuth2TokenValidatorResult validate(Jwt jwt) {
+                return jwt.getAudience().contains("my-api")
+                    ? OAuth2TokenValidatorResult.success()
+                    : OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "Wrong audience", null));
+            }
+        }
     ));
-
     return decoder;
 }
 ```
 
-`DelegatingOAuth2TokenValidator` runs multiple validators in sequence. The default validators check the `iss` (issuer) and `exp` (expiration) claims. You can add custom validators, for example checking that a specific `aud` (audience) claim is present:
-
-```
-new OAuth2TokenValidator<Jwt>() {
-    @Override
-    public OAuth2TokenValidatorResult validate(Jwt jwt) {
-        Set<String> audiences = jwt.getAudience();
-        if (audiences != null && audiences.contains("my-api")) {
-            return OAuth2TokenValidatorResult.success();
-        }
-        return OAuth2TokenValidatorResult.failure(
-            new OAuth2Error("invalid_token", "Wrong audience", null)
-        );
-    }
-}
-```
+Default validators check `iss` and `exp`. Chain more via `DelegatingOAuth2TokenValidator`.
 
 ## Protected endpoints with @AuthenticationPrincipal
 
-Once the JWT is validated, Spring Security populates the authentication object. You can access the authenticated user's claims in a controller:
+Once validated, Spring populates the authentication object. Inject the decoded token in any controller:
 
 ```
 @RestController
 @RequestMapping("/api")
 public class UserController {
-
     @GetMapping("/me")
     public Map<String, Object> me(@AuthenticationPrincipal Jwt jwt) {
-        return Map.of(
-            "subject", jwt.getSubject(),
-            "claims", jwt.getClaims()
-        );
+        return Map.of("subject", jwt.getSubject(), "claims", jwt.getClaims());
     }
-
     @GetMapping("/admin")
     @PreAuthorize("hasAuthority('ROLE_admin')")
     public String admin() {
@@ -139,7 +93,7 @@ public class UserController {
 }
 ```
 
-`@AuthenticationPrincipal Jwt jwt` injects the decoded JWT. You can read any claim: `jwt.getSubject()`, `jwt.getClaimAsString("role")`, `jwt.getClaims()` for all of them. `hasAuthority()` checks granted authorities derived from the token's `scope` claim by default. To map custom claims to roles, configure a `JwtAuthenticationConverter`:
+Read claims via `jwt.getSubject()`, `jwt.getClaimAsString("role")`, or `jwt.getClaims()`. By default `hasAuthority()` checks the `scope` claim. Map custom claims to roles:
 
 ```
 @Bean
@@ -147,16 +101,14 @@ JwtAuthenticationConverter jwtAuthenticationConverter() {
     JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(jwt -> {
         String role = jwt.getClaimAsString("role");
-        if (role == null) return List.of();
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        return role == null ? List.of() : List.of(new SimpleGrantedAuthority("ROLE_" + role));
     });
     return converter;
 }
 ```
-
 ## OAuth2 Client: login with external providers
 
-The **OAuth2 Client** role lets your application redirect users to an external provider (Google, GitHub, Okta) for login. Add the dependency:
+The **OAuth2 Client** role redirects users to external providers (Google, GitHub, Okta) for login. Add the dependency:
 
 ```
 <dependency>
@@ -165,7 +117,7 @@ The **OAuth2 Client** role lets your application redirect users to an external p
 </dependency>
 ```
 
-Configure the provider credentials in `application.yml`:
+Configure provider credentials:
 
 ```
 spring:
@@ -204,7 +156,6 @@ To require login for all endpoints, configure the security filter chain:
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -219,80 +170,10 @@ public class SecurityConfig {
 }
 ```
 
-This single configuration supports two flows: browser users log in via the OAuth2 Client redirect flow (Google/GitHub login page), and API clients send `Bearer` JWTs validated by the Resource Server.
-
-## Practical: configure a resource server to validate JWT tokens
-
-Given an API that accepts JWTs issued by an external authorization server at `https://auth.example.com`, here is the minimal setup:
-
-**1\. Add the dependency**
-
-```
-<dependency>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-</dependency>
-```
-
-**2\. Configure the issuer**
-
-```
-# application.yml
-spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://auth.example.com
-```
-
-**3\. Secure the endpoints**
-
-```
-@Configuration
-@EnableWebSecurity
-public class ResourceServerConfig {
-
-    @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/health").permitAll()
-                .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-        return http.build();
-    }
-}
-```
-
-**4\. Use the claims in your controller**
-
-```
-@RestController
-@RequestMapping("/api/orders")
-public class OrderController {
-
-    @GetMapping
-    public List<Order> list(@AuthenticationPrincipal Jwt jwt) {
-        String userId = jwt.getSubject();
-        return orderService.findByOwner(userId);
-    }
-}
-```
-
-Send a request with a valid JWT:
-
-```
-curl -H "Authorization: Bearer eyJhbGciOi..." https://localhost:8080/api/orders
-```
-
-If the token is valid, `jwt.getSubject()` returns the user ID from the token's `sub` claim. If the token is expired, has the wrong issuer, or an invalid signature, Spring returns `401 Unauthorized` before your controller is reached.
+This single configuration supports both flows: browser users log in via OAuth2 Client redirect (Google/GitHub), and API clients send `Bearer` JWTs validated by the Resource Server.
 
 **Primary sources:** [Spring Security: OAuth2 Resource Server JWT](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html) · [JWT.io: Introduction to JSON Web Tokens](https://jwt.io/introduction) · [Spring Security: OAuth2 Client](https://docs.spring.io/spring-security/reference/servlet/oauth2/client/index.html) · [RFC 7519: JSON Web Token](https://datatracker.ietf.org/doc/html/rfc7519)
-
 ## Check your understanding
-
 <details>
 <summary>1. What does the signature in a JWT guarantee?</summary>
 <p><strong>Correct answer:</strong> The token has not been modified since it was signed</p>

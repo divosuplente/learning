@@ -1,7 +1,7 @@
 ---
 title: "JUnit 5 & AssertJ for Readable Assertions"
 description: "JUnit 5 & AssertJ for Readable Assertions"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0052-junit5-and-assertj.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/09-tdd/0052-junit5-and-assertj.md
 ---
 
 # JUnit 5 & AssertJ for Readable Assertions

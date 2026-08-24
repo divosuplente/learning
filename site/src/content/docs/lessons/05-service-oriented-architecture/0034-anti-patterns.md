@@ -1,7 +1,7 @@
 ---
 title: "Common Anti-Patterns & Module Review"
 description: "Common Anti-Patterns & Module Review"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0034-anti-patterns.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/05-service-oriented-architecture/0034-anti-patterns.md
 ---
 
 # Common Anti-Patterns & Module Review

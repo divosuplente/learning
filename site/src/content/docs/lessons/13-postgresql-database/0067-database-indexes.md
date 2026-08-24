@@ -1,7 +1,7 @@
 ---
 title: "Database Indexes"
 description: "Database Indexes"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0067-database-indexes.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/13-postgresql-database/0067-database-indexes.md
 ---
 
 # Database Indexes

@@ -1,7 +1,7 @@
 ---
 title: "PostgreSQL Deep Dive"
 description: "PostgreSQL Deep Dive"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0066-postgresql-deep-dive.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/13-postgresql-database/0066-postgresql-deep-dive.md
 ---
 
 # PostgreSQL Deep Dive

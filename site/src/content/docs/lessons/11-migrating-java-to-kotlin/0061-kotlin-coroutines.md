@@ -1,7 +1,7 @@
 ---
 title: "Kotlin Coroutines vs Reactor Mono/Flux"
 description: "Kotlin Coroutines vs Reactor Mono/Flux"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0061-kotlin-coroutines.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0061-kotlin-coroutines.md
 ---
 
 # Kotlin Coroutines vs Reactor Mono/Flux

@@ -1,7 +1,7 @@
 ---
 title: "Building the Order Management System"
 description: "Building the Order Management System"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0056-building-oms.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/10-capstone-project/0056-building-oms.md
 ---
 
 # Building the Order Management System

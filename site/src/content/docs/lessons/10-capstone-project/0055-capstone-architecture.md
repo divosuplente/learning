@@ -1,7 +1,7 @@
 ---
 title: "Capstone Architecture: Assembling All Technologies"
 description: "Capstone Architecture: Assembling All Technologies"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0055-capstone-architecture.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/10-capstone-project/0055-capstone-architecture.md
 ---
 
 # Capstone Architecture: Assembling All Technologies

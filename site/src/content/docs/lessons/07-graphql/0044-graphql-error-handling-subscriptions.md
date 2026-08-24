@@ -1,7 +1,7 @@
 ---
 title: "Error Handling, Subscriptions & Module Review"
 description: "Error Handling, Subscriptions & Module Review"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0044-graphql-error-handling-subscriptions.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0044-graphql-error-handling-subscriptions.md
 ---
 
 # Error Handling, Subscriptions & Module Review

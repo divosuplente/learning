@@ -1,7 +1,7 @@
 ---
 title: "Kotlin Data Classes, Extension Functions & DSLs"
 description: "Kotlin Data Classes, Extension Functions & DSLs"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0060-kotlin-classes-extensions.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0060-kotlin-classes-extensions.md
 ---
 
 # Kotlin Data Classes, Extension Functions & DSLs

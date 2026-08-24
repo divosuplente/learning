@@ -1,7 +1,7 @@
 ---
 title: "Reactive Patterns with R2DBC"
 description: "Reactive Patterns with R2DBC"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0065-r2dbc-reactive-patterns.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/12-r2dbc-reactive-data/0065-r2dbc-reactive-patterns.md
 ---
 
 # Reactive Patterns with R2DBC

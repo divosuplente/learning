@@ -1,7 +1,7 @@
 ---
 title: "Why Kotlin & Setting Up Kotlin in Spring Boot"
 description: "Why Kotlin & Setting Up Kotlin in Spring Boot"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0058-why-kotlin.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0058-why-kotlin.md
 ---
 
 # Why Kotlin & Setting Up Kotlin in Spring Boot

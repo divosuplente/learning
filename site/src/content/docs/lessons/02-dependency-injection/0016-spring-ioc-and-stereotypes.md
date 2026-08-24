@@ -1,7 +1,7 @@
 ---
 title: "Spring IoC Container & Stereotype Annotations"
 description: "Spring IoC Container & Stereotype Annotations"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0016-spring-ioc-and-stereotypes.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/02-dependency-injection/0016-spring-ioc-and-stereotypes.md
 ---
 
 # Spring IoC Container & Stereotype Annotations

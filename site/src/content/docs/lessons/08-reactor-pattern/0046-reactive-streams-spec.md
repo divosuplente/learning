@@ -1,7 +1,7 @@
 ---
 title: "Lesson 46: Reactive Streams Spec: Publisher, Subscriber, Backpressure"
 description: "Lesson 46: Reactive Streams Spec: Publisher, Subscriber, Backpressure"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0046-reactive-streams-spec.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0046-reactive-streams-spec.md
 ---
 
 # Reactive Streams Spec: Publisher, Subscriber, Backpressure

@@ -1,7 +1,7 @@
 ---
 title: "Spring Initializr & Project Structure"
 description: "Spring Initializr & Project Structure"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0011-spring-initializr-and-project-structure.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0011-spring-initializr-and-project-structure.md
 ---
 
 # Spring Initializr & Project Structure

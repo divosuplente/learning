@@ -1,7 +1,7 @@
 ---
 title: "Kotlin Syntax: Variables, Null Safety & String Interpolation"
 description: "Kotlin Syntax: Variables, Null Safety & String Interpolation"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0059-kotlin-syntax-basics.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0059-kotlin-syntax-basics.md
 ---
 
 # Kotlin Syntax: Variables, Null Safety & String Interpolation

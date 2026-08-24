@@ -1,7 +1,7 @@
 ---
 title: "Running the App & Maven Commands"
 description: "Running the App & Maven Commands"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0014-running-and-maven-commands.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0014-running-and-maven-commands.md
 ---
 
 # Running the App & Maven Commands

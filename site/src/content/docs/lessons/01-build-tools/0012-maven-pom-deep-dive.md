@@ -1,7 +1,7 @@
 ---
 title: "Maven POM Deep Dive"
 description: "Maven POM Deep Dive"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0012-maven-pom-deep-dive.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0012-maven-pom-deep-dive.md
 ---
 
 # Maven POM Deep Dive

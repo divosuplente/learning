@@ -1,7 +1,7 @@
 ---
 title: "Lesson 9: Enums, Sealed Types & Packages"
 description: "Lesson 9: Enums, Sealed Types & Packages"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0009-enums-sealed-types-and-packages.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0009-enums-sealed-types-and-packages.md
 ---
 
 # Enums, Sealed Types & Packages

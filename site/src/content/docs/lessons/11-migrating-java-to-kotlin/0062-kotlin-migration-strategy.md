@@ -1,7 +1,7 @@
 ---
 title: "Migration Strategy & Module Review"
 description: "Migration Strategy & Module Review"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0062-kotlin-migration-strategy.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0062-kotlin-migration-strategy.md
 ---
 
 # Migration Strategy & Module Review

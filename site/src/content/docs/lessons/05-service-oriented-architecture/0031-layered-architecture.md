@@ -1,7 +1,7 @@
 ---
 title: "Layered Architecture"
 description: "Layered Architecture"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0031-layered-architecture.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/05-service-oriented-architecture/0031-layered-architecture.md
 ---
 
 # Layered Architecture

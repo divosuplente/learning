@@ -1,7 +1,7 @@
 ---
 title: "REST Problems: Over-fetching & Under-fetching"
 description: "REST Problems: Over-fetching & Under-fetching"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0040-rest-problems-over-under-fetching.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0040-rest-problems-over-under-fetching.md
 ---
 
 # REST Problems: Over-fetching & Under-fetching

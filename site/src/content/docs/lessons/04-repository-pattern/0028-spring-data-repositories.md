@@ -1,7 +1,7 @@
 ---
 title: "Spring Data Repositories: JpaRepository & Derived Queries"
 description: "Spring Data Repositories: JpaRepository & Derived Queries"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0028-spring-data-repositories.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/04-repository-pattern/0028-spring-data-repositories.md
 ---
 
 # Spring Data Repositories: JpaRepository & Derived Queries

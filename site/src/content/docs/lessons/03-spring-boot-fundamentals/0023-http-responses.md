@@ -1,7 +1,7 @@
 ---
 title: "Lesson 23: HTTP Responses with ResponseEntity & Status Codes"
 description: "Lesson 23: HTTP Responses with ResponseEntity & Status Codes"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0023-http-responses.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/03-spring-boot-fundamentals/0023-http-responses.md
 ---
 
 # HTTP Responses with `ResponseEntity` & Status Codes

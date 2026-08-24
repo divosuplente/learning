@@ -1,7 +1,7 @@
 ---
 title: "Kustomize: Managing Kubernetes Environments"
 description: "Kustomize: Managing Kubernetes Environments"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0075-kustomize-environments.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/15-infrastructure-platform/0075-kustomize-environments.md
 ---
 
 # Kustomize: Managing Kubernetes Environments

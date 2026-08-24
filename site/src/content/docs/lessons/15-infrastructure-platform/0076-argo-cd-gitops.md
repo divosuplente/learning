@@ -1,7 +1,7 @@
 ---
 title: "Argo CD & GitOps"
 description: "Argo CD & GitOps"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0076-argo-cd-gitops.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/15-infrastructure-platform/0076-argo-cd-gitops.md
 ---
 
 # Argo CD & GitOps

@@ -1,7 +1,7 @@
 ---
 title: "Custom Queries, Pagination & the N+1 Problem"
 description: "Custom Queries, Pagination & the N+1 Problem"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0029-custom-queries-and-n-plus-1.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/04-repository-pattern/0029-custom-queries-and-n-plus-1.md
 ---
 
 # Custom Queries, Pagination & the N+1 Problem

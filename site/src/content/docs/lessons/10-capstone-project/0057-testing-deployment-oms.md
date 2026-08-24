@@ -1,7 +1,7 @@
 ---
 title: "Testing, Deployment & Running the Full Application"
 description: "Testing, Deployment & Running the Full Application"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0057-testing-deployment-oms.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/10-capstone-project/0057-testing-deployment-oms.md
 ---
 
 # Testing, Deployment & Running the Full Application

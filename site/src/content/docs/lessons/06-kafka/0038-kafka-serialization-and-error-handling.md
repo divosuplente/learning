@@ -1,7 +1,7 @@
 ---
 title: "Lesson 38: Serialization, Error Handling & Dead Letter Queues"
 description: "Lesson 38: Serialization, Error Handling & Dead Letter Queues"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0038-kafka-serialization-and-error-handling.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0038-kafka-serialization-and-error-handling.md
 ---
 
 # Serialization, Error Handling & Dead Letter Queues

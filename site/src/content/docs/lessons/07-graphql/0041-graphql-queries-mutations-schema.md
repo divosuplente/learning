@@ -1,7 +1,7 @@
 ---
 title: "GraphQL Queries, Mutations & Schema Definition"
 description: "GraphQL Queries, Mutations & Schema Definition"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0041-graphql-queries-mutations-schema.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0041-graphql-queries-mutations-schema.md
 ---
 
 # GraphQL Queries, Mutations & Schema Definition

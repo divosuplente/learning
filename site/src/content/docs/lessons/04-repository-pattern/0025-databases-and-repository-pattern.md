@@ -1,7 +1,7 @@
 ---
 title: "Databases, SQL Crash Course & the Repository Pattern"
 description: "Databases, SQL Crash Course & the Repository Pattern"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0025-databases-and-repository-pattern.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/04-repository-pattern/0025-databases-and-repository-pattern.md
 ---
 
 # Databases, SQL Crash Course & the Repository Pattern

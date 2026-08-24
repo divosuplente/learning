@@ -1,7 +1,7 @@
 ---
 title: "JPA Entities"
 description: "JPA Entities"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0027-jpa-entities.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/04-repository-pattern/0027-jpa-entities.md
 ---
 
 # JPA Entities

@@ -1,7 +1,7 @@
 ---
 title: "Lesson 45: Reactive Programming Paradigm & the C10K Problem"
 description: "Lesson 45: Reactive Programming Paradigm & the C10K Problem"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0045-reactive-programming-paradigm.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0045-reactive-programming-paradigm.md
 ---
 
 # Reactive Programming Paradigm & the C10K Problem

@@ -1,7 +1,7 @@
 ---
 title: "N+1 Problem in GraphQL & DataLoader"
 description: "N+1 Problem in GraphQL & DataLoader"
-editUrl: https://github.com/divosuplente/learning/blob/main/teaching/lessons/0043-graphql-n-plus-1-and-dataloader.html
+editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0043-graphql-n-plus-1-and-dataloader.md
 ---
 
 # N+1 Problem in GraphQL & DataLoader
