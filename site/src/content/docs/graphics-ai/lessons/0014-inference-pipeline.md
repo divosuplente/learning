@@ -168,4 +168,4 @@ model.eval()
 
 ---
 
-**Milestone 3 complete.** Next up: [SAMv2 — Promptable Segmentation](./0015-samv2-promptable-segmentation.md)
+**Milestone 3 complete.** Next up: [SAMv2 — Promptable Segmentation](0015-samv2-promptable-segmentation/)

@@ -1,20 +1,14 @@
 ---
 title: Case Study Walkthrough
-description: How to structure your interview answer — problem → approach → tradeoffs → result — and practice the 5-minute explanation.
+description: How to structure an architecture answer — problem → approach → tradeoffs → result.
 level: advanced
 duration: "7 min"
 weight: 28
 ---
 
-## The Interview Format
-
-Plain Concepts will likely give you a scenario: "How would you build a system that takes photos of a factory floor and lets an operator click on a machine to isolate it in 3D?"
-
-They're not testing whether you know the right answer — there isn't one. They're testing *how you think*: can you decompose the problem, make reasoned choices, and discuss what you'd sacrifice?
-
 ## The Four-Part Structure
 
-Every case study answer follows this skeleton:
+Every architecture case study follows this skeleton:
 
 1. **Problem** — What are we actually building? Re-state it in your own words.
 2. **Approach** — What components, tools, and data flow would you use?
@@ -31,26 +25,26 @@ Let's walk through an example.
 
 > "We need a system where an operator can look at a 3D scan of a factory floor, click on a machine, and see just that machine isolated. The input is a set of photos captured by a walk-through camera rig. The output is an interactive 3D view of the selected object."
 
-You've re-stated the problem clearly and grounded it in concrete inputs and outputs. This alone signals engineering maturity.
+You've re-stated the problem clearly and grounded it in concrete inputs and outputs.
 
 ### 2. Approach
 
-> "Three components. First, reconstruction — I'd use COLMAP for Structure-from-Motion to get a point cloud and camera poses from the photos. Second, segmentation — I'd project the operator's click in the 3D view back to a 2D frame, run SAMv2 with that point as a prompt, and get a segmentation mask. Third, projection — I'd project the mask into 3D using the camera parameters to filter the point cloud. The visualization would use Evergine for real-time rendering with raycasting for the click interaction."
+> "Three components. First, reconstruction — COLMAP for Structure-from-Motion to get a point cloud and camera poses from the photos. Second, segmentation — project the operator's click in the 3D view back to a 2D frame, run SAMv2 with that point as a prompt, and get a segmentation mask. Third, projection — project the mask into 3D using the camera parameters to filter the point cloud. The visualization uses Open3D for interactive rendering with raycasting for the click interaction."
 
 Key moves:
-- You named specific tools and **why** (COLMAP → proven SfM; SAMv2 → zero-shot; Evergine → the team's engine).
+- You named specific tools and **why** (COLMAP → proven SfM; SAMv2 → zero-shot).
 - You described the data flow end-to-end.
 - You kept scope tight — no "and then I'd train a custom model."
 
 ### 3. Tradeoffs
 
-This is where interviews are won. Someone who only says what they'd do is guessing. Someone who says what they'd do *and what they chose not to do* is deciding.
+This is where depth shows. Someone who only says what they'd do is guessing. Someone who says what they'd do *and what they chose not to do* is deciding.
 
 > "I chose COLMAP over Nerfstudio because the output needs to be a point cloud that I can segment and filter — a NeRF or Gaussian Splat would be harder to interact with at the per-object level. The tradeoff is visual quality: a Gaussian Splat looks better than a point cloud, especially for thin structures. If visual fidelity were the priority, I'd switch to Nerfstudio with Gaussian Splatting and do the segmentation in image space before reconstruction."
 >
 > "I chose SAMv2 over GroundingDINO because the prompt is a click (spatial), not text (semantic). If the use case were 'find all fire extinguishers,' I'd reach for GroundingDINO instead."
 >
-> "I chose file-based communication between Python and Evergine for the prototype. The tradeoff is latency — every segmentation request means writing and reading a file. For production, I'd use a REST API for prompts and memory-mapped files for the point cloud data."
+> "I chose file-based communication between Python and the visualizer for the prototype. The tradeoff is latency — every segmentation request means writing and reading a file. For production, I'd use a REST API for prompts and memory-mapped files for the point cloud data."
 
 Pattern: **"I chose X over Y because Z. The tradeoff is W. If the priority were Q, I'd choose Y instead."**
 
@@ -58,13 +52,11 @@ Pattern: **"I chose X over Y because Z. The tradeoff is W. If the priority were 
 
 > "Success is: the operator clicks a machine and sees it isolated in under two seconds. I'd validate by testing on a small dataset of 20–30 photos of a scene with known objects and measuring segmentation accuracy — does the isolated cloud match the actual object boundary? I'd also measure end-to-end latency from click to visual update."
 
-You've defined a measurable outcome and a validation plan. That's engineering, not aspiration.
+A measurable outcome and a validation plan.
 
 ---
 
-## Practicing the 5-Minute Explanation
-
-The format is strict. Time yourself.
+## Structuring an Explanation
 
 | Time | Section | What to Cover |
 |---|---|---|
@@ -76,7 +68,7 @@ The format is strict. Time yourself.
 
 ### The "Open Questions" Bonus
 
-Ending with "What I'd want to investigate" shows intellectual honesty and curiosity:
+Ending with "What I'd want to investigate" shows honest assessment:
 
 > "With more time, I'd look into multi-view consensus for the mask projection — a point might be visible from five cameras but only masked in three. A voting threshold would make that more robust. I'd also benchmark SAMv2 Small vs Large on the actual factory images — the latency difference might let me use the smaller model without quality loss."
 
@@ -89,15 +81,13 @@ Ending with "What I'd want to investigate" shows intellectual honesty and curios
 
 ## Practice Exercise
 
-Record yourself explaining your prototype in 5 minutes using the four-part structure. Listen back. Ask yourself:
+Walk through your prototype using the four-part structure. Ask yourself:
 
 1. Did I re-state the problem in my own words?
 2. Did I name specific tools and *why*?
 3. Did I discuss at least two tradeoffs with alternatives?
 4. Did I define what success looks like?
 
-If any answer is "no," re-record that section.
+If any answer is "no," revise that section.
 
----
-
-**Next:** [Evergine & Plain Concepts Context](./0029-evergine-plain-concepts-context.md)
+This completes **M6: Prototype & Case Study Prep**. You've covered the full stack: math foundations, PyTorch, modern vision models, 3D reconstruction, architecture decisions, and deployment.

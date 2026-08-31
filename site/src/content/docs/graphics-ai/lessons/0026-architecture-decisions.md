@@ -1,6 +1,6 @@
 ---
 title: Architecture Decisions
-description: "Why Python/PyTorch for the CV pipeline, C#/Unity for visualization, and how they communicate — the architectural choices interviewers will ask about."
+description: "Why Python/PyTorch for the CV pipeline, C# for visualization, and how they communicate."
 level: advanced
 duration: "6 min"
 weight: 26
@@ -24,10 +24,9 @@ Why? Each ecosystem is best at its own domain. PyTorch has no game engine. Unity
 
 **Tradeoff:** Python is slower than C++ for the glue code between models. For a prototype this doesn't matter. For production, you'd profile and move bottlenecks to C++ extensions or ONNX Runtime.
 
-## Why C# / Evergine for Visualization
+## Why C# for Visualization
 
-- **Plain Concepts built Evergine.** Using their own engine in your prototype shows you've done your research.
-- **C# is the language of Unity and Evergine.** Same syntax, same patterns — MonoBehaviour becomes Evergine's `Drawable`, `Update()` maps to frame callbacks.
+- **C# is the language of Unity, Evergine, and other .NET-based engines.** Same syntax, same patterns — MonoBehaviour/Drawable, `Update()` maps to frame callbacks.
 - **Real-time rendering needs frame-level control.** Game engines give you camera systems, asset loading, materials, and shaders out of the box. Writing this from scratch in Python would take months.
 - **User interaction.** Click to place a segmentation prompt? That's a raycast from camera through mouse position — one line in a game engine, a custom implementation in raw OpenGL.
 
@@ -38,7 +37,7 @@ This is the architecture question that matters most. Three patterns, in order of
 ### 1. File-Based (Simplest — Prototype Ready)
 
 ```
-Python writes segmented_object.ply → Unity/Evergine loads .ply on refresh
+Python writes segmented_object.ply → Engine loads .ply on refresh
 ```
 
 - Python runs the pipeline, writes `.ply` or `.obj` files.
@@ -80,25 +79,21 @@ async def segment(prompt: SegmentPrompt):
 
 - Zero-copy data sharing for large point clouds (millions of points).
 - gRPC for structured bidirectional streaming.
-- Overkill for a prototype, but knowing it exists shows maturity.
+- Overkill for a prototype, but good to know it exists.
 
-**What to say:**
+**The practical answer:**
 
-> "For the prototype, I'd use file-based communication — it's simple and decoupled. For production, a REST API for control messages and shared memory or memory-mapped files for large 3D data. The bottleneck isn't the communication pattern, it's the inference speed."
+> "For the prototype, file-based communication — it's simple and decoupled. For production, a REST API for control messages and shared memory or memory-mapped files for large 3D data. The bottleneck isn't the communication pattern, it's the inference speed."
 
 ## Decision Summary
 
 | Decision | Choice | Why | When to Revisit |
 |---|---|---|---|
 | Language for AI pipeline | Python + PyTorch | Ecosystem, speed of prototyping | If inference latency becomes critical → ONNX Runtime in C# |
-| Language for rendering | C# + Evergine | Real-time rendering, Plain Concepts stack | If the project doesn't need interactivity → Python + Open3D only |
+| Language for rendering | C# + game engine | Real-time rendering, interactivity | If the project doesn't need interactivity → Python + Open3D only |
 | Communication | File-based → REST | Simplest path that works | If you need sub-100ms round trips → gRPC + shared memory |
 | 3D format for exchange | PLY / OBJ | Universally supported | If you need materials or animations → glTF |
 
-## The One-Liner for the Interview
-
-> "Python for the AI pipeline because that's where the models live. C# and Evergine for rendering because that's what the team uses. They talk through files for the prototype, REST for anything interactive."
-
 ---
 
-**Next:** [Deploying 3D AI](./0027-deploying-3d-ai.md)
+**Next:** [Deploying 3D AI](0027-deploying-3d-ai/)

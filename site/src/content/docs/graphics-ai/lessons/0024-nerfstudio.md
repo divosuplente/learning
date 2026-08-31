@@ -127,4 +127,4 @@ Nerfstudio is the **practical on-ramp** to 3D reconstruction. For the interview,
 
 ---
 
-**Next:** [Target Prototype — Photos to Point Cloud to Segmentation](./0025-target-prototype-pipeline.md)
+**Next:** [Target Prototype — Photos to Point Cloud to Segmentation](0025-target-prototype-pipeline/)

@@ -125,4 +125,4 @@ This is also how SAMv2 works: give it a bounding box prompt, get back a precise 
 
 ---
 
-**Next:** [Training Loop Anatomy](./0013-training-loop-anatomy.md)
+**Next:** [Training Loop Anatomy](0013-training-loop-anatomy/)

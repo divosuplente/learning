@@ -147,4 +147,4 @@ These are visual questions. Text logs won't answer them. Learning to draw your d
 
 ---
 
-**Next:** [Images as Tensors](./0010-images-as-tensors.md)
+**Next:** [Images as Tensors](0010-images-as-tensors/)

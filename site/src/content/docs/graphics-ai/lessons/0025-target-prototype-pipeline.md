@@ -1,6 +1,6 @@
 ---
 title: Target Prototype Pipeline
-description: The end-to-end pipeline your interview prototype follows — photos to point cloud to segmented 3D visualization.
+description: The end-to-end pipeline — photos to point cloud to segmented 3D visualization.
 level: advanced
 duration: "5 min"
 weight: 25
@@ -18,7 +18,7 @@ Four stages. Each is a well-understood component with existing tools. You're ass
 
 **What happens:** Feed a set of overlapping photos into a Structure-from-Motion pipeline. COLMAP estimates camera poses (position + orientation for each photo) and produces a sparse then dense point cloud.
 
-**Why not NeRF/GS here?** They produce radiance fields, not point clouds. For the prototype, a point cloud is simpler to manipulate, segment, and visualize. You can always say "with more time, I'd swap COLMAP for Nerfstudio/Gaussian Splatting" — that's a strong interview signal.
+**Why not NeRF/GS here?** They produce radiance fields, not point clouds. For the prototype, a point cloud is simpler to manipulate, segment, and visualize. You can always swap COLMAP for Nerfstudio/Gaussian Splatting later for better visual quality.
 
 **Key output:** `points.ply` — millions of (x, y, z) points with optional RGB.
 
@@ -89,12 +89,6 @@ o3d.visualization.draw_geometries([pcd], window_name="Segmented Object")
 | Mask Projection | Point cloud + masks + poses | Filtered point cloud | Custom (numpy) |
 | 3D Visualization | Point cloud (.ply) | Interactive render | Open3D |
 
-## What to Say in the Interview
-
-> "The prototype has four components. COLMAP handles reconstruction because it's proven and gives me both poses and points. SAMv2 handles segmentation because it's zero-shot — I don't need training data for my specific objects. The bridge between them is a projection step using COLMAP's camera parameters. Open3D for visualization because it's the fastest way to get an interactive result."
-
-That's 15 seconds. The follow-up questions are where you show depth: "What if the object is occluded in some views?" → "I'd use multi-view consensus — only keep points seen as 'inside' in the majority of views."
-
 ---
 
-**Next:** [Architecture Decisions](./0026-architecture-decisions.md)
+**Next:** [Architecture Decisions](0026-architecture-decisions/)

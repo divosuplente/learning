@@ -6,9 +6,9 @@ duration: "6 min"
 weight: 27
 ---
 
-## Why Deployment Matters for This Role
+## Why Deployment Matters
 
-Plain Concepts builds real applications for clients. A model that only runs in a notebook doesn't ship. You need to explain how your prototype would run on a cloud GPU, how you'd containerize it, and what the latency story looks like.
+A model that only runs in a notebook doesn't ship. You need to understand how your prototype would run on a cloud GPU, how you'd containerize it, and what the latency story looks like.
 
 ## Cloud GPU Instances
 
@@ -20,7 +20,7 @@ Plain Concepts builds real applications for clients. A model that only runs in a
 | AWS | SageMaker | P-series (A10G, A100) | Client is on AWS. |
 | GCP | Vertex AI | L4, A100 | Client is on GCP. |
 
-For the interview, Azure ML is your default answer — it's your existing experience. SageMaker and Vertex AI are the same mental model: provision a GPU, push a Docker image, hit an endpoint.
+Same mental model across all three: provision a GPU, push a Docker image, hit an endpoint.
 
 ### What "Provisioning a GPU Instance" Actually Means
 
@@ -75,7 +75,7 @@ docker push my-registry.azurecr.io/3d-segmenter:v1
 
 ## Model Size vs Latency
 
-This is the production tradeoff interviewers probe. Bigger models are more accurate but slower and more expensive.
+This is the production tradeoff. Bigger models are more accurate but slower and more expensive.
 
 ### The Numbers That Matter
 
@@ -106,12 +106,12 @@ with torch.inference_mode():
     output = model(input_tensor.half())
 ```
 
-## What to Say
+## The Practical Path
 
-> "I'd containerize the inference pipeline with a PyTorch CUDA runtime image and serve it via FastAPI. For the cloud, Azure ML compute with a T4 GPU — good enough for a prototype, easy to scale up. If latency matters, I'd profile first, then apply ONNX export and FP16 quantization. You typically get 2–3× speedup without accuracy loss."
+> "Containerize the inference pipeline with a PyTorch CUDA runtime image and serve it via FastAPI. For the cloud, a T4 GPU — good enough for a prototype, easy to scale up. If latency matters, profile first, then apply ONNX export and FP16 quantization. You typically get 2–3× speedup without accuracy loss."
 
-This shows you understand the path from "works in a notebook" to "runs in production" without overcomplicating it.
+That's the path from "works in a notebook" to "runs in production" without overcomplicating it.
 
 ---
 
-**Next:** [Case Study Walkthrough](./0028-case-study-walkthrough.md)
+**Next:** [Case Study Walkthrough](0028-case-study-walkthrough/)

@@ -133,4 +133,4 @@ Training is like learning to throw darts blindfolded: throw (forward), someone t
 
 ---
 
-**Next:** [Inference Pipeline](./0014-inference-pipeline.md)
+**Next:** [Inference Pipeline](0014-inference-pipeline/)

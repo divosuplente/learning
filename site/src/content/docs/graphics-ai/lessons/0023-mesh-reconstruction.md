@@ -105,4 +105,4 @@ Mesh reconstruction is the **last mile** from 3D data to a usable 3D asset. In p
 
 ---
 
-**Next:** [Nerfstudio — Running NeRF/Gaussian Splatting via CLI](./0024-nerfstudio.md)
+**Next:** [Nerfstudio — Running NeRF/Gaussian Splatting via CLI](0024-nerfstudio/)

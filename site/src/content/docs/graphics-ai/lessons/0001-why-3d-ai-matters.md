@@ -38,4 +38,4 @@ Start with **math intuition**, not code. If vectors, matrices, and coordinate tr
 
 ---
 
-**Next:** [Vectors and Transformations](./0002-vectors-and-transformations.md)
+**Next:** [Vectors and Transformations](0002-vectors-and-transformations/)

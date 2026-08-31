@@ -101,4 +101,4 @@ masks, scores, _ = sam_predictor.predict(box=box_xyxy)
 
 ---
 
-**Next:** [FlorenceV2 — Unified Vision Model](./0017-florence-v2-unified-vision.md)
+**Next:** [FlorenceV2 — Unified Vision Model](0017-florence-v2-unified-vision/)

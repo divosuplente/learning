@@ -137,4 +137,4 @@ For real-time 3D applications (AR/VR, interactive segmentation), optimize for la
 
 This completes **M4: Modern Vision Models**. You can now compare SAMv2, GroundingDINO, and FlorenceV2 on their input/output contracts, understand why transformers replaced CNNs in vision, and describe how to deploy a model to production.
 
-**Next milestone:** [M5 — 3D AI: Reconstruction & Rendering](./0020-point-clouds.md)
+**Next milestone:** [M5 — 3D AI: Reconstruction & Rendering](0020-point-clouds/)

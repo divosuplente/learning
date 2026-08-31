@@ -128,4 +128,4 @@ These two operations are the mathematical backbone of 3D graphics. If you unders
 
 ---
 
-**Milestone M1 complete.** Next milestone: [Python for ML + C# for Engines](./0006-numpy-to-pytorch-tensors.md)
+**Milestone M1 complete.** Next milestone: [Python for ML + C# for Engines](0006-numpy-to-pytorch-tensors/)

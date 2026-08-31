@@ -64,4 +64,4 @@ The tradeoff: **implicit = elegant + slow, explicit = practical + fast**. In pro
 
 ---
 
-**Next:** [Mesh Reconstruction — From Points to Triangles](./0023-mesh-reconstruction.md)
+**Next:** [Mesh Reconstruction — From Points to Triangles](0023-mesh-reconstruction/)

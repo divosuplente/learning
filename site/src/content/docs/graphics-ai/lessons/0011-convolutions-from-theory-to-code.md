@@ -121,4 +121,4 @@ Conv → BatchNorm → ReLU is the standard recipe. You'll see it repeated throu
 
 ---
 
-**Next:** [Object Detection vs Segmentation](./0012-object-detection-vs-segmentation.md)
+**Next:** [Object Detection vs Segmentation](0012-object-detection-vs-segmentation/)

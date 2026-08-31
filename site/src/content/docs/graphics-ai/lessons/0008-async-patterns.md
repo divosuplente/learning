@@ -138,4 +138,4 @@ Getting async right means smooth interaction while heavy AI work happens in the 
 
 ---
 
-**Next:** [Debugging 3D — Why Print Isn't Enough](./0009-debugging-3d.md)
+**Next:** [Debugging 3D — Why Print Isn't Enough](0009-debugging-3d/)

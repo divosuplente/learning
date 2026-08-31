@@ -88,4 +88,4 @@ Each transformer encoder block: LayerNorm → Multi-Head Self-Attention → Laye
 
 ---
 
-**Next:** [Model Deployment — ONNX, TorchScript, and Serving](./0019-model-deployment.md)
+**Next:** [Model Deployment — ONNX, TorchScript, and Serving](0019-model-deployment/)

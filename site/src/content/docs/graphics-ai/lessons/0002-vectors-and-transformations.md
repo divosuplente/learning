@@ -85,4 +85,4 @@ Subtracting two positions gives a direction. Subtracting positions is how you co
 
 ---
 
-**Next:** [Matrices as Transformations](./0003-matrices-as-transformations.md)
+**Next:** [Matrices as Transformations](0003-matrices-as-transformations/)

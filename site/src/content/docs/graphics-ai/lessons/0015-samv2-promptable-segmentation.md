@@ -78,4 +78,4 @@ Always pick the highest-scoring mask unless you have a reason not to.
 
 ---
 
-**Next:** [GroundingDINO — Text-Guided Detection](./0016-grounding-dino-text-detection.md)
+**Next:** [GroundingDINO — Text-Guided Detection](0016-grounding-dino-text-detection/)

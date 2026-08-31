@@ -98,4 +98,4 @@ This is the comparison table to know cold for interviews.
 
 ---
 
-**Next:** [Vision Transformers — How Transformers Replaced CNNs](./0018-vision-transformers.md)
+**Next:** [Vision Transformers — How Transformers Replaced CNNs](0018-vision-transformers/)

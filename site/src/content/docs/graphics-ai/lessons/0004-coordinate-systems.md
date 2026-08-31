@@ -84,4 +84,4 @@ Get the coordinate system wrong and objects appear mirrored, floating, or inside
 
 ---
 
-**Next:** [Dot & Cross Products](./0005-dot-and-cross-products.md)
+**Next:** [Dot & Cross Products](0005-dot-and-cross-products/)

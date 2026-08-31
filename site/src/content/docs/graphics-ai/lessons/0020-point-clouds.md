@@ -88,4 +88,4 @@ A point cloud is the **raw bridge** between 3D sensing and 3D processing. You lo
 
 ---
 
-**Next:** [NeRF — Neural Radiance Fields](./0021-nerf.md)
+**Next:** [NeRF — Neural Radiance Fields](0021-nerf/)

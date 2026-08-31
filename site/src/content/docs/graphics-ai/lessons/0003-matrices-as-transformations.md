@@ -100,4 +100,4 @@ Order matters. `T @ R` is "rotate then translate." `R @ T` is "translate then ro
 
 ---
 
-**Next:** [Coordinate Systems](./0004-coordinate-systems.md)
+**Next:** [Coordinate Systems](0004-coordinate-systems/)

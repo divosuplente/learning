@@ -99,4 +99,4 @@ print(img.shape, img.dtype)      # torch.Size([3, 224, 224]) torch.float32
 
 ---
 
-**Next:** [Convolutions from Theory to Code](./0011-convolutions-from-theory-to-code.md)
+**Next:** [Convolutions from Theory to Code](0011-convolutions-from-theory-to-code/)

@@ -100,4 +100,4 @@ Every model you'll use in this course (SAMv2, GroundingDINO, NeRF) takes tensors
 
 ---
 
-**Next:** [C# in Unity — MonoBehaviour Lifecycle](./0007-csharp-unity-monobehaviour.md)
+**Next:** [C# in Unity — MonoBehaviour Lifecycle](0007-csharp-unity-monobehaviour/)

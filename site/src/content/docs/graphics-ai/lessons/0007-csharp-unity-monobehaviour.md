@@ -122,4 +122,4 @@ The MonoBehaviour lifecycle is the clock that drives everything. Understanding w
 
 ---
 
-**Next:** [Async Patterns — Python and C#](./0008-async-patterns.md)
+**Next:** [Async Patterns — Python and C#](0008-async-patterns/)
