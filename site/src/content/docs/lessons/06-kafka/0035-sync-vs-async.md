@@ -1,6 +1,5 @@
 ---
 title: "Sync vs Async Communication & What Kafka Solves"
-description: "Sync vs Async Communication & What Kafka Solves"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0035-sync-vs-async.md
 ---
 

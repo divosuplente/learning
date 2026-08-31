@@ -1,6 +1,5 @@
 ---
 title: "Exception Handling"
-description: "Exception Handling"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0007-exception-handling.md
 ---
 

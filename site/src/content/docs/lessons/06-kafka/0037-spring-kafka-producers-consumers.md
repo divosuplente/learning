@@ -1,6 +1,5 @@
 ---
 title: "Spring Boot Kafka Producers & Consumers"
-description: "Spring Boot Kafka Producers & Consumers"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0037-spring-kafka-producers-consumers.md
 ---
 

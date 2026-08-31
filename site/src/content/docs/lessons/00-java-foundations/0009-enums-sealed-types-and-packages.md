@@ -1,6 +1,5 @@
 ---
 title: "Enums, Sealed Types & Packages"
-description: "Enums, Sealed Types & Packages"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0009-enums-sealed-types-and-packages.md
 ---
 

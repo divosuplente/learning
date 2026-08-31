@@ -1,6 +1,5 @@
 ---
 title: "Kubernetes Fundamentals: Pods, Deployments, Services, ConfigMaps"
-description: "Kubernetes Fundamentals: Pods, Deployments, Services, ConfigMaps"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/15-infrastructure-platform/0073-kubernetes-fundamentals.md
 ---
 

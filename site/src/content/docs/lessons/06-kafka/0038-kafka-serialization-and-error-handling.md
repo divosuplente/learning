@@ -1,6 +1,5 @@
 ---
 title: "Serialization, Error Handling & Dead Letter Queues"
-description: "Serialization, Error Handling & Dead Letter Queues"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0038-kafka-serialization-and-error-handling.md
 ---
 

@@ -1,6 +1,5 @@
 ---
 title: "Kafka Core Concepts: Topics, Partitions, Offsets, Consumer Groups"
-description: "Kafka Core Concepts: Topics, Partitions, Offsets, Consumer Groups"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0036-kafka-core-concepts.md
 ---
 

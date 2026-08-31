@@ -1,6 +1,5 @@
 ---
 title: "Delivery Semantics, Idempotency & Module Review"
-description: "Delivery Semantics, Idempotency & Module Review"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0039-kafka-delivery-semantics.md
 ---
 

@@ -1,6 +1,5 @@
 ---
 title: "Project Reactor: Mono & Flux Basics"
-description: "Project Reactor: Mono & Flux Basics"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0047-reactor-mono-flux.md
 ---
 
