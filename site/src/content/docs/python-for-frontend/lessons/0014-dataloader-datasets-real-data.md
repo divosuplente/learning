@@ -235,4 +235,4 @@ This is the **minimal end-to-end pattern**. Every real project adds more (loggin
 
 1. Wrap a pandas DataFrame (use `pd.DataFrame(np.random.randn(200, 4))`) in a custom `Dataset`. Iterate through it and print the first 3 samples.
 2. Build a `DataLoader` with `batch_size=16` and `shuffle=True`. Iterate one epoch and print each batch shape.
-Next: [Reading and Modifying Real ML Code](./0015-reading-real-ml-code.md)
+Next: [Reading and Modifying Real ML Code](0015-reading-real-ml-code/)

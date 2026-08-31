@@ -246,4 +246,4 @@ plt.savefig("chart.svg")   # vector, good for web
 2. Compute a new column from two existing ones using NumPy operations on `.to_numpy()`. Put it back in the DataFrame.
 3. Create a 3-plot figure: histogram of one column, scatter of two columns, bar chart of group means. Save to PNG.
 
-Next: [0011 — Tensors: NumPy with Superpowers](./0011-tensors-numpy-with-superpowers.md)
+Next: [0011 — Tensors: NumPy with Superpowers](0011-tensors-numpy-with-superpowers/)

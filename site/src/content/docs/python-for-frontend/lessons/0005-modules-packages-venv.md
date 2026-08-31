@@ -253,4 +253,4 @@ myproject/
 
 ---
 
-Next: [0006 — NumPy: The Array That Changed Python](./0006-numpy-array.md)
+Next: [0006 — NumPy: The Array That Changed Python](0006-numpy-array/)

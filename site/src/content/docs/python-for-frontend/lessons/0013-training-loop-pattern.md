@@ -206,4 +206,4 @@ We'll cover `Dataset` and `DataLoader` in depth next lesson. For now: `DataLoade
 1. Build a 2-layer MLP on synthetic data (the example above). Train it. Print the loss curve (just `print` the loss every 20 epochs).
 2. Change the hidden layer from 16 to 64 neurons. Observe: does training converge faster or slower? Why?
 3. Replace `SGD` with `Adam` at `lr=0.001`. Observe the convergence speed difference.
-Next: [DataLoader, Datasets, and Real Data](./0014-dataloader-datasets-real-data.md)
+Next: [DataLoader, Datasets, and Real Data](0014-dataloader-datasets-real-data/)

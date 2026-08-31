@@ -197,4 +197,4 @@ arr.astype(np.int32)  # [1, 2, 3]  ← truncates, like Math.trunc
 2. Replace the loop: convert `[x**2 for x in range(100)]` to a vectorized operation.
 3. Given a 3×4 matrix, compute the mean of each row and each column using `axis`.
 
-Next: [0007 — NumPy: Broadcasting and Advanced Indexing](./0007-numpy-broadcasting.md)
+Next: [0007 — NumPy: Broadcasting and Advanced Indexing](0007-numpy-broadcasting/)

@@ -156,4 +156,4 @@ t_gpu.cpu().numpy()             # works — copies GPU → CPU → NumPy
 
 1. Create a tensor of shape `(2, 3, 4)`, reshape it to `(6, 4)`, then view it as `(24,)`. Verify they share memory by modifying one.
 2. Reproduce 5 operations from lesson 0006 (slicing, masking, axis-wise stats) using `torch` instead of `np`. Compare results with `torch.allclose()`.
-Next: [Autograd: The Engine That Makes ML Work](./0012-autograd-engine-that-makes-ml-work.md)
+Next: [Autograd: The Engine That Makes ML Work](0012-autograd-engine-that-makes-ml-work/)

@@ -192,4 +192,4 @@ np.clip(raw, 0, 1)               # [0, 0.1, 0.9, 1.0]
 2. Implement one-hot encoding for `[2, 0, 1, 1]` with 3 classes using `np.eye`.
 3. Find the top-3 values and their indices in `np.random.default_rng(0).random(10)` using `np.argsort`.
 
-Next: [0008 — pandas: DataFrames as Typed Spreadsheets](./0008-pandas-dataframe.md)
+Next: [0008 — pandas: DataFrames as Typed Spreadsheets](0008-pandas-dataframe/)

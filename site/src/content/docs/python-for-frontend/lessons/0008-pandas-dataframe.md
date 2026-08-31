@@ -225,4 +225,4 @@ df["price"] = df["price"] * 1.1   # 10% increase
 2. Filter a DataFrame to rows where a numeric column is above its median and a string column matches one of three values.
 3. Select rows 5–15, columns `["name", "age"]` using both `loc` and `iloc`. Explain why the slice end behavior differs.
 
-Next: [0009 — pandas: GroupBy, Merge, and Transform](./0009-pandas-groupby-merge.md)
+Next: [0009 — pandas: GroupBy, Merge, and Transform](0009-pandas-groupby-merge/)

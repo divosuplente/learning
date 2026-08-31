@@ -213,4 +213,4 @@ pd.pivot_table(sales, values="revenue", index="region",
 2. Inner-join a users table and an orders table on `user_id`. Find users with no orders using a left join + `isna()` check.
 3. Given a DataFrame with NaN values in a numeric column, fill with the column median and verify no NaN remains.
 
-Next: [0010 — The Data Pipeline: NumPy ↔ pandas ↔ Matplotlib](./0010-data-pipeline.md)
+Next: [0010 — The Data Pipeline: NumPy ↔ pandas ↔ Matplotlib](0010-data-pipeline/)

@@ -177,4 +177,4 @@ In JS terms: autograd is like React deriving the DOM update from your render fun
 
 1. Define `f(x) = x^3 + 2x^2 - 5x + 1`. Compute `f'(3)` by hand, then verify with autograd.
 2. Implement gradient descent on `f(x) = sin(x) + 0.1*x^2`. Start from `x=3.0`, find a local minimum. Print `x` and `loss` every 10 steps.
-Next: [The Training Loop: The Pattern That Powers Everything](./0013-training-loop-pattern.md)
+Next: [The Training Loop: The Pattern That Powers Everything](0013-training-loop-pattern/)
