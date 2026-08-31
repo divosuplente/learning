@@ -1,5 +1,5 @@
 ---
-title: "Lesson 1: Java Records: Boilerplate-Free Data Classes"
+title: "Java Records: Boilerplate-Free Data Classes"
 description: "Lesson 1: Java Records: Boilerplate-Free Data Classes"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0001-java-records.md
 ---

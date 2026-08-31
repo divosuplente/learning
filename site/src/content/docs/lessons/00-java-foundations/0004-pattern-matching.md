@@ -1,5 +1,5 @@
 ---
-title: "Lesson 4: Pattern Matching with switch"
+title: "Pattern Matching with switch"
 description: "Lesson 4: Pattern Matching with switch"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0004-pattern-matching.md
 ---

@@ -1,5 +1,5 @@
 ---
-title: "Lesson 5: Collections & Streams"
+title: "Collections & Streams"
 description: "Lesson 5: Collections & Streams"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0005-collections-and-streams.md
 ---

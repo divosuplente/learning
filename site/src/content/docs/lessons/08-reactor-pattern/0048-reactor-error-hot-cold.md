@@ -1,5 +1,5 @@
 ---
-title: "Lesson 48: Error Handling, Hot vs Cold Publishers"
+title: "Error Handling, Hot vs Cold Publishers"
 description: "Lesson 48: Error Handling, Hot vs Cold Publishers"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0048-reactor-error-hot-cold.md
 ---

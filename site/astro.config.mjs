@@ -13,7 +13,7 @@ export default defineConfig({
       ],
       sidebar: [
         {
-          label: 'Backend Engineering',
+          label: 'Backend Engineering in Java',
           collapsed: true,
           items: [
             {
@@ -104,20 +104,14 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Careers',
+          label: 'AI Graphics Software Engineer',
           collapsed: true,
-          items: [
-            {
-              label: 'Graphics AI Engineer',
-              collapsed: true,
-              items: [{ autogenerate: { directory: 'graphics-ai/lessons' } }],
-            },
-            {
-              label: 'Python for Frontend Devs',
-              collapsed: true,
-              items: [{ autogenerate: { directory: 'python-for-frontend/lessons' } }],
-            },
-          ],
+          items: [{ autogenerate: { directory: 'graphics-ai/lessons' } }],
+        },
+        {
+          label: 'Python for Frontend Devs',
+          collapsed: true,
+          items: [{ autogenerate: { directory: 'python-for-frontend/lessons' } }],
         },
         {
           label: 'Reference',

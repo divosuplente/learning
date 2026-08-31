@@ -1,5 +1,5 @@
 ---
-title: "Lesson 10: Build Tools & Maven Basics"
+title: "Build Tools & Maven Basics"
 description: "Lesson 10: Build Tools & Maven Basics"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0010-build-tools-and-maven-basics.md
 ---

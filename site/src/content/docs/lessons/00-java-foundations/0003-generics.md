@@ -1,5 +1,5 @@
 ---
-title: "Lesson 3: Generics"
+title: "Generics"
 description: "Lesson 3: Generics"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0003-generics.md
 ---

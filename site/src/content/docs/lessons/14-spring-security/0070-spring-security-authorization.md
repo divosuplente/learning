@@ -1,5 +1,5 @@
 ---
-title: "Lesson 70: Spring Security Authorization"
+title: "Spring Security Authorization"
 description: "Lesson 70: Spring Security Authorization"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/14-spring-security/0070-spring-security-authorization.md
 ---

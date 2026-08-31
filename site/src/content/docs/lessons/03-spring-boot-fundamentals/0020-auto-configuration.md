@@ -1,5 +1,5 @@
 ---
-title: "Lesson 20: Auto-configuration & @SpringBootApplication"
+title: "Auto-configuration & @SpringBootApplication"
 description: "Lesson 20: Auto-configuration & @SpringBootApplication"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/03-spring-boot-fundamentals/0020-auto-configuration.md
 ---

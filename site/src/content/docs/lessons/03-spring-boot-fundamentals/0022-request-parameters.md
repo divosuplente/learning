@@ -1,5 +1,5 @@
 ---
-title: "Lesson 22: Request Parameters"
+title: "Request Parameters"
 description: "Lesson 22: Request Parameters"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/03-spring-boot-fundamentals/0022-request-parameters.md
 ---

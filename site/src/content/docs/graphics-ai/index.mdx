@@ -1,29 +1,65 @@
 ---
-title: Graphics AI Engineer
+title: AI Graphics Software Engineer
 description: 3D graphics meets AI — from linear algebra to neural rendering and production prototypes
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
-
 Build fluency at the intersection of computer vision, neural rendering, and game engines. Designed for interview readiness — willingness to learn over prior experience.
 
-<CardGrid stagger>
-  <Card title="M1: Math Intuition" icon="sigma">
-    Vectors, matrices, coordinate systems, dot & cross products — the geometry behind every 3D operation.
-  </Card>
-  <Card title="M2: Python + C#" icon="code">
-    NumPy/PyTorch tensors, Unity MonoBehaviour, async patterns, debugging 3D — the dual-stack foundation.
-  </Card>
-  <Card title="M3: Computer Vision" icon="eye">
-    Images as tensors, convolutions, detection vs segmentation, training loops, inference pipelines.
-  </Card>
-  <Card title="M4: Modern Vision Models" icon="brain">
-    SAMv2, GroundingDINO, FlorenceV2, Vision Transformers, model deployment.
-  </Card>
-  <Card title="M5: 3D AI" icon="cube">
-    Point clouds, NeRF, Gaussian Splatting, mesh reconstruction, Nerfstudio.
-  </Card>
-  <Card title="M6: Interview Prep" icon="rocket">
-    Prototype pipeline, architecture decisions, deployment, case study walkthrough, Evergine/Plain Concepts context.
-  </Card>
-</CardGrid>
+## M1: Math Intuition for 3D
+
+Vectors, matrices, coordinate systems, dot & cross products — the geometry behind every 3D operation.
+
+1. [Why 3D + AI Matters](lessons/0001-why-3d-ai-matters/)
+2. [Vectors — Direction, Magnitude, and 3D Representation](lessons/0002-vectors-and-transformations/)
+3. [Matrices — Transformations as Function Calls](lessons/0003-matrices-as-transformations/)
+4. [Coordinate Systems — World, Local, Camera, and Why Engines Disagree](lessons/0004-coordinate-systems/)
+5. [Dot & Cross Products — Lighting, Normals, and Angles](lessons/0005-dot-and-cross-products/)
+
+## M2: Python for ML + C# for Engines
+
+NumPy/PyTorch tensors, Unity MonoBehaviour, async patterns, debugging 3D — the dual-stack foundation.
+
+1. [NumPy → PyTorch Tensors](lessons/0006-numpy-to-pytorch-tensors/)
+2. [C# in Unity — MonoBehaviour Lifecycle](lessons/0007-csharp-unity-monobehaviour/)
+3. [Async Patterns — Python and C#](lessons/0008-async-patterns/)
+4. [Debugging 3D — Why Print Isn't Enough](lessons/0009-debugging-3d/)
+
+## M3: Computer Vision Foundations
+
+Images as tensors, convolutions, detection vs segmentation, training loops, inference pipelines.
+
+1. [Images as Tensors](lessons/0010-images-as-tensors/)
+2. [Convolutions from Theory to Code](lessons/0011-convolutions-from-theory-to-code/)
+3. [Object Detection vs Segmentation](lessons/0012-object-detection-vs-segmentation/)
+4. [Training Loop Anatomy](lessons/0013-training-loop-anatomy/)
+5. [Inference Pipeline](lessons/0014-inference-pipeline/)
+
+## M4: Modern Vision Models
+
+SAMv2, GroundingDINO, FlorenceV2, Vision Transformers, model deployment.
+
+1. [SAMv2 — Promptable Segmentation](lessons/0015-samv2-promptable-segmentation/)
+2. [GroundingDINO — Text-Guided Object Detection](lessons/0016-grounding-dino-text-detection/)
+3. [FlorenceV2 — Unified Vision Model](lessons/0017-florence-v2-unified-vision/)
+4. [Vision Transformers — How Transformers Replaced CNNs](lessons/0018-vision-transformers/)
+5. [Model Deployment — ONNX, TorchScript, and Serving](lessons/0019-model-deployment/)
+
+## M5: 3D AI — Reconstruction & Rendering
+
+Point clouds, NeRF, Gaussian Splatting, mesh reconstruction, Nerfstudio.
+
+1. [Point Clouds](lessons/0020-point-clouds/)
+2. [NeRF — Neural Radiance Fields](lessons/0021-nerf/)
+3. [Gaussian Splatting — Explicit Real-Time Rendering](lessons/0022-gaussian-splatting/)
+4. [Mesh Reconstruction — From Points to Triangles](lessons/0023-mesh-reconstruction/)
+5. [Nerfstudio — Running NeRF and Gaussian Splatting via CLI](lessons/0024-nerfstudio/)
+
+## M6: Interview Prototype & Case Study Prep
+
+Prototype pipeline, architecture decisions, deployment, case study walkthrough, Evergine/Plain Concepts context.
+
+1. [Target Prototype Pipeline](lessons/0025-target-prototype-pipeline/)
+2. [Architecture Decisions](lessons/0026-architecture-decisions/)
+3. [Deploying 3D AI](lessons/0027-deploying-3d-ai/)
+4. [Case Study Walkthrough](lessons/0028-case-study-walkthrough/)
+5. [Evergine & Plain Concepts Context](lessons/0029-evergine-plain-concepts-context/)

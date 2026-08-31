@@ -1,5 +1,5 @@
 ---
-title: "Lesson 49: Spring WebFlux, Virtual Threads vs Reactive & Module Review"
+title: "Spring WebFlux, Virtual Threads vs Reactive & Module Review"
 description: "Lesson 49: Spring WebFlux, Virtual Threads vs Reactive & Module Review"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0049-webflux-virtual-threads.md
 ---

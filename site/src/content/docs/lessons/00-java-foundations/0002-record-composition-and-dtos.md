@@ -1,5 +1,5 @@
 ---
-title: "Lesson 2: Composing Records and Backend DTOs"
+title: "Composing Records and Backend DTOs"
 description: "Lesson 2: Composing Records and Backend DTOs"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0002-record-composition-and-dtos.md
 ---

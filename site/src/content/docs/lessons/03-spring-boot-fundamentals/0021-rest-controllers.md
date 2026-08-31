@@ -1,5 +1,5 @@
 ---
-title: "Lesson 21: REST Controllers & HTTP Mappings"
+title: "REST Controllers & HTTP Mappings"
 description: "Lesson 21: REST Controllers & HTTP Mappings"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/03-spring-boot-fundamentals/0021-rest-controllers.md
 ---
