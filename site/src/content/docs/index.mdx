@@ -1,18 +1,40 @@
 ---
-title: Backend Engineering Course
-description: Java, Spring Boot, Kafka, GraphQL, Reactor, TDD, Kotlin — for active developers
+title: Your Learning Paths
+description: Short, practical lessons built around real-world sources
 template: splash
 hero:
-  tagline: Java and the backend ecosystem, from syntax to production.
+  tagline: Careers and backend engineering — frequency-first.
   actions:
-    - text: Start with Module 00
-      link: 00-java-foundations/
+    - text: Explore
+      link: graphics-ai/
       icon: right-arrow
     - text: GitHub
       link: https://github.com/divosuplente/learning
       icon: external
       variant: minimal
 ---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+Short, practical lessons built around **real-world sources**, not classrooms. Each lesson takes 5–10 minutes. Visual-first. Frequency-driven.
+
+## Careers
+
+<CardGrid stagger>
+  <Card title="🎨 Graphics AI Engineer" icon="rocket">
+    3D graphics meets AI — from linear algebra to neural rendering and production prototypes. 29 lessons.
+
+    [Start →](graphics-ai/)
+  </Card>
+  <Card title="🐍 Python for Frontend Devs" icon="code">
+    TypeScript/React → Python, NumPy, pandas, PyTorch. Every lesson bridges from known JS concepts. 15 lessons.
+
+    [Start →](python-for-frontend/)
+  </Card>
+</CardGrid>
+
+
+## Backend Engineering
 
 <div class="module-grid">
   <a href="00-java-foundations/" class="module-card">
@@ -96,13 +118,3 @@ hero:
     <span class="module-desc">Kubernetes, Terraform, Kustomize, Argo CD GitOps.</span>
   </a>
 </div>
-
-## Tools You'll Need
-
-| Tool | Version | Purpose |
-| --- | --- | --- |
-| JDK | 21+ | Java runtime and compiler |
-| Maven / Gradle | Latest | Build tool and dependency management |
-| IntelliJ IDEA Community | Latest | Code editor with Java support |
-| Docker Desktop | Latest | Running Kafka, Postgres locally |
-| Git | Latest | Version control |
