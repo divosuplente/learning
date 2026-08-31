@@ -6,8 +6,6 @@ duration: "7 min"
 weight: 3
 ---
 
-# Functions, Lambdas, and Comprehensions
-
 Python functions look familiar but have sharper edges than JS functions. Lambdas are limited by design. Comprehensions replace the `.map().filter()` chains you write daily. And one footgun — mutable default arguments — will bite you eventually.
 
 ## `def` vs `function`

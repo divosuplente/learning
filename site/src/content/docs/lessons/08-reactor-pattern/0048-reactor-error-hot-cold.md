@@ -1,10 +1,8 @@
 ---
 title: "Error Handling, Hot vs Cold Publishers"
-description: "Lesson 48: Error Handling, Hot vs Cold Publishers"
+description: "Error Handling, Hot vs Cold Publishers"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0048-reactor-error-hot-cold.md
 ---
-
-# Error Handling, Hot vs Cold Publishers
 
 A reactive pipeline without error handling fails silently when errors hit. Reactor treats errors as **first-class signals**, just like `onNext` and `onComplete`, and gives you operators to recover, retry, or gracefully degrade. This lesson also covers the distinction between **cold** publishers (lazy, per-subscriber) and **hot** publishers (eager, shared), and why *nothing happens until you subscribe*.
 

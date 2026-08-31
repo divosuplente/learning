@@ -1,10 +1,8 @@
 ---
 title: "Reactive Streams Spec: Publisher, Subscriber, Backpressure"
-description: "Lesson 46: Reactive Streams Spec: Publisher, Subscriber, Backpressure"
+description: "Reactive Streams Spec: Publisher, Subscriber, Backpressure"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0046-reactive-streams-spec.md
 ---
-
-# Reactive Streams Spec: Publisher, Subscriber, Backpressure
 
 Before learning any specific library (Reactor, RxJava, Mutiny), you need the **Reactive Streams specification**: a contract that defines how asynchronous stream processing must work. Every compliant library implements the same four interfaces. Understand the spec once, and the concepts transfer everywhere.
 

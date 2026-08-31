@@ -1,10 +1,8 @@
 ---
 title: "Generics"
-description: "Lesson 3: Generics"
+description: "Generics"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0003-generics.md
 ---
-
-# Generics
 
 Without generics, collections held `Object` and you cast on retrieval. Bugs surfaced at runtime, not compile time. Generics let you write **type-safe, reusable code** where the compiler catches mismatches before the program runs.
 

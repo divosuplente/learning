@@ -1,10 +1,7 @@
 ---
 title: "Migration Strategy & Module Review"
-description: "Migration Strategy & Module Review"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0062-kotlin-migration-strategy.md
 ---
-
-# Migration Strategy & Module Review
 
 You've seen Kotlin's syntax, data classes, extension functions, and coroutines. Now the practical question: **how do you actually move a production Spring Boot codebase from Java to Kotlin?** This lesson covers the J2K converter, the recommended migration order, how Java and Kotlin coexist in the same project, testing Kotlin code with JUnit 5 and MockK, and wraps up the entire course.
 

@@ -1,10 +1,7 @@
 ---
 title: "N+1 Problem in GraphQL & DataLoader"
-description: "N+1 Problem in GraphQL & DataLoader"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0043-graphql-n-plus-1-and-dataloader.md
 ---
-
-# N+1 Problem in GraphQL & DataLoader
 
 GraphQL lets clients request nested data in a single query, but on the server, each nested field can trigger its own database call. A query for 50 orders, each requesting its customer, fires **51 SQL statements** instead of 2. This lesson explains why, and how DataLoader turns N+1 queries into a pair of batched queries.
 

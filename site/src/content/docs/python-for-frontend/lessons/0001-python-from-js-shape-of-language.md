@@ -6,8 +6,6 @@ duration: "6 min"
 weight: 1
 ---
 
-# Python from JS: The Shape of the Language
-
 Python reads like pseudocode that runs. No semicolons, no braces, no `let`/`const`. But the differences that trip you up aren't the obvious ones — they're the quiet behavioral shifts between languages that *look* similar.
 
 ## Variables: no declaration keyword

@@ -1,10 +1,7 @@
 ---
 title: "Why Kotlin & Setting Up Kotlin in Spring Boot"
-description: "Why Kotlin & Setting Up Kotlin in Spring Boot"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0058-why-kotlin.md
 ---
-
-# Why Kotlin & Setting Up Kotlin in Spring Boot
 
 Every Java Spring Boot project can run Kotlin instead: same JVM, same libraries, same deployment pipeline. This lesson explains what Kotlin fixes in Java, when a migration makes sense, and how to wire the Kotlin compiler into an existing Maven project so both languages coexist during the transition.
 

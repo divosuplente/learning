@@ -6,8 +6,6 @@ duration: "7 min"
 weight: 5
 ---
 
-# Modules, Packages, and venv
-
 Every Python file is a module. Every directory with `__init__.py` is a package. venv is your per-project `node_modules`. `pip` is your `npm`. The mental model maps cleanly — but the defaults differ in ways that matter.
 
 ## `import`/`export` → `import`

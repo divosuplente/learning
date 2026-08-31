@@ -1,10 +1,8 @@
 ---
 title: "Project Reactor: Mono & Flux Basics"
-description: "Lesson 47: Project Reactor: Mono & Flux Basics"
+description: "Project Reactor: Mono & Flux Basics"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0047-reactor-mono-flux.md
 ---
-
-# Project Reactor: Mono & Flux Basics
 
 Project Reactor is the Reactive Streams implementation that powers Spring WebFlux. It gives you two publisher types (`Mono` for zero-or-one results, `Flux` for zero-to-many) and a toolkit of static factories to create them. This lesson covers what each type models and how to build publishers from scratch.
 

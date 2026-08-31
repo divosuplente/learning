@@ -1,10 +1,7 @@
 ---
 title: "Types of Injection: Why Constructor Is Preferred"
-description: "Types of Injection: Why Constructor Is Preferred"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/02-dependency-injection/0017-types-of-injection.md
 ---
-
-# Types of Injection: Why Constructor Is Preferred
 
 Spring gives you three ways to deliver a dependency into a bean. Two of them are traps. This lesson shows each style, explains what goes wrong with setter and field injection, and gives you the comparison table that decides every code review.
 

@@ -1,10 +1,7 @@
 ---
 title: "Kotlin Data Classes, Extension Functions & DSLs"
-description: "Kotlin Data Classes, Extension Functions & DSLs"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0060-kotlin-classes-extensions.md
 ---
-
-# Kotlin Data Classes, Extension Functions & DSLs
 
 Java records gave you compact carriers for data. Kotlin's `data class` adds `copy()`, destructuring, and named arguments out of the box. But the bigger shift comes from **extension functions**, which let you add methods to classes you don't own, and **DSL builders**, which use Kotlin's syntax to create type-safe configuration languages. This lesson shows you how each works and when to reach for them in a Spring Boot project.
 

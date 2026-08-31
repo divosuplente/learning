@@ -1,10 +1,7 @@
 ---
 title: "Spring IoC Container & Stereotype Annotations"
-description: "Spring IoC Container & Stereotype Annotations"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/02-dependency-injection/0016-spring-ioc-and-stereotypes.md
 ---
-
-# Spring IoC Container & Stereotype Annotations
 
 In the last lesson you saw the problem: `new` creates tight coupling. Now meet the solution: the **Spring IoC container**, which discovers your classes, creates them, and wires their dependencies together. All you do is add the right annotation.
 

@@ -1,6 +1,5 @@
 ---
 title: "TDD: Red-Green-Refactor Cycle"
-description: "TDD: Red-Green-Refactor Cycle"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/09-tdd/0051-tdd-red-green-refactor.md
 ---
 

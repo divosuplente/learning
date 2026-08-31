@@ -1,10 +1,8 @@
 ---
 title: "Java Records: Boilerplate-Free Data Classes"
-description: "Lesson 1: Java Records: Boilerplate-Free Data Classes"
+description: "Java Records: Boilerplate-Free Data Classes"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0001-java-records.md
 ---
-
-# Java Records: Boilerplate-Free Data Classes
 
 If you've written data-carrying classes in any language, you know the drill: constructor, getters, `equals()`, `hashCode()`, `toString()`. Easily 50 lines of identical structure for something that should be one.
 

@@ -1,10 +1,7 @@
 ---
 title: "Running the App & Maven Commands"
-description: "Running the App & Maven Commands"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0014-running-and-maven-commands.md
 ---
-
-# Running the App & Maven Commands
 
 Writing code is half the job. The other half is **building, running, and shipping** it. Maven gives you a small, well-defined set of commands that take you from source to a running application or a deployable JAR. This lesson covers the commands you'll use every day, the Maven Wrapper that keeps your team consistent, and when Gradle might be the better choice.
 

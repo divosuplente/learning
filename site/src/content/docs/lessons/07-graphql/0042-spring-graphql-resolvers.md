@@ -1,10 +1,7 @@
 ---
 title: "Spring Boot GraphQL Resolvers"
-description: "Spring Boot GraphQL Resolvers"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0042-spring-graphql-resolvers.md
 ---
-
-# Spring Boot GraphQL Resolvers
 
 A **resolver** is a Java method that provides the data for a GraphQL field. When a client queries `order(id: 42)`, Spring finds the resolver method annotated with `@QueryMapping` whose name matches `order` and calls it. Three annotations cover every case:
 

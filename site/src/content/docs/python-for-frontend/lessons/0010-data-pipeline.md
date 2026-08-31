@@ -6,8 +6,6 @@ duration: "7 min"
 weight: 10
 ---
 
-# The Data Pipeline: NumPy ↔ pandas ↔ Matplotlib
-
 ## The three-layer workflow
 
 Every ML project starts the same way:

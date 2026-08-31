@@ -1,10 +1,8 @@
 ---
 title: "Enums, Sealed Types & Packages"
-description: "Lesson 9: Enums, Sealed Types & Packages"
+description: "Enums, Sealed Types & Packages"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0009-enums-sealed-types-and-packages.md
 ---
-
-# Enums, Sealed Types & Packages
 
 Real domains have **fixed sets of variants**: shipping methods, order statuses, payment types. Java enums make these type-safe at compile time, sealed types let you guarantee *no other variant exists*, and packages organize who can see what. Together they close the gap between your domain model and the type system.
 

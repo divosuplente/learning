@@ -1,10 +1,7 @@
 ---
 title: "Mockito for Mocking Dependencies"
-description: "Mockito for Mocking Dependencies"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/09-tdd/0053-mockito-for-mocking.md
 ---
-
-# Mockito for Mocking Dependencies
 
 Unit tests should prove one class works in isolation. But real classes have dependencies: repositories, HTTP clients, message producers. If you call the real database in a unit test, you're testing the database too, and your test is slow and fragile. **Mockito** creates fake versions of those dependencies that you control completely.
 

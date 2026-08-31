@@ -6,8 +6,6 @@ duration: "6 min"
 weight: 14
 ---
 
-# DataLoader, Datasets, and Real Data
-
 You've written a training loop. But it operated on `torch.randn()` — toy data. Real ML starts with messy CSVs, images, or text. `Dataset` and `DataLoader` are the pipeline that turns raw data into batched tensors your model can eat.
 
 ## Dataset: an iterable with a contract

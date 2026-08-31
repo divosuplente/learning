@@ -1,10 +1,7 @@
 ---
 title: "Testing, Deployment & Running the Full Application"
-description: "Testing, Deployment & Running the Full Application"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/10-capstone-project/0057-testing-deployment-oms.md
 ---
-
-# Testing, Deployment & Running the Full Application
 
 You have an Order Management System with REST endpoints, GraphQL queries, Kafka events, and JPA repositories. The final question: how do you **prove it works** at every level and ship it? This lesson walks through the full test suite, Docker Compose for local infrastructure, and hands-on verification with curl and GraphQL.
 

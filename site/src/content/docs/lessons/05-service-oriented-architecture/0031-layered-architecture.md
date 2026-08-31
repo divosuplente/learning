@@ -1,10 +1,7 @@
 ---
 title: "Layered Architecture"
-description: "Layered Architecture"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/05-service-oriented-architecture/0031-layered-architecture.md
 ---
-
-# Layered Architecture
 
 Inside every well-structured Spring Boot application, code is organized into **layers**, each with one job, each talking only to the layer directly below it. This lesson introduces the four layers you'll see in almost every Spring project: Controller, Service, Repository, and Database.
 

@@ -1,10 +1,8 @@
 ---
 title: "Reactive Programming Paradigm & the C10K Problem"
-description: "Lesson 45: Reactive Programming Paradigm & the C10K Problem"
+description: "Reactive Programming Paradigm & the C10K Problem"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0045-reactive-programming-paradigm.md
 ---
-
-# Reactive Programming Paradigm & the C10K Problem
 
 Every I/O operation your code performs (a database query, an HTTP call, reading a file) takes time. The question is: **what does your thread do while it waits?** If the answer is "nothing," you're writing blocking code. Reactive programming flips the model: your thread never waits. It moves on, and gets notified when the result arrives.
 

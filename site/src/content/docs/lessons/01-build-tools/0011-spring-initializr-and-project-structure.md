@@ -1,10 +1,7 @@
 ---
 title: "Spring Initializr & Project Structure"
-description: "Spring Initializr & Project Structure"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0011-spring-initializr-and-project-structure.md
 ---
-
-# Spring Initializr & Project Structure
 
 Instead of creating every file by hand, **Spring Initializr** generates a complete Spring Boot project skeleton from a web form. Fill it in, download the zip, and open it in your IDE. You have a running project in under a minute.
 

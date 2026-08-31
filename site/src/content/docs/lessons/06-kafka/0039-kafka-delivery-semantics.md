@@ -1,10 +1,8 @@
 ---
 title: "Delivery Semantics, Idempotency & Module Review"
-description: "Lesson 39: Delivery Semantics, Idempotency & Module Review"
+description: "Delivery Semantics, Idempotency & Module Review"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0039-kafka-delivery-semantics.md
 ---
-
-# Delivery Semantics, Idempotency & Module Review
 
 Kafka's default is **at-least-once** delivery: messages are never lost but may arrive twice. This lesson explains the three delivery guarantees, shows how to make your consumers safe against duplicates, and reviews everything from Module 06.
 

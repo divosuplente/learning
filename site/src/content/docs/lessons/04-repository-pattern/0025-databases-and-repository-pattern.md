@@ -1,10 +1,7 @@
 ---
 title: "Databases, SQL Crash Course & the Repository Pattern"
-description: "Databases, SQL Crash Course & the Repository Pattern"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/04-repository-pattern/0025-databases-and-repository-pattern.md
 ---
-
-# Databases, SQL Crash Course & the Repository Pattern
 
 Your application's objects vanish the moment the process stops. A **database** persists data to disk so it survives restarts, crashes, and deploys. This lesson covers how relational databases organize that data, the SQL you need to talk to them, and the Repository Pattern that keeps data-access logic from infecting your business code.
 

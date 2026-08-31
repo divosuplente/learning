@@ -6,8 +6,6 @@ duration: "6 min"
 weight: 11
 ---
 
-# Tensors: NumPy with Superpowers
-
 You've been using `np.ndarray` — a typed, contiguous block of numbers with shape and dtype. A `torch.Tensor` is the same idea, plus two things NumPy can't do: run on GPU and track gradients.
 
 ## The mental model

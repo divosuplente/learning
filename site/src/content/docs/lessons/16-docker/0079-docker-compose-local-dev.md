@@ -1,10 +1,7 @@
 ---
 title: "Docker Compose for Local Development"
-description: "Docker Compose for Local Development"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/16-docker/0079-docker-compose-local-dev.md
 ---
-
-# Docker Compose for Local Development
 
 A Spring Boot application rarely runs alone. It needs PostgreSQL, Kafka, Redis, or other infrastructure. Docker Compose defines multi-service stacks in a single YAML file and starts them with one command. This lesson covers the Compose file structure, service networking, health checks, and the common pattern of running infrastructure in Docker while the Spring Boot app runs on the host for fast reloads.
 

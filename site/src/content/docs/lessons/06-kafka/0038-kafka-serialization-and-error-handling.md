@@ -1,10 +1,8 @@
 ---
 title: "Serialization, Error Handling & Dead Letter Queues"
-description: "Lesson 38: Serialization, Error Handling & Dead Letter Queues"
+description: "Serialization, Error Handling & Dead Letter Queues"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0038-kafka-serialization-and-error-handling.md
 ---
-
-# Serialization, Error Handling & Dead Letter Queues
 
 Kafka stores bytes, not Java objects. Getting your events safely across that boundary requires serialization on the way in and deserialization on the way out. When deserialization fails or a consumer throws, you need a strategy beyond "crash and loop." This lesson covers the JSON type-header mechanism, the trusted-packages security gate, error handling with `@RetryableTopic`, and Dead Letter Queues.
 

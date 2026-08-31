@@ -1,10 +1,7 @@
 ---
 title: "Spring Security: CSRF, CORS & Security Headers"
-description: "Spring Security: CSRF, CORS & Security Headers"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/14-spring-security/0072-spring-security-csrf-cors.md
 ---
-
-# Spring Security: CSRF, CORS & Security Headers
 
 A web application involves more than your server and your users. Browsers enforce rules about who can call whom and how. **CSRF** attacks work because browsers send cookies automatically; **CORS** controls which origins a browser will let your JavaScript call; **security headers** instruct the browser to apply stricter defaults. Spring Security supports all three. This lesson covers what each mechanism does and how to configure it.
 

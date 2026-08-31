@@ -1,10 +1,7 @@
 ---
 title: "JPA Entities"
-description: "JPA Entities"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/04-repository-pattern/0027-jpa-entities.md
 ---
-
-# JPA Entities
 
 A JPA entity is a Java class that maps to a database table. Each instance of the class represents one row. JPA uses annotations to describe exactly how objects become rows and back again, closing the gap between your object model and your relational schema.
 

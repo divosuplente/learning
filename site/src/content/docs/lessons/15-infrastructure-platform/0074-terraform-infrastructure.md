@@ -1,10 +1,7 @@
 ---
 title: "Terraform Infrastructure as Code"
-description: "Terraform Infrastructure as Code"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/15-infrastructure-platform/0074-terraform-infrastructure.md
 ---
-
-# Terraform Infrastructure as Code
 
 Every Spring Boot service you deploy needs compute, networking, and a database. Clicking through the AWS Console to create a VPC, subnet, and RDS instance works for a demo. It fails for production: no audit trail, no repeatability, no way to reproduce the same setup across staging and production. Terraform lets you write infrastructure as declarative code that you version, review, and apply like any other source file.
 

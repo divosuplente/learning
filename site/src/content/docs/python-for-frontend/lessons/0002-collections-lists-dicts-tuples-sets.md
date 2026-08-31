@@ -6,8 +6,6 @@ duration: "6 min"
 weight: 2
 ---
 
-# Collections: Lists, Dicts, Tuples, Sets
-
 Python has four built-in collection types where JS has two (`Array`, `Object`) plus `Map`/`Set`. Each serves a distinct role. Understanding which to reach for — and how they differ from their JS lookalikes — is 80% of day-one Python fluency.
 
 ## `Array` → `list`

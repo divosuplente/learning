@@ -1,10 +1,8 @@
 ---
 title: "Request Parameters"
-description: "Lesson 22: Request Parameters"
+description: "Request Parameters"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/03-spring-boot-fundamentals/0022-request-parameters.md
 ---
-
-# Request Parameters
 
 Every HTTP request carries data in different places: the URL path, the query string, the body, the headers. Spring gives you one annotation per location. Pick the right one and the framework does the parsing for you. Pick the wrong one and you're fighting the framework instead of using it.
 

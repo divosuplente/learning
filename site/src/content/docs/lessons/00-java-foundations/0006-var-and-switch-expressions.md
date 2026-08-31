@@ -1,10 +1,8 @@
 ---
 title: "var & Switch Expressions"
-description: "Lesson 6: var & Switch Expressions"
+description: "var & Switch Expressions"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0006-var-and-switch-expressions.md
 ---
-
-# var & Switch Expressions
 
 Two modern Java features that reduce boilerplate without changing runtime behavior: `var` lets the compiler infer local variable types, and switch expressions turn `switch` into something that returns a value. Both are purely compile-time conveniences, the JVM sees the same bytecode either way.
 

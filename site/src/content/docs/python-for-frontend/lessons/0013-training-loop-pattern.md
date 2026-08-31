@@ -6,8 +6,6 @@ duration: "7 min"
 weight: 13
 ---
 
-# The Training Loop: The Pattern That Powers Everything
-
 Every ML training script, from a toy example to GPT, runs the same 5-line loop. It's the `for` loop of machine learning — as fundamental as `Array.map()` is to JS.
 
 ## The 5-line pattern

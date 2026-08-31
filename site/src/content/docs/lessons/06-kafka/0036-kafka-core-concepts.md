@@ -1,10 +1,8 @@
 ---
 title: "Kafka Core Concepts: Topics, Partitions, Offsets, Consumer Groups"
-description: "Lesson 36: Kafka Core Concepts: Topics, Partitions, Offsets, Consumer Groups"
+description: "Kafka Core Concepts: Topics, Partitions, Offsets, Consumer Groups"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0036-kafka-core-concepts.md
 ---
-
-# Kafka Core Concepts: Topics, Partitions, Offsets, Consumer Groups
 
 Kafka stores and routes millions of messages per second using a small set of abstractions. This lesson makes each one concrete with the **newsstand analogy**, then shows how they fit together in a real architecture.
 

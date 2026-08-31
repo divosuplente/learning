@@ -1,10 +1,7 @@
 ---
 title: "Building the Order Management System"
-description: "Building the Order Management System"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/10-capstone-project/0056-building-oms.md
 ---
-
-# Building the Order Management System
 
 The capstone project brings together every technology from this course: REST controllers, a service layer with transactional boundaries, Kafka event publishing, GraphQL resolvers, and Spring Data repositories. This lesson walks through the full implementation as a working system where every layer cooperates, not as isolated snippets.
 

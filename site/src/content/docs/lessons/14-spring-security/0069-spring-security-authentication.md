@@ -1,10 +1,7 @@
 ---
 title: "Spring Security: Authentication"
-description: "Spring Security: Authentication"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/14-spring-security/0069-spring-security-authentication.md
 ---
-
-# Spring Security: Authentication
 
 Every secured application answers two questions: **who are you?** and **what are you allowed to do?** The first question is authentication; the second is authorization. This lesson covers authentication: how Spring Security verifies identity, from its default auto-configuration to a custom `SecurityFilterChain` with form login, a `UserDetailsService`, and `BCryptPasswordEncoder`.
 

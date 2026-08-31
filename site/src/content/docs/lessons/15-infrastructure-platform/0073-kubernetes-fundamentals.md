@@ -1,10 +1,8 @@
 ---
 title: "Kubernetes Fundamentals: Pods, Deployments, Services, ConfigMaps"
-description: "Lesson 73: Kubernetes Fundamentals: Pods, Deployments, Services, ConfigMaps"
+description: "Kubernetes Fundamentals: Pods, Deployments, Services, ConfigMaps"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/15-infrastructure-platform/0073-kubernetes-fundamentals.md
 ---
-
-# Kubernetes Fundamentals: Pods, Deployments, Services, ConfigMaps
 
 Spring Boot apps have run on bare metal, VMs, and Docker containers. Kubernetes adds orchestration on top: it decides *where* containers run, restarts them when they fail, and routes traffic to them. This lesson covers the five abstractions you work with daily (Pod, Deployment, Service, ConfigMap, and Secret) and walks through deploying a Spring Boot app from jar to running cluster.
 

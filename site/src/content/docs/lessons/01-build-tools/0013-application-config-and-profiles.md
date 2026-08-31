@@ -1,10 +1,7 @@
 ---
 title: "Application Config & Spring Profiles"
-description: "Application Config & Spring Profiles"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0013-application-config-and-profiles.md
 ---
-
-# Application Config & Spring Profiles
 
 Hardcoded values are fragile. Spring Boot reads configuration from external files, so you can change the database, the port, or the log level without recompiling. The mechanism: `application.yml`, profile-specific overrides, and environment variables for secrets.
 

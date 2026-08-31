@@ -1,10 +1,7 @@
 ---
 title: "The Problem: Tight Coupling & What DI Solves"
-description: "The Problem: Tight Coupling & What DI Solves"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/02-dependency-injection/0015-tight-coupling-and-di.md
 ---
-
-# The Problem: Tight Coupling & What DI Solves
 
 When a class creates its own dependencies with `new`, it ties itself to one specific implementation, and **that one line will haunt every test, every change, and every new feature** you write afterward. Dependency Injection is the fix: instead of reaching out and grabbing what you need, you declare what you need and let something else provide it.
 

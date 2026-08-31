@@ -6,8 +6,6 @@ duration: "7 min"
 weight: 7
 ---
 
-# NumPy: Broadcasting and Advanced Indexing
-
 ## Broadcasting: how NumPy stretches arrays without copying
 
 In JS, adding arrays element-wise requires `.map()` or a loop. In NumPy, `a + b` works even when `a` and `b` have **different shapes** — NumPy "broadcasts" the smaller one.

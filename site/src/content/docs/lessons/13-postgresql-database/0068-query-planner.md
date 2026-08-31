@@ -1,10 +1,8 @@
 ---
 title: "The PostgreSQL Query Planner"
-description: "Lesson 68: The PostgreSQL Query Planner"
+description: "The PostgreSQL Query Planner"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/13-postgresql-database/0068-query-planner.md
 ---
-
-# The PostgreSQL Query Planner
 
 When you write a SQL query, PostgreSQL does not execute it verbatim. It hands the query to the **planner** (also called the optimizer), which examines multiple execution strategies and picks the cheapest one. A wrong plan choice can mean the difference between a query finishing in milliseconds and one taking minutes. This lesson covers the planner's cost model, the scan and join strategies it chooses between, and how to read and influence its decisions.
 

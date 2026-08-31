@@ -1,10 +1,7 @@
 ---
 title: "Kustomize: Managing Kubernetes Environments"
-description: "Kustomize: Managing Kubernetes Environments"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/15-infrastructure-platform/0075-kustomize-environments.md
 ---
-
-# Kustomize: Managing Kubernetes Environments
 
 Every Spring Boot service you deploy to Kubernetes needs different settings per environment: fewer replicas in dev, more in prod; a `latest` tag in dev but a pinned SHA in prod; smaller resource limits locally, larger ones under load. Maintaining separate YAML files for each environment leads to drift and copy-paste errors. Kustomize solves this by layering environment-specific patches on top of a shared base, with no templating engine required.
 

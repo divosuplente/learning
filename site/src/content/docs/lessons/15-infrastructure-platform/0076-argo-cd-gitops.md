@@ -1,10 +1,7 @@
 ---
 title: "Argo CD & GitOps"
-description: "Argo CD & GitOps"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/15-infrastructure-platform/0076-argo-cd-gitops.md
 ---
-
-# Argo CD & GitOps
 
 You have Kubernetes manifests and Kustomize overlays from the previous lessons. The remaining question: how do you get those manifests onto the cluster, keep them in sync, and know when the cluster has drifted from what you declared? Argo CD does this by making **Git the single source of truth** and continuously reconciling the cluster state against it. This lesson covers the GitOps model, Argo CD's architecture, installation, application setup, sync policies, and a practical walkthrough connecting a repo with Kustomize overlays.
 

@@ -6,8 +6,6 @@ duration: "6 min"
 weight: 8
 ---
 
-# pandas: DataFrames as Typed Spreadsheets
-
 ## What is a DataFrame?
 
 In JS, you'd represent tabular data as `Array<Object>` — but it's untyped, has no built-in aggregation, and filtering means `.filter().map()`. pandas `DataFrame` is a **typed, indexed spreadsheet** with a built-in query engine.

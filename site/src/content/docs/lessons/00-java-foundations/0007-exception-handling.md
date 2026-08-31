@@ -1,10 +1,8 @@
 ---
 title: "Exception Handling"
-description: "Lesson 7: Exception Handling"
+description: "Exception Handling"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0007-exception-handling.md
 ---
-
-# Exception Handling
 
 Exceptions signal that something went wrong. Java splits them into two families: **checked** (the compiler forces you to handle) and **unchecked** (runtime errors you may or may not catch). Knowing which to use, and when, keeps your APIs clean and your error paths honest.
 

@@ -1,10 +1,7 @@
 ---
 title: "Custom Queries, Pagination & the N+1 Problem"
-description: "Custom Queries, Pagination & the N+1 Problem"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/04-repository-pattern/0029-custom-queries-and-n-plus-1.md
 ---
-
-# Custom Queries, Pagination & the N+1 Problem
 
 Derived query methods take you far, but not everywhere. When you need aggregates, complex joins, or database-specific functions, you write the query yourself. This lesson covers `@Query` with JPQL and native SQL, pagination with `Pageable`, and the N+1 problem: a silent performance killer that turns one database round-trip into hundreds.
 

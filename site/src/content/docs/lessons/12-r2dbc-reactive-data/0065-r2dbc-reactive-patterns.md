@@ -1,10 +1,7 @@
 ---
 title: "Reactive Patterns with R2DBC"
-description: "Reactive Patterns with R2DBC"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/12-r2dbc-reactive-data/0065-r2dbc-reactive-patterns.md
 ---
-
-# Reactive Patterns with R2DBC
 
 You have seen how Spring Data R2DBC replaces JPA's blocking calls with `Mono` and `Flux`. But real services need transactions, batch operations, error recovery, and composed database calls. This lesson covers the reactive patterns that make R2DBC work in production: transaction management with `ReactiveTransactionTemplate`, bulk operations, Project Reactor error handling, call composition, backpressure, and the cases where R2DBC is the wrong choice.
 

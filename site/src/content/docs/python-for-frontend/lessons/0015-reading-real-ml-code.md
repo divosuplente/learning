@@ -6,8 +6,6 @@ duration: "7 min"
 weight: 15
 ---
 
-# Reading and Modifying Real ML Code
-
 You know tensors, autograd, training loops, and data pipelines. Now let's read code the way you'll encounter it in the wild — split across files, driven by config, with checkpointing, scheduling, and device management. This is the lesson that ties everything together.
 
 ## Anatomy of a PyTorch project

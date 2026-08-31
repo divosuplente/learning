@@ -1,10 +1,7 @@
 ---
 title: "Maven POM Deep Dive"
-description: "Maven POM Deep Dive"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0012-maven-pom-deep-dive.md
 ---
-
-# Maven POM Deep Dive
 
 The `pom.xml` is your project's contract with Maven. Three coordinates identify your artifact, a parent POM eliminates version sprawl, scopes control when dependencies are available, and the fat JAR packages everything into one deployable file. If you understand these pieces, you understand how your build works.
 

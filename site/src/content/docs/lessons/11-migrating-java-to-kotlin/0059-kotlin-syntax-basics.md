@@ -1,10 +1,7 @@
 ---
 title: "Kotlin Syntax: Variables, Null Safety & String Interpolation"
-description: "Kotlin Syntax: Variables, Null Safety & String Interpolation"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0059-kotlin-syntax-basics.md
 ---
-
-# Kotlin Syntax: Variables, Null Safety & String Interpolation
 
 Kotlin's syntax removes large swaths of Java boilerplate. This lesson covers the first things you encounter when writing Kotlin: how to declare variables (`val`/`var`), how the type system makes `NullPointerException` a compile-time error, how to interpolate values into strings, how smart casts remove redundant type checks, and how `when` replaces the switch statement.
 

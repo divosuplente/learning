@@ -1,10 +1,7 @@
 ---
 title: "Capstone Architecture: Assembling All Technologies"
-description: "Capstone Architecture: Assembling All Technologies"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/10-capstone-project/0055-capstone-architecture.md
 ---
-
-# Capstone Architecture: Assembling All Technologies
 
 Modules 00-09 each taught one technology in isolation. A real application uses them **all at once**. This lesson shows you how REST, GraphQL, Kafka, JPA, and WebFlux coexist in a single Spring Boot application, and why layered architecture keeps the resulting codebase navigable.
 

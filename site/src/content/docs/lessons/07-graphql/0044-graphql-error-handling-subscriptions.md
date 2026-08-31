@@ -1,10 +1,7 @@
 ---
 title: "Error Handling, Subscriptions & Module Review"
-description: "Error Handling, Subscriptions & Module Review"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0044-graphql-error-handling-subscriptions.md
 ---
-
-# Error Handling, Subscriptions & Module Review
 
 GraphQL changes how APIs handle errors: **even a failed query returns HTTP 200**, with error details in the response body. This lesson covers GraphQL's error format, partial results, custom exception handling in Spring Boot, real-time subscriptions over WebSockets, and a review of all things GraphQL from Module 07.
 

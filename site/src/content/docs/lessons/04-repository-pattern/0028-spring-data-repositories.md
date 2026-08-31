@@ -1,10 +1,7 @@
 ---
 title: "Spring Data Repositories: JpaRepository & Derived Queries"
-description: "Spring Data Repositories: JpaRepository & Derived Queries"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/04-repository-pattern/0028-spring-data-repositories.md
 ---
-
-# Spring Data Repositories: JpaRepository & Derived Queries
 
 You defined your entities in the last lesson. Now comes the surprising part: **you write almost no data-access code**. Spring Data JPA's `JpaRepository` interface gives you a full CRUD repository just by extending it, and when the built-in methods aren't enough, you name a method and Spring *generates the SQL*.
 

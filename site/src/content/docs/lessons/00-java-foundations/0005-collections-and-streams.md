@@ -1,10 +1,8 @@
 ---
 title: "Collections & Streams"
-description: "Lesson 5: Collections & Streams"
+description: "Collections & Streams"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0005-collections-and-streams.md
 ---
-
-# Collections & Streams
 
 Every backend system moves data through structures: ordered lists, unique sets, key-value lookups. Java's Collections Framework gives you the building blocks, and the Stream API lets you transform them declaratively: **what** you want, not **how** to loop.
 

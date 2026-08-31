@@ -1,10 +1,8 @@
 ---
 title: "Build Tools & Maven Basics"
-description: "Lesson 10: Build Tools & Maven Basics"
+description: "Build Tools & Maven Basics"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/01-build-tools/0010-build-tools-and-maven-basics.md
 ---
-
-# Build Tools & Maven Basics
 
 Java source files can't run on their own. Between writing `.java` and seeing output, a chain of steps must fire: compile to bytecode, fetch libraries, bundle everything, run tests, launch the app. A **build tool** automates this chain so you never think about it manually.
 

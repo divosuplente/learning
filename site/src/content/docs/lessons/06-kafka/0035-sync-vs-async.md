@@ -1,10 +1,8 @@
 ---
 title: "Sync vs Async Communication & What Kafka Solves"
-description: "Lesson 35: Sync vs Async Communication & What Kafka Solves"
+description: "Sync vs Async Communication & What Kafka Solves"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0035-sync-vs-async.md
 ---
-
-# Sync vs Async Communication & What Kafka Solves
 
 When two services need to talk, you have two choices: wait for an answer, or fire and forget. The choice sounds simple, but it shapes your entire system's resilience, scalability, and coupling. This lesson covers the difference, when each applies, and why Apache Kafka exists as the standard message broker for async, event-driven architecture.
 

@@ -1,10 +1,7 @@
 ---
 title: "GraphQL Queries, Mutations & Schema Definition"
-description: "GraphQL Queries, Mutations & Schema Definition"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0041-graphql-queries-mutations-schema.md
 ---
-
-# GraphQL Queries, Mutations & Schema Definition
 
 In Lesson 40 you saw why REST's fixed-shape responses cause over-fetching and under-fetching. GraphQL solves this by letting the **client** declare exactly what it needs. But before you can write queries, you need a schema: the contract that tells both sides what data exists and what operations are available. This lesson covers the query language, the difference between queries and mutations, and the Schema Definition Language (SDL) that ties it all together.
 

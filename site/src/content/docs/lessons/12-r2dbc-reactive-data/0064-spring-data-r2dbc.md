@@ -1,10 +1,7 @@
 ---
 title: "Spring Data R2DBC Repositories"
-description: "Spring Data R2DBC Repositories"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/12-r2dbc-reactive-data/0064-spring-data-r2dbc.md
 ---
-
-# Spring Data R2DBC Repositories
 
 Spring Data JPA provides synchronous repositories backed by Hibernate. Spring Data R2DBC provides the same repository abstraction, but every method returns `Mono` or `Flux` and every database call is non-blocking. This lesson covers reactive entities, `ReactiveCrudRepository`, derived queries, `@Query` with native SQL, and a side-by-side comparison with JPA.
 

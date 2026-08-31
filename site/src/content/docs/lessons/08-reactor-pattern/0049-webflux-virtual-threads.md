@@ -1,10 +1,8 @@
 ---
 title: "Spring WebFlux, Virtual Threads vs Reactive & Module Review"
-description: "Lesson 49: Spring WebFlux, Virtual Threads vs Reactive & Module Review"
+description: "Spring WebFlux, Virtual Threads vs Reactive & Module Review"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/08-reactor-pattern/0049-webflux-virtual-threads.md
 ---
-
-# Spring WebFlux, Virtual Threads vs Reactive & Module Review
 
 Reactive pipelines live inside a web framework, connected to a database and a message broker. This lesson shows you how Spring WebFlux wires Mono and Flux into HTTP endpoints, how reactive Kafka and R2DBC complete the non-blocking stack, and when you should **skip reactive entirely**. Spring Boot 4 defaults to virtual threads for MVC, making it the right choice for most applications without any reactive code.
 

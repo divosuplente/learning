@@ -1,10 +1,7 @@
 ---
 title: "Multi-Stage Builds for Java/Spring Boot"
-description: "Multi-Stage Builds for Java/Spring Boot"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/16-docker/0078-docker-multi-stage-builds.md
 ---
-
-# Multi-Stage Builds for Java/Spring Boot
 
 The single-stage Dockerfile from the previous lesson works, but the image includes only the JAR — the Maven build runs on your host machine first. Multi-stage builds move the entire build into Docker, produce dramatically smaller images by splitting build dependencies from runtime, and exploit Docker layer caching for fast rebuilds. This lesson shows the production-ready pattern for Spring Boot.
 

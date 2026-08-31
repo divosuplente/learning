@@ -1,10 +1,7 @@
 ---
 title: "Architecture Patterns: Monolith vs Microservices vs SOA"
-description: "Architecture Patterns: Monolith vs Microservices vs SOA"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/05-service-oriented-architecture/0030-architecture-patterns.md
 ---
-
-# Architecture Patterns: Monolith vs Microservices vs SOA
 
 When you build a house, you don't start placing bricks randomly. You follow a blueprint. Software is no different. An **architecture pattern** is that blueprint: it defines which parts of the code talk to which other parts, what each part is responsible for, and how data flows through the system. Without one, code becomes a tangled mess where everything depends on everything else. Changing one thing breaks five others. This is **spaghetti code**, and it is a nightmare to maintain.
 

@@ -1,10 +1,7 @@
 ---
 title: "Kotlin Coroutines vs Reactor Mono/Flux"
-description: "Kotlin Coroutines vs Reactor Mono/Flux"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/11-migrating-java-to-kotlin/0061-kotlin-coroutines.md
 ---
-
-# Kotlin Coroutines vs Reactor Mono/Flux
 
 In Module 08 you learned Reactor's `Mono` and `Flux`, declarative pipelines that model async data flows. Kotlin offers an alternative: **coroutines**, which let you write non-blocking code that *looks synchronous*. This lesson covers `suspend` functions, `Flow`, structured concurrency, and when to pick coroutines over Reactor.
 

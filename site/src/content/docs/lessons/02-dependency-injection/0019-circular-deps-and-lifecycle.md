@@ -1,10 +1,7 @@
 ---
 title: "Circular Dependencies & Lifecycle Hooks"
-description: "Circular Dependencies & Lifecycle Hooks"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/02-dependency-injection/0019-circular-deps-and-lifecycle.md
 ---
-
-# Circular Dependencies & Lifecycle Hooks
 
 Two beans that need each other. A service that must open a connection *after* its dependencies arrive. These are the two runtime puzzles that trip up every Spring developer. This lesson covers what circular dependencies are, why Spring rejects them, how to break the cycle, and the hooks that let you run code at the right moment in a bean's life.
 

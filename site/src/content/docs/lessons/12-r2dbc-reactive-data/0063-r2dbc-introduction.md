@@ -1,10 +1,7 @@
 ---
 title: "R2DBC: Reactive Relational Database Connectivity"
-description: "R2DBC: Reactive Relational Database Connectivity"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/12-r2dbc-reactive-data/0063-r2dbc-introduction.md
 ---
-
-# R2DBC: Reactive Relational Database Connectivity
 
 JDBC blocks a thread for every database call: the calling thread sits idle until the database responds. On a server handling thousands of concurrent requests, those blocked threads waste memory and cap throughput. **R2DBC** (Reactive Relational Database Connectivity) is a specification for non-blocking, reactive access to relational databases. Where JDBC ties up a thread per query, R2DBC streams results over the same event loop your reactive web server already uses.
 

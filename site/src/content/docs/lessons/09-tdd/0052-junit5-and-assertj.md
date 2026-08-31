@@ -1,10 +1,7 @@
 ---
 title: "JUnit 5 & AssertJ for Readable Assertions"
-description: "JUnit 5 & AssertJ for Readable Assertions"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/09-tdd/0052-junit5-and-assertj.md
 ---
-
-# JUnit 5 & AssertJ for Readable Assertions
 
 JUnit 5 is the standard testing framework for Java. AssertJ is the assertion library that makes your test verifications read like sentences. Together they turn the "assert" step of Arrange-Act-Assert into code you can scan at a glance.
 

@@ -1,10 +1,8 @@
 ---
 title: "Composing Records and Backend DTOs"
-description: "Lesson 2: Composing Records and Backend DTOs"
+description: "Composing Records and Backend DTOs"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0002-record-composition-and-dtos.md
 ---
-
-# Composing Records and Backend DTOs
 
 Lesson 1 covered single records. Real backend systems model relationships: an order contains a buyer and line items. Records **compose** naturally: one record can contain another.
 

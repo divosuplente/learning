@@ -1,10 +1,8 @@
 ---
 title: "OOP Fundamentals"
-description: "Lesson 8: OOP Fundamentals"
+description: "OOP Fundamentals"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/00-java-foundations/0008-oop-fundamentals.md
 ---
-
-# OOP Fundamentals
 
 Java is object-oriented at its core. You model your domain with classes, compose behavior through interfaces, and share common structure with abstract classes. The payoff: code that depends on abstractions, not implementations, so you can swap strategies without rewriting callers.
 

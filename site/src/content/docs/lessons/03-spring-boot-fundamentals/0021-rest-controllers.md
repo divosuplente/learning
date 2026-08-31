@@ -1,10 +1,8 @@
 ---
 title: "REST Controllers & HTTP Mappings"
-description: "Lesson 21: REST Controllers & HTTP Mappings"
+description: "REST Controllers & HTTP Mappings"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/03-spring-boot-fundamentals/0021-rest-controllers.md
 ---
-
-# REST Controllers & HTTP Mappings
 
 A REST API maps HTTP requests to Java method calls. Spring MVC makes this nearly declarative: annotate a class, annotate its methods, and the framework wires everything together. This lesson covers `@RestController`, the five HTTP method annotations, and a complete CRUD controller you can use as a starting template.
 

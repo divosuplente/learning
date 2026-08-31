@@ -6,8 +6,6 @@ duration: "7 min"
 weight: 9
 ---
 
-# pandas: GroupBy, Merge, and Transform
-
 ## groupby: SQL GROUP BY + HAVING
 
 ```python

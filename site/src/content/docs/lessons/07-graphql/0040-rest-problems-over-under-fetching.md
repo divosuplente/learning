@@ -1,10 +1,7 @@
 ---
 title: "REST Problems: Over-fetching & Under-fetching"
-description: "REST Problems: Over-fetching & Under-fetching"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/07-graphql/0040-rest-problems-over-under-fetching.md
 ---
-
-# REST Problems: Over-fetching & Under-fetching
 
 REST works well for simple CRUD. But when your clients have different data needs, **the fixed response shape becomes a bottleneck**. This lesson identifies two fundamental problems, over-fetching and under-fetching, and shows why GraphQL was created to solve them.
 

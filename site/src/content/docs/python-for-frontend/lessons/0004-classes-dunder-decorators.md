@@ -6,8 +6,6 @@ duration: "7 min"
 weight: 4
 ---
 
-# Classes, Dunder Methods, and Decorators
-
 Python classes look like JS classes — `class` keyword, methods, `this` (spelled `self`). But the protocol system (dunder methods) is far more central than JS's `Symbol` hooks, and decorators are a first-class feature with no JS equivalent.
 
 ## JS class → Python class

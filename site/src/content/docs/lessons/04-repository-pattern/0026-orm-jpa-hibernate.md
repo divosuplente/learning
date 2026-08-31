@@ -1,6 +1,5 @@
 ---
 title: "ORM, JPA, Hibernate — The Stack Explained"
-description: "ORM, JPA, Hibernate — The Stack Explained"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/04-repository-pattern/0026-orm-jpa-hibernate.md
 ---
 

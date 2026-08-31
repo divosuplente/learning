@@ -6,8 +6,6 @@ duration: "6 min"
 weight: 12
 ---
 
-# Autograd: The Engine That Makes ML Work
-
 Training a model means: compute a loss, then nudge every parameter in the direction that reduces that loss. That "direction" is the **gradient** — the derivative of the loss with respect to each parameter. Autograd computes these derivatives automatically. No calculus required.
 
 ## The JS analogy

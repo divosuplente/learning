@@ -1,10 +1,7 @@
 ---
 title: "PostgreSQL Deep Dive"
-description: "PostgreSQL Deep Dive"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/13-postgresql-database/0066-postgresql-deep-dive.md
 ---
-
-# PostgreSQL Deep Dive
 
 You have used MySQL and SQLite in earlier lessons. PostgreSQL differs from both: it treats SQL as a first-class programming language, not just a query interface. This lesson covers what makes PostgreSQL distinct, how to connect it to Spring Boot, and the column types you will use most often: `SERIAL`, `UUID`, `JSONB`, `ARRAY`, `ENUM`, and `tsvector`.
 

@@ -1,10 +1,7 @@
 ---
 title: "What Testing Is & The Test Pyramid"
-description: "What Testing Is & The Test Pyramid"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/09-tdd/0050-what-testing-is.md
 ---
-
-# What Testing Is & The Test Pyramid
 
 **Testing** is the deliberate execution of your code to verify it does what you intend. You write code, then you write *another* piece of code that calls the first and checks whether the result is correct. If that sounds circular, good. The test defines what "correct" means, and the production code satisfies it.
 

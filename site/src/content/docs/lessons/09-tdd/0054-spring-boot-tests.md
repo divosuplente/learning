@@ -1,10 +1,7 @@
 ---
 title: "Spring Boot Tests: @WebMvcTest, @DataJpaTest, Testcontainers & Module Review"
-description: "Spring Boot Tests: @WebMvcTest, @DataJpaTest, Testcontainers & Module Review"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/09-tdd/0054-spring-boot-tests.md
 ---
-
-# Spring Boot Tests: @WebMvcTest, @DataJpaTest, Testcontainers & Module Review
 
 Unit tests verify isolated methods. But bugs often hide in the wiring: between controllers and services, between repositories and the database, between JSON payloads and object fields. Spring Boot provides **test slices** that load exactly one layer of your application, making integration-focused tests fast and targeted.
 

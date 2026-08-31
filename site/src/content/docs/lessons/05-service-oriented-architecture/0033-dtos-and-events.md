@@ -1,10 +1,7 @@
 ---
 title: "DTOs, Domain Exceptions & Application Events"
-description: "DTOs, Domain Exceptions & Application Events"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/05-service-oriented-architecture/0033-dtos-and-events.md
 ---
-
-# DTOs, Domain Exceptions & Application Events
 
 So far your service layer returns entities straight to the controller. That works, until a client overwrites a server-managed field, or you add a lazy-loaded association that crashes during serialization, or two services need to talk without creating a circular dependency. This lesson covers three patterns that solve all three problems: **Data Transfer Objects** to control what crosses layer boundaries, **domain exceptions** to make errors meaningful, and **application events** to decouple services that need to react to each other.
 

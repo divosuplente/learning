@@ -1,10 +1,8 @@
 ---
 title: "Spring Boot Kafka Producers & Consumers"
-description: "Lesson 37: Spring Boot Kafka Producers & Consumers"
+description: "Spring Boot Kafka Producers & Consumers"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/06-kafka/0037-spring-kafka-producers-consumers.md
 ---
-
-# Spring Boot Kafka Producers & Consumers
 
 Now that you understand Kafka's core concepts, it's time to write real code. This lesson covers three practical steps: spinning up Kafka locally with Docker Compose, configuring Spring Boot to connect to it, and building a producer and a consumer that exchange events.
 

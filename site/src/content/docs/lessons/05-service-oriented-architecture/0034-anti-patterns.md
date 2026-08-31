@@ -1,10 +1,7 @@
 ---
 title: "Common Anti-Patterns & Module Review"
-description: "Common Anti-Patterns & Module Review"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/05-service-oriented-architecture/0034-anti-patterns.md
 ---
-
-# Common Anti-Patterns & Module Review
 
 Knowing the right architecture is half the battle. The other half is **recognizing when you've drifted**. This lesson covers four anti-patterns that creep into Spring Boot codebases, explains when pragmatism beats purity, and ties together everything from Modules 02 through 05.
 

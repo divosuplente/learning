@@ -6,8 +6,6 @@ duration: "6 min"
 weight: 6
 ---
 
-# NumPy: The Array That Changed Python
-
 ## Why not just use lists?
 
 In JS, a `Float64Array` is faster than a plain `Array` for math because it's **typed and contiguous in memory**. Python's `list` has the same problem as JS `Array` — every element is a boxed object reference, scattered across the heap.

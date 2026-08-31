@@ -1,10 +1,8 @@
 ---
 title: "Input Validation & Exception Handling"
-description: "Lesson 24: Input Validation & Exception Handling"
+description: "Input Validation & Exception Handling"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/03-spring-boot-fundamentals/0024-validation-and-exceptions.md
 ---
-
-# Input Validation & Exception Handling
 
 Every API receives bad input eventually: missing fields, negative quantities, malformed email addresses. Without validation, garbage slips into your database. Without structured error handling, clients get ugly stack traces. This lesson covers **Jakarta Bean Validation** for declaring constraints on input, and **@RestControllerAdvice** for turning exceptions into clean HTTP responses.
 

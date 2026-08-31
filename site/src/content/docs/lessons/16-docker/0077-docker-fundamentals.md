@@ -1,10 +1,7 @@
 ---
 title: "Docker Fundamentals: Images, Containers, and Dockerfile Basics"
-description: "Docker Fundamentals: Images, Containers, and Dockerfile Basics"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/16-docker/0077-docker-fundamentals.md
 ---
-
-# Docker Fundamentals: Images, Containers, and Dockerfile Basics
 
 Spring Boot produces a single executable JAR. Docker wraps that JAR in a lightweight, reproducible, and portable container that runs the same way on every machine. This lesson covers the three core concepts (images, containers, Dockerfiles), shows how to build and run a Spring Boot container, and explains the lifecycle you use daily.
 

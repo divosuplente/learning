@@ -1,10 +1,7 @@
 ---
 title: "Database Indexes"
-description: "Database Indexes"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/13-postgresql-database/0067-database-indexes.md
 ---
-
-# Database Indexes
 
 A query like `SELECT * FROM orders WHERE customer_id = 42` scans every row in the table to find matches. On a table with ten million rows, that means reading ten million rows even if only three match. An index gives PostgreSQL a shortcut: a sorted data structure that lets it jump straight to the rows it needs, the way a book index sends you to a page number without reading every page. This lesson covers the index types PostgreSQL offers, how to choose the right one, and how to spot when an index is missing or when too many are hurting you.
 

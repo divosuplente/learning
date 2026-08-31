@@ -1,10 +1,8 @@
 ---
 title: "Spring Security Authorization"
-description: "Lesson 70: Spring Security Authorization"
+description: "Spring Security Authorization"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/14-spring-security/0070-spring-security-authorization.md
 ---
-
-# Spring Security Authorization
 
 Authentication answers "who are you?" Authorization answers "what are you allowed to do?" Spring Security separates the two. This lesson covers URL-based authorization rules, role and authority naming conventions, method-level security annotations, and SpEL expressions for custom access decisions.
 

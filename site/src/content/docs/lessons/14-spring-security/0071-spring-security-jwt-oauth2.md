@@ -1,10 +1,7 @@
 ---
 title: "Spring Security: JWT and OAuth2"
-description: "Spring Security: JWT and OAuth2"
 editUrl: https://github.com/divosuplente/learning/blob/main/site/src/content/docs/lessons/14-spring-security/0071-spring-security-jwt-oauth2.md
 ---
-
-# Spring Security: JWT and OAuth2
 
 Session-based authentication stores state on the server. Behind a load balancer, multiple instances need shared session storage. **JSON Web Tokens** eliminate that: the signed token carries authentication data, so any server instance validates independently without looking up session state. JWTs cannot be revoked before expiration — use short lifetimes, refresh tokens, or a token blocklist. This lesson covers JWT structure, Spring Security OAuth2 Resource Server configuration, and OAuth2 Client login with external providers.
 
