@@ -16,6 +16,7 @@ export default defineConfig({
           label: 'Backend Engineering in Java',
           collapsed: true,
           items: [
+            { label: 'Overview', slug: 'backend-engineering' },
             {
               label: '00 — Java Foundations',
               collapsed: true,
@@ -101,26 +102,32 @@ export default defineConfig({
               collapsed: true,
               items: [{ autogenerate: { directory: 'lessons/16-docker' } }],
             },
+            {
+              label: 'Reference',
+              collapsed: true,
+              items: [
+                { label: 'Spring Annotations', slug: 'reference/spring-annotations' },
+                { label: 'Maven Cheatsheet', slug: 'reference/maven-cheatsheet' },
+                { label: 'Kafka API', slug: 'reference/kafka-api' },
+                { label: 'Glossary', slug: 'reference/glossary' },
+              ],
+            },
           ],
         },
         {
           label: 'AI Graphics Software Engineer',
           collapsed: true,
-          items: [{ autogenerate: { directory: 'graphics-ai/lessons' } }],
+          items: [
+            { label: 'Overview', slug: 'graphics-ai' },
+            { autogenerate: { directory: 'graphics-ai/lessons' } },
+          ],
         },
         {
           label: 'Python for Frontend Devs',
           collapsed: true,
-          items: [{ autogenerate: { directory: 'python-for-frontend/lessons' } }],
-        },
-        {
-          label: 'Reference',
           items: [
-            { label: 'Overview', slug: 'reference' },
-            { label: 'Spring Annotations', slug: 'reference/spring-annotations' },
-            { label: 'Maven Cheatsheet', slug: 'reference/maven-cheatsheet' },
-            { label: 'Kafka API', slug: 'reference/kafka-api' },
-            { label: 'Glossary', slug: 'reference/glossary' },
+            { label: 'Overview', slug: 'python-for-frontend' },
+            { autogenerate: { directory: 'python-for-frontend/lessons' } },
           ],
         },
       ],
